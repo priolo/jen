@@ -1,0 +1,38 @@
+{
+  "extends": "@tsconfig/node22",
+  "compilerOptions": {
+
+    //"target": "ESNext",
+    //"module": "NodeNext",
+    //"moduleResolution": "nodenext",
+
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "preserveConstEnums": true,
+    "allowJs": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "declaration": true,
+    "declarationMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts"
+  ]
+}

@@ -1,0 +1,18 @@
+.root {
+}
+
+.root.bold {
+    font-weight: 900;
+}
+
+.root.italic {
+    font-style: italic;
+}
+
+.root.code {
+    
+}
+
+.root.link {
+    text-decoration: underline;
+}

@@ -1,0 +1,41 @@
+
+.root {
+	display: flex;
+	flex-direction: column;
+}
+
+
+.node {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.node .toggle {
+	margin-right: 3px;
+}
+
+.node .label {
+	 display: flex;
+	 flex-direction: column;
+	 padding: 3px 5px;
+	 border-radius: 5px;
+}
+.node .label.selected {
+	background-color: aliceblue;
+	color: black;
+}
+.node .label:hover {
+	font-weight: bold;
+}
+.node .label .name {
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 900;
+}
+.node .label .class {
+	cursor: pointer;
+	font-size: 10px;
+	font-weight: 500;
+	opacity: .7;
+}

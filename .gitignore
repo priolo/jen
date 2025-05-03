@@ -1,0 +1,9 @@
+*.map
+
+node_modules/
+dist/
+examples/
+src/examples/
+db/
+
+.env

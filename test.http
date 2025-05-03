@@ -1,0 +1,17 @@
+
+
+GET http://localhost:8080/api/index
+
+###
+
+
+GET http://localhost:8080/api/index/39
+
+###
+
+POST http://localhost:8080/api/auth/register
+content-type: application/json
+
+{
+    "email": "sample@test.com"
+}

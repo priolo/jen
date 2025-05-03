@@ -1,0 +1,29 @@
+/* prism-markdown.css */
+.token.heading {
+	color: #ff6347; /* Tomato */
+	font-weight: bold;
+  }
+  
+  .token.bold {
+	color: #d2691e; /* Chocolate */
+	font-weight: bold;
+  }
+  
+  .token.italic {
+	color: #8a2be2; /* BlueViolet */
+	font-style: italic;
+  }
+  
+  .token.code {
+	color: #2e8b57; /* SeaGreen */
+	background-color: #f5f5f5; /* LightGray */
+	padding: 2px 4px;
+	border-radius: 4px;
+  }
+  
+  .token.blockquote {
+	color: #696969; /* DimGray */
+	border-left: 4px solid #dcdcdc; /* Gainsboro */
+	padding-left: 10px;
+	margin-left: 0;
+  }
