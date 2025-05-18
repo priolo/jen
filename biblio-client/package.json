@@ -1,5 +1,5 @@
 {
-  "name": "biblio-client",
+  "name": "jen-client",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -21,10 +21,10 @@
     "@fontsource-variable/inter": "^5.0.17",
     "@fontsource/darker-grotesque": "^5.0.8",
     "@monaco-editor/react": "^4.6.0",
-    "@priolo/jack": "file:C:/Users/iorio/Documents/jack",
-    "@priolo/jess": "file:C:/Users/iorio/Documents/jess",
+    "@priolo/jack": "file:C:/Users/ivano.iorio/Documents/jack",
+    "@priolo/jess": "file:C:/Users/ivano.iorio/Documents/jess",
     "@priolo/jon": "^0.7.7",
-    "@priolo/jon-utils": "file:C:/Users/iorio/Documents/jon-utils",
+    "@priolo/jon-utils": "file:C:/Users/ivano.iorio/Documents/jon-utils",
     "@react-oauth/google": "^0.12.1",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.13",
@@ -33,20 +33,20 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-virtuoso": "^4.12.2",
-    "slate": "^0.110.2",
-    "slate-history": "^0.110.3",
-    "slate-react": "^0.111.0",
+    "slate": "^0.114.0",
+    "slate-history": "^0.113.1",
+    "slate-react": "^0.114.2",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/prismjs": "^1.26.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react-swc": "^3.7.1",
+    "@vitejs/plugin-react-swc": "^3.9.0",
     "msw": "^2.3.4",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.11",
-    "vitest": "^2.1.5"
+    "typescript": "^5.8.3",
+    "vite": "^6.3.4",
+    "vitest": "^3.1.2"
   },
   "msw": {
     "workerDirectory": "public"

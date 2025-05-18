@@ -1,7 +1,12 @@
+import { http, httpRouter, log, ServiceBase, typeorm } from "@priolo/julian";
 import { dirname } from 'path';
-import { http, ws, log, NodeConf, ServiceBase } from "@priolo/julian";
 import { fileURLToPath } from 'url';
-import * as wsRef from "@priolo/julian-ws-reflection";
+import { Agent } from './repository/Agent.js';
+import { getDBConnectionConfig } from './repository/dbConfig.js';
+import AgentRoute from './routers/AgentRoute.js';
+import { Tool } from "./repository/Tool.js";
+import { Llm } from "./repository/Llm.js";
+import LlmRoute from "./routers/LlmRoute.js";
 
 
 
@@ -35,26 +40,73 @@ function buildNodeConfig() {
 
 	return [
 
-		<log.conf>{ class: "log" },
+		<log.conf>{ 
+			class: "log",
+			onLog: (msg) => {
+				if ( msg.type == "error") {
+					console.error(msg)
+				}
+			}
+		},
 
 		<http.conf>{
 			class: "http",
 			port: PORT,
 			children: [
-				<ws.conf>{
-					class: "ws",
+
+				<httpRouter.conf>{
+					class: "http-router",
+					path: "/api",
+					cors: {
+						"origin": "*",
+						// "allowedHeaders": "*",
+						// "credentials": true,
+					},
 					children: [
-						//{ class: "npm:@priolo/julian-ws-reflection" }
-						<wsRef.conf>{ class: wsRef.Service }
-					]
+						{ class: AgentRoute },
+						{ class: LlmRoute },
+					],
 				}
+
+				// <ws.conf>{
+				// 	class: "ws",
+				// 	children: [
+				// 		//{ class: "npm:@priolo/julian-ws-reflection" }
+				// 		<wsRef.conf>{ class: wsRef.Service }
+				// 	]
+				// }
 			]
 		},
 
-		{
-			class: myState,
-			name: "node.1"
-		}
+		<typeorm.conf>{
+			class: "typeorm",
+			options: {
+				...getDBConnectionConfig(),
+				//entities: repositories
+			},
+			children: [
+				{
+					name: "llm",
+					class: "typeorm/repo",
+					model: Llm,
+				},
+				{
+					name: "agents",
+					class: "typeorm/repo",
+					model: Agent,
+				},
+				{
+					name: "tools",
+					class: "typeorm/repo",
+					model: Tool,
+				},
+			],
+		},
+
+		// {
+		// 	class: myState,
+		// 	name: "node.1"
+		// }
 
 	]
 }

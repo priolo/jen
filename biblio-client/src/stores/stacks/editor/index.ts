@@ -1,6 +1,5 @@
 import { clientObjects } from "@/plugins/docsService"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { DragDoc } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { createEditor } from "slate"
 import { withHistory } from 'slate-history'
@@ -9,8 +8,9 @@ import { createUUID } from "../../docs/utils/factory"
 import { EditorState } from "../editorBase"
 import { NODE_TYPES, NodeType } from "./slate/types"
 import { SugarEditor, withSugar } from "./slate/withSugar"
-import { updateEditorChildren } from "./utils/slate"
+//import { updateEditorChildren } from "./utils/slate"
 import { SlateApplicator } from "@priolo/jess"
+import { DragDoc } from "@priolo/jack"
 
 
 

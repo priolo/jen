@@ -19,6 +19,8 @@ import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
+import { AgentState, AgentStore } from "@/stores/stacks/agent"
+import { LlmListState, LlmListStore } from "@/stores/stacks/llm"
 
 
 
@@ -37,6 +39,13 @@ const MainMenu: FunctionComponent<Props> = ({
 	// HOOKS
 
 	// HANDLERS
+	const handleLlmList = () => {
+		const view = buildStore({
+			type: DOC_TYPE.LLM_LIST,
+		} as LlmListState) as LlmListStore
+		deckCardsSo.add({ view, anim: true })
+	}
+
 	const handleUser = () => {
 		const view = buildUserCard()
 		deckCardsSo.add({ view, anim: true })
@@ -56,6 +65,15 @@ const MainMenu: FunctionComponent<Props> = ({
 		const view = buildCodeEditor("pippo")
 		deckCardsSo.add({ view, anim: true })
 	}
+
+	const handleAgent = () => {
+		const view = buildStore({
+			type: DOC_TYPE.AGENT,
+			docId: "agent-uuid",
+		} as AgentState) as AgentStore
+		deckCardsSo.add({ view, anim: true })
+	}
+
 
 	const handleDoc = () => {
 		const view = buildStore({
@@ -96,8 +114,13 @@ const MainMenu: FunctionComponent<Props> = ({
 			{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
 
 			<Button children="ACCOUNT" onClick={handleAccount} />
+
+			<Button children="LLM" onClick={handleLlmList} />
+			
 		</>}
 		{/* *** DEBUG *** */}
+
+		<Button children="AGENT" onClick={handleAgent} />
 
 		<MenuButton
 			title={"USER"}

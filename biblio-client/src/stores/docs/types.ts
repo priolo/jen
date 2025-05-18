@@ -10,6 +10,10 @@ export enum DOC_TYPE {
 
 	TEXT_EDITOR = "text_editor",
 	CODE_EDITOR = "code_editor",
+	AGENT = "agent",
+	LLM_LIST = "llm_list",
+	LLM_DETAIL = "llm_detail",
+
 	REFLECTION = "reflection",
 	HELP = "help",
 

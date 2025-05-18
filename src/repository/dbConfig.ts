@@ -2,6 +2,11 @@ import fs from "fs";
 import { ENV_TYPE } from "../utils.js";
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
+import dotenv from "dotenv";
+
+
+const envFile = `.env.${process.env.NODE_ENV}`;
+dotenv.config({ path: envFile });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

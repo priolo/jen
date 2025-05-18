@@ -10,6 +10,9 @@ import { DOC_TYPE } from "@/types";
 import { createStore } from "@priolo/jon";
 import { ViewState, ViewStore } from "../../stacks/viewBase";
 import reflectionSetup from "../../stacks/reflection";
+import agentSetup from "@/stores/stacks/agent";
+import llmListSetup from "@/stores/stacks/llm";
+import llmDetailSetup from "@/stores/stacks/llm/detail";
 
 
 
@@ -38,6 +41,11 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 		[DOC_TYPE.ABOUT]: aboutSetup,
 
 		[DOC_TYPE.TEXT_EDITOR]: txtEditorSetup,
+		[DOC_TYPE.AGENT]: agentSetup,
+
+		[DOC_TYPE.LLM_LIST]: llmListSetup,
+		[DOC_TYPE.LLM_DETAIL]: llmDetailSetup,
+
 		[DOC_TYPE.CODE_EDITOR]: editCodeSetup,
 		[DOC_TYPE.REFLECTION]: reflectionSetup,
 		[DOC_TYPE.HELP]: helpSetup,
@@ -47,9 +55,9 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 	}[state?.type]
 	if (!setup) return
 	const store: ViewStore = <ViewStore>createStore(setup)
-	store.state = { ...store.state, ...state }
+	store.state = { ...store.state, ...state };
 	// se non c'e' l'uuid lo creo IO!
-	if (store.state.uuid == null) store.state.uuid = createUUID()
-	store.onCreated()
+	//if (store.state.uuid == null) store.state.uuid = createUUID()
+	(<any>store).onCreated?.()
 	return store
 }

@@ -19,6 +19,12 @@ import UserDetailView from "../../app/cards/user/detail/View"
 import StreamsListView from "../../app/cards/user/list/ListView"
 import { AccountStore } from "../../stores/stacks/account"
 import { ReflectionStore } from "../../stores/stacks/reflection"
+import { AgentStore } from "@/stores/stacks/agent"
+import AgentView from "@/app/cards/agent/View"
+import { LlmListStore } from "@/stores/stacks/llm"
+import LlmListView from "@/app/cards/llm/ListView"
+import LlmDetailView from "@/app/cards/llm/detail/View"
+import { LlmDetailStore } from "@/stores/stacks/llm/detail"
 
 
 
@@ -47,6 +53,13 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 
 			case DOC_TYPE.TEXT_EDITOR:
 				return <TextEditorView store={view as TextEditorStore} />
+			case DOC_TYPE.AGENT:
+				return <AgentView store={view as AgentStore} />
+			case DOC_TYPE.LLM_LIST:
+				return <LlmListView store={view as LlmListStore} />
+			case DOC_TYPE.LLM_DETAIL:
+				return <LlmDetailView store={view as LlmDetailStore} />
+
 			case DOC_TYPE.CODE_EDITOR:
 				return <EditorCodeView store={view as EditorCodeStore} />
 			case DOC_TYPE.HELP:

@@ -12,10 +12,11 @@ import { DOC_TYPE } from "@/types"
 import { loadLocalStorage, saveLocalStorage } from "./storage"
 import { Session } from "./types"
 import { delay } from "../../utils/time"
+import llmSo from "@/stores/stacks/llm/repo"
 
 
 
-// window.addEventListener("load", async (event) => StartSession())
+window.addEventListener("load", async (event) => StartSession())
 // window.addEventListener("beforeunload", async (event) => EndSession())
 window.onerror = (message, url, line, col, error) => {
 	logSo.addError(error)
@@ -51,30 +52,24 @@ export async function StartSession() {
 	// altrimenti MSW non funziona
 	if (import.meta.env.DEV) await delay(1000)
 
-	// carico e costruisco la CARD in CACHE
-	const session = loadLocalStorage()
-	docsSo.setSerialization(session.docsState)
-	const { deckStores, drawerStores, menuStores } = buildCards(session)
-	const allStores = [...deckStores, ...drawerStores, ...menuStores]
-	// inserisco negli STOREs
-	deckCardsSo.setAll(deckStores)
-	drawerCardsSo.setAll(drawerStores)
-	menuSo.setAll(menuStores)
+	// LOAD LLM
+	await llmSo.fetch()
 
-	// BUILD SINGLETONE CARDS
-	buildFixedCards(allStores)
+	// // carico e costruisco la CARD in CACHE
+	// const session = loadLocalStorage()
+	// docsSo.setSerialization(session.docsState)
+	// const { deckStores, drawerStores, menuStores } = buildCards(session)
+	// const allStores = [...deckStores, ...drawerStores, ...menuStores]
+	// // inserisco negli STOREs
+	// deckCardsSo.setAll(deckStores)
+	// drawerCardsSo.setAll(drawerStores)
+	// menuSo.setAll(menuStores)
 
-	// FINITO! lo indico nel LOGs
-	logSo.add({ body: "STARTUP NUI - load session" })
+	// // BUILD SINGLETONE CARDS
+	// buildFixedCards(allStores)
 
-	// mi connetto a chicchessia
-	// const ss = new SocketService({
-	// 	protocol: window.location.protocol == "http:" ? "ws:" : "wss:",
-	// 	host: window.location.hostname,
-	// 	port: 3000, //import.meta.env.VITE_API_WS_PORT ?? window.location.port,
-	// 	base: "",
-	// })
-	// ss.connect()
+	// // FINITO! lo indico nel LOGs
+	// logSo.add({ body: "STARTUP NUI - load session" })
 }
 
 export function ClearSession() {

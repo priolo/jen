@@ -1,0 +1,19 @@
+
+.root {
+	
+}
+.drag:hover {
+	outline: 2px solid var(--cmp-select-bg);
+}
+
+.root.system {
+	border-left: 2px solid red
+}
+
+.root.user {
+	border-left: 2px solid blue
+}
+
+.root.tool {
+	border-left: 2px solid yellow
+}

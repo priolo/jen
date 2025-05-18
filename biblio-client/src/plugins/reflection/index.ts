@@ -105,5 +105,5 @@ export class ReflectionService {
 }
 
 const reflectionService = new ReflectionService()
-reflectionService.connect()
+//reflectionService.connect()
 export default reflectionService
