@@ -1,10 +1,11 @@
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { Llm } from "@/types/Llm"
-import { focusSo, loadBaseSetup, LoadBaseStore, VIEW_SIZE } from "@priolo/jack"
+import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../editorBase"
 import { LlmDetailStore } from "./detail"
-import { buildLlmDetail } from "./factory"
+import { buildLlmDetail, buildLlmDetailNew } from "./factory"
+import llmSo from "./repo"
 
 
 
@@ -22,16 +23,25 @@ const setup = {
 		getTitle: (_: void, store?: ViewStore) => "LLM",
 		getSubTitle: (_: void, store?: ViewStore) => "llm list",
 		//#endregion
-		
+
 	},
 
 	actions: {
 
-		//#region VIEWBASE
+		//#region OVERRIDE VIEWBASE
+
+		// setSerialization: (data: any, store?: LlmListStore) => {
+		// 	viewSetup.actions.setSerialization(data, store)
+		// 	const state = store.state as LlmListState
+		// },
 
 		//#endregion
 
-		//#region OVERWRITE
+		//#region OVERRIDE LOADBASE
+
+		async fetch(_: void, store?: LoadBaseStore) {
+			await llmSo.fetch()
+		},
 
 		//#endregion
 
@@ -49,6 +59,28 @@ const setup = {
 				//store.setSelect(newId)
 				store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
 			}
+		},
+
+		create(_: void, store?: LlmListStore) {
+			const view = buildLlmDetailNew()
+			store.state.group.addLink({ view, parent: store, anim: true })
+		},
+
+		async delete(llmId: string, store?: LlmListStore) {
+			if (!await store.alertOpen({
+				title: "CONSUMER DELETION",
+				body: "This action is irreversible.\nAre you sure you want to delete the CONSUMER?",
+			})) return
+
+			llmSo.delete(llmId)
+
+			store.state.group.addLink({ view: null, parent: store, anim: true })
+
+			store.setSnackbar({
+				open: true, type: MESSAGE_TYPE.SUCCESS, timeout: 5000,
+				title: "DELETED",
+				body: "it is gone forever",
+			})
 		},
 
 	},

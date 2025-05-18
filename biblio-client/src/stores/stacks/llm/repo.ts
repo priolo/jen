@@ -40,7 +40,7 @@ const setup = {
 		},
 
 
-		async save(llm: Partial<Llm>, store?: LlmStore) : Promise<Llm> {
+		async save(llm: Partial<Llm>, store?: LlmStore): Promise<Llm> {
 			let llmSaved: Llm = null
 			if (!llm.id) {
 				llmSaved = await llmApi.create(llm, { store })
@@ -56,6 +56,11 @@ const setup = {
 			return llmSaved
 		},
 
+		async delete(llmId: string, store?: LlmStore) {
+			await llmApi.remove(llmId, { store })
+			store.setAll(store.state.all.filter(llm => llm.id != llmId))
+		},
+
 	},
 
 	mutators: {
@@ -63,7 +68,7 @@ const setup = {
 	},
 }
 
-export type LlmState = typeof setup.state 
+export type LlmState = typeof setup.state
 export type LlmGetters = typeof setup.getters
 export type LlmActions = typeof setup.actions
 export type LlmMutators = typeof setup.mutators

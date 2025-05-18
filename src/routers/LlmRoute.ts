@@ -1,6 +1,6 @@
-import { Agent } from "@/repository/Agent.js";
+import { Llm } from "@/repository/Llm.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
-import { Request, Response } from "express"
+import { Request, Response } from "express";
 
 
 
@@ -30,21 +30,21 @@ class LlmRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const agent: Agent = await new Bus(this, this.state.repository).dispatch({
+		const llm: Llm = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
-		res.json(agent)
+		res.json(llm)
 	}
 
 
 	async create(req: Request, res: Response) {
-		const agent = req.body as Partial<Agent>
-		const agentNew: Agent = await new Bus(this, this.state.repository).dispatch({
+		const { llm }: { llm: Llm } = req.body
+		const llmNew: Llm = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
-			payload: agent
+			payload: llm
 		})
-		res.json(agentNew)
+		res.json(llmNew)
 	}
 
 	async delete(req: Request, res: Response) {
@@ -57,30 +57,14 @@ class LlmRoute extends httpRouter.Service {
 	}
 
 	async update(req: Request, res: Response) {
-		// const id = req.params["id"]
-		// const body: { actions: BaseOperation[] } = req.body
-		// if (!id || !(body?.actions?.length > 0)) return
-
-		// // recupero il DOC interessato
-		// const doc: Doc = await new Bus(this, this.state.repository).dispatch({
-		// 	type: typeorm.RepoRestActions.GET_BY_ID,
-		// 	payload: id
-		// })
-
-		// // applico le ACTIONS
-		// try {
-		// 	doc.children = applyOperations(body.actions, doc.children)
-		// 	await new Bus(this, this.state.repository).dispatch({
-		// 		type: typeorm.RepoRestActions.SAVE,
-		// 		payload: doc,
-		// 	})
-		// 	// TODO: memorizzare le ACTIONS nella history
-		// } catch (e) {
-		// 	console.error(e)
-		// 	// restituire errore!
-		// }
-
-		res.json({ data: "ok" })
+		const id = req.params["id"]
+		const { llm }: { llm: Llm } = req.body
+		if (!id || !llm) return
+		const llmUp = await new Bus(this, this.state.repository).dispatch({
+			type: typeorm.RepoRestActions.SAVE,
+			payload: llm,
+		})
+		res.json(llmUp)
 	}
 }
 

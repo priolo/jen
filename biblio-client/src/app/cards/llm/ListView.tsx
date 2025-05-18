@@ -4,7 +4,7 @@ import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
-import { Button, IconButton, OptionsCmp } from "@priolo/jack"
+import { AlertDialog, Button, IconButton, OptionsCmp } from "@priolo/jack"
 import { Llm } from "@/types/Llm"
 import llmSo from "@/stores/stacks/llm/repo"
 import { LlmDetailStore } from "@/stores/stacks/llm/detail"
@@ -21,6 +21,7 @@ const LlmListView: FunctionComponent<Props> = ({
 
 	// STORE
 	useStore(store)
+	useStore(store.state.group)
 	useStore(llmSo)
 
 	// HOOKs
@@ -30,10 +31,16 @@ const LlmListView: FunctionComponent<Props> = ({
 
 	// HANDLER
 	const handleSelect = (llm: Llm) => store.select(llm.id)
+	const handleNew = () => store.create()
+	const handleDelete = () => store.delete(selectId)
+
 
 	// RENDER
 	const selectId = (store.state.linked as LlmDetailStore)?.state?.llm?.id
 	const isSelected = (llm: Llm) => llm.id == selectId
+
+	//const isNewSelect = consumersSa.linked?.state.type == DOC_TYPE.CONSUMER && (consumersSa.linked as ConsumerStore).state.editState == EDIT_STATE.NEW
+
 
 	// const isNewSelect = cnnListSa.linked?.state.type == DOC_TYPE.CONNECTION && (cnnListSa.linked as CnnDetailStore).state.editState == EDIT_STATE.NEW
 	// const selectId = (cnnListSa.linked as CnnDetailStore)?.state?.connection?.id
@@ -54,15 +61,16 @@ const LlmListView: FunctionComponent<Props> = ({
 				storeView={store}
 			/>
 			<div style={{ flex: 1 }} />
-			{/* {!!selectId && <Button
+			{!!selectId && <Button
 				children="DELETE"
 				onClick={handleDelete}
 			/>}
+			{!!selectId && <div> | </div>}
 			<Button
 				children="NEW"
-				select={isNewSelect}
+				//select={isNewSelect}
 				onClick={handleNew}
-			/> */}
+			/>
 		</>}
 	>
 		<div className={clsCard.content}>
@@ -74,7 +82,9 @@ const LlmListView: FunctionComponent<Props> = ({
 				</div>
 			})}
 		</div>
-		CIAO2
+
+		<AlertDialog store={store} />
+
 	</FrameworkCard>
 }
 

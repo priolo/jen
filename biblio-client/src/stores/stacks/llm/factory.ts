@@ -1,14 +1,28 @@
 import { buildStore } from "@/stores/docs/utils/factory";
-import { DOC_TYPE } from "@/types";
+import { DOC_TYPE, EDIT_STATE } from "@/types";
 import { LlmDetailState, LlmDetailStore } from "./detail";
+import { VIEW_SIZE } from "@priolo/jack";
+import { PROVIDER } from "@/types/Llm";
 
 
 
 export function buildLlmDetail(state:Partial<LlmDetailState>) {
-	const cnnStore = buildStore({
+	const store = buildStore({
 		type: DOC_TYPE.LLM_DETAIL,
 		...state,
 	} as LlmDetailState) as LlmDetailStore;
-	return cnnStore;
+	return store;
 }
 
+export function buildLlmDetailNew() {
+	const store = buildStore({
+		type: DOC_TYPE.LLM_DETAIL,
+		editState: EDIT_STATE.NEW,
+		size: VIEW_SIZE.NORMAL,
+		sizeForce: true,
+		llm: {
+			provider: PROVIDER.GOOGLE,
+		},
+	} as LlmDetailState) as LlmDetailStore;
+	return store;
+}

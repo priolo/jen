@@ -57,6 +57,7 @@ const setup = {
 		/** crea un nuovo CONSUMER-INFO tramite CONSUMER-CONFIG */
 		async save(_: void, store?: LlmDetailStore) {
 			const llmSaved = await llmSo.save(store.state.llm)
+
 			store.setLlm(llmSaved)
 			store.setEditState(EDIT_STATE.READ)
 			store.setSnackbar({
