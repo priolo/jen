@@ -1,6 +1,7 @@
 import { Agent } from "@/repository/Agent.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
-import { Request, Response } from "express"
+import { Request, Response } from "express";
+import { select } from "slate";
 
 
 
@@ -31,15 +32,21 @@ class AgentRoute extends httpRouter.Service {
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
 		const agent: Agent = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.GET_BY_ID,
-			payload: id
+			type: typeorm.Actions.FIND_ONE,
+			payload: {
+				where: { id },
+				relations: ["tools", "llm", "agents"],
+				select: {
+					agents: { id: true, name: true },
+				}
+			}
 		})
 		res.json(agent)
 	}
 
 
 	async create(req: Request, res: Response) {
-		const agent = req.body as Partial<Agent>
+		const { agent }: { agent: Agent } = req.body
 		const agentNew: Agent = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: agent
@@ -57,30 +64,29 @@ class AgentRoute extends httpRouter.Service {
 	}
 
 	async update(req: Request, res: Response) {
-		// const id = req.params["id"]
-		// const body: { actions: BaseOperation[] } = req.body
-		// if (!id || !(body?.actions?.length > 0)) return
+		const id = req.params["id"]
+		const { agent }: { agent: Agent } = req.body
 
-		// // recupero il DOC interessato
-		// const doc: Doc = await new Bus(this, this.state.repository).dispatch({
-		// 	type: typeorm.RepoRestActions.GET_BY_ID,
-		// 	payload: id
-		// })
+		if (!id) {
+			return res.status(400).json({ error: "Agent ID is required for an update." });
+		}
 
-		// // applico le ACTIONS
-		// try {
-		// 	doc.children = applyOperations(body.actions, doc.children)
-		// 	await new Bus(this, this.state.repository).dispatch({
-		// 		type: typeorm.RepoRestActions.SAVE,
-		// 		payload: doc,
-		// 	})
-		// 	// TODO: memorizzare le ACTIONS nella history
-		// } catch (e) {
-		// 	console.error(e)
-		// 	// restituire errore!
-		// }
+		// Ensure the ID from the path is used for the update
+		const payload = { ...agent, id };
 
-		res.json({ data: "ok" })
+		try {
+			const updatedAgent: Agent = await new Bus(this, this.state.repository).dispatch({
+				type: typeorm.RepoRestActions.SAVE,
+				payload,
+			})
+			if (!updatedAgent) {
+				return res.status(404).json({ error: "Agent not found or update failed." });
+			}
+			res.json(updatedAgent)
+		} catch (e) {
+			console.error("Error updating agent:", e)
+			res.status(500).json({ error: "Failed to update agent." })
+		}
 	}
 }
 

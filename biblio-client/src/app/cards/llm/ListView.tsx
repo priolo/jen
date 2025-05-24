@@ -1,5 +1,5 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import { LlmListStore } from "@/stores/stacks/llm"
+import { LlmListStore } from "@/stores/stacks/llm/list"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../icons/EditorIcon"
@@ -52,7 +52,6 @@ const LlmListView: FunctionComponent<Props> = ({
 		className={clsCard.root}
 		icon={<EditorIcon />}
 		store={store}
-		//actionsRender={<ActionsCmp store={store} />}
 		iconizedRender={null}
 		actionsRender={<>
 			<OptionsCmp

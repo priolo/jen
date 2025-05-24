@@ -4,7 +4,7 @@ import { DOC_TYPE, EDIT_STATE } from "@/types"
 import { Llm } from "@/types/Llm"
 import { MESSAGE_TYPE, utils } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { LlmListState, LlmListStore } from "."
+import { LlmListState, LlmListStore } from "./list"
 import llmSo from "./repo"
 
 

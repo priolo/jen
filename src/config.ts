@@ -7,6 +7,7 @@ import AgentRoute from './routers/AgentRoute.js';
 import { Tool } from "./repository/Tool.js";
 import { Llm } from "./repository/Llm.js";
 import LlmRoute from "./routers/LlmRoute.js";
+import ToolRoute from "./routers/ToolRoute.js";
 
 
 
@@ -65,6 +66,7 @@ function buildNodeConfig() {
 					children: [
 						{ class: AgentRoute },
 						{ class: LlmRoute },
+						{ class: ToolRoute },
 					],
 				}
 

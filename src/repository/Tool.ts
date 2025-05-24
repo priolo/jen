@@ -8,7 +8,7 @@ export class Tool {
 	@PrimaryGeneratedColumn("uuid")
 	id: string;
 
-	@Column({ type: 'varchar', default: '' })
+	@Column({ type: 'varchar' })
 	name: string;
 
 	/** Descrive il TOOL per l'utilizzo degli AGENT */

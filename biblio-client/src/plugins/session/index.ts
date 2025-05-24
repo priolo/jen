@@ -13,6 +13,8 @@ import { loadLocalStorage, saveLocalStorage } from "./storage"
 import { Session } from "./types"
 import { delay } from "../../utils/time"
 import llmSo from "@/stores/stacks/llm/repo"
+import toolSo from "@/stores/stacks/tool/repo"
+import agentSo from "@/stores/stacks/agent/repo"
 
 
 
@@ -52,8 +54,10 @@ export async function StartSession() {
 	// altrimenti MSW non funziona
 	if (import.meta.env.DEV) await delay(1000)
 
-	// LOAD LLM
+	// LOAD SINGLETONE STORES
 	await llmSo.fetch()
+	await toolSo.fetch()
+	await agentSo.fetch()
 
 	// // carico e costruisco la CARD in CACHE
 	// const session = loadLocalStorage()

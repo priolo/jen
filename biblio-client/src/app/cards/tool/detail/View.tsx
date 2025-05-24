@@ -1,19 +1,19 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import { LlmDetailStore } from "@/stores/stacks/llm/detail"
+import { ToolDetailStore } from "@/stores/stacks/tool/detail"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
 import ConnectionIcon from "../../../../icons/cards/ConnectionIcon"
 import clsGreen from "../../CardGreen.module.css"
-import LlmDetailForm from "./Form"
-import LlmDetailActions from "./Actions"
+import ToolDetailActions from "./Actions"
+import ToolDetailForm from "./Form"
 
 
 
 interface Props {
-	store?: LlmDetailStore
+	store?: ToolDetailStore
 }
 
-const LlmDetailView: FunctionComponent<Props> = ({
+const ToolDetailView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
@@ -35,16 +35,16 @@ const LlmDetailView: FunctionComponent<Props> = ({
 		className={clsGreen.root}
 		icon={<ConnectionIcon />}
 		store={store}
-		actionsRender={<LlmDetailActions store={store} />}
+		actionsRender={<ToolDetailActions store={store} />}
 		iconizedRender={
 			<div className="lyt-v lyt-v-btts">
 			</div>
 		}
 	>
 
-		<LlmDetailForm store={store} />
+		<ToolDetailForm store={store} />
 
 	</FrameworkCard>
 }
 
-export default LlmDetailView
+export default ToolDetailView

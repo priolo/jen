@@ -1,4 +1,4 @@
-import { SugarEditor } from "@/stores/stacks/editor/slate/withSugar"
+import { SugarEditor } from "@/stores/stacks/agent/slate/withSugar"
 import { mouseSo } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, HTMLProps } from "react"
@@ -31,10 +31,13 @@ const Drop: FunctionComponent<RenderElementProps & HTMLProps<HTMLDivElement>> = 
 		if (!mouseSo.state.drag?.source?.view) return
 		mouseSo.setDrag({ ...mouseSo.state.drag, destination: null })
 	}
+	const handleGripClick = () => {
+		editor.store.setRoleDialogOpen(true)
+	}
 
 	// RENDER
 	const clsDrag = !!mouseSa.drag?.source ? cls.drag : ""
-	const cnRoot = `${cls.root} ${cls[element.type]} ${clsDrag} ${className}`
+	const cnRoot = `${cls.root} ${clsDrag} ${className}`
 
 	return <div {...attributes}
 		className={cnRoot}
@@ -42,7 +45,13 @@ const Drop: FunctionComponent<RenderElementProps & HTMLProps<HTMLDivElement>> = 
 		onMouseLeave={handleMouseLeave}
 		{...props}
 	>
-		{children}
+		<div className={`${cls.grip} ${cls[element.type]}`} contentEditable={false}
+			onClick={handleGripClick}
+		>
+		</div>
+		<div>
+			{children}
+		</div>
 	</div>
 }
 

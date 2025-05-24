@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1747118997230" clover="3.2.0">
-  <project timestamp="1747118997230" name="All files">
-    <metrics statements="64" coveredstatements="46" conditionals="12" coveredconditionals="8" methods="19" coveredmethods="13" elements="95" coveredelements="67" complexity="0" loc="64" ncloc="64" packages="3" files="6" classes="6"/>
+<coverage generated="1747981313878" clover="3.2.0">
+  <project timestamp="1747981313879" name="All files">
+    <metrics statements="117" coveredstatements="53" conditionals="20" coveredconditionals="8" methods="35" coveredmethods="18" elements="172" coveredelements="79" complexity="0" loc="117" ncloc="117" packages="3" files="9" classes="9"/>
     <package name="src">
       <metrics statements="15" coveredstatements="11" conditionals="5" coveredconditionals="4" methods="6" coveredmethods="4"/>
       <file name="config.ts" path="C:\Users\ivano.iorio\Documents\jen\src\config.ts">
         <metrics statements="11" coveredstatements="7" conditionals="3" coveredconditionals="2" methods="5" coveredmethods="3"/>
-        <line num="11" count="1" type="stmt"/>
-        <line num="12" count="1" type="stmt"/>
-        <line num="13" count="1" type="cond" truecount="2" falsecount="0"/>
-        <line num="18" count="1" type="stmt"/>
-        <line num="25" count="0" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="16" count="1" type="cond" truecount="2" falsecount="0"/>
+        <line num="21" count="1" type="stmt"/>
         <line num="28" count="0" type="stmt"/>
-        <line num="29" count="0" type="stmt"/>
-        <line num="35" count="1" type="stmt"/>
-        <line num="39" count="1" type="stmt"/>
-        <line num="44" count="36" type="cond" truecount="0" falsecount="1"/>
-        <line num="45" count="0" type="stmt"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="38" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="47" count="47" type="cond" truecount="0" falsecount="1"/>
+        <line num="48" count="0" type="stmt"/>
       </file>
       <file name="utils.ts" path="C:\Users\ivano.iorio\Documents\jen\src\utils.ts">
         <metrics statements="4" coveredstatements="4" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
@@ -27,21 +27,32 @@
       </file>
     </package>
     <package name="src.repository">
-      <metrics statements="36" coveredstatements="31" conditionals="7" coveredconditionals="4" methods="7" coveredmethods="7"/>
+      <metrics statements="44" coveredstatements="39" conditionals="7" coveredconditionals="4" methods="11" coveredmethods="11"/>
       <file name="Agent.ts" path="C:\Users\ivano.iorio\Documents\jen\src\repository\Agent.ts">
-        <metrics statements="12" coveredstatements="12" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+        <metrics statements="14" coveredstatements="14" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="6"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="39" count="1" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="44" count="1" type="stmt"/>
+        <line num="46" count="1" type="stmt"/>
+        <line num="48" count="1" type="stmt"/>
+      </file>
+      <file name="Llm.ts" path="C:\Users\ivano.iorio\Documents\jen\src\repository\Llm.ts">
+        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="7" count="1" type="stmt"/>
-        <line num="11" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
-        <line num="19" count="1" type="stmt"/>
-        <line num="23" count="1" type="stmt"/>
-        <line num="27" count="1" type="stmt"/>
-        <line num="30" count="1" type="stmt"/>
-        <line num="33" count="1" type="stmt"/>
-        <line num="35" count="1" type="stmt"/>
-        <line num="36" count="1" type="stmt"/>
-        <line num="38" count="1" type="stmt"/>
-        <line num="40" count="1" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
       </file>
       <file name="Tool.ts" path="C:\Users\ivano.iorio\Documents\jen\src\repository\Tool.ts">
         <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
@@ -75,22 +86,73 @@
       </file>
     </package>
     <package name="src.routers">
-      <metrics statements="13" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="2"/>
+      <metrics statements="58" coveredstatements="3" conditionals="8" coveredconditionals="0" methods="18" coveredmethods="3"/>
       <file name="AgentRoute.ts" path="C:\Users\ivano.iorio\Documents\jen\src\routers\AgentRoute.ts">
-        <metrics statements="13" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="2"/>
+        <metrics statements="24" coveredstatements="1" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="1"/>
         <line num="10" count="1" type="stmt"/>
         <line num="25" count="0" type="stmt"/>
         <line num="28" count="0" type="stmt"/>
         <line num="32" count="0" type="stmt"/>
         <line num="33" count="0" type="stmt"/>
         <line num="37" count="0" type="stmt"/>
-        <line num="42" count="1" type="stmt"/>
-        <line num="43" count="1" type="stmt"/>
-        <line num="47" count="1" type="stmt"/>
+        <line num="42" count="0" type="stmt"/>
+        <line num="43" count="0" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
         <line num="51" count="0" type="stmt"/>
         <line num="52" count="0" type="stmt"/>
         <line num="56" count="0" type="stmt"/>
-        <line num="86" count="0" type="stmt"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="63" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="64" count="0" type="stmt"/>
+        <line num="68" count="0" type="stmt"/>
+        <line num="70" count="0" type="stmt"/>
+        <line num="71" count="0" type="stmt"/>
+        <line num="75" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="76" count="0" type="stmt"/>
+        <line num="78" count="0" type="stmt"/>
+        <line num="80" count="0" type="stmt"/>
+        <line num="81" count="0" type="stmt"/>
+      </file>
+      <file name="LlmRoute.ts" path="C:\Users\ivano.iorio\Documents\jen\src\routers\LlmRoute.ts">
+        <metrics statements="17" coveredstatements="1" conditionals="3" coveredconditionals="0" methods="6" coveredmethods="1"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="28" count="0" type="stmt"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="33" count="0" type="stmt"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="42" count="0" type="stmt"/>
+        <line num="43" count="0" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="56" count="0" type="stmt"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="62" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="63" count="0" type="stmt"/>
+        <line num="67" count="0" type="stmt"/>
+      </file>
+      <file name="ToolRoute.ts" path="C:\Users\ivano.iorio\Documents\jen\src\routers\ToolRoute.ts">
+        <metrics statements="17" coveredstatements="1" conditionals="3" coveredconditionals="0" methods="6" coveredmethods="1"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="29" count="0" type="stmt"/>
+        <line num="33" count="0" type="stmt"/>
+        <line num="34" count="0" type="stmt"/>
+        <line num="38" count="0" type="stmt"/>
+        <line num="43" count="0" type="stmt"/>
+        <line num="44" count="0" type="stmt"/>
+        <line num="48" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="62" count="0" type="stmt"/>
+        <line num="63" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="64" count="0" type="stmt"/>
+        <line num="68" count="0" type="stmt"/>
       </file>
     </package>
   </project>

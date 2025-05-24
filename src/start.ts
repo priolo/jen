@@ -30,10 +30,29 @@ dotenv.config({ path: envFile });
 			type: typeorm.RepoStructActions.SEED,
 			payload: [
 				{ type: typeorm.RepoStructActions.TRUNCATE },
-				// inserisco dei dati fittizi
 				{ name: "test llm 1", key: "AAA" },
 				{ name: "test llm 2", key: "BBB" },
 				{ name: "test llm 3", key: "CCC" },
+			]
+		})
+
+		new Bus(root, "/typeorm/agents").dispatch({
+			type: typeorm.RepoStructActions.SEED,
+			payload: [
+				{ type: typeorm.RepoStructActions.TRUNCATE },
+				{ name: "agent 1", tools: [{ name: "tool 4" }, { name: "tool 5" }] },
+				{ name: "agent 2" },
+				{ name: "agent 3", tools: [{ name: "tool 7" }, { name: "tool 6" }] },
+			]
+		})
+
+		new Bus(root, "/typeorm/tools").dispatch({
+			type: typeorm.RepoStructActions.SEED,
+			payload: [
+				{ type: typeorm.RepoStructActions.TRUNCATE },
+				{ name: "tool 1" },
+				{ name: "tool 2" },
+				{ name: "tool 3" },
 			]
 		})
 

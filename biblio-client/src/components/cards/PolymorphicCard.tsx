@@ -19,12 +19,16 @@ import UserDetailView from "../../app/cards/user/detail/View"
 import StreamsListView from "../../app/cards/user/list/ListView"
 import { AccountStore } from "../../stores/stacks/account"
 import { ReflectionStore } from "../../stores/stacks/reflection"
-import { AgentStore } from "@/stores/stacks/agent"
+import { AgentDetailStore } from "@/stores/stacks/agent"
 import AgentView from "@/app/cards/agent/View"
-import { LlmListStore } from "@/stores/stacks/llm"
+import { LlmListStore } from "@/stores/stacks/llm/list"
 import LlmListView from "@/app/cards/llm/ListView"
 import LlmDetailView from "@/app/cards/llm/detail/View"
 import { LlmDetailStore } from "@/stores/stacks/llm/detail"
+import ToolListView from "@/app/cards/tool/ListView"
+import { ToolListStore } from "@/stores/stacks/tool/list"
+import ToolDetailView from "@/app/cards/tool/detail/View"
+import { ToolDetailStore } from "@/stores/stacks/tool/detail"
 
 
 
@@ -54,11 +58,17 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 			case DOC_TYPE.TEXT_EDITOR:
 				return <TextEditorView store={view as TextEditorStore} />
 			case DOC_TYPE.AGENT:
-				return <AgentView store={view as AgentStore} />
+				return <AgentView store={view as AgentDetailStore} />
+
 			case DOC_TYPE.LLM_LIST:
 				return <LlmListView store={view as LlmListStore} />
 			case DOC_TYPE.LLM_DETAIL:
 				return <LlmDetailView store={view as LlmDetailStore} />
+
+			case DOC_TYPE.TOOL_LIST:
+				return <ToolListView store={view as ToolListStore} />
+			case DOC_TYPE.TOOL_DETAIL:
+				return <ToolDetailView store={view as ToolDetailStore} />
 
 			case DOC_TYPE.CODE_EDITOR:
 				return <EditorCodeView store={view as EditorCodeStore} />

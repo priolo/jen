@@ -19,8 +19,10 @@ import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
-import { AgentState, AgentStore } from "@/stores/stacks/agent"
-import { LlmListState, LlmListStore } from "@/stores/stacks/llm"
+import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent"
+import { LlmListState, LlmListStore } from "@/stores/stacks/llm/list"
+import { buildToolList } from "@/stores/stacks/tool/factory"
+import { buildLlmList } from "@/stores/stacks/llm/factory"
 
 
 
@@ -40,11 +42,14 @@ const MainMenu: FunctionComponent<Props> = ({
 
 	// HANDLERS
 	const handleLlmList = () => {
-		const view = buildStore({
-			type: DOC_TYPE.LLM_LIST,
-		} as LlmListState) as LlmListStore
+		const view = buildLlmList()
 		deckCardsSo.add({ view, anim: true })
 	}
+	const handleToolList = () => {
+		const view = buildToolList()
+		deckCardsSo.add({ view, anim: true })
+	}
+
 
 	const handleUser = () => {
 		const view = buildUserCard()
@@ -69,8 +74,14 @@ const MainMenu: FunctionComponent<Props> = ({
 	const handleAgent = () => {
 		const view = buildStore({
 			type: DOC_TYPE.AGENT,
-			docId: "agent-uuid",
-		} as AgentState) as AgentStore
+			agent: {
+				id: "test-uuid",
+				name: "Test Agent",
+				tools: [],
+				// tools: [{ id: "test-uuid", name: "Test Tool" }],
+				// tools: [{ id: "test-uuid", name: "Test Tool" }, { id: "test-uuid", name: "Test Tool" }],
+			},
+		} as AgentDetailState) as AgentDetailStore
 		deckCardsSo.add({ view, anim: true })
 	}
 
@@ -116,6 +127,7 @@ const MainMenu: FunctionComponent<Props> = ({
 			<Button children="ACCOUNT" onClick={handleAccount} />
 
 			<Button children="LLM" onClick={handleLlmList} />
+			<Button children="TOOLS" onClick={handleToolList} />
 			
 		</>}
 		{/* *** DEBUG *** */}

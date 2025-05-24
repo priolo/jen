@@ -1,13 +1,12 @@
-import { AgentStore } from "@/stores/stacks/agent"
-import { Button } from "@priolo/jack"
+import { AgentDetailStore } from "@/stores/stacks/agent"
+import { EDIT_STATE } from "@/types"
+import { Button, CircularLoadingCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
 import cls from "./View.module.css"
 
-
-
 interface Props {
-	store?: AgentStore
+	store?: AgentDetailStore
 	style?: React.CSSProperties
 }
 
@@ -17,26 +16,58 @@ const ActionsCmp: FunctionComponent<Props> = ({
 }) => {
 
 	// STORE
-	const state = useStore(store)
+	useStore(store.state.group)
+	const agentDetailSa = useStore(store)
 
 	// HOOKs
 
 	// HANDLER
-	const handleRoleOpen = (e) => {
-		store.setRoleDialogOpen(true)
+	const handleEditClick = async () => store.setEditState(EDIT_STATE.EDIT)
+	const handleCancelClick = () => store.restore()
+	const handleSaveClick = async () => store.save()
+	
+
+	// LOADING
+	if (agentDetailSa.disabled) {
+		return <CircularLoadingCmp style={{ width: 25, height: 25, color: "rgba(0,0,0,.5)" }} />
 	}
 
 	// RENDER
+	if (agentDetailSa.editState == EDIT_STATE.NEW) {
+		return <div
+			className={cls.actions}
+			style={style}
+		>
+			<Button
+				children="CREATE"
+				onClick={handleSaveClick}
+			/>
+		</div>
+
+	} else if (agentDetailSa.editState == EDIT_STATE.READ) {
+		return <div
+			className={cls.actions}
+			style={style}
+		>
+			<Button
+				children="EDIT"
+				onClick={handleEditClick}
+			/>
+		</div>
+	}
 
 	return (<div
 		className={cls.actions}
 		style={style}
 	>
-		<div style={{ display: "flex", flex: 1, gap: 5 }}>
-			<Button 
-				onClick={handleRoleOpen}
-			>ROLE</Button>
-		</div>
+		<Button
+			children="SAVE"
+			onClick={handleSaveClick}
+		/>
+		<Button
+			children="CANCEL"
+			onClick={handleCancelClick}
+		/>
 	</div>)
 }
 

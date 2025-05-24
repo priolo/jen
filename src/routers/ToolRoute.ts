@@ -1,4 +1,5 @@
 import { Agent } from "@/repository/Agent.js";
+import { Tool } from "@/repository/Tool.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express"
 
@@ -21,32 +22,30 @@ class ToolRoute extends httpRouter.Service {
 		}
 	}
 
-	async getAll(req: Request, res: Response)  {
-		const agents = await new Bus(this, this.state.repository).dispatch({
+	async getAll(req: Request, res: Response) {
+		const tools = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.ALL
 		})
-		res.json(agents)
+		res.json(tools)
 	}
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const agent: Agent = await new Bus(this, this.state.repository).dispatch({
+		const tool: Tool = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
-		res.json({ data: agent })
+		res.json(tool)
 	}
 
 
 	async create(req: Request, res: Response) {
-		const { name } = req.body as { name: string }
-
-		const agent:Agent = await new Bus(this, this.state.repository).dispatch({
+		const { tool }: { tool: Tool } = req.body
+		const toolNew: Tool = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
-			payload: { name }
+			payload: tool
 		})
-
-		res.json({ data: agent })
+		res.json(toolNew)
 	}
 
 	async delete(req: Request, res: Response) {
@@ -58,34 +57,15 @@ class ToolRoute extends httpRouter.Service {
 		res.json({ data: "ok" })
 	}
 
-	/** 
-	 * aggiorna un DOC tramite un array di ACTIONS
-	 */
 	async update(req: Request, res: Response) {
 		const id = req.params["id"]
-		const body: { actions: BaseOperation[] } = req.body
-		if (!id || !(body?.actions?.length > 0)) return
-
-		// recupero il DOC interessato
-		const doc: Doc = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.GET_BY_ID,
-			payload: id
+		const { tool }: { tool: Tool } = req.body
+		if (!id || !tool) return
+		const toolUp = await new Bus(this, this.state.repository).dispatch({
+			type: typeorm.RepoRestActions.SAVE,
+			payload: tool,
 		})
-
-		// applico le ACTIONS
-		try {
-			doc.children = applyOperations(body.actions, doc.children)
-			await new Bus(this, this.state.repository).dispatch({
-				type: typeorm.RepoRestActions.SAVE,
-				payload: doc,
-			})
-			// TODO: memorizzare le ACTIONS nella history
-		} catch (e) {
-			console.error(e)
-			// restituire errore!
-		}
-
-		res.json({ data: "ok" })
+		res.json(toolUp)
 	}
 }
 

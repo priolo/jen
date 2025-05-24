@@ -90,7 +90,7 @@ const setup = {
 	},
 }
 
-export type LlmListState = typeof setup.state & ViewState & EditorState
+export type LlmListState = typeof setup.state & ViewState
 export type LlmListGetters = typeof setup.getters
 export type LlmListActions = typeof setup.actions
 export type LlmListMutators = typeof setup.mutators

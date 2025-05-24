@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/routers/AgentRoute.ts</title>
+    <title>Code coverage report for src/routers/LlmRoute.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,20 +19,20 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/routers</a> AgentRoute.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/routers</a> LlmRoute.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.16% </span>
+                <span class="strong">5.55% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/24</span>
+                <span class='fraction'>1/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>0/3</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.16% </span>
+                <span class="strong">5.88% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/24</span>
+                <span class='fraction'>1/17</span>
             </div>
         
             
@@ -136,22 +136,7 @@
 <a name='L71'></a><a href='#L71'>71</a>
 <a name='L72'></a><a href='#L72'>72</a>
 <a name='L73'></a><a href='#L73'>73</a>
-<a name='L74'></a><a href='#L74'>74</a>
-<a name='L75'></a><a href='#L75'>75</a>
-<a name='L76'></a><a href='#L76'>76</a>
-<a name='L77'></a><a href='#L77'>77</a>
-<a name='L78'></a><a href='#L78'>78</a>
-<a name='L79'></a><a href='#L79'>79</a>
-<a name='L80'></a><a href='#L80'>80</a>
-<a name='L81'></a><a href='#L81'>81</a>
-<a name='L82'></a><a href='#L82'>82</a>
-<a name='L83'></a><a href='#L83'>83</a>
-<a name='L84'></a><a href='#L84'>84</a>
-<a name='L85'></a><a href='#L85'>85</a>
-<a name='L86'></a><a href='#L86'>86</a>
-<a name='L87'></a><a href='#L87'>87</a>
-<a name='L88'></a><a href='#L88'>88</a>
-<a name='L89'></a><a href='#L89'>89</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L74'></a><a href='#L74'>74</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -212,7 +197,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -220,38 +204,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Agent } from "@/repository/Agent.js";
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Llm } from "@/repository/Llm.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
-import { Request, Response } from "express"
+import { Request, Response } from "express";
 &nbsp;
 &nbsp;
 &nbsp;
-class AgentRoute extends httpRouter.Service {
+class LlmRoute extends httpRouter.Service {
 &nbsp;
 	get stateDefault(): httpRouter.conf &amp; any {
 		return {
 			...super.stateDefault,
-			path: "/agents",
-			repository: "/typeorm/agents",
+			path: "/llm",
+			repository: "/typeorm/llm",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
@@ -263,29 +233,29 @@ class AgentRoute extends httpRouter.Service {
 	}
 &nbsp;
 <span class="fstat-no" title="function not covered" >	async </span>getAll(req: Request, res: Response) {
-		const agents = <span class="cstat-no" title="statement not covered" >await new Bus(this, this.state.repository).dispatch({</span>
+		const llm = <span class="cstat-no" title="statement not covered" >await new Bus(this, this.state.repository).dispatch({</span>
 			type: typeorm.RepoRestActions.ALL
 		})
-<span class="cstat-no" title="statement not covered" >		res.json(agents)</span>
+<span class="cstat-no" title="statement not covered" >		res.json(llm)</span>
 	}
 &nbsp;
 <span class="fstat-no" title="function not covered" >	async </span>getById(req: Request, res: Response) {
 		const id = <span class="cstat-no" title="statement not covered" >req.params["id"]</span>
-		const agent: Agent = <span class="cstat-no" title="statement not covered" >await new Bus(this, this.state.repository).dispatch({</span>
+		const llm: Llm = <span class="cstat-no" title="statement not covered" >await new Bus(this, this.state.repository).dispatch({</span>
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
-<span class="cstat-no" title="statement not covered" >		res.json(agent)</span>
+<span class="cstat-no" title="statement not covered" >		res.json(llm)</span>
 	}
 &nbsp;
 &nbsp;
 <span class="fstat-no" title="function not covered" >	async </span>create(req: Request, res: Response) {
-		const agent = <span class="cstat-no" title="statement not covered" >req.body as Partial&lt;Agent&gt;</span>
-		const agentNew: Agent = <span class="cstat-no" title="statement not covered" >await new Bus(this, this.state.repository).dispatch({</span>
+		const { llm }: { llm: Llm } = <span class="cstat-no" title="statement not covered" >req.body</span>
+		const llmNew: Llm = <span class="cstat-no" title="statement not covered" >await new Bus(this, this.state.repository).dispatch({</span>
 			type: typeorm.RepoRestActions.SAVE,
-			payload: agent
+			payload: llm
 		})
-<span class="cstat-no" title="statement not covered" >		res.json(agentNew)</span>
+<span class="cstat-no" title="statement not covered" >		res.json(llmNew)</span>
 	}
 &nbsp;
 <span class="fstat-no" title="function not covered" >	async </span>delete(req: Request, res: Response) {
@@ -299,32 +269,17 @@ class AgentRoute extends httpRouter.Service {
 &nbsp;
 <span class="fstat-no" title="function not covered" >	async </span>update(req: Request, res: Response) {
 		const id = <span class="cstat-no" title="statement not covered" >req.params["id"]</span>
-		const agentData = <span class="cstat-no" title="statement not covered" >req.body as Partial&lt;Agent&gt;</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >		<span class="missing-if-branch" title="if path not taken" >I</span>if (!id) {</span>
-<span class="cstat-no" title="statement not covered" >			return res.status(400).json({ error: "Agent ID is required for an update." });</span>
-		}
-&nbsp;
-		// Ensure the ID from the path is used for the update
-		const payload = <span class="cstat-no" title="statement not covered" >{ ...agentData, id };</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >		try {</span>
-			const updatedAgent: Agent = <span class="cstat-no" title="statement not covered" >await new Bus(this, this.state.repository).dispatch({</span>
-				type: typeorm.RepoRestActions.SAVE,
-				payload: payload,
-			})
-<span class="cstat-no" title="statement not covered" >			<span class="missing-if-branch" title="if path not taken" >I</span>if (!updatedAgent) {</span>
-<span class="cstat-no" title="statement not covered" >				return res.status(404).json({ error: "Agent not found or update failed." });</span>
-			}
-<span class="cstat-no" title="statement not covered" >			res.json(updatedAgent)</span>
-		} catch (e) {
-<span class="cstat-no" title="statement not covered" >			console.error("Error updating agent:", e)</span>
-<span class="cstat-no" title="statement not covered" >			res.status(500).json({ error: "Failed to update agent." })</span>
-		}
+		const { llm }: { llm: Llm } = <span class="cstat-no" title="statement not covered" >req.body</span>
+<span class="cstat-no" title="statement not covered" >		<span class="missing-if-branch" title="if path not taken" >I</span>if (!id || !llm) <span class="cstat-no" title="statement not covered" >return</span></span>
+		const llmUp = <span class="cstat-no" title="statement not covered" >await new Bus(this, this.state.repository).dispatch({</span>
+			type: typeorm.RepoRestActions.SAVE,
+			payload: llm,
+		})
+<span class="cstat-no" title="statement not covered" >		res.json(llmUp)</span>
 	}
 }
 &nbsp;
-export default AgentRoute
+export default LlmRoute
 &nbsp;
 &nbsp;
 &nbsp;</pre></td></tr></table></pre>

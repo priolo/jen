@@ -1,19 +1,28 @@
-
 .root {
-	
+	display: flex;
 }
+
+/** quando c'e' un drag over */
 .drag:hover {
 	outline: 2px solid var(--cmp-select-bg);
 }
 
-.root.system {
-	border-left: 2px solid red
+.grip {
+	width: 20px;
+	margin-right: 5px;
 }
 
-.root.user {
-	border-left: 2px solid blue
+/** elemento di tipo "system" */
+.grip.system {
+	background-color: red
 }
 
-.root.tool {
-	border-left: 2px solid yellow
+/** elemento di tipo "user" */
+.grip.user {
+	background-color: blue
+}
+
+/** elemento di tipo "tool" */
+.grip.tool {
+	background-color: yellow
 }

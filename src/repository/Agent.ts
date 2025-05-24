@@ -1,5 +1,6 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Tool } from './Tool.js';
+import { Llm } from './Llm.js';
 
 
 
@@ -32,11 +33,31 @@ export class Agent {
 	@Column({ type: 'boolean', default: true })
 	killOnResponse: boolean;
 
-	@OneToMany(() => Agent, node => node.agents, { cascade: false })
-	agents: Relation<Agent>[];
+
+	// RELATIONSHIPS
+
+	@ManyToOne(() => Llm, (llm) => llm.agents, { nullable: true, onDelete: 'SET NULL' }) // Added nullable and onDelete for flexibility
+    @JoinColumn({ name: 'llmId' }) // Specifies the foreign key column
+    llm: Llm | null; // Changed from Relation<Llm>
+
+	// Replace the existing 'agents' relationship with a ManyToMany self-referencing one
+    @ManyToMany(() => Agent)
+    @JoinTable({
+        name: "agent_relations", // Name of the pivot table for agent-to-agent relationships
+        joinColumn: { // Foreign key for the first agent in the relation
+            name: "agentId_1",
+            referencedColumnName: "id"
+        },
+        inverseJoinColumn: { // Foreign key for the second agent in the relation
+            name: "agentId_2",
+            referencedColumnName: "id"
+        }
+    })
+    agents: Agent[]; // Renamed for clarity, or you can keep 'agents'
+
 
 	@ManyToMany(() => Tool, tool => tool.agents)
     @JoinTable() // Manages the join table for the relationship
-    tools: Relation<Tool>[]; // Corrected type from Relation<any>[]
+    tools: Tool[]; // Changed from Relation<Tool[]>
 
 }
