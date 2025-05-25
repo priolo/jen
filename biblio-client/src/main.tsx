@@ -20,7 +20,7 @@ import './css/label.css';
 import './css/layout.css';
 import './css/scrollbar.css';
 import './css/monaco.css';
-import "@priolo/jack/dist/style.css";
+import "@priolo/jack/dist/jack.css";
 //import "@priolo/jack/dist/jack.css";
 
 

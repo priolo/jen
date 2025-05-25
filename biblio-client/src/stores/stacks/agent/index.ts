@@ -1,16 +1,12 @@
-import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { DragDoc } from "@priolo/jack"
-import { mixStores } from "@priolo/jon"
-import { createEditor } from "slate"
-import { withHistory } from 'slate-history'
-import { withReact } from "slate-react"
-import { EditorState } from "../editorBase"
-import { NodeType, PROMPT_ROLES } from "./slate/types"
-import { SugarEditor, withSugar } from "./slate/withSugar"
-import { Agent } from "@/types/Agent"
-import { EDIT_STATE } from "@/types"
 import agentApi from "@/api/agent"
+import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
+import { EDIT_STATE } from "@/types"
+import { Agent } from "@/types/Agent"
 import { MESSAGE_TYPE } from "@priolo/jack"
+import { mixStores } from "@priolo/jon"
+import { EditorState } from "../editorBase"
+
+
 
 const setup = {
 
@@ -19,40 +15,6 @@ const setup = {
 		agent: <Agent>null,
 		editState: EDIT_STATE.READ,
 
-		/** SLATE editor */
-		editor: <SugarEditor>null,
-
-		/** testo iniziale */
-		initValue: <NodeType[]>[
-			{
-				type: PROMPT_ROLES.SYSTEM,
-				children: [
-					{ text: "# primo2" },
-					{ text: "\nsecondo **ciccio** 56" },
-					{ text: "\nterzo *pippo*" },
-				]
-			},
-			{
-				type: PROMPT_ROLES.SYSTEM,
-				children: [
-					{ text: "# primo2" },
-					{ text: "\nsecondo **ciccio** 56" },
-					{ text: "\nterzo *pippo*" },
-				]
-			},
-			{
-				type: PROMPT_ROLES.SYSTEM,
-				children: [
-					{ text: "# primo2" },
-					{ text: "\nsecondo **ciccio** 56" },
-					{ text: "\nterzo *pippo*" },
-				]
-			}
-
-		],
-
-		/** indica che la dialog ROLE è aperto */
-		roleDialogOpen: false,
 		/** indica che la dialog TOOLS è aperto */
 		toolsDialogOpen: false,
 		/** indica che la dialog LLM è aperto */
@@ -74,49 +36,6 @@ const setup = {
 	actions: {
 
 		//#region VIEWBASE
-
-		onDrop: (data: DragDoc, store?: ViewStore) => {
-			const editorSo = store as AgentDetailStore
-			const editor = editorSo.state.editor
-			if (!data.source?.view) return
-
-			// se è uno spostamento al'interno dello stesso documento...
-			if (data.source.view == data.destination?.view) {
-				editor.moveNodes({ at: [data.source.index], to: [data.destination.index] })
-
-				// si trata di uno spostamento da CARD esterna
-			} else {
-				// è un NODE di una CARD esterna
-				if (data.source.index) {
-					const sourceEditor = (<AgentDetailStore>data.source.view).state.editor
-					if (!sourceEditor) return
-					const [node] = sourceEditor.node([data.source.index])
-					editor.insertNode(node, { at: [data.destination.index] })
-					// è tutta la CARD
-				} else {
-					// cotruisco un NODE da una VIEW
-					// const node = {
-					// 	type: PROMPT_ROLES.CARD, // This was causing an error
-					// 	data: data.source.view.getSerialization(),
-					// 	subtitle: data.source.view.getSubTitle(),
-					// 	children: [{ text: data.source.view.getTitle() }],
-					// }
-					// editor.insertNode(node, { at: [data.destination.index] })
-				}
-			}
-		},
-
-		/** chiamata dalla build dello stesso store */
-		onCreated: async (_: void, store?: ViewStore) => {
-			const editorSo = store as AgentDetailStore
-
-			// creo l'editor SLATE
-			const editor: SugarEditor = withSugar(withHistory(withReact(createEditor())))
-			editor.store = editorSo
-			//editor.children = editorSo.state.initValue ?? [{ type: PROMPT_TYPES.SYSTEM, children: [{ text: "" }] }] as NodeType[]
-			editorSo.state.editor = editor
-		},
-
 		//#endregion
 
 		async fetch(_: void, store?: AgentDetailStore) {
@@ -156,7 +75,6 @@ const setup = {
 	mutators: {
 		setAgent: (agent: Agent) => ({ agent }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
-		setRoleDialogOpen: (roleDialogOpen: boolean) => ({ roleDialogOpen }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),
 		setLlmDialogOpen: (llmDialogOpen: boolean) => ({ llmDialogOpen }),
 	},

@@ -19,7 +19,7 @@ export class Agent {
 	@Column({ type: 'varchar', default: '' })
 	description: string;
 
-	/** imprinting */
+	/** system prompt imprinting */
 	@Column({ type: 'varchar', default: '' })
 	systemPrompt: string;
 
@@ -39,6 +39,15 @@ export class Agent {
 	@ManyToOne(() => Llm, (llm) => llm.agents, { nullable: true, onDelete: 'SET NULL' }) // Added nullable and onDelete for flexibility
     @JoinColumn({ name: 'llmId' }) // Specifies the foreign key column
     llm: Llm | null; // Changed from Relation<Llm>
+
+	// Base agent relationship 
+	@ManyToOne(() => Agent, (agent) => agent.subAgents, { nullable: true, onDelete: 'SET NULL' })
+	@JoinColumn({ name: 'baseId' })
+	base: Agent | null;
+
+	// Sub-agents relationship - inverse of base relationship
+	@OneToMany(() => Agent, (agent) => agent.base)
+	subAgents: Agent[];
 
 	// Replace the existing 'agents' relationship with a ManyToMany self-referencing one
     @ManyToMany(() => Agent)

@@ -7,6 +7,7 @@ import { Tool } from "./Tool"
 export interface Agent {
 	id: Uuid
 	name: string
+	//type: AGENT_TYPE
 
 	description: string
 	systemPrompt: string
@@ -14,7 +15,23 @@ export interface Agent {
 	askInformation: boolean
 	killOnResponse: boolean
 
-	llm: Partial<Llm>
-	agents: Agent[]
+	base?: Partial<Agent>
+	subAgents: Agent[]
+	llm: Llm
 	tools: Tool[]
+}
+
+export enum AGENT_TYPE {
+	REASONING = "REASONING",
+	FINDER = "FINDER",
+}
+
+
+
+// prompt
+
+export interface Message {
+	role: string
+	content: string
+	timestamp: string
 }

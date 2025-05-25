@@ -1,27 +1,18 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import SendIcon from "@/icons/SendIcon"
 import { AgentDetailStore } from "@/stores/stacks/agent"
-import { codeOnKeyDown } from "@/stores/stacks/agent/utils/onkeydown"
-import { Accordion, Button, FloatButton, List, ListDialog, ListMultiDialog, TitleAccordion } from "@priolo/jack"
+import agentSo from "@/stores/stacks/agent/repo"
+import llmSo from "@/stores/stacks/llm/repo"
+import toolSo from "@/stores/stacks/tool/repo"
+import { Agent, AGENT_TYPE } from "@/types/Agent"
+import { Tool } from "@/types/Tool"
+import { IconToggle, ListDialog, ListDialog2, ListMultiDialog, MarkdownEditor, StringUpRow, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import Prism from "prismjs"
-import { FunctionComponent, useMemo, useState } from "react"
-import { Text } from "slate"
-import { Editable, Slate } from "slate-react"
+import { FunctionComponent, useMemo, useState, useEffect } from "react"
 import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
-import PromptElement from "./elements/PromptElement"
-import BiblioLeaf from "./leafs/BiblioLeaf"
-import RoleDialog from "./RoleDialog"
-import cls from "./View.module.css"
-import ToolsDialog from "./ToolsDialog"
 import LlmDialog from "./LlmDialog"
-import llmSo from "@/stores/stacks/llm/repo"
-import { Agent } from "@/types/Agent"
-import agentSo from "@/stores/stacks/agent/repo"
-import toolSo from "@/stores/stacks/tool/repo"
-import { Tool } from "@/types/Tool"
+import ToolsDialog from "./ToolsDialog"
 
 
 
@@ -37,35 +28,28 @@ const AgentView: FunctionComponent<Props> = ({
 	useStore(store)
 
 	// HOOKs
-	const [open, setOpen] = useState(false)
+	useEffect(() => {
+		// Fetch agents if not already loaded
+		agentSo.fetchIfVoid()
+	}, [])
 
 	// HANDLER
-	const handleFocus = () => {
-		//store.setFormatOpen(true)
-	}
-	const handleBlur = () => {
-		//store.setFormatOpen(false)
-	}
-	const handleStartDrag = (e: React.MouseEvent) => {
-		e.preventDefault()
-		e.stopPropagation()
-	}
-
-	const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-		//biblioOnKeyDown(event, editor)
-		codeOnKeyDown(event, editor)
-	}
-
-	const handleCopy = (event: React.ClipboardEvent<HTMLDivElement>) => {
-		editor.onCopy(event.nativeEvent);
-	}
+	// const handleTypeChange = (index: number) => {
+	// 	const type = Object.values(AGENT_TYPE)[index]
+	// 	store.setAgent({ ...store.state.agent, type })
+	// }
 
 	const handleLlmChange = (index: number) => {
 		const llm = llmSo.state.all[index]
-		store.setAgent({
-			...store.state.agent,
-			llm: llm
-		})
+		store.setAgent({ ...store.state.agent, llm })
+	}
+
+	const handleBaseAgentChange = (id: string) => {
+		store.setAgent({ ...store.state.agent, base: { id } })
+	}
+
+	const handleNameChange = (name: string) => {
+		store.setAgent({ ...store.state.agent, name })
 	}
 
 	const handleChangeAgentsSelect = (ids: number[]) => {
@@ -75,20 +59,19 @@ const AgentView: FunctionComponent<Props> = ({
 		setToolsSelect(ids)
 	}
 
-	
 	// RENDER
-	const editor = store.state.editor
-
-	const llm = useMemo(() => llmSo.state.all?.map(llm => llm.name) ?? [], [llmSo.state.all]) 
+	const llm = useMemo(() => llmSo.state.all?.map(llm => llm.name) ?? [], [llmSo.state.all])
 	const indexSelect = useMemo(() =>
 		llmSo.state.all?.findIndex((llm) => llm.id === store.state.agent.llm?.id) ?? -1
 		, [llmSo.state.all, store.state.agent.llm?.id]
 	)
 
-	const agents = useMemo(() => agentSo.state.all ?? [], [agentSo.state.all]) 
+	
+	const agents = useMemo(() => agentSo.state.all ?? [], [agentSo.state.all])
+	const agentBaseId = store.state.agent?.base?.id
 	const [agentsSelect, setAgentsSelect] = useState<number[]>([])
 
-	const tools = useMemo(() => toolSo.state.all ?? [], [toolSo.state.all]) 
+	const tools = useMemo(() => toolSo.state.all ?? [], [toolSo.state.all])
 	const [toolsSelect, setToolsSelect] = useState<number[]>([])
 
 
@@ -103,7 +86,28 @@ const AgentView: FunctionComponent<Props> = ({
 		iconizedRender={null}
 	>
 
-		<TitleAccordion title="STATS" open={false}>
+		<TitleAccordion title="BASE">
+
+			<div className="lyt-v">
+				<div className="jack-lbl-prop">NAME</div>
+				<TextInput
+					value={store.state.agent.name ?? ""}
+					onChange={handleNameChange}
+					placeholder="Enter agent name..."
+				/>
+			</div>
+
+			{/* <div className="lyt-v">
+				<div className="jack-lbl-prop">TYPE</div>
+				<ListDialog width={100}
+					store={store}
+					select={Object.values(AGENT_TYPE).indexOf(store.state.agent.type ?? AGENT_TYPE.REASONING)}
+					items={Object.values(AGENT_TYPE)}
+					RenderRow={StringUpRow}
+					//readOnly={readOnly}
+					onSelect={handleTypeChange}
+				/>
+			</div> */}
 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">LLM</div>
@@ -114,6 +118,18 @@ const AgentView: FunctionComponent<Props> = ({
 					//RenderRow={StringUpRow}
 					//readOnly={inRead || !inNew}
 					onSelect={handleLlmChange}
+				/>
+			</div>
+
+			<div className="lyt-v">
+				<div className="jack-lbl-prop">BASE</div>
+				<ListDialog2
+					store={store}
+					select={agentBaseId}
+					items={agents}
+					fnGetId={(item: Agent) => item?.id}
+					fnGetString={(item: Agent) => item?.name}
+					onChangeSelect={handleBaseAgentChange}
 				/>
 			</div>
 
@@ -140,72 +156,83 @@ const AgentView: FunctionComponent<Props> = ({
 					fnGetString={(item: Agent) => item.name}
 				/>
 			</div>
+
+			<div className="lyt-v">
+				<div className="jack-lbl-prop">ASK INFORMATION</div>
+				<IconToggle
+					check={store.state.agent.askInformation ?? false}
+					onChange={askInformation => store.setAgent({
+						...store.state.agent,
+						askInformation
+					})}
+				/>
+			</div>
+
+			<div className="lyt-v">
+				<div className="jack-lbl-prop">KILL ON RESPONSE</div>
+				<IconToggle
+					check={store.state.agent.killOnResponse ?? true}
+					onChange={killOnResponse => store.setAgent({
+						...store.state.agent,
+						killOnResponse
+					})}
+				/>
+			</div>
+
+
 		</TitleAccordion>
 
-		<Slate
-			editor={editor}
-			initialValue={store.state.initValue}
-		>
-			{/* <ActionsCmp store={store} style={{ margin: '-10px -10px 5px -10px' }} /> */}
-			<Editable
-				decorate={decorateMD}
-				className={`${cls.editor} code-editor`}
-				style={{ flex: 1, overflowY: "auto" }}
-				spellCheck={false}
-				renderElement={props => <PromptElement {...props} />}
-				renderLeaf={props => <BiblioLeaf {...props} />}
-				onKeyDown={handleKeyDown}
-				onFocus={handleFocus}
-				onBlur={handleBlur}
-				onDragStart={handleStartDrag}
-				onCopy={handleCopy}
-			/>
-		</Slate>
+		<TitleAccordion title="PROMPTS">
 
-		<RoleDialog store={store} />
+			<div className="lyt-v">
+				<div className="jack-lbl-prop">DESCRIPTION</div>
+				<MarkdownEditor
+					value={store.state.agent.description ?? ""}
+					onChange={text => store.setAgent({
+						...store.state.agent,
+						description: text
+					})}
+					//placeholder="Enter your markdown here..."
+					style={{ minHeight: '100px', marginTop: '10px' }}
+				/>
+			</div>
+
+			<div className="lyt-v">
+				<div className="jack-lbl-prop">SYSTEM</div>
+				<MarkdownEditor
+					value={store.state.agent.systemPrompt ?? ""}
+					onChange={text => store.setAgent({
+						...store.state.agent,
+						systemPrompt: text
+					})}
+					//placeholder="Enter your markdown here..."
+					style={{ minHeight: '100px', marginTop: '10px' }}
+				/>
+			</div>
+
+
+			<div className="lyt-v">
+				<div className="jack-lbl-prop">CONTEXT</div>
+				<MarkdownEditor
+					value={store.state.agent.contextPrompt ?? ""}
+					onChange={text => store.setAgent({
+						...store.state.agent,
+						contextPrompt: text
+					})}
+					//placeholder="Enter your markdown here..."
+					style={{ minHeight: '100px', marginTop: '10px' }}
+				/>
+			</div>
+
+
+
+		</TitleAccordion>
+
 		<ToolsDialog store={store} />
-		<LlmDialog store={store} />
 
-		<FloatButton
-			style={{ position: "absolute", right: 20, bottom: 20 }}
-			onClick={() => console.log("click float")}
-			disabled={false}
-		><SendIcon /></FloatButton>
+		<LlmDialog store={store} />
 
 	</FrameworkCard>
 }
 
 export default AgentView
-
-const decorateMD = ([node, path]) => {
-	const ranges = []
-	if (!Text.isText(node)) return ranges
-
-	// helper per calcolare lunghezza token
-	const getLength = token =>
-		typeof token === 'string'
-			? token.length
-			: typeof token.content === 'string'
-				? token.content.length
-				: token.content.reduce((l, t) => l + getLength(t), 0)
-
-	// Prism tokenizza il testo in base alla grammatica Markdown
-	const tokens = Prism.tokenize(node.text, Prism.languages.markdown)
-	let start = 0
-
-	for (const token of tokens) {
-		const length = getLength(token)
-		const end = start + length
-
-		if (typeof token !== 'string') {
-			ranges.push({
-				[token.type]: true,
-				anchor: { path, offset: start },
-				focus: { path, offset: end }
-			})
-		}
-		start = end
-	}
-
-	return ranges
-}
