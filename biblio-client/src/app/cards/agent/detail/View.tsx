@@ -5,6 +5,7 @@ import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
 import { Agent } from "@/types/Agent"
 import { Tool } from "@/types/Tool"
+import { EDIT_STATE } from "@/types"
 import { IconToggle, ListDialog2, ListMultiDialog, MarkdownEditor, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect, useMemo } from "react"
@@ -75,6 +76,9 @@ const AgentView: FunctionComponent<Props> = ({
 	const toolsSelected = store.state.agent?.tools?.map(tool => tool.id) ?? []
 	const tools = toolSo.state.all ?? []
 
+	const inRead = store.state.editState == EDIT_STATE.READ
+	const inNew = store.state.editState == EDIT_STATE.NEW
+
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -92,6 +96,7 @@ const AgentView: FunctionComponent<Props> = ({
 					value={store.state.agent.name ?? ""}
 					onChange={handleNameChange}
 					placeholder="Enter agent name..."
+					readOnly={inRead}
 				/>
 			</div>
 
@@ -113,7 +118,7 @@ const AgentView: FunctionComponent<Props> = ({
 					store={store}
 					select={llmSelected}
 					items={llm}
-					//readOnly={inRead || !inNew}
+					readOnly={inRead}
 					fnGetId={(item: Tool) => item?.id}
 					fnGetString={(item: Tool) => item?.name}
 					onChangeSelect={handleLlmChange}
@@ -126,6 +131,7 @@ const AgentView: FunctionComponent<Props> = ({
 					store={store}
 					select={agentBaseId}
 					items={agents}
+					readOnly={inRead}
 					fnGetId={(item: Agent) => item?.id}
 					fnGetString={(item: Agent) => item?.name}
 					onChangeSelect={handleBaseAgentChange}
@@ -138,6 +144,7 @@ const AgentView: FunctionComponent<Props> = ({
 					store={store}
 					items={tools}
 					selects={toolsSelected}
+					readOnly={inRead}
 					onChangeSelect={handleToolsSelectChange}
 					fnGetId={(item: Tool) => item.id}
 					fnGetString={(item: Tool) => item.name}
@@ -150,6 +157,7 @@ const AgentView: FunctionComponent<Props> = ({
 					store={store}
 					items={agents}
 					selects={subAgentsSelected}
+					readOnly={inRead}
 					onChangeSelect={handleAgentsSelectChange}
 					fnGetId={(item: Agent) => item.id}
 					fnGetString={(item: Agent) => item.name}
@@ -160,6 +168,7 @@ const AgentView: FunctionComponent<Props> = ({
 				<div className="jack-lbl-prop">ASK INFORMATION</div>
 				<IconToggle
 					check={store.state.agent.askInformation ?? false}
+					readOnly={inRead}
 					onChange={askInformation => store.setAgent({
 						...store.state.agent,
 						askInformation
@@ -171,6 +180,7 @@ const AgentView: FunctionComponent<Props> = ({
 				<div className="jack-lbl-prop">KILL ON RESPONSE</div>
 				<IconToggle
 					check={store.state.agent.killOnResponse ?? true}
+					readOnly={inRead}
 					onChange={killOnResponse => store.setAgent({
 						...store.state.agent,
 						killOnResponse
@@ -190,6 +200,7 @@ const AgentView: FunctionComponent<Props> = ({
 						{baseAgent.name}
 						<MarkdownEditor
 							value={baseAgent.description ?? ""}
+							readOnly={inRead}
 							// onChange={text => store.setAgent({
 							// 	...store.state.agent,
 							// 	description: text
@@ -202,6 +213,7 @@ const AgentView: FunctionComponent<Props> = ({
 
 				<MarkdownEditor
 					value={store.state.agent.description ?? ""}
+					readOnly={inRead}
 					onChange={text => store.setAgent({
 						...store.state.agent,
 						description: text
@@ -215,6 +227,7 @@ const AgentView: FunctionComponent<Props> = ({
 				<div className="jack-lbl-prop">SYSTEM</div>
 				<MarkdownEditor
 					value={store.state.agent.systemPrompt ?? ""}
+					readOnly={inRead}
 					onChange={text => store.setAgent({
 						...store.state.agent,
 						systemPrompt: text
