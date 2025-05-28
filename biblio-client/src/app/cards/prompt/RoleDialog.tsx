@@ -1,5 +1,5 @@
 
-import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent"
+import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent/detail"
 import { PROMPT_ROLES } from "@/stores/stacks/agent/slate/types"
 import { Dialog, List } from "@priolo/jack"
 import { useStore } from "@priolo/jon"

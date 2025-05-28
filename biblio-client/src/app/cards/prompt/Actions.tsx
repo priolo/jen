@@ -1,4 +1,4 @@
-import { AgentDetailStore } from "@/stores/stacks/agent"
+import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import { EDIT_STATE } from "@/types"
 import { Button, CircularLoadingCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"

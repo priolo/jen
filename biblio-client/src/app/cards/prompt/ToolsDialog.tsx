@@ -1,5 +1,5 @@
 
-import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent"
+import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent/detail"
 import toolSo from "@/stores/stacks/tool/repo"
 import { Tool } from "@/types/Tool"
 import { Dialog, List, ListMultiWithFilter, ListMultiWithFilter2 } from "@priolo/jack"

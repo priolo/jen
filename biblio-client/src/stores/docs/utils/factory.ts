@@ -10,7 +10,8 @@ import { DOC_TYPE } from "@/types";
 import { createStore } from "@priolo/jon";
 import { ViewState, ViewStore } from "../../stacks/viewBase";
 import reflectionSetup from "../../stacks/reflection";
-import agentDetailSetup from "@/stores/stacks/agent";
+import agentDetailSetup from "@/stores/stacks/agent/detail";
+import agentListSetup from "@/stores/stacks/agent/list";
 import llmListSetup from "@/stores/stacks/llm/list";
 import llmDetailSetup from "@/stores/stacks/llm/detail";
 import toolListSetup from "@/stores/stacks/tool/list";
@@ -44,6 +45,7 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 
 		[DOC_TYPE.TEXT_EDITOR]: txtEditorSetup,
 		[DOC_TYPE.AGENT]: agentDetailSetup,
+		[DOC_TYPE.AGENT_LIST]: agentListSetup,
 
 		[DOC_TYPE.LLM_LIST]: llmListSetup,
 		[DOC_TYPE.LLM_DETAIL]: llmDetailSetup,

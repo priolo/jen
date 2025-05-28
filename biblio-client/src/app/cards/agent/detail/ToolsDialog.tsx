@@ -1,8 +1,8 @@
 
-import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent"
+import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent/detail"
 import toolSo from "@/stores/stacks/tool/repo"
 import { Tool } from "@/types/Tool"
-import { Dialog, List, ListMultiWithFilter, ListMultiWithFilter2 } from "@priolo/jack"
+import { Dialog, ListMultiWithFilter2 } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useState } from "react"
 
@@ -17,17 +17,16 @@ const ToolsDialog: FunctionComponent<Props> = ({
 }) => {
 
 	// STORE
-	const state = useStore(store) as AgentDetailState
+	useStore(store) as AgentDetailState
 
 	// HOOKs
-	const [test, setTest] = useState([])
 
 	// HANDLER
 	const handleClose = () => {
 		store.setToolsDialogOpen(false)
 	}
 	const handleSelect = (ids: string[]) => {
-		store.setAgent({ ...state.agent, 
+		store.setAgent({ ...store.state.agent, 
 			tools: ids.map((id) => toolSo.state.all.find((tool) => tool.id === id))
 		})
 	}
@@ -35,7 +34,7 @@ const ToolsDialog: FunctionComponent<Props> = ({
 	// RENDER
 
 	const tools = toolSo.state.all
-	const ids = state.agent.tools.map((tool) => tool.id)
+	const ids = store.state.agent?.tools?.map((tool) => tool.id) ?? []
 
 	return (
 		<Dialog
@@ -43,7 +42,7 @@ const ToolsDialog: FunctionComponent<Props> = ({
 			store={store}
 			title={"TOOLS"}
 			width={85}
-			open={state.toolsDialogOpen}
+			open={store.state.toolsDialogOpen}
 			onClose={handleClose}
 		>
 			<div className="lyt-form">

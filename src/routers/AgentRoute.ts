@@ -35,9 +35,9 @@ class AgentRoute extends httpRouter.Service {
 			type: typeorm.Actions.FIND_ONE,
 			payload: {
 				where: { id },
-				relations: ["tools", "llm", "agents"],
+				relations: ["tools", "llm", "subAgents"],
 				select: {
-					agents: { id: true, name: true },
+					subAgents: { id: true, name: true },
 				}
 			}
 		})

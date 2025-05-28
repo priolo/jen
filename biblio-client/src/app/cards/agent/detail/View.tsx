@@ -1,15 +1,15 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import { AgentDetailStore } from "@/stores/stacks/agent"
+import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import agentSo from "@/stores/stacks/agent/repo"
 import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
-import { Agent, AGENT_TYPE } from "@/types/Agent"
+import { Agent } from "@/types/Agent"
 import { Tool } from "@/types/Tool"
-import { IconToggle, ListDialog, ListDialog2, ListMultiDialog, MarkdownEditor, StringUpRow, TextInput, TitleAccordion } from "@priolo/jack"
+import { IconToggle, ListDialog2, ListMultiDialog, MarkdownEditor, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { FunctionComponent, useMemo, useState, useEffect } from "react"
-import EditorIcon from "../../../icons/EditorIcon"
-import clsCard from "../CardCyanDef.module.css"
+import { FunctionComponent, useEffect, useMemo } from "react"
+import EditorIcon from "../../../../icons/EditorIcon"
+import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import LlmDialog from "./LlmDialog"
 import ToolsDialog from "./ToolsDialog"
@@ -29,8 +29,7 @@ const AgentView: FunctionComponent<Props> = ({
 
 	// HOOKs
 	useEffect(() => {
-		// Fetch agents if not already loaded
-		agentSo.fetchIfVoid()
+		store.fetchIfVoid()
 	}, [])
 
 	// HANDLER
@@ -39,44 +38,43 @@ const AgentView: FunctionComponent<Props> = ({
 	// 	store.setAgent({ ...store.state.agent, type })
 	// }
 
-	const handleLlmChange = (index: number) => {
-		const llm = llmSo.state.all[index]
-		store.setAgent({ ...store.state.agent, llm })
+	const handleLlmChange = (id: string) => {
+		store.setAgent({ ...store.state.agent, llm: { id } })
 	}
 
-	const handleBaseAgentChange = (id: string) => {
-		store.setAgent({ ...store.state.agent, base: { id } })
+	const handleBaseAgentChange = (baseId: string) => {
+		store.setAgent({ ...store.state.agent, baseId  })
 	}
 
 	const handleNameChange = (name: string) => {
 		store.setAgent({ ...store.state.agent, name })
 	}
 
-	const handleChangeAgentsSelect = (ids: number[]) => {
-		setAgentsSelect(ids)
+	const handleAgentsSelectChange = (ids: string[]) => {
+		const subAgents: Partial<Agent>[] = ids.map(id => ({ id }))
+		store.setAgent({ ...store.state.agent, subAgents })
 	}
-	const handleChangeToolsSelect = (ids: number[]) => {
-		setToolsSelect(ids)
+
+	const handleToolsSelectChange = (ids: string[]) => {
+		const tools: Partial<Tool>[] = ids.map(id => ({ id }))
+		store.setAgent({ ...store.state.agent, tools })
 	}
 
 	// RENDER
-	const llm = useMemo(() => llmSo.state.all?.map(llm => llm.name) ?? [], [llmSo.state.all])
-	const indexSelect = useMemo(() =>
-		llmSo.state.all?.findIndex((llm) => llm.id === store.state.agent.llm?.id) ?? -1
-		, [llmSo.state.all, store.state.agent.llm?.id]
+	const llm = llmSo.state.all ?? []
+	const llmSelected = store.state.agent.llm?.id
+
+	const agents = agentSo.state.all ?? []
+	const baseAgents = useMemo(() =>
+		agentSo.getAllBaseAgents(store.state.agent?.id),
+		[agentSo.state.all, store.state.agent]
 	)
+	const agentBaseId = store.state.agent?.baseId
+	const subAgentsSelected = store.state.agent?.subAgents?.map(agent => agent.id) ?? []
 
-	
-	const agents = useMemo(() => agentSo.state.all ?? [], [agentSo.state.all])
-	const agentBaseId = store.state.agent?.base?.id
-	const [agentsSelect, setAgentsSelect] = useState<number[]>([])
+	const toolsSelected = store.state.agent?.tools?.map(tool => tool.id) ?? []
+	const tools = toolSo.state.all ?? []
 
-	const tools = useMemo(() => toolSo.state.all ?? [], [toolSo.state.all])
-	const [toolsSelect, setToolsSelect] = useState<number[]>([])
-
-
-
-	//const agents = useMemo(() => agentSo.state.all?.map(llm => llm.name) ?? [], [llmSo.state.all]) 
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -111,13 +109,14 @@ const AgentView: FunctionComponent<Props> = ({
 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">LLM</div>
-				<ListDialog width={80}
+				<ListDialog2
 					store={store}
-					select={indexSelect}
+					select={llmSelected}
 					items={llm}
-					//RenderRow={StringUpRow}
 					//readOnly={inRead || !inNew}
-					onSelect={handleLlmChange}
+					fnGetId={(item: Tool) => item?.id}
+					fnGetString={(item: Tool) => item?.name}
+					onChangeSelect={handleLlmChange}
 				/>
 			</div>
 
@@ -138,8 +137,8 @@ const AgentView: FunctionComponent<Props> = ({
 				<ListMultiDialog
 					store={store}
 					items={tools}
-					selects={toolsSelect}
-					onChangeSelect={handleChangeToolsSelect}
+					selects={toolsSelected}
+					onChangeSelect={handleToolsSelectChange}
 					fnGetId={(item: Tool) => item.id}
 					fnGetString={(item: Tool) => item.name}
 				/>
@@ -150,8 +149,8 @@ const AgentView: FunctionComponent<Props> = ({
 				<ListMultiDialog
 					store={store}
 					items={agents}
-					selects={agentsSelect}
-					onChangeSelect={handleChangeAgentsSelect}
+					selects={subAgentsSelected}
+					onChangeSelect={handleAgentsSelectChange}
 					fnGetId={(item: Agent) => item.id}
 					fnGetString={(item: Agent) => item.name}
 				/>
@@ -186,6 +185,21 @@ const AgentView: FunctionComponent<Props> = ({
 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">DESCRIPTION</div>
+				{baseAgents.map((baseAgent: Agent) => (
+					<div key={baseAgent.id} className="jack-lbl-prop">
+						{baseAgent.name}
+						<MarkdownEditor
+							value={baseAgent.description ?? ""}
+							// onChange={text => store.setAgent({
+							// 	...store.state.agent,
+							// 	description: text
+							// })}
+							//placeholder="Enter your markdown here..."
+							style={{ minHeight: '100px', marginTop: '10px' }}
+						/>
+					</div>
+				))}
+
 				<MarkdownEditor
 					value={store.state.agent.description ?? ""}
 					onChange={text => store.setAgent({

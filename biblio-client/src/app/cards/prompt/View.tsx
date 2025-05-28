@@ -1,6 +1,6 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
-import { AgentDetailStore } from "@/stores/stacks/agent"
+import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import { codeOnKeyDown } from "@/stores/stacks/agent/utils/onkeydown"
 import { Accordion, Button, FloatButton, List, ListDialog, ListMultiDialog, MarkdownEditor, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"

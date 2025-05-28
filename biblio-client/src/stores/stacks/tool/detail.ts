@@ -16,7 +16,6 @@ const setup = {
 
 		/** tool visualizzato */
 		tool: <Partial<Tool>>null,
-
 		editState: EDIT_STATE.READ,
 
 		//#region VIEWBASE

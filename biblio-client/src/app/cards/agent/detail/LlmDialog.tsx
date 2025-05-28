@@ -1,12 +1,10 @@
 
-import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent"
+import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent/detail"
 import llmSo from "@/stores/stacks/llm/repo"
-import toolSo from "@/stores/stacks/tool/repo"
 import { Llm } from "@/types/Llm"
-import { Tool } from "@/types/Tool"
-import { Dialog, List, ListMultiWithFilter, ListMultiWithFilter2 } from "@priolo/jack"
+import { Dialog, List } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { FunctionComponent, useMemo, useState } from "react"
+import { FunctionComponent, useMemo } from "react"
 
 
 

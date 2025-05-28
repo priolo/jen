@@ -14,6 +14,7 @@ export class Llm {
 	@Column({ type: 'text' })
 	key: string;
 
+	/** agenti che implementano questo llm */
 	@OneToMany(() => Agent, (agent) => agent.llm)
     agents: Agent[];
 }

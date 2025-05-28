@@ -2,71 +2,95 @@ import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany
 import { Tool } from './Tool.js';
 import { Llm } from './Llm.js';
 
-
-
 @Entity('agents')
 export class Agent {
 
-	/** id dell'agente */
-	@PrimaryGeneratedColumn("uuid")
-	id: string;
+    /** id dell'agente */
+    @PrimaryGeneratedColumn("uuid")
+    id: string;
 
-	/** nome dell'agente */
-	@Column({ type: 'varchar', default: '' })
-	name: string;
+    /** nome dell'agente */
+    @Column({ type: 'varchar', default: '' })
+    name: string;
 
-	/** Descrive l'agent nel tool */
-	@Column({ type: 'varchar', default: '' })
-	description: string;
+    /** Descrive l'agent nel tool */
+    @Column({ type: 'varchar', default: '' })
+    description: string;
 
-	/** system prompt imprinting */
-	@Column({ type: 'varchar', default: '' })
-	systemPrompt: string;
+    /** system prompt imprinting */
+    @Column({ type: 'varchar', default: '' })
+    systemPrompt: string;
 
-	/** contesto nel prompt iniziale */
-	@Column({ type: 'varchar', default: '' })
-	contextPrompt: string;
+    /** contesto nel prompt iniziale */
+    @Column({ type: 'varchar', default: '' })
+    contextPrompt: string;
 
-	@Column({ type: 'boolean', default: false })
-	askInformation: boolean;
+    @Column({ type: 'boolean', default: false })
+    askInformation: boolean;
 
-	@Column({ type: 'boolean', default: true })
-	killOnResponse: boolean;
+    @Column({ type: 'boolean', default: true })
+    killOnResponse: boolean;
+
+    // RELATIONSHIPS
+
+    // LLM
+    /** ID LLM utilizzato per questo agente*/
+    @Column({ type: 'uuid', nullable: true }) 
+    llmId: string | null
+
+    /** LLM utilizzato per questo agente*/
+    @ManyToOne(() => Llm, (llm) => llm.agents, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'llmId' })
+    llm: Llm | null
 
 
-	// RELATIONSHIPS
+    // AGENT BASE (inheritance relationship)
+    /** ID dell'agente base da cui è derivato questo agente */
+    @Column({ type: 'uuid', nullable: true })
+    baseId: string | null
 
-	@ManyToOne(() => Llm, (llm) => llm.agents, { nullable: true, onDelete: 'SET NULL' }) // Added nullable and onDelete for flexibility
-    @JoinColumn({ name: 'llmId' }) // Specifies the foreign key column
-    llm: Llm | null; // Changed from Relation<Llm>
+    // Agente base da cui è derivato questo agente
+    @ManyToOne(() => Agent, (agent) => agent.derivedAgents, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'baseId' })
+    base: Agent | null
 
-	// Base agent relationship 
-	@ManyToOne(() => Agent, (agent) => agent.subAgents, { nullable: true, onDelete: 'SET NULL' })
-	@JoinColumn({ name: 'baseId' })
-	base: Agent | null;
+    // Agenti derivati da questo agente
+    @OneToMany(() => Agent, (agent) => agent.base)
+    derivedAgents: Agent[]
 
-	// Sub-agents relationship - inverse of base relationship
-	@OneToMany(() => Agent, (agent) => agent.base)
-	subAgents: Agent[];
 
-	// Replace the existing 'agents' relationship with a ManyToMany self-referencing one
-    @ManyToMany(() => Agent)
+    // SUB AGENTS (composition relationship)
+    @ManyToMany(() => Agent, (agent) => agent.parentAgents)
     @JoinTable({
-        name: "agent_relations", // Name of the pivot table for agent-to-agent relationships
-        joinColumn: { // Foreign key for the first agent in the relation
-            name: "agentId_1",
+        name: "agent_relations",
+        joinColumn: {
+            name: "parentAgentId",
             referencedColumnName: "id"
         },
-        inverseJoinColumn: { // Foreign key for the second agent in the relation
-            name: "agentId_2",
+        inverseJoinColumn: {
+            name: "subAgentId", 
             referencedColumnName: "id"
         }
     })
-    agents: Agent[]; // Renamed for clarity, or you can keep 'agents'
+    subAgents: Agent[]
 
+    // Parent agents (inverse side of subAgents)
+    @ManyToMany(() => Agent, (agent) => agent.subAgents)
+    parentAgents: Agent[]
 
-	@ManyToMany(() => Tool, tool => tool.agents)
-    @JoinTable() // Manages the join table for the relationship
-    tools: Tool[]; // Changed from Relation<Tool[]>
-
+    
+    // TOOLS
+    @ManyToMany(() => Tool, tool => tool.agents,  { cascade: true })
+    @JoinTable({
+        name: "agent_tools",
+        joinColumn: {
+            name: "agentId",
+            referencedColumnName: "id"
+        },
+        inverseJoinColumn: {
+            name: "toolId",
+            referencedColumnName: "id"
+        }
+    })
+    tools: Tool[]
 }

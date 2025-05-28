@@ -15,10 +15,17 @@ export interface Agent {
 	askInformation: boolean
 	killOnResponse: boolean
 
+	llm?: Partial<Llm>
+	llmId?: string
+
+	baseId?: string
 	base?: Partial<Agent>
-	subAgents: Agent[]
-	llm: Llm
-	tools: Tool[]
+	derivedAgents: Partial<Agent>[]
+
+	subAgents?: Partial<Agent>[]
+	parentAgents?: Partial<Agent>[]
+	
+	tools: Partial<Tool>[]
 }
 
 export enum AGENT_TYPE {

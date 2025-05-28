@@ -15,6 +15,20 @@ const setup = {
 			if (!id) return -1
 			return store.state.all?.findIndex(llm => llm.id == id)
 		},
+		getById(id: string, store?: AgentStore): Agent {
+			if (!id) return null
+			return store.state.all?.find(llm => llm.id == id) ?? null
+		},
+		getAllBaseAgents(agentId: string, store?: AgentStore): Agent[] {
+			let nextAgent = store.getById(agentId)
+			const agents:Agent[] = []
+			do {
+				nextAgent = store.getById(nextAgent?.baseId)
+				if (!nextAgent) break
+				agents.push(nextAgent)
+			} while (true)
+			return agents
+		}
 	},
 
 	actions: {

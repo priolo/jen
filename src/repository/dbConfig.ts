@@ -26,6 +26,11 @@ export const getDBConnectionConfig = () => {
 			catch (e) { console.log(e) }
 		} else if (process.env.NODE_ENV == ENV_TYPE.DEV) {
 			dbPath = path.join(base, "/database.dev.sqlite")
+			// Delete database file in dev mode when DB_DEV_RESET is true
+			if (process.env.DB_DEV_RESET == "true") {
+				try { if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath) }
+				catch (e) { console.log(e) }
+			}
 		} else {
 			dbPath = path.join(base, "/database.sqlite")
 		}

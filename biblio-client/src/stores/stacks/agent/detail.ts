@@ -12,7 +12,7 @@ const setup = {
 
 	state: {
 
-		agent: <Agent>null,
+		agent: <Partial<Agent>>null,
 		editState: EDIT_STATE.READ,
 
 		/** indica che la dialog TOOLS è aperto */
@@ -73,7 +73,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAgent: (agent: Agent) => ({ agent }),
+		setAgent: (agent: Partial<Agent>) => ({ agent }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),
 		setLlmDialogOpen: (llmDialogOpen: boolean) => ({ llmDialogOpen }),
