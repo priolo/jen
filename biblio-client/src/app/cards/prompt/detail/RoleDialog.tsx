@@ -1,6 +1,4 @@
-
-import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent/detail"
-import { PROMPT_ROLES } from "@/stores/stacks/agent/slate/types"
+import { PromptDetailState, PromptDetailStore } from "@/stores/stacks/prompt/detail"
 import { Dialog, List } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
@@ -8,7 +6,7 @@ import { FunctionComponent } from "react"
 
 
 interface Props {
-	store?: AgentDetailStore
+	store?: PromptDetailStore
 }
 
 const RoleDialog: FunctionComponent<Props> = ({
@@ -16,7 +14,7 @@ const RoleDialog: FunctionComponent<Props> = ({
 }) => {
 
 	// STORE
-	const state = useStore(store) as AgentDetailState
+	useStore(store) as PromptDetailState
 
 	// HOOKs
 
@@ -59,7 +57,7 @@ const RoleDialog: FunctionComponent<Props> = ({
 			store={store}
 			title={"PIPPO"}
 			width={85}
-			open={state.roleDialogOpen}
+			open={store.state.roleDialogOpen}
 			onClose={handleClose}
 		>
 			<div className="lyt-form">

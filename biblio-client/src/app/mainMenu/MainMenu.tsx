@@ -24,6 +24,7 @@ import { LlmListState, LlmListStore } from "@/stores/stacks/llm/list"
 import { buildToolList } from "@/stores/stacks/tool/factory"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
+import { buildPromptList } from "@/stores/stacks/prompt/factory"
 
 
 
@@ -52,6 +53,10 @@ const MainMenu: FunctionComponent<Props> = ({
 	}
 	const handleAgentList = () => {
 		const view = buildAgentList()
+		deckCardsSo.add({ view, anim: true })
+	}
+	const handlePromptList = () => {
+		const view = buildPromptList()
 		deckCardsSo.add({ view, anim: true })
 	}
 
@@ -122,15 +127,19 @@ const MainMenu: FunctionComponent<Props> = ({
 			<Button children="REF" onClick={handleReflection} />
 			{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
 
+
+
 			<Button children="ACCOUNT" onClick={handleAccount} />
 
 			<Button children="LLM" onClick={handleLlmList} />
 			<Button children="TOOLS" onClick={handleToolList} />
+			<Button children="AGENTS" onClick={handleAgentList} />
+			<Button children="PROMPT" onClick={handlePromptList} />
 
 		</>}
 		{/* *** DEBUG *** */}
 
-		<Button children="AGENTS" onClick={handleAgentList} />
+		
 
 		<MenuButton
 			title={"USER"}

@@ -10,6 +10,13 @@ export enum DOC_TYPE {
 
 	TEXT_EDITOR = "text_editor",
 	CODE_EDITOR = "code_editor",
+
+
+
+
+	PROMPT_DETAIL = "prompt",
+	PROMPT_LIST = "prompt_list",
+
 	AGENT = "agent",
 	AGENT_LIST = "agent_list",
 	
@@ -19,9 +26,11 @@ export enum DOC_TYPE {
 	TOOL_LIST = "tool_list",
 	TOOL_DETAIL = "tool_detail",
 
+
+
+
 	REFLECTION = "reflection",
 	HELP = "help",
-
 	ACCOUNT = "account",
 }
 

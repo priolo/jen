@@ -4,9 +4,12 @@ import { Button, CircularLoadingCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
 import cls from "./View.module.css"
+import { PromptDetailStore } from "@/stores/stacks/prompt/detail"
+
+
 
 interface Props {
-	store?: AgentDetailStore
+	store?: PromptDetailStore
 	style?: React.CSSProperties
 }
 

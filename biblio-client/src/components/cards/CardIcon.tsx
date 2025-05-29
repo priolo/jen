@@ -35,16 +35,30 @@ const CardIcon: FunctionComponent<Props> = ({
 
 		case DOC_TYPE.TEXT_EDITOR:
 			return null//<EditorIcon className={className} style={style} />
+
+
+		case DOC_TYPE.PROMPT_LIST:
+			return null
+		case DOC_TYPE.PROMPT_DETAIL:
+			return null
+
+		case DOC_TYPE.AGENT_LIST:
+			return null
 		case DOC_TYPE.AGENT:
-			return null//<EditorIcon className={className} style={style} />
+			return null
+
 		case DOC_TYPE.LLM_LIST:
 			return null
 		case DOC_TYPE.LLM_DETAIL:
 			return null
+
 		case DOC_TYPE.TOOL_LIST:
 			return null
 		case DOC_TYPE.TOOL_DETAIL:
 			return null
+
+
+
 
 		case DOC_TYPE.CODE_EDITOR:
 			return null//<EditorIcon className={className} style={style} />

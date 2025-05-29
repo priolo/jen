@@ -6,8 +6,10 @@ import { getDBConnectionConfig } from './repository/dbConfig.js';
 import AgentRoute from './routers/AgentRoute.js';
 import { Tool } from "./repository/Tool.js";
 import { Llm } from "./repository/Llm.js";
+import { Prompt } from "./repository/Prompt.js";
 import LlmRoute from "./routers/LlmRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
+import PromptRoute from "./routers/PromptRoute.js";
 
 
 
@@ -67,6 +69,7 @@ function buildNodeConfig() {
 						{ class: AgentRoute },
 						{ class: LlmRoute },
 						{ class: ToolRoute },
+						{ class: PromptRoute },
 					],
 				}
 
@@ -101,6 +104,11 @@ function buildNodeConfig() {
 					name: "tools",
 					class: "typeorm/repo",
 					model: Tool,
+				},
+				{
+					name: "prompts",
+					class: "typeorm/repo",
+					model: Prompt,
 				},
 			],
 		},

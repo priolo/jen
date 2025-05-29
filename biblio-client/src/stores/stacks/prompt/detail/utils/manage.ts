@@ -1,8 +1,8 @@
 import { GetAllCards } from "@/stores/docs/cards";
 import { forEachViews } from "@/stores/docs/utils/manage";
 import { Path } from "slate";
-import { AgentDetailStore } from "..";
-import { ViewStore } from "../../viewBase";
+import { PromptDetailStore } from "..";
+import { ViewStore } from "../../../viewBase";
 import { PROMPT_ROLES, NodeType } from "../slate/types";
 import { SugarEditor } from "../slate/withSugar";
 
@@ -30,7 +30,7 @@ export function findUuidInViews(uuid: string): Position {
 		GetAllCards(),
 		view => {
 			if (view.state.uuid == uuid) return { view }
-			const paths = findCardPathsByUuid((<AgentDetailStore>view).state.editor, uuid)
+			const paths = findCardPathsByUuid((<PromptDetailStore>view).state.editor, uuid)
 			if (paths.length > 0) return { view, paths }
 			return null
 		}

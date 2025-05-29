@@ -1,6 +1,6 @@
 import { Node, Operation } from "slate"
 import { ReactEditor } from "slate-react"
-import { AgentDetailStore } from ".."
+import { PromptDetailStore } from ".."
 import { NodeType, PROMPT_ROLES } from "./types"
 
 
@@ -55,7 +55,7 @@ export const withSugar = (editor: ReactEditor) => {
 }
 
 export interface SugarEditor extends ReactEditor {
-	store?: AgentDetailStore
+	store?: PromptDetailStore
 	//actionsDisabled?: boolean
 	setTypeOnSelect: (type: PROMPT_ROLES) => void
 	onCopy: (event: ClipboardEvent) => void

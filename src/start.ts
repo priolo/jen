@@ -3,6 +3,7 @@ import buildNodeConfig from "./config.js";
 import { RootService, Bus, typeorm } from "@priolo/julian";
 import { ENV_TYPE } from "./utils.js";
 import { Agent } from "./repository/Agent.js";
+import { Prompt } from "./repository/Prompt.js";
 
 
 
@@ -119,6 +120,43 @@ dotenv.config({ path: envFile });
 					askInformation: true,
 					killOnResponse: true,
 				},
+			]
+		})
+
+		await (new Bus(root, "/typeorm/prompts")).dispatch({
+			type: typeorm.RepoStructActions.SEED,
+			payload: [
+				{ type: typeorm.RepoStructActions.TRUNCATE },
+				<Prompt>{
+					name: "Welcome Conversation",
+					agentId: agentBase.id,
+					history: [
+						{ role: "user", text: "Hello, can you help me?" },
+						{ role: "llm", text: "Hello! I'm happy to help you. What can I assist you with today?" },
+						{ role: "user", text: "What are your capabilities?" },
+						{ role: "llm", text: "I can help with various tasks including answering questions, providing information, and assisting with problem-solving. How can I help you specifically?" }
+					]
+				},
+				<Prompt>{
+					name: "Technical Discussion",
+					agentId: agentSub1.id,
+					history: [
+						{ role: "user", text: "Can you explain TypeScript interfaces?" },
+						{ role: "llm", text: "TypeScript interfaces define the structure of objects, specifying what properties and methods they should have. They're used for type checking and ensuring code consistency." },
+						{ role: "user", text: "Can you give me an example?" },
+						{ role: "llm", text: "Sure! Here's a simple example:\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nThis interface ensures any User object has these three properties with the specified types." }
+					]
+				},
+				<Prompt>{
+					name: "Planning Session",
+					agentId: agentSub2.id,
+					history: [
+						{ role: "user", text: "I need help planning a project" },
+						{ role: "llm", text: "I'd be happy to help you plan your project! Could you tell me more about what kind of project you're working on?" },
+						{ role: "user", text: "It's a web application for task management" },
+						{ role: "llm", text: "Great! For a task management web app, we should consider the core features like user authentication, task creation, editing, categorization, and due dates. What's your target timeline?" }
+					]
+				}
 			]
 		})
 

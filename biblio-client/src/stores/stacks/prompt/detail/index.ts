@@ -1,22 +1,21 @@
+import promptApi from "@/api/prompt"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { DragDoc } from "@priolo/jack"
+import { EDIT_STATE } from "@/types"
+import { Prompt } from "@/types/Prompt"
+import { DragDoc, MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { createEditor } from "slate"
 import { withHistory } from 'slate-history'
 import { withReact } from "slate-react"
-import { EditorState } from "../editorBase"
+import { EditorState } from "../../editorBase"
 import { NodeType, PROMPT_ROLES } from "./slate/types"
 import { SugarEditor, withSugar } from "./slate/withSugar"
-import { Agent } from "@/types/Agent"
-import { EDIT_STATE } from "@/types"
-import agentApi from "@/api/agent"
-import { MESSAGE_TYPE } from "@priolo/jack"
 
 const setup = {
 
 	state: {
 
-		agent: <Agent>null,
+		prompt: <Partial<Prompt>>null,
 		editState: EDIT_STATE.READ,
 
 		/** SLATE editor */
@@ -76,7 +75,7 @@ const setup = {
 		//#region VIEWBASE
 
 		onDrop: (data: DragDoc, store?: ViewStore) => {
-			const editorSo = store as AgentDetailStore
+			const editorSo = store as PromptDetailStore
 			const editor = editorSo.state.editor
 			if (!data.source?.view) return
 
@@ -88,7 +87,7 @@ const setup = {
 			} else {
 				// è un NODE di una CARD esterna
 				if (data.source.index) {
-					const sourceEditor = (<AgentDetailStore>data.source.view).state.editor
+					const sourceEditor = (<PromptDetailStore>data.source.view).state.editor
 					if (!sourceEditor) return
 					const [node] = sourceEditor.node([data.source.index])
 					editor.insertNode(node, { at: [data.destination.index] })
@@ -108,7 +107,7 @@ const setup = {
 
 		/** chiamata dalla build dello stesso store */
 		onCreated: async (_: void, store?: ViewStore) => {
-			const editorSo = store as AgentDetailStore
+			const editorSo = store as PromptDetailStore
 
 			// creo l'editor SLATE
 			const editor: SugarEditor = withSugar(withHistory(withReact(createEditor())))
@@ -119,34 +118,34 @@ const setup = {
 
 		//#endregion
 
-		async fetch(_: void, store?: AgentDetailStore) {
-			if (!store.state.agent?.id) return
-			const agent = await agentApi.get(store.state.agent.id, { store, manageAbort: true })
-			store.setAgent(agent)
+		async fetch(_: void, store?: PromptDetailStore) {
+			if (!store.state.prompt?.id) return
+			const prompt = await promptApi.get(store.state.prompt.id, { store, manageAbort: true })
+			store.setPrompt(prompt)
 		},
 
-		async fetchIfVoid(_: void, store?: AgentDetailStore) {
-			if (!!store.state.agent?.name) return // Assuming name is a required prop
+		async fetchIfVoid(_: void, store?: PromptDetailStore) {
+			if (!!store.state.prompt?.name) return 
 			await store.fetch()
 		},
 
-		async save(_: void, store?: AgentDetailStore) {
-			let agentSaved: Agent = null
+		async save(_: void, store?: PromptDetailStore) {
+			let promptSaved: Prompt = null
 			if (store.state.editState == EDIT_STATE.NEW) {
-				agentSaved = await agentApi.create(store.state.agent, { store })
+				promptSaved = await promptApi.create(store.state.prompt, { store })
 			} else {
-				agentSaved = await agentApi.update(store.state.agent, { store })
+				promptSaved = await promptApi.update(store.state.prompt, { store })
 			}
-			store.setAgent(agentSaved)
+			store.setPrompt(promptSaved)
 			store.setEditState(EDIT_STATE.READ)
 			store.setSnackbar({
 				open: true, type: MESSAGE_TYPE.SUCCESS, timeout: 5000,
 				title: "SAVED",
-				body: "Agent saved successfully",
+				body: "Prompt saved successfully",
 			})
 		},
 
-		restore: (_: void, store?: AgentDetailStore) => {
+		restore: (_: void, store?: PromptDetailStore) => {
 			store.fetch()
 			store.setEditState(EDIT_STATE.READ)
 		},
@@ -154,7 +153,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAgent: (agent: Agent) => ({ agent }),
+		setPrompt: (prompt: Prompt) => ({ agent: prompt }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 		setRoleDialogOpen: (roleDialogOpen: boolean) => ({ roleDialogOpen }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),
@@ -162,13 +161,13 @@ const setup = {
 	},
 }
 
-export type AgentDetailState = typeof setup.state & ViewState & EditorState
-export type AgentDetailGetters = typeof setup.getters
-export type AgentDetailActions = typeof setup.actions
-export type AgentDetailMutators = typeof setup.mutators
-export interface AgentDetailStore extends ViewStore, AgentDetailGetters, AgentDetailActions, AgentDetailMutators {
-	state: AgentDetailState
+export type PromptDetailState = typeof setup.state & ViewState & EditorState
+export type PromptDetailGetters = typeof setup.getters
+export type PromptDetailActions = typeof setup.actions
+export type PromptDetailMutators = typeof setup.mutators
+export interface PromptDetailStore extends ViewStore, PromptDetailGetters, PromptDetailActions, PromptDetailMutators {
+	state: PromptDetailState
 	onCreated: (_: void, store?: ViewStore) => Promise<void>;
 }
-const agentDetailSetup = mixStores(viewSetup, setup)
-export default agentDetailSetup
+const promptDetailSetup = mixStores(viewSetup, setup)
+export default promptDetailSetup

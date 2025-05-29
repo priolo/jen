@@ -31,6 +31,10 @@ import ToolListView from "@/app/cards/tool/ListView"
 import { ToolListStore } from "@/stores/stacks/tool/list"
 import ToolDetailView from "@/app/cards/tool/detail/View"
 import { ToolDetailStore } from "@/stores/stacks/tool/detail"
+import { PromptDetailStore } from "@/stores/stacks/prompt/detail"
+import { PromptListStore } from "@/stores/stacks/prompt/list"
+import PromptListView from "@/app/cards/prompt/ListView"
+import PromptView from "@/app/cards/prompt/detail/View"
 
 
 
@@ -59,6 +63,12 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 
 			case DOC_TYPE.TEXT_EDITOR:
 				return <TextEditorView store={view as TextEditorStore} />
+
+			case DOC_TYPE.PROMPT_DETAIL:
+				return <PromptView store={view as PromptDetailStore} />
+			case DOC_TYPE.PROMPT_LIST:
+				return <PromptListView store={view as PromptListStore} />
+
 			case DOC_TYPE.AGENT:
 				return <AgentView store={view as AgentDetailStore} />
 			case DOC_TYPE.AGENT_LIST:
