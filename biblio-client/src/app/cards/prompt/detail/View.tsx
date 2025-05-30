@@ -1,10 +1,10 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
 import { PromptDetailStore } from "@/stores/stacks/prompt/detail"
-import { FloatButton, TitleAccordion } from "@priolo/jack"
+import { FloatButton, TitleAccordion, ListDialog2 } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import Prism from "prismjs"
-import { FunctionComponent, useState } from "react"
+import { FunctionComponent, useState, useEffect } from "react"
 import { Text } from "slate"
 import { Editable, Slate } from "slate-react"
 import EditorIcon from "../../../../icons/EditorIcon"
@@ -15,6 +15,9 @@ import BiblioLeaf from "./leafs/BiblioLeaf"
 import RoleDialog from "./RoleDialog"
 import cls from "./View.module.css"
 import { codeOnKeyDown } from "@/stores/stacks/prompt/detail/utils/onkeydown"
+import agentSo from "@/stores/stacks/agent/repo"
+import { Agent } from "@/types/Agent"
+import { EDIT_STATE } from "@/types"
 
 
 
@@ -28,9 +31,14 @@ const PromptView: FunctionComponent<Props> = ({
 
 	// STORE
 	useStore(store)
+	useStore(agentSo)
 
 	// HOOKs
 	const [open, setOpen] = useState(false)
+
+	useEffect(() => {
+		agentSo.fetchIfVoid()
+	}, [])
 
 	// HANDLER
 	const handleFocus = () => {
@@ -53,9 +61,16 @@ const PromptView: FunctionComponent<Props> = ({
 		editor.onCopy(event.nativeEvent);
 	}
 
+	const handleAgentChange = (agentId: string) => {
+		store.setPrompt({ ...store.state.prompt, agentId })
+	}
+
 
 	// RENDER
 	const editor = store.state.editor
+	const agents = agentSo.state.all ?? []
+	const selectedAgentId = store.state.prompt?.agentId
+	const inRead = store.state.editState === EDIT_STATE.READ
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -66,7 +81,18 @@ const PromptView: FunctionComponent<Props> = ({
 	>
 
 		<TitleAccordion title="BASE" open={false}>
-
+			<div className="lyt-v">
+				<div className="jack-lbl-prop">AGENT</div>
+				<ListDialog2
+					store={store}
+					select={selectedAgentId}
+					items={agents}
+					readOnly={inRead}
+					fnGetId={(item: Agent) => item?.id}
+					fnGetString={(item: Agent) => item?.name}
+					onChangeSelect={handleAgentChange}
+				/>
+			</div>
 		</TitleAccordion>
 
 
