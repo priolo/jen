@@ -14,13 +14,13 @@ export function buildPromptDetail(state: Partial<PromptDetailState>) {
 	return store;
 }
 
-export function buildPromptDetailNew() {
+export function buildPromptDetailNew( agentId?: string ) {
 	const store = buildStore({
 		type: DOC_TYPE.PROMPT_DETAIL,
 		editState: EDIT_STATE.NEW,
 		size: VIEW_SIZE.NORMAL,
 		sizeForce: true,
-		prompt: {}
+		prompt: { agentId }
 	} as PromptDetailState) as PromptDetailStore;
 	return store;
 }

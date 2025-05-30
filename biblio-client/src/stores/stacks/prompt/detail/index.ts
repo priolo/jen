@@ -153,7 +153,7 @@ const setup = {
 	},
 
 	mutators: {
-		setPrompt: (prompt: Prompt) => ({ agent: prompt }),
+		setPrompt: (prompt: Partial<Prompt>) => ({ prompt }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 		setRoleDialogOpen: (roleDialogOpen: boolean) => ({ roleDialogOpen }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),
