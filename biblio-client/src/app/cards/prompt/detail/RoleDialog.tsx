@@ -1,4 +1,4 @@
-import { PromptDetailState, PromptDetailStore } from "@/stores/stacks/prompt/detail"
+import { PromptDetailState, PromptDetailStore } from "@/stores/stacks/prompt/detail/detail"
 import { Dialog, List } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"

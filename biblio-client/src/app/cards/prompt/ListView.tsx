@@ -1,5 +1,5 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import { PromptDetailStore } from "@/stores/stacks/prompt/detail"
+import { PromptDetailStore } from "@/stores/stacks/prompt/detail/detail"
 import { PromptListStore } from "@/stores/stacks/prompt/list"
 import { Prompt } from "@/types/Prompt"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"

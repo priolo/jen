@@ -1,7 +1,7 @@
 import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE, EDIT_STATE } from "@/types";
 import { VIEW_SIZE } from "@priolo/jack";
-import { PromptDetailState, PromptDetailStore } from "./detail";
+import { PromptDetailState, PromptDetailStore } from "./detail/detail";
 import { PromptListState, PromptListStore } from "./list";
 
 

@@ -28,6 +28,11 @@ function remove(promptId: string, opt?: CallOptions): Promise<void> {
 	return ajax.delete(`prompts/${promptId}`, null, opt)
 }
 
+/** EXECUTE */
+function execute(prompt: Partial<Prompt>, opt?: CallOptions): Promise<Partial<Prompt>> {
+	return ajax.post(`prompts/execute`, { prompt }, opt)
+}
+
 
 const promptApi = {
 	index,
@@ -35,5 +40,6 @@ const promptApi = {
 	create,
 	update,
 	remove,
+	execute,
 }
 export default promptApi

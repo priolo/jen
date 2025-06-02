@@ -1,6 +1,6 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
-import { PromptDetailStore } from "@/stores/stacks/prompt/detail"
+import { PromptDetailStore } from "@/stores/stacks/prompt/detail/detail"
 import { FloatButton, TitleAccordion, ListDialog2 } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import Prism from "prismjs"
@@ -33,12 +33,12 @@ const PromptView: FunctionComponent<Props> = ({
 	useStore(store)
 	useStore(agentSo)
 
-	// HOOKs
-	const [open, setOpen] = useState(false)
 
+	// HOOKs
 	useEffect(() => {
 		agentSo.fetchIfVoid()
 	}, [])
+
 
 	// HANDLER
 	const handleFocus = () => {
@@ -63,6 +63,10 @@ const PromptView: FunctionComponent<Props> = ({
 
 	const handleAgentChange = (agentId: string) => {
 		store.setPrompt({ ...store.state.prompt, agentId })
+	}
+
+	const handleCompleteClick = () => {
+		store.execute()
 	}
 
 
@@ -121,7 +125,7 @@ const PromptView: FunctionComponent<Props> = ({
 
 		<FloatButton
 			style={{ position: "absolute", right: 20, bottom: 20 }}
-			onClick={() => console.log("click float")}
+			onClick={handleCompleteClick}
 			disabled={false}
 		><SendIcon /></FloatButton>
 

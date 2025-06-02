@@ -1,6 +1,6 @@
 import { Node, Operation } from "slate"
 import { ReactEditor } from "slate-react"
-import { PromptDetailStore } from ".."
+import { PromptDetailStore } from "../detail"
 import { NodeType, PROMPT_ROLES } from "./types"
 
 

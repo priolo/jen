@@ -8,7 +8,7 @@ import helpSetup from "@/stores/stacks/help";
 import llmDetailSetup from "@/stores/stacks/llm/detail";
 import llmListSetup from "@/stores/stacks/llm/list";
 import logsSetup from "@/stores/stacks/log";
-import promptDetailSetup from "@/stores/stacks/prompt/detail";
+import promptDetailSetup from "@/stores/stacks/prompt/detail/detail";
 import promptListSetup from "@/stores/stacks/prompt/list";
 import usersSetup from "@/stores/stacks/streams";
 import userSetup from "@/stores/stacks/streams/detail";

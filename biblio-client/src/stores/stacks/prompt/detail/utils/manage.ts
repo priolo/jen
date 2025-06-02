@@ -1,7 +1,7 @@
 import { GetAllCards } from "@/stores/docs/cards";
 import { forEachViews } from "@/stores/docs/utils/manage";
 import { Path } from "slate";
-import { PromptDetailStore } from "..";
+import { PromptDetailStore } from "../detail";
 import { ViewStore } from "../../../viewBase";
 import { PROMPT_ROLES, NodeType } from "../slate/types";
 import { SugarEditor } from "../slate/withSugar";

@@ -3,7 +3,7 @@ import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { Prompt } from "@/types/Prompt"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { PromptDetailStore } from "./detail"
+import { PromptDetailStore } from "./detail/detail.js"
 import { buildPromptDetail, buildPromptDetailNew } from "./factory.js"
 
 

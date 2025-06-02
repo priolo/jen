@@ -1,7 +1,6 @@
 import { Prompt } from "@/repository/Prompt.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
-import { Request, Response } from "express"
-
+import { Request, Response } from "express";
 
 
 class PromptRoute extends httpRouter.Service {
@@ -16,7 +15,8 @@ class PromptRoute extends httpRouter.Service {
 				{ path: "/:id", verb: "get", method: "getById" },
 				{ path: "/", verb: "post", method: "create" },
 				{ path: "/:id", verb: "delete", method: "delete" },
-				{ path: "/:id", verb: "patch", method: "update" }
+				{ path: "/:id", verb: "patch", method: "update" },
+				{ path: "/:id/execute", verb: "post", method: "executeLlm" }
 			]
 		}
 	}
@@ -66,6 +66,7 @@ class PromptRoute extends httpRouter.Service {
 		})
 		res.json(promptUp)
 	}
+
 }
 
 export default PromptRoute

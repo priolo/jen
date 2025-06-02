@@ -11,6 +11,8 @@ import { EditorState } from "../../editorBase"
 import { NodeType, PROMPT_ROLES } from "./slate/types"
 import { SugarEditor, withSugar } from "./slate/withSugar"
 
+
+
 const setup = {
 
 	state: {
@@ -148,6 +150,11 @@ const setup = {
 		restore: (_: void, store?: PromptDetailStore) => {
 			store.fetch()
 			store.setEditState(EDIT_STATE.READ)
+		},
+
+		execute: async (_: void, store?: PromptDetailStore) => {
+			const prompt = await promptApi.execute(store.state.prompt, { store, manageAbort: true })
+			store.setPrompt(prompt)
 		},
 
 	},

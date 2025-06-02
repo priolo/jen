@@ -1,4 +1,4 @@
-import { http, httpRouter, log, ServiceBase, typeorm } from "@priolo/julian";
+import { http, httpRouter, log, ServiceBase, typeorm, ws } from "@priolo/julian";
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Agent } from './repository/Agent.js';
@@ -10,6 +10,7 @@ import { Prompt } from "./repository/Prompt.js";
 import LlmRoute from "./routers/LlmRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
 import PromptRoute from "./routers/PromptRoute.js";
+import { WSPromptService, WSPromptConf } from "./routers/PromptWSRoute.js";
 
 
 
@@ -71,15 +72,18 @@ function buildNodeConfig() {
 						{ class: ToolRoute },
 						{ class: PromptRoute },
 					],
-				}
+				},
 
-				// <ws.conf>{
-				// 	class: "ws",
-				// 	children: [
-				// 		//{ class: "npm:@priolo/julian-ws-reflection" }
-				// 		<wsRef.conf>{ class: wsRef.Service }
-				// 	]
-				// }
+				<ws.conf>{
+					class: "ws",
+					port: (3010),
+					children: [
+						//{ class: "npm:@priolo/julian-ws-reflection" }
+						<WSPromptConf>{ 
+							class: WSPromptService 
+						}
+					]
+				}
 			]
 		},
 
