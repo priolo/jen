@@ -5,6 +5,7 @@ import { Agent } from "@/types/Agent"
 import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../editorBase"
+import { buildRoomDetailNew } from "../room/factory"
 
 
 
@@ -68,6 +69,13 @@ const setup = {
 		restore: (_: void, store?: AgentDetailStore) => {
 			store.fetch()
 			store.setEditState(EDIT_STATE.READ)
+		},
+
+
+		/** apertura della CARD ROOM */
+		openRoom(_: void, store?: AgentDetailStore) {
+			const view = buildRoomDetailNew(store.state.agent?.id)
+			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
 	},

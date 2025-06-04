@@ -1,6 +1,6 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import { PromptDetailStore } from "@/stores/stacks/prompt/detail/detail"
-import { PromptListStore } from "@/stores/stacks/prompt/list"
+import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
+import { PromptListStore } from "@/stores/stacks/room/list"
 import { Prompt } from "@/types/Prompt"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -14,7 +14,7 @@ interface Props {
 	store?: PromptListStore
 }
 
-const PromptListView: FunctionComponent<Props> = ({
+const RootListView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
@@ -36,7 +36,7 @@ const PromptListView: FunctionComponent<Props> = ({
 
 
 	// RENDER
-	const selectId = (store.state.linked as PromptDetailStore)?.state?.prompt?.id
+	const selectId = (store.state.linked as RoomDetailStore)?.state?.prompt?.id
 	const isSelected = (prompt: Prompt) => prompt.id == selectId
 	const prompts = store.state.all
 
@@ -79,4 +79,4 @@ const PromptListView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default PromptListView
+export default RootListView

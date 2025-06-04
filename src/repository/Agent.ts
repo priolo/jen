@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Tool } from './Tool.js';
 import { Llm } from './Llm.js';
-import { Prompt } from './Prompt.js';
+import { Room } from './Room.js';
 
 @Entity('agents')
 export class Agent {
@@ -95,7 +95,8 @@ export class Agent {
     })
     tools: Tool[]
 
-    // PROMPTS
-    @OneToMany(() => Prompt, prompt => prompt.agent)
-    prompts: Prompt[]
+    // ROOMS 
+    /** rooms where is used this agent */
+    @OneToMany(() => Room, prompt => prompt.agent)
+    rooms: Room[]
 }

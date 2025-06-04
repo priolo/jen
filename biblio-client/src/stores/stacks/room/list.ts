@@ -3,8 +3,8 @@ import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { Prompt } from "@/types/Prompt"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { PromptDetailStore } from "./detail/detail.js"
-import { buildPromptDetail, buildPromptDetailNew } from "./factory.js"
+import { RoomDetailStore } from "./detail/detail.js"
+import { buildRoomDetail, buildRoomDetailNew } from "./factory.js"
 
 
 
@@ -49,21 +49,21 @@ const setup = {
 		/** apro/chiudo la CARD del dettaglio */
 		select(promptId: string, store?: PromptListStore) {
 			const detached = focusSo.state.shiftKey
-			const oldId = (store.state.linked as PromptDetailStore)?.state?.prompt?.id
+			const oldId = (store.state.linked as RoomDetailStore)?.state?.prompt?.id
 			const newId = (promptId && oldId !== promptId) ? promptId : null
 
 			if (detached) {
-				const view = buildPromptDetail({ prompt: { id: promptId }, size: VIEW_SIZE.NORMAL })
+				const view = buildRoomDetail({ prompt: { id: promptId }, size: VIEW_SIZE.NORMAL })
 				store.state.group.add({ view, index: store.state.group.getIndexByView(store) + 1 })
 			} else {
-				const view = newId ? buildPromptDetail({ prompt: { id: promptId } }) : null
+				const view = newId ? buildRoomDetail({ prompt: { id: promptId } }) : null
 				//store.setSelect(newId)
 				store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
 			}
 		},
 
 		create(_: void, store?: PromptListStore) {
-			const view = buildPromptDetailNew()
+			const view = buildRoomDetailNew()
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 

@@ -3,7 +3,7 @@ import buildNodeConfig from "./config.js";
 import { RootService, Bus, typeorm } from "@priolo/julian";
 import { ENV_TYPE } from "./utils.js";
 import { Agent } from "./repository/Agent.js";
-import { Prompt } from "./repository/Prompt.js";
+import { Room } from "./repository/Room.js";
 
 
 
@@ -127,7 +127,7 @@ dotenv.config({ path: envFile });
 			type: typeorm.RepoStructActions.SEED,
 			payload: [
 				{ type: typeorm.RepoStructActions.TRUNCATE },
-				<Prompt>{
+				<Room>{
 					name: "Welcome Conversation",
 					agentId: agentBase.id,
 					history: [
@@ -137,7 +137,7 @@ dotenv.config({ path: envFile });
 						{ role: "llm", text: "I can help with various tasks including answering questions, providing information, and assisting with problem-solving. How can I help you specifically?" }
 					]
 				},
-				<Prompt>{
+				<Room>{
 					name: "Technical Discussion",
 					agentId: agentSub1.id,
 					history: [
@@ -147,7 +147,7 @@ dotenv.config({ path: envFile });
 						{ role: "llm", text: "Sure! Here's a simple example:\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\nThis interface ensures any User object has these three properties with the specified types." }
 					]
 				},
-				<Prompt>{
+				<Room>{
 					name: "Planning Session",
 					agentId: agentSub2.id,
 					history: [

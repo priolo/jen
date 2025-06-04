@@ -3,14 +3,14 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Agent } from './repository/Agent.js';
 import { getDBConnectionConfig } from './repository/dbConfig.js';
-import AgentRoute from './routers/AgentRoute.js';
-import { Tool } from "./repository/Tool.js";
 import { Llm } from "./repository/Llm.js";
-import { Prompt } from "./repository/Prompt.js";
+import { Room } from "./repository/Room.js";
+import { Tool } from "./repository/Tool.js";
+import AgentRoute from './routers/AgentRoute.js';
 import LlmRoute from "./routers/LlmRoute.js";
+import RoomRoute from "./routers/RoomRoute.js";
+import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
-import PromptRoute from "./routers/PromptRoute.js";
-import { WSPromptService, WSPromptConf } from "./routers/PromptWSRoute.js";
 
 
 
@@ -70,17 +70,17 @@ function buildNodeConfig() {
 						{ class: AgentRoute },
 						{ class: LlmRoute },
 						{ class: ToolRoute },
-						{ class: PromptRoute },
+						{ class: RoomRoute },
 					],
 				},
 
 				<ws.conf>{
 					class: "ws",
-					port: (3010),
+					port: 3100,
 					children: [
 						//{ class: "npm:@priolo/julian-ws-reflection" }
-						<WSPromptConf>{ 
-							class: WSPromptService 
+						<WSRoomsConf>{ 
+							class: WSRoomsService 
 						}
 					]
 				}
@@ -112,7 +112,7 @@ function buildNodeConfig() {
 				{
 					name: "prompts",
 					class: "typeorm/repo",
-					model: Prompt,
+					model: Room,
 				},
 			],
 		},

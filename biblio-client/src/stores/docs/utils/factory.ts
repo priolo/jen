@@ -1,15 +1,12 @@
-import aboutSetup from "@/stores/stacks/about";
 import accountSetup from "@/stores/stacks/account";
 import agentDetailSetup from "@/stores/stacks/agent/detail";
 import agentListSetup from "@/stores/stacks/agent/list";
 import txtEditorSetup from "@/stores/stacks/editor";
 import editCodeSetup from "@/stores/stacks/editorCode";
-import helpSetup from "@/stores/stacks/help";
 import llmDetailSetup from "@/stores/stacks/llm/detail";
 import llmListSetup from "@/stores/stacks/llm/list";
-import logsSetup from "@/stores/stacks/log";
-import promptDetailSetup from "@/stores/stacks/prompt/detail/detail";
-import promptListSetup from "@/stores/stacks/prompt/list";
+import roomDetailSetup from "@/stores/stacks/room/detail/detail";
+import promptListSetup from "@/stores/stacks/room/list";
 import usersSetup from "@/stores/stacks/streams";
 import userSetup from "@/stores/stacks/streams/detail";
 import toolDetailSetup from "@/stores/stacks/tool/detail";
@@ -42,14 +39,11 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 		[DOC_TYPE.USERS]: usersSetup,
 		[DOC_TYPE.USER]: userSetup,
 
-		[DOC_TYPE.LOGS]: logsSetup,
-		[DOC_TYPE.ABOUT]: aboutSetup,
-
 		[DOC_TYPE.TEXT_EDITOR]: txtEditorSetup,
 
 
-		[DOC_TYPE.PROMPT_DETAIL]: promptDetailSetup,
-		[DOC_TYPE.PROMPT_LIST]: promptListSetup,
+		[DOC_TYPE.ROOM_DETAIL]: roomDetailSetup,
+		[DOC_TYPE.ROOM_LIST]: promptListSetup,
 
 		[DOC_TYPE.AGENT]: agentDetailSetup,
 		[DOC_TYPE.AGENT_LIST]: agentListSetup,
@@ -62,7 +56,6 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 
 		[DOC_TYPE.CODE_EDITOR]: editCodeSetup,
 		[DOC_TYPE.REFLECTION]: reflectionSetup,
-		[DOC_TYPE.HELP]: helpSetup,
 
 		[DOC_TYPE.ACCOUNT]: accountSetup,
 		

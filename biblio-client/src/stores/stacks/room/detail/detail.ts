@@ -67,8 +67,8 @@ const setup = {
 
 	getters: {
 		//#region VIEWBASE
-		getTitle: (_: void, store?: ViewStore) => "AGENT",
-		getSubTitle: (_: void, store?: ViewStore) => "agente",
+		getTitle: (_: void, store?: ViewStore) => "ROOM",
+		getSubTitle: (_: void, store?: ViewStore) => "room detail",
 		//#endregion
 	},
 
@@ -77,7 +77,7 @@ const setup = {
 		//#region VIEWBASE
 
 		onDrop: (data: DragDoc, store?: ViewStore) => {
-			const editorSo = store as PromptDetailStore
+			const editorSo = store as RoomDetailStore
 			const editor = editorSo.state.editor
 			if (!data.source?.view) return
 
@@ -89,7 +89,7 @@ const setup = {
 			} else {
 				// è un NODE di una CARD esterna
 				if (data.source.index) {
-					const sourceEditor = (<PromptDetailStore>data.source.view).state.editor
+					const sourceEditor = (<RoomDetailStore>data.source.view).state.editor
 					if (!sourceEditor) return
 					const [node] = sourceEditor.node([data.source.index])
 					editor.insertNode(node, { at: [data.destination.index] })
@@ -109,7 +109,7 @@ const setup = {
 
 		/** chiamata dalla build dello stesso store */
 		onCreated: async (_: void, store?: ViewStore) => {
-			const editorSo = store as PromptDetailStore
+			const editorSo = store as RoomDetailStore
 
 			// creo l'editor SLATE
 			const editor: SugarEditor = withSugar(withHistory(withReact(createEditor())))
@@ -120,18 +120,18 @@ const setup = {
 
 		//#endregion
 
-		async fetch(_: void, store?: PromptDetailStore) {
+		async fetch(_: void, store?: RoomDetailStore) {
 			if (!store.state.prompt?.id) return
 			const prompt = await promptApi.get(store.state.prompt.id, { store, manageAbort: true })
 			store.setPrompt(prompt)
 		},
 
-		async fetchIfVoid(_: void, store?: PromptDetailStore) {
+		async fetchIfVoid(_: void, store?: RoomDetailStore) {
 			if (!!store.state.prompt?.name) return 
 			await store.fetch()
 		},
 
-		async save(_: void, store?: PromptDetailStore) {
+		async save(_: void, store?: RoomDetailStore) {
 			let promptSaved: Prompt = null
 			if (store.state.editState == EDIT_STATE.NEW) {
 				promptSaved = await promptApi.create(store.state.prompt, { store })
@@ -147,12 +147,12 @@ const setup = {
 			})
 		},
 
-		restore: (_: void, store?: PromptDetailStore) => {
+		restore: (_: void, store?: RoomDetailStore) => {
 			store.fetch()
 			store.setEditState(EDIT_STATE.READ)
 		},
 
-		execute: async (_: void, store?: PromptDetailStore) => {
+		execute: async (_: void, store?: RoomDetailStore) => {
 			const prompt = await promptApi.execute(store.state.prompt, { store, manageAbort: true })
 			store.setPrompt(prompt)
 		},
@@ -168,13 +168,13 @@ const setup = {
 	},
 }
 
-export type PromptDetailState = typeof setup.state & ViewState & EditorState
-export type PromptDetailGetters = typeof setup.getters
-export type PromptDetailActions = typeof setup.actions
-export type PromptDetailMutators = typeof setup.mutators
-export interface PromptDetailStore extends ViewStore, PromptDetailGetters, PromptDetailActions, PromptDetailMutators {
-	state: PromptDetailState
+export type RoomDetailState = typeof setup.state & ViewState & EditorState
+export type RoomDetailGetters = typeof setup.getters
+export type RoomDetailActions = typeof setup.actions
+export type RoomDetailMutators = typeof setup.mutators
+export interface RoomDetailStore extends ViewStore, RoomDetailGetters, RoomDetailActions, RoomDetailMutators {
+	state: RoomDetailState
 	onCreated: (_: void, store?: ViewStore) => Promise<void>;
 }
-const promptDetailSetup = mixStores(viewSetup, setup)
-export default promptDetailSetup
+const roomDetailSetup = mixStores(viewSetup, setup)
+export default roomDetailSetup

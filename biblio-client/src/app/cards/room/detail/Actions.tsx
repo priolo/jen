@@ -1,4 +1,4 @@
-import { PromptDetailStore } from "@/stores/stacks/prompt/detail/detail"
+import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { EDIT_STATE } from "@/types"
 import { Button, CircularLoadingCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -8,7 +8,7 @@ import cls from "./View.module.css"
 
 
 interface Props {
-	store?: PromptDetailStore
+	store?: RoomDetailStore
 	style?: React.CSSProperties
 }
 

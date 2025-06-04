@@ -4,6 +4,10 @@ import docsSo, { FIXED_CARD } from "@/stores/docs"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
 import { buildUserCard } from "@/stores/stacks/account/utils/factory"
+import { buildAgentList } from "@/stores/stacks/agent/factory"
+import { buildLlmList } from "@/stores/stacks/llm/factory"
+import { buildRoomList } from "@/stores/stacks/room/factory"
+import { buildToolList } from "@/stores/stacks/tool/factory"
 import { Button } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import React, { FunctionComponent } from "react"
@@ -19,12 +23,6 @@ import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
-import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent/detail"
-import { LlmListState, LlmListStore } from "@/stores/stacks/llm/list"
-import { buildToolList } from "@/stores/stacks/tool/factory"
-import { buildLlmList } from "@/stores/stacks/llm/factory"
-import { buildAgentList } from "@/stores/stacks/agent/factory"
-import { buildPromptList } from "@/stores/stacks/prompt/factory"
 
 
 
@@ -37,7 +35,7 @@ const MainMenu: FunctionComponent<Props> = ({
 }) => {
 
 	// STORE
-	const menuSa = useStore(menuSo)
+	useStore(menuSo)
 	useStore(docsSo)
 
 	// HOOKS
@@ -56,7 +54,7 @@ const MainMenu: FunctionComponent<Props> = ({
 		deckCardsSo.add({ view, anim: true })
 	}
 	const handlePromptList = () => {
-		const view = buildPromptList()
+		const view = buildRoomList()
 		deckCardsSo.add({ view, anim: true })
 	}
 
@@ -138,8 +136,6 @@ const MainMenu: FunctionComponent<Props> = ({
 
 		</>}
 		{/* *** DEBUG *** */}
-
-		
 
 		<MenuButton
 			title={"USER"}

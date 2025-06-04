@@ -1,33 +1,33 @@
 import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE, EDIT_STATE } from "@/types";
 import { VIEW_SIZE } from "@priolo/jack";
-import { PromptDetailState, PromptDetailStore } from "./detail/detail";
+import { RoomDetailState, RoomDetailStore } from "./detail/detail";
 import { PromptListState, PromptListStore } from "./list";
 
 
 
-export function buildPromptDetail(state: Partial<PromptDetailState>) {
+export function buildRoomDetail(state: Partial<RoomDetailState>) {
 	const store = buildStore({
-		type: DOC_TYPE.PROMPT_DETAIL,
+		type: DOC_TYPE.ROOM_DETAIL,
 		...state,
-	} as PromptDetailState) as PromptDetailStore;
+	} as RoomDetailState) as RoomDetailStore;
 	return store;
 }
 
-export function buildPromptDetailNew( agentId?: string ) {
+export function buildRoomDetailNew( agentId?: string ) {
 	const store = buildStore({
-		type: DOC_TYPE.PROMPT_DETAIL,
+		type: DOC_TYPE.ROOM_DETAIL,
 		editState: EDIT_STATE.NEW,
 		size: VIEW_SIZE.NORMAL,
 		sizeForce: true,
 		prompt: { agentId }
-	} as PromptDetailState) as PromptDetailStore;
+	} as RoomDetailState) as RoomDetailStore;
 	return store;
 }
 
-export function buildPromptList() {
+export function buildRoomList() {
 	const store = buildStore({
-		type: DOC_TYPE.PROMPT_LIST,
+		type: DOC_TYPE.ROOM_LIST,
 	} as PromptListState) as PromptListStore
 	return store;
 }

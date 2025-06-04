@@ -26,10 +26,6 @@ const CardIcon: FunctionComponent<Props> = ({
 		case DOC_TYPE.USER:
 			return <StreamIcon className={className} style={style} />
 
-		case DOC_TYPE.LOGS:
-			return <LogIcon className={className} style={style} />
-		case DOC_TYPE.ABOUT:
-			return <div className={className} style={{ fontSize: 16, fontWeight: 700 }}>?</div>
 		case DOC_TYPE.REFLECTION:
 			return null
 
@@ -37,9 +33,9 @@ const CardIcon: FunctionComponent<Props> = ({
 			return null//<EditorIcon className={className} style={style} />
 
 
-		case DOC_TYPE.PROMPT_LIST:
+		case DOC_TYPE.ROOM_LIST:
 			return null
-		case DOC_TYPE.PROMPT_DETAIL:
+		case DOC_TYPE.ROOM_DETAIL:
 			return null
 
 		case DOC_TYPE.AGENT_LIST:

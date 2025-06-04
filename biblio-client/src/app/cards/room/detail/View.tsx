@@ -1,6 +1,6 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
-import { PromptDetailStore } from "@/stores/stacks/prompt/detail/detail"
+import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { FloatButton, TitleAccordion, ListDialog2 } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import Prism from "prismjs"
@@ -14,7 +14,7 @@ import PromptElement from "./elements/PromptElement"
 import BiblioLeaf from "./leafs/BiblioLeaf"
 import RoleDialog from "./RoleDialog"
 import cls from "./View.module.css"
-import { codeOnKeyDown } from "@/stores/stacks/prompt/detail/utils/onkeydown"
+import { codeOnKeyDown } from "@/stores/stacks/room/detail/utils/onkeydown"
 import agentSo from "@/stores/stacks/agent/repo"
 import { Agent } from "@/types/Agent"
 import { EDIT_STATE } from "@/types"
@@ -22,21 +22,20 @@ import { EDIT_STATE } from "@/types"
 
 
 interface Props {
-	store?: PromptDetailStore
+	store?: RoomDetailStore
 }
 
-const PromptView: FunctionComponent<Props> = ({
+const RoomView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
 	// STORE
 	useStore(store)
-	useStore(agentSo)
 
 
 	// HOOKs
 	useEffect(() => {
-		agentSo.fetchIfVoid()
+		store.fetchIfVoid()
 	}, [])
 
 
@@ -132,7 +131,7 @@ const PromptView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default PromptView
+export default RoomView
 
 const decorateMD = ([node, path]) => {
 	const ranges = []

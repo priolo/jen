@@ -1,4 +1,4 @@
-import { PromptDetailState, PromptDetailStore } from "@/stores/stacks/prompt/detail/detail"
+import { RoomDetailState, RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { Dialog, List } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
@@ -6,7 +6,7 @@ import { FunctionComponent } from "react"
 
 
 interface Props {
-	store?: PromptDetailStore
+	store?: RoomDetailStore
 }
 
 const RoleDialog: FunctionComponent<Props> = ({
@@ -14,7 +14,7 @@ const RoleDialog: FunctionComponent<Props> = ({
 }) => {
 
 	// STORE
-	useStore(store) as PromptDetailState
+	useStore(store) as RoomDetailState
 
 	// HOOKs
 
