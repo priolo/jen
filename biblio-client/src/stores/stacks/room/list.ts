@@ -1,6 +1,6 @@
-import promptApi from "@/api/prompt"
+import roomApi from "@/api/room"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { Prompt } from "@/types/Prompt"
+import { Room } from "@/types/Room.js"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { RoomDetailStore } from "./detail/detail.js"
@@ -12,7 +12,7 @@ const setup = {
 
 	state: {
 
-		all: <Prompt[]>null,
+		all: <Room[]>null,
 
 		//#region VIEWBASE
 		width: 370,
@@ -22,8 +22,8 @@ const setup = {
 
 	getters: {
 		//#region VIEWBASE
-		getTitle: (_: void, store?: ViewStore) => "PROMPT",
-		getSubTitle: (_: void, store?: ViewStore) => "prompts list",
+		getTitle: (_: void, store?: ViewStore) => "ROOMS",
+		getSubTitle: (_: void, store?: ViewStore) => "Rooms list",
 		//#endregion
 	},
 
@@ -35,7 +35,7 @@ const setup = {
 		//#region OVERRIDE LOADBASE
 
 		async fetch(_: void, store?: LoadBaseStore) {
-			const prompts = await promptApi.index({ store });
+			const prompts = await roomApi.index({ store });
 			(store as PromptListStore).setAll(prompts)
 		},
 
@@ -49,14 +49,14 @@ const setup = {
 		/** apro/chiudo la CARD del dettaglio */
 		select(promptId: string, store?: PromptListStore) {
 			const detached = focusSo.state.shiftKey
-			const oldId = (store.state.linked as RoomDetailStore)?.state?.prompt?.id
+			const oldId = (store.state.linked as RoomDetailStore)?.state?.room?.id
 			const newId = (promptId && oldId !== promptId) ? promptId : null
 
 			if (detached) {
-				const view = buildRoomDetail({ prompt: { id: promptId }, size: VIEW_SIZE.NORMAL })
+				const view = buildRoomDetail({ room: { id: promptId }, size: VIEW_SIZE.NORMAL })
 				store.state.group.add({ view, index: store.state.group.getIndexByView(store) + 1 })
 			} else {
-				const view = newId ? buildRoomDetail({ prompt: { id: promptId } }) : null
+				const view = newId ? buildRoomDetail({ room: { id: promptId } }) : null
 				//store.setSelect(newId)
 				store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
 			}
@@ -84,7 +84,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Prompt[]) => ({ all }),
+		setAll: (all: Room[]) => ({ all }),
 	},
 }
 

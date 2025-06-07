@@ -1,7 +1,7 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { PromptListStore } from "@/stores/stacks/room/list"
-import { Prompt } from "@/types/Prompt"
+import { Room } from "@/types/Room"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
@@ -30,14 +30,14 @@ const RootListView: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleSelect = (prompt: Prompt) => store.select(prompt.id)
+	const handleSelect = (prompt: Room) => store.select(prompt.id)
 	const handleNew = () => store.create()
 	const handleDelete = () => store.delete(selectId)
 
 
 	// RENDER
-	const selectId = (store.state.linked as RoomDetailStore)?.state?.prompt?.id
-	const isSelected = (prompt: Prompt) => prompt.id == selectId
+	const selectId = (store.state.linked as RoomDetailStore)?.state?.room?.id
+	const isSelected = (prompt: Room) => prompt.id == selectId
 	const prompts = store.state.all
 
 	return <FrameworkCard

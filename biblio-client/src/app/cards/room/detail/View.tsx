@@ -1,10 +1,14 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
+import agentSo from "@/stores/stacks/agent/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
-import { FloatButton, TitleAccordion, ListDialog2 } from "@priolo/jack"
+import { codeOnKeyDown } from "@/stores/stacks/room/detail/utils/onkeydown"
+import { EDIT_STATE } from "@/types"
+import { Agent } from "@/types/Agent"
+import { FloatButton, ListDialog2, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import Prism from "prismjs"
-import { FunctionComponent, useState, useEffect } from "react"
+import { FunctionComponent, useEffect } from "react"
 import { Text } from "slate"
 import { Editable, Slate } from "slate-react"
 import EditorIcon from "../../../../icons/EditorIcon"
@@ -14,10 +18,6 @@ import PromptElement from "./elements/PromptElement"
 import BiblioLeaf from "./leafs/BiblioLeaf"
 import RoleDialog from "./RoleDialog"
 import cls from "./View.module.css"
-import { codeOnKeyDown } from "@/stores/stacks/room/detail/utils/onkeydown"
-import agentSo from "@/stores/stacks/agent/repo"
-import { Agent } from "@/types/Agent"
-import { EDIT_STATE } from "@/types"
 
 
 
@@ -61,7 +61,7 @@ const RoomView: FunctionComponent<Props> = ({
 	}
 
 	const handleAgentChange = (agentId: string) => {
-		store.setPrompt({ ...store.state.prompt, agentId })
+		store.setRoom({ ...store.state.room, agentId })
 	}
 
 	const handleCompleteClick = () => {
@@ -72,7 +72,7 @@ const RoomView: FunctionComponent<Props> = ({
 	// RENDER
 	const editor = store.state.editor
 	const agents = agentSo.state.all ?? []
-	const selectedAgentId = store.state.prompt?.agentId
+	const selectedAgentId = store.state.room?.agentId
 	const inRead = store.state.editState === EDIT_STATE.READ
 
 	return <FrameworkCard
@@ -98,14 +98,12 @@ const RoomView: FunctionComponent<Props> = ({
 			</div>
 		</TitleAccordion>
 
-
-
 		<Slate
 			editor={editor}
 			initialValue={store.state.initValue}
 		>
-			{/* <ActionsCmp store={store} style={{ margin: '-10px -10px 5px -10px' }} /> */}
 			<Editable
+				readOnly={true}
 				decorate={decorateMD}
 				className={`${cls.editor} code-editor`}
 				style={{ flex: 1, overflowY: "auto" }}
@@ -119,6 +117,12 @@ const RoomView: FunctionComponent<Props> = ({
 				onCopy={handleCopy}
 			/>
 		</Slate>
+
+		<TextInput
+			value={store.state.prompt}
+			onChange={v => store.setPrompt(v)}
+			placeholder="Test input"
+		/>
 
 		<RoleDialog store={store} />
 

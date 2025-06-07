@@ -1,15 +1,18 @@
-import promptApi from "@/api/prompt"
+import roomApi from "@/api/room"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { EDIT_STATE } from "@/types"
-import { Prompt } from "@/types/Prompt"
+import { Room } from "@/types/Room"
 import { DragDoc, MESSAGE_TYPE } from "@priolo/jack"
-import { mixStores } from "@priolo/jon"
+import { LISTENER_CHANGE, mixStores } from "@priolo/jon"
 import { createEditor } from "slate"
 import { withHistory } from 'slate-history'
 import { withReact } from "slate-react"
 import { EditorState } from "../../editorBase"
 import { NodeType, PROMPT_ROLES } from "./slate/types"
 import { SugarEditor, withSugar } from "./slate/withSugar"
+import { wsConnection } from "@/plugins/session"
+import { AppendMessageS2C, ROOM_ACTION_C2S, ROOM_ACTION_S2C, UserEnterC2S, UserEnteredS2C, UserMessageC2S } from "@/types/WSMessages"
+import { ROOM_STATE } from "../types"
 
 
 
@@ -17,8 +20,11 @@ const setup = {
 
 	state: {
 
-		prompt: <Partial<Prompt>>null,
+		room: <Partial<Room>>null,
 		editState: EDIT_STATE.READ,
+		roomState: ROOM_STATE.OFFLINE,
+
+		prompt: "",
 
 		/** SLATE editor */
 		editor: <SugarEditor>null,
@@ -36,9 +42,7 @@ const setup = {
 			{
 				type: PROMPT_ROLES.SYSTEM,
 				children: [
-					{ text: "# primo2" },
-					{ text: "\nsecondo **ciccio** 56" },
-					{ text: "\nterzo *pippo*" },
+					{ text: "# primo2\nsecondo **ciccio** 56\nterzo *pippo*" },
 				]
 			},
 			{
@@ -109,36 +113,69 @@ const setup = {
 
 		/** chiamata dalla build dello stesso store */
 		onCreated: async (_: void, store?: ViewStore) => {
-			const editorSo = store as RoomDetailStore
+			const roomSo = store as RoomDetailStore
 
 			// creo l'editor SLATE
 			const editor: SugarEditor = withSugar(withHistory(withReact(createEditor())))
-			editor.store = editorSo
+			editor.store = roomSo
 			//editor.children = editorSo.state.initValue ?? [{ type: PROMPT_TYPES.SYSTEM, children: [{ text: "" }] }] as NodeType[]
-			editorSo.state.editor = editor
+			roomSo.state.editor = editor
+
+			// mi unisco alla stanza
+			const message: UserEnterC2S = {
+				action: ROOM_ACTION_C2S.ENTER,
+				roomId: null,
+			}
+			const enteredMsgStr: string = await wsConnection.sendAndWait(
+				JSON.stringify(message),
+				(data: any) => {
+					return JSON.parse(data).action == ROOM_ACTION_S2C.ENTERED
+				},
+				5000
+			)
+			const enteredMsg: UserEnteredS2C = JSON.parse(enteredMsgStr)
+			roomSo.setRoomState(ROOM_STATE.ONLINE)
+			roomSo.setRoom({ ...roomSo.state.room, id: enteredMsg.roomId })
 		},
+
+		onMessage: (data: any, store?: RoomDetailStore) => {
+			const editor: SugarEditor = store.state.editor
+			const message: AppendMessageS2C = JSON.parse(data.payload)
+
+			if (message.action == ROOM_ACTION_S2C.APPEND_MESSAGE && message.roomId == store.state.room.id) {
+				// aggiungo il messaggio all'editor
+				const newNode: NodeType = {
+					type: PROMPT_ROLES.USER,
+					children: [{ text: message.text }],
+				}
+				const insertPosition = [editor.children.length];
+				editor.insertNode(newNode, { at: insertPosition })
+				editor.select(insertPosition);
+			}
+		},
+
 
 		//#endregion
 
 		async fetch(_: void, store?: RoomDetailStore) {
-			if (!store.state.prompt?.id) return
-			const prompt = await promptApi.get(store.state.prompt.id, { store, manageAbort: true })
-			store.setPrompt(prompt)
+			if (!store.state.room?.id) return
+			const prompt = await roomApi.get(store.state.room.id, { store, manageAbort: true })
+			store.setRoom(prompt)
 		},
 
 		async fetchIfVoid(_: void, store?: RoomDetailStore) {
-			if (!!store.state.prompt?.name) return 
+			if (!!store.state.room?.name) return
 			await store.fetch()
 		},
 
 		async save(_: void, store?: RoomDetailStore) {
-			let promptSaved: Prompt = null
+			let roomSaved: Room = null
 			if (store.state.editState == EDIT_STATE.NEW) {
-				promptSaved = await promptApi.create(store.state.prompt, { store })
+				roomSaved = await roomApi.create(store.state.room, { store })
 			} else {
-				promptSaved = await promptApi.update(store.state.prompt, { store })
+				roomSaved = await roomApi.update(store.state.room, { store })
 			}
-			store.setPrompt(promptSaved)
+			store.setRoom(roomSaved)
 			store.setEditState(EDIT_STATE.READ)
 			store.setSnackbar({
 				open: true, type: MESSAGE_TYPE.SUCCESS, timeout: 5000,
@@ -153,19 +190,40 @@ const setup = {
 		},
 
 		execute: async (_: void, store?: RoomDetailStore) => {
-			const prompt = await promptApi.execute(store.state.prompt, { store, manageAbort: true })
-			store.setPrompt(prompt)
+			// creo e invio il messaggio
+			const message: UserMessageC2S = {
+				action: ROOM_ACTION_C2S.USER_MESSAGE,
+				roomId: store.state.room.id,
+				text: store.state.prompt,
+			}
+			// cancella la text
+			store.setPrompt("")
+			// invio il messaggio al server
+			wsConnection.send(JSON.stringify(message))
 		},
 
 	},
 
 	mutators: {
-		setPrompt: (prompt: Partial<Prompt>) => ({ prompt }),
+		setRoom: (room: Partial<Room>) => ({ room }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 		setRoleDialogOpen: (roleDialogOpen: boolean) => ({ roleDialogOpen }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),
 		setLlmDialogOpen: (llmDialogOpen: boolean) => ({ llmDialogOpen }),
+
+		setPrompt: (prompt: string) => ({ prompt }),
+		setRoomState: (roomState: ROOM_STATE) => ({ roomState }),
 	},
+
+	onListenerChange: (store: RoomDetailStore, type: LISTENER_CHANGE) => {
+		if (store._listeners.size == 1 && type == LISTENER_CHANGE.ADD) {
+			wsConnection.emitter.on("message", store.onMessage)
+		} else if (store._listeners.size == 0) {
+			wsConnection.emitter.off("message", store.onMessage)
+			//store["fetchAbort"]?.()
+		}
+	},
+
 }
 
 export type RoomDetailState = typeof setup.state & ViewState & EditorState
@@ -178,3 +236,4 @@ export interface RoomDetailStore extends ViewStore, RoomDetailGetters, RoomDetai
 }
 const roomDetailSetup = mixStores(viewSetup, setup)
 export default roomDetailSetup
+

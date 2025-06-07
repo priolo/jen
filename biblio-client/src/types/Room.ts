@@ -3,7 +3,7 @@ import { Uuid } from "./global";
 
 
 
-export class Prompt {
+export class Room {
 	id: Uuid
 	name: string
 	history: HistoryItem[]

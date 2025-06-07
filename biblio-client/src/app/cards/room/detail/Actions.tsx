@@ -19,9 +19,11 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 	// STORE
 	useStore(store.state.group)
-	const agentDetailSa = useStore(store)
+	const roomDetailSa = useStore(store)
+
 
 	// HOOKs
+
 
 	// HANDLER
 	const handleEditClick = async () => store.setEditState(EDIT_STATE.EDIT)
@@ -30,23 +32,25 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	
 
 	// LOADING
-	if (agentDetailSa.disabled) {
+	if (roomDetailSa.disabled) {
 		return <CircularLoadingCmp style={{ width: 25, height: 25, color: "rgba(0,0,0,.5)" }} />
 	}
 
+	
 	// RENDER
-	if (agentDetailSa.editState == EDIT_STATE.NEW) {
+	if (roomDetailSa.editState == EDIT_STATE.NEW) {
 		return <div
 			className={cls.actions}
 			style={style}
 		>
+			{store.state.roomState}
 			<Button
 				children="CREATE"
 				onClick={handleSaveClick}
 			/>
 		</div>
 
-	} else if (agentDetailSa.editState == EDIT_STATE.READ) {
+	} else if (roomDetailSa.editState == EDIT_STATE.READ) {
 		return <div
 			className={cls.actions}
 			style={style}

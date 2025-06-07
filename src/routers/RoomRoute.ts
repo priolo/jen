@@ -36,7 +36,6 @@ class RoomRoute extends httpRouter.Service {
 		res.json(room)
 	}
 
-
 	async create(req: Request, res: Response) {
 		const { room }: { room: Room } = req.body
 		const roomNew: Room = await new Bus(this, this.state.repository).dispatch({

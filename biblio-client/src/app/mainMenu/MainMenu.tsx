@@ -6,7 +6,7 @@ import { menuSo } from "@/stores/docs/links"
 import { buildUserCard } from "@/stores/stacks/account/utils/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
-import { buildRoomList } from "@/stores/stacks/room/factory"
+import { buildRoomDetailNew, buildRoomList } from "@/stores/stacks/room/factory"
 import { buildToolList } from "@/stores/stacks/tool/factory"
 import { Button } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -53,8 +53,8 @@ const MainMenu: FunctionComponent<Props> = ({
 		const view = buildAgentList()
 		deckCardsSo.add({ view, anim: true })
 	}
-	const handlePromptList = () => {
-		const view = buildRoomList()
+	const handleRoom = () => {
+		const view = buildRoomDetailNew()
 		deckCardsSo.add({ view, anim: true })
 	}
 
@@ -132,7 +132,7 @@ const MainMenu: FunctionComponent<Props> = ({
 			<Button children="LLM" onClick={handleLlmList} />
 			<Button children="TOOLS" onClick={handleToolList} />
 			<Button children="AGENTS" onClick={handleAgentList} />
-			<Button children="PROMPT" onClick={handlePromptList} />
+			<Button children="ROOM" onClick={handleRoom} />
 
 		</>}
 		{/* *** DEBUG *** */}

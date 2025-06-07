@@ -110,7 +110,7 @@ function buildNodeConfig() {
 					model: Tool,
 				},
 				{
-					name: "prompts",
+					name: "rooms",
 					class: "typeorm/repo",
 					model: Room,
 				},
