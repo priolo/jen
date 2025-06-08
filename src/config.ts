@@ -7,6 +7,7 @@ import { Llm } from "./repository/Llm.js";
 import { Room } from "./repository/Room.js";
 import { Tool } from "./repository/Tool.js";
 import AgentRoute from './routers/AgentRoute.js';
+import { WSDocConf, WSDocService } from "./routers/DocsWSRoute.js";
 import LlmRoute from "./routers/LlmRoute.js";
 import RoomRoute from "./routers/RoomRoute.js";
 import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
@@ -81,6 +82,9 @@ function buildNodeConfig() {
 						//{ class: "npm:@priolo/julian-ws-reflection" }
 						<WSRoomsConf>{ 
 							class: WSRoomsService 
+						},
+						<WSDocConf>{ 
+							class: WSDocService 
 						}
 					]
 				}

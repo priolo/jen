@@ -1,5 +1,6 @@
 import { ClientMessage, ClientMessageType, ClientObjects, ClientUpdateMessage, SlateApplicator } from "@priolo/jess"
 import { Operation } from "slate"
+import { wsConnection } from "../session"
 
 
 
@@ -28,7 +29,7 @@ clientObjects.onSend = async (messages) => {
 	}
 
 	const allMessages = msgGen.concat(mesUpNorm)
-	//cws.send(JSON.stringify(allMessages))
+	wsConnection.send(JSON.stringify(allMessages))
 	console.log("socket::send", allMessages)
 	return allMessages
 }
