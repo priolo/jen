@@ -3,7 +3,6 @@ import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
 import { delay } from "../../utils/time"
 import { SocketService } from "../SocketService"
-import { clientObjects } from "../docsService"
 
 
 
@@ -43,10 +42,6 @@ export async function StartSession() {
 
 	// WS CONNECTION
 	wsConnection.connect()
-
-	wsConnection.emitter.on( "message", 
-		(data: any) => clientObjects.receive(data.payload.toString())
-	)
 }
 
 export async function EndSession() {

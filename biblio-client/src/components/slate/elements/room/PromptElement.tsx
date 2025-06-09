@@ -1,4 +1,4 @@
-import { ElementType } from "@/stores/stacks/editor/slate/types"
+import { ElementType } from "@/components/slate/elements/doc/types"
 import { FunctionComponent } from "react"
 import { Node } from "slate"
 import { RenderElementProps, useFocused, useSelected } from "slate-react"

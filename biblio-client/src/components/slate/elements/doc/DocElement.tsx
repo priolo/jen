@@ -1,4 +1,4 @@
-import { ElementType, NODE_TYPES } from "@/stores/stacks/editor/slate/types"
+import { ElementType, NODE_TYPES } from "@/components/slate/elements/doc/types"
 import { FunctionComponent } from "react"
 import { RenderElementProps } from "slate-react"
 import Card, { CardProps } from "./Card"
@@ -12,7 +12,7 @@ import Text from "./Text"
 interface Props extends RenderElementProps {
 }
 
-const BiblioElement: FunctionComponent<Props> = (props) => {
+const DocElement: FunctionComponent<Props> = (props) => {
 
 	const element = props.element as ElementType
 	switch (element.type) {
@@ -32,4 +32,4 @@ const BiblioElement: FunctionComponent<Props> = (props) => {
 	}
 }
 
-export default BiblioElement
+export default DocElement

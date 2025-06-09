@@ -1,17 +1,19 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { TextEditorStore } from "@/stores/stacks/editor"
-import { biblioOnKeyDown } from "@/stores/stacks/editor/utils/onkeydown"
+import { docOnKeyDown } from "@/components/slate/utils/docOnKeyDown"
 import { useStore } from "@priolo/jon"
-import Prism from "prismjs"
 import { FunctionComponent } from "react"
-import { Node } from "slate"
 import { Editable, Slate } from "slate-react"
 import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import cls from "./View.module.css"
-import BiblioElement from "./elements/BiblioElement"
-import BiblioLeaf from "./leafs/BiblioLeaf"
+import DocElement from "../../../components/slate/elements/doc/DocElement"
+import DocLeaf from "../../../components/slate/elements/doc/DocLeaf"
+import { docDecor } from "@/components/slate/decorators/docDecor"
+import PromptElement from "@/components/slate/elements/room/PromptElement"
+import PromptLeaf from "@/components/slate/elements/room/PromptLeaf"
+import { mdDecor } from "@/components/slate/decorators/mdDecor"
 
 
 
@@ -41,7 +43,7 @@ const EditorView: FunctionComponent<Props> = ({
 	}
 
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-		biblioOnKeyDown(event, editor)
+		docOnKeyDown(event, editor)
 	}
 
 	const handleCopy = (event: React.ClipboardEvent<HTMLDivElement>) => {
@@ -68,12 +70,18 @@ const EditorView: FunctionComponent<Props> = ({
 		>
 			<ActionsCmp store={store} style={{ margin: '-10px -10px 5px -10px' }} />
 			<Editable
-				decorate={decorateCode}
+				//decorate={docDecor}
+				decorate={mdDecor}
+
 				className={`${cls.editor} code-editor`}
 				style={{ flex: 1, overflowY: "auto" }}
 				spellCheck={false}
-				renderElement={props => <BiblioElement {...props} />}
-				renderLeaf={props => <BiblioLeaf {...props} />}
+
+				// renderElement={props => <DocElement {...props} />}
+				// renderLeaf={props => <DocLeaf {...props} />}
+				renderElement={props => <PromptElement {...props} />}
+				renderLeaf={props => <PromptLeaf {...props} />}
+
 				onKeyDown={handleKeyDown}
 				onFocus={handleFocus}
 				onBlur={handleBlur}
@@ -86,56 +94,4 @@ const EditorView: FunctionComponent<Props> = ({
 
 export default EditorView
 
-const decorateCode = ([node, path]) => {
-	const ranges = []
-	if (node.type === 'code') {
-		console.log("decorateCode")
-		const text = Node.string(node)
-		const tokens = Prism.tokenize(text, Prism.languages.javascript)
-		let start = 0
 
-		for (const token of tokens) {
-			const length = token.length
-			const end = start + length
-
-			if (typeof token !== 'string') {
-				ranges.push({
-					anchor: { path, offset: start },
-					focus: { path, offset: end },
-					className: `token ${token.type}`,
-				})
-			}
-
-			start = end
-		}
-	}
-	return ranges
-}
-
-// const decorateCode = ([node, path]) => {
-// 	const ranges = []
-// 	if (node.type === 'code') {
-// 	  const text = Node.string(node)
-// 	  const language = 'javascript' // Cambia questa riga per supportare altri linguaggi
-// 	  const { value } = hljs.highlight(text, { language })
-// 	  const tokens = value.split(/\r\n|\r|\n/
-	  
-// 	  let start = 0
-// 	  for (const token of tokens) {
-// 		const length = token.length
-// 		const end = start + length
-  
-// 		const tokenClasses = token.match(/class="([^"]+)"/)?.[1]
-// 		if (tokenClasses) {
-// 		  ranges.push({
-// 			anchor: { path, offset: start },
-// 			focus: { path, offset: end },
-// 			className: tokenClasses,
-// 		  })
-// 		}
-  
-// 		start = end + 1 // +1 per il carattere di nuova riga
-// 	  }
-// 	}
-// 	return ranges
-//   }

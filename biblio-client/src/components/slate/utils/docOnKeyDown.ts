@@ -1,10 +1,10 @@
 import { Range } from "slate"
-import { NODE_TYPES, NodeType } from "../slate/types"
-import { SugarEditor } from "../slate/withSugar"
+import { NODE_TYPES, NodeType } from "../elements/doc/types"
+import { SugarEditor } from "../../../stores/stacks/editor/slate/withSugar"
 
 
 /** gestisce l'evento ON KEY DOWN sulla card in base ai tipi di NODE */
-export function biblioOnKeyDown(event: React.KeyboardEvent<HTMLDivElement>, editor: SugarEditor) {
+export function docOnKeyDown(event: React.KeyboardEvent<HTMLDivElement>, editor: SugarEditor) {
 	const selection = editor.selection
 	if ( !selection ) return
 	const node = editor.node(selection, { depth: 1 })?.[0] as NodeType

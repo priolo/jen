@@ -1,4 +1,4 @@
-import { ElementCode, NODE_CODE_SIZE } from "@/stores/stacks/editor/slate/types";
+import { ElementCode, NODE_CODE_SIZE } from "@/components/slate/elements/doc/types";
 import Editor, { Monaco } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { FunctionComponent, useEffect, useRef, useState } from "react";

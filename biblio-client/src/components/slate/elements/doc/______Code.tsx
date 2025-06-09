@@ -4,9 +4,9 @@ import "prismjs/themes/prism.css";
 import { FunctionComponent, useCallback } from "react";
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react";
 import Drop from "./Drop";
-import { ElementCode, NODE_TYPES } from "../../../../stores/stacks/editor/slate/types";
+import { ElementCode, NODE_TYPES } from "./types";
 import { Editor, Element, Node, NodeEntry } from "slate";
-import { normalizeTokens } from "../utils/normalize-tokens";
+import { normalizeTokens } from "../../../../app/cards/editorTxt/utils/normalize-tokens";
 
 
 

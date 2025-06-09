@@ -1,7 +1,7 @@
 import { Button, IconButton, TextInput, ListDialog } from "@priolo/jack"
 import LinkIcon from "@/icons/LinkIcon"
 import { TextEditorStore } from "@/stores/stacks/editor"
-import { NODE_CODE_SIZE, NODE_TYPES, NodeType } from "@/stores/stacks/editor/slate/types"
+import { NODE_CODE_SIZE, NODE_TYPES, NodeType } from "@/components/slate/elements/doc/types"
 import { SugarEditor } from "@/stores/stacks/editor/slate/withSugar"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useState } from "react"

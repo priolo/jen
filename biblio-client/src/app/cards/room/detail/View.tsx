@@ -1,21 +1,20 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
+import { mdDecor } from "@/components/slate/decorators/mdDecor"
 import SendIcon from "@/icons/SendIcon"
 import agentSo from "@/stores/stacks/agent/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
-import { codeOnKeyDown } from "@/stores/stacks/room/detail/utils/onkeydown"
+import { mdOnKeyDown } from "@/components/slate/utils/mdOnKeyDown"
 import { EDIT_STATE } from "@/types"
 import { Agent } from "@/types/Agent"
 import { FloatButton, ListDialog2, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import Prism from "prismjs"
 import { FunctionComponent, useEffect } from "react"
-import { Text } from "slate"
 import { Editable, Slate } from "slate-react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
-import PromptElement from "./elements/PromptElement"
-import BiblioLeaf from "./leafs/BiblioLeaf"
+import PromptElement from "@/components/slate/elements/room/PromptElement"
+import PromptLeaf from "@/components/slate/elements/room/PromptLeaf"
 import RoleDialog from "./RoleDialog"
 import cls from "./View.module.css"
 
@@ -53,7 +52,7 @@ const RoomView: FunctionComponent<Props> = ({
 
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
 		//biblioOnKeyDown(event, editor)
-		codeOnKeyDown(event, editor)
+		mdOnKeyDown(event, editor)
 	}
 
 	const handleCopy = (event: React.ClipboardEvent<HTMLDivElement>) => {
@@ -104,12 +103,12 @@ const RoomView: FunctionComponent<Props> = ({
 		>
 			<Editable
 				readOnly={true}
-				decorate={decorateMD}
+				decorate={mdDecor}
 				className={`${cls.editor} code-editor`}
 				style={{ flex: 1, overflowY: "auto" }}
 				spellCheck={false}
 				renderElement={props => <PromptElement {...props} />}
-				renderLeaf={props => <BiblioLeaf {...props} />}
+				renderLeaf={props => <PromptLeaf {...props} />}
 				onKeyDown={handleKeyDown}
 				onFocus={handleFocus}
 				onBlur={handleBlur}
@@ -137,35 +136,3 @@ const RoomView: FunctionComponent<Props> = ({
 
 export default RoomView
 
-const decorateMD = ([node, path]) => {
-	const ranges = []
-	if (!Text.isText(node)) return ranges
-
-	// helper per calcolare lunghezza token
-	const getLength = token =>
-		typeof token === 'string'
-			? token.length
-			: typeof token.content === 'string'
-				? token.content.length
-				: token.content.reduce((l, t) => l + getLength(t), 0)
-
-	// Prism tokenizza il testo in base alla grammatica Markdown
-	const tokens = Prism.tokenize(node.text, Prism.languages.markdown)
-	let start = 0
-
-	for (const token of tokens) {
-		const length = getLength(token)
-		const end = start + length
-
-		if (typeof token !== 'string') {
-			ranges.push({
-				[token.type]: true,
-				anchor: { path, offset: start },
-				focus: { path, offset: end }
-			})
-		}
-		start = end
-	}
-
-	return ranges
-}

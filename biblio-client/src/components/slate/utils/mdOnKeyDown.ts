@@ -1,10 +1,10 @@
 import { Editor, Element, Range, Transforms } from "slate";
-import { NodeType, PROMPT_ROLES } from "../slate/types";
-import { SugarEditor } from "../slate/withSugar";
+import { NodeType, PROMPT_ROLES } from "../elements/room/types";
+import { StoreEditor } from "../editors/withStore";
 
 
 
-export function codeOnKeyDown(event: React.KeyboardEvent<HTMLDivElement>, editor: SugarEditor, node?: NodeType) {
+export function mdOnKeyDown(event: React.KeyboardEvent<HTMLDivElement>, editor: StoreEditor, node?: NodeType) {
 	if (event.key == "Enter") {
 		if (event.ctrlKey || event.altKey || event.shiftKey) {
 			event.preventDefault();

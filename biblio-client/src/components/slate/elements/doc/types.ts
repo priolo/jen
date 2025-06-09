@@ -1,5 +1,5 @@
 import { BaseElement, BaseText } from "slate"
-import { ViewState } from "../../viewBase"
+import { ViewState } from "../../../../stores/stacks/viewBase"
 
 
 

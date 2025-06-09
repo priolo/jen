@@ -1,6 +1,7 @@
 import { ClientMessage, ClientMessageType, ClientObjects, ClientUpdateMessage, SlateApplicator } from "@priolo/jess"
 import { Operation } from "slate"
 import { wsConnection } from "../session"
+import { SS_EVENT } from "../SocketService/types"
 
 
 
@@ -67,3 +68,24 @@ export function sendCommands(idDoc, operation: Operation) {
 	clearTimeout(idTimeout)
 	idTimeout = setTimeout(() => clientObjects.update(), 1000)
 }
+
+
+
+
+
+const onMessage = (data: any) => {
+	clientObjects.receive(data.payload.toString())
+}
+// if (wsConnection.websocket?.readyState === WebSocket.OPEN) {
+// 	wsConnection.emitter.on(SS_EVENT.MESSAGE, onMessage)
+// }
+wsConnection.emitter.on(SS_EVENT.CONNECTION, ({payload}:{payload:number}) => {
+	if (payload == WebSocket.OPEN) {
+		wsConnection.emitter.on(SS_EVENT.MESSAGE, onMessage)
+	} else {
+		wsConnection.emitter.off(SS_EVENT.MESSAGE, onMessage)
+	}
+})
+// wsConnection.emitter.on(SS_EVENT.CLOSE, () => {
+// 	wsConnection.emitter.off(SS_EVENT.MESSAGE, onMessage)
+// })

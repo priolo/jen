@@ -1,23 +1,21 @@
-import { Operation, Node } from "slate"
+import { Node, Operation } from "slate"
 import { ReactEditor } from "slate-react"
-import { TextEditorStore } from ".."
-import { sendCommands } from "../../../../plugins/docsService"
-import { NODE_TYPES, NodeType } from "./types"
+import { sendCommands } from "@/plugins/docsService"
 
 
 /**
  * Aggiunge funzionalità a slate
  */
-export const withSugar = (editor: ReactEditor) => {
-	const se = editor as SugarEditor
+export const withJess = (editor: ReactEditor, ) => {
+
+	const se = editor as JessEditor
 	//se.actionsDisabled = false
 	/** lo store che contiene questo editor */
-	se.store = null
 	const { apply, insertData } = editor;
 
 	editor.apply = (operation: Operation) => {
 		// sincronizza con il server 
-		sendCommands(se.store.state.docId, operation)
+		sendCommands(se.docId, operation)
 		apply(operation);
 	};
 
@@ -46,18 +44,17 @@ export const withSugar = (editor: ReactEditor) => {
 		}
 	};
 
-	se.setTypeOnSelect = (type: NODE_TYPES) => {
-		// Non fare nulla se non c'è una selezione o se la selezione è collassata
-		if (!editor.selection) return;
-		editor.setNodes<NodeType>({ type })
-	}
+	// se.setTypeOnSelect = (type: NODE_TYPES) => {
+	// 	// Non fare nulla se non c'è una selezione o se la selezione è collassata
+	// 	if (!editor.selection) return;
+	// 	editor.setNodes<NodeType>({ type })
+	// }
 
 	return se
 }
 
-export interface SugarEditor extends ReactEditor {
-	store?: TextEditorStore
-	//actionsDisabled?: boolean
-	setTypeOnSelect: (type: NODE_TYPES) => void
+export interface JessEditor extends ReactEditor {
+	docId?: string
+	//setTypeOnSelect: (type: NODE_TYPES) => void
 	onCopy: (event: ClipboardEvent) => void
 }

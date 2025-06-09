@@ -4,13 +4,12 @@ import { mixStores } from "@priolo/jon"
 import { createEditor } from "slate"
 import { withHistory } from 'slate-history'
 import { withReact } from "slate-react"
-import { createUUID } from "../../docs/utils/factory"
 import { EditorState } from "../editorBase"
-import { NODE_TYPES, NodeType } from "./slate/types"
-import { SugarEditor, withSugar } from "./slate/withSugar"
+import { NODE_TYPES, NodeType } from "../../../components/slate/elements/doc/types"
 //import { updateEditorChildren } from "./utils/slate"
 import { SlateApplicator } from "@priolo/jess"
 import { DragDoc } from "@priolo/jack"
+import { JessEditor, withJess } from "@/components/slate/editors/withJess"
 
 
 
@@ -20,7 +19,7 @@ const setup = {
 		/** Doc corrente in editor */
 		docId: <string>null,
 		/** SLATE editor */
-		editor: <SugarEditor>null,
+		editor: <JessEditor>null,
 
 		/** testo iniziale */
 		initValue: <NodeType[]>[{ type: NODE_TYPES.TEXT, children: [{ text: "" }] }],
@@ -76,30 +75,24 @@ const setup = {
 		/** chiamata dalla build dello stesso store */
 		onCreated: async (_: void, store?: ViewStore) => {
 			const editorSo = store as TextEditorStore
+			const docId = editorSo.state.docId
 
-			// creo l'editor SLATE
-			const editor: SugarEditor = withSugar(withHistory(withReact(createEditor())))
-			editor.store = editorSo
+			// creo l'editor SLATE e lo assegno allo state
+			const editor: JessEditor = withJess(withHistory(withReact(createEditor())))
+			editor.docId = docId
 			//editor.children = editorSo.state.initValue ?? [{ type: NODE_TYPES.TEXT, children: [{ text: "" }] }] as NodeType[]
 			editorSo.state.editor = editor
 
-
-
-			const docId = editorSo.state.docId
-
-
+			// esegue le varie connessioni jess
 			clientObjects.observe(docId, (data) => {
 				const children = clientObjects.getObject(docId).valueTemp
 				SlateApplicator.UpdateChildren(editor, children)
 			})
 			await clientObjects.init(docId, true)
-
 			// [II] e onDestroy unobserve????
 		},
 
-
 		//#endregion
-
 	},
 
 	mutators: {

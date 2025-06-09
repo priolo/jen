@@ -1,4 +1,4 @@
-import { ElementCode } from "@/stores/stacks/editor/slate/types";
+import { ElementCode } from "@/components/slate/elements/doc/types";
 import { SugarEditor } from "@/stores/stacks/editor/slate/withSugar";
 import { CopyButton, IconButton } from "@priolo/jack";
 import { FunctionComponent } from "react";

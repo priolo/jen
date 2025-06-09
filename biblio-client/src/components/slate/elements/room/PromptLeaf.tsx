@@ -1,14 +1,14 @@
-import { TextType } from "@/stores/stacks/editor/slate/types";
+import { TextType } from "@/components/slate/elements/doc/types";
 import { FunctionComponent } from "react";
 import { RenderLeafProps } from "slate-react";
-import cls from "./BiblioLeaf.module.css";
+import cls from "./PromptLeaf.module.css";
 
 
 
 interface Props extends RenderLeafProps {
 }
 
-const BiblioLeaf: FunctionComponent<Props> = ({
+const PromptLeaf: FunctionComponent<Props> = ({
 	attributes,
 	leaf,
 	children,
@@ -18,14 +18,15 @@ const BiblioLeaf: FunctionComponent<Props> = ({
 	const clsItalic = leafBib.italic? cls.italic : ""
 	const clsCode = leafBib.code ? cls.code : ""
 	const clsLink = leafBib.link ? cls.link : ""
-	const cnRoot = `${cls.root} ${clsBold} ${clsItalic} ${clsCode} ${clsLink}`
+	const clsTitle = leafBib.title ? cls.title : ""
+	const cnRoot = `${cls.root} ${clsTitle} ${clsBold} ${clsItalic} ${clsCode} ${clsLink}`
 
 	return <span
 		{...attributes} 
-		className={leaf.className}
+		className={cnRoot}
 	>
 		{children}
 	</span>
 }
 
-export default BiblioLeaf
+export default PromptLeaf

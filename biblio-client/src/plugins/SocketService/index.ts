@@ -1,12 +1,11 @@
 import { EventEmitter } from "@priolo/jon-utils";
 import { Reconnect } from "./reconnect.js";
-import { SocketOptions } from "./types.js";
+import { SocketOptions, SS_EVENT } from "./types.js";
 
 
 
 /**
  * Crea una connessione WS
- * [II] mttere in jon-utils
  */
 export class SocketService {
 
@@ -40,12 +39,12 @@ export class SocketService {
 			return
 		}
 
-		this.websocket.addEventListener("open",  this.handleOpen)
-		this.websocket.addEventListener("close",  this.handleClose)
-		this.websocket.addEventListener("message",  this.handleMessage)
-		this.websocket.addEventListener("error",  this.handleError)
-		
-		this.emitter.emit("connection", this.websocket.readyState)
+		this.websocket.addEventListener("open", this.handleOpen)
+		this.websocket.addEventListener("close", this.handleClose)
+		this.websocket.addEventListener("message", this.handleMessage)
+		this.websocket.addEventListener("error", this.handleError)
+
+		this.emitter.emit(SS_EVENT.CONNECTION, this.websocket.readyState)
 	}
 
 	/** 
@@ -54,10 +53,10 @@ export class SocketService {
 	clear() {
 		if (!this.websocket) return
 		this.websocket.close()
-		this.websocket.removeEventListener("open",  this.handleOpen)
-		this.websocket.removeEventListener("close",  this.handleClose)
-		this.websocket.removeEventListener("message",  this.handleMessage)
-		this.websocket.removeEventListener("error",  this.handleError)
+		this.websocket.removeEventListener("open", this.handleOpen)
+		this.websocket.removeEventListener("close", this.handleClose)
+		this.websocket.removeEventListener("message", this.handleMessage)
+		this.websocket.removeEventListener("error", this.handleError)
 		this.websocket = null
 	}
 
@@ -81,27 +80,27 @@ export class SocketService {
 
 	handleOpen = (_: Event) => {
 		console.log("socket:open")
-		this.emitter.emit("connection", this.websocket.readyState)
+		this.emitter.emit(SS_EVENT.CONNECTION, this.websocket.readyState)
 		this.reconnect.stop()
 		this.reconnect.tryZero()
 	}
 
 	handleClose = (_: CloseEvent) => {
 		console.log("socket:close")
-		this.emitter.emit("connection", this.websocket.readyState)
+		this.emitter.emit(SS_EVENT.CONNECTION, this.websocket.readyState)
 		this.clear()
 		this.reconnect.start()
 	}
 
 	handleMessage = (event: MessageEvent) => {
 		console.log("socket:message")
-		this.emitter.emit("message", event.data)
+		this.emitter.emit(SS_EVENT.MESSAGE, event.data)
 	}
 
 	handleError = (event: Event) => {
 		console.error("socket:error")
 		//this.reconnect.start()
-		this.emitter.emit("error", event)
+		this.emitter.emit(SS_EVENT.ERROR, event)
 	}
 
 	//#endregion

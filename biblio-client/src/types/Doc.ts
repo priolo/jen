@@ -1,5 +1,5 @@
 import { BaseOperation } from "slate"
-import { NodeType } from "../stores/stacks/editor/slate/types"
+import { NodeType } from "../components/slate/elements/doc/types"
 import { User } from "./User"
 
 

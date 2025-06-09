@@ -8,8 +8,8 @@ import { createEditor } from "slate"
 import { withHistory } from 'slate-history'
 import { withReact } from "slate-react"
 import { EditorState } from "../../editorBase"
-import { NodeType, PROMPT_ROLES } from "./slate/types"
-import { SugarEditor, withSugar } from "./slate/withSugar"
+import { NodeType, PROMPT_ROLES } from "../../../../components/slate/elements/room/types"
+import { StoreEditor, withStore } from "../../../../components/slate/editors/withStore"
 import { wsConnection } from "@/plugins/session"
 import { AppendMessageS2C, ROOM_ACTION_C2S, ROOM_ACTION_S2C, UserEnterC2S, UserEnteredS2C, UserMessageC2S } from "@/types/WSMessages"
 import { ROOM_STATE } from "../types"
@@ -27,7 +27,7 @@ const setup = {
 		prompt: "",
 
 		/** SLATE editor */
-		editor: <SugarEditor>null,
+		editor: <StoreEditor>null,
 
 		/** testo iniziale */
 		initValue: <NodeType[]>[
@@ -116,7 +116,7 @@ const setup = {
 			const roomSo = store as RoomDetailStore
 
 			// creo l'editor SLATE
-			const editor: SugarEditor = withSugar(withHistory(withReact(createEditor())))
+			const editor: StoreEditor = withStore(withHistory(withReact(createEditor())))
 			editor.store = roomSo
 			//editor.children = editorSo.state.initValue ?? [{ type: PROMPT_TYPES.SYSTEM, children: [{ text: "" }] }] as NodeType[]
 			roomSo.state.editor = editor
@@ -139,7 +139,7 @@ const setup = {
 		},
 
 		onMessage: (data: any, store?: RoomDetailStore) => {
-			const editor: SugarEditor = store.state.editor
+			const editor: StoreEditor = store.state.editor
 			const message: AppendMessageS2C = JSON.parse(data.payload)
 
 			if (message.action == ROOM_ACTION_S2C.APPEND_MESSAGE && message.roomId == store.state.room.id) {
