@@ -1,6 +1,11 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import { TextEditorStore } from "@/stores/stacks/editor"
+import { mdDecor } from "@/components/slate/decorators/mdDecor"
+import PromptElement from "@/components/slate/elements/room/PromptElement"
+import PromptLeaf from "@/components/slate/elements/room/PromptLeaf"
 import { docOnKeyDown } from "@/components/slate/utils/docOnKeyDown"
+import SendIcon from "@/icons/SendIcon"
+import { TextEditorStore } from "@/stores/stacks/editor"
+import { FloatButton } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
 import { Editable, Slate } from "slate-react"
@@ -8,12 +13,7 @@ import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import cls from "./View.module.css"
-import DocElement from "../../../components/slate/elements/doc/DocElement"
-import DocLeaf from "../../../components/slate/elements/doc/DocLeaf"
-import { docDecor } from "@/components/slate/decorators/docDecor"
-import PromptElement from "@/components/slate/elements/room/PromptElement"
-import PromptLeaf from "@/components/slate/elements/room/PromptLeaf"
-import { mdDecor } from "@/components/slate/decorators/mdDecor"
+import RoleDialog from "./RoleDialog"
 
 
 
@@ -50,6 +50,10 @@ const EditorView: FunctionComponent<Props> = ({
 		editor.onCopy(event.nativeEvent);
 	}
 
+	const handleCompleteClick = () => {
+		store.execute()
+	}
+
 	// const handleValueChange = () => {
 	// 	store.onValueChange()
 	// }
@@ -79,8 +83,8 @@ const EditorView: FunctionComponent<Props> = ({
 
 				// renderElement={props => <DocElement {...props} />}
 				// renderLeaf={props => <DocLeaf {...props} />}
-				renderElement={props => <PromptElement {...props} />}
-				renderLeaf={props => <PromptLeaf {...props} />}
+				renderElement={props => <PromptElement {...props} store={store}/>}
+				renderLeaf={props => <PromptLeaf {...props} store={store}/>}
 
 				onKeyDown={handleKeyDown}
 				onFocus={handleFocus}
@@ -89,6 +93,15 @@ const EditorView: FunctionComponent<Props> = ({
 				onCopy={handleCopy}
 			/>
 		</Slate>
+		
+		<RoleDialog store={store} />
+
+		<FloatButton
+			style={{ position: "absolute", right: 20, bottom: 20 }}
+			onClick={handleCompleteClick}
+			disabled={false}
+		><SendIcon /></FloatButton>
+
 	</FrameworkCard>
 }
 

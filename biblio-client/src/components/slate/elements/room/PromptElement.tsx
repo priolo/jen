@@ -7,7 +7,12 @@ import styles from "./PromptElement.module.css"
 
 
 
-const PromptElement: FunctionComponent<RenderElementProps> = ({
+interface Props extends RenderElementProps {
+	store: any
+}
+
+const PromptElement: FunctionComponent<Props> = ({
+	store,
 	attributes,
 	element,
 	children,
@@ -24,6 +29,7 @@ const PromptElement: FunctionComponent<RenderElementProps> = ({
 	const cnRoot = `${styles.root} ${selected && focused ? styles.focus : ''}`
 
 	return <Drop
+		store={store}
 		attributes={attributes}
 		element={element}
 		className={cnRoot}

@@ -24,6 +24,9 @@ const setup = {
 		/** testo iniziale */
 		initValue: <NodeType[]>[{ type: NODE_TYPES.TEXT, children: [{ text: "" }] }],
 
+		/** indica che la dialog ROLE è aperto */
+		roleDialogOpen: false,
+
 		//#region VIEWBASE
 		width: 370,
 		widthMax: 1000,
@@ -92,11 +95,17 @@ const setup = {
 			// [II] e onDestroy unobserve????
 		},
 
+		execute: async (_: void, store?: ViewStore) => {
+			console.log("execute")
+		},
+
 		//#endregion
 	},
 
 	mutators: {
 		setFormatOpen: (formatOpen: boolean) => ({ formatOpen }),
+
+		setRoleDialogOpen: (roleDialogOpen: boolean) => ({ roleDialogOpen }),
 	},
 }
 

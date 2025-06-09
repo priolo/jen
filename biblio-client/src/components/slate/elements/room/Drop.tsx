@@ -1,4 +1,3 @@
-import { SugarEditor } from "@/stores/stacks/agent/slate/withSugar"
 import { mouseSo } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, HTMLProps } from "react"
@@ -7,7 +6,12 @@ import cls from "./Drop.module.css"
 
 
 
-const Drop: FunctionComponent<RenderElementProps & HTMLProps<HTMLDivElement>> = ({
+interface Props extends RenderElementProps {
+	store: any
+}
+
+const Drop: FunctionComponent<Props & HTMLProps<HTMLDivElement>> = ({
+	store,
 	attributes,
 	element,
 	children,
@@ -19,20 +23,21 @@ const Drop: FunctionComponent<RenderElementProps & HTMLProps<HTMLDivElement>> = 
 	const mouseSa = useStore(mouseSo)
 
 	// HOOKs
-	const editor = useSlate() as SugarEditor
+	const editor = useSlate()
 
 	// HANDLERS
 	const handleMouseOver = (_: React.DragEvent<HTMLDivElement>) => {
 		if (!mouseSo.state.drag?.source?.view) return
-		const path = ReactEditor.findPath(editor, element)
-		mouseSo.setDrag({ ...mouseSo.state.drag, destination: { view: editor.store, index: path?.[0] } })
+		const path = ReactEditor.findPath(editor as ReactEditor, element)
+		console.log( path)
+		mouseSo.setDrag({ ...mouseSo.state.drag, destination: { view: store, index: path?.[0] } })
 	}
 	const handleMouseLeave = () => {
 		if (!mouseSo.state.drag?.source?.view) return
 		mouseSo.setDrag({ ...mouseSo.state.drag, destination: null })
 	}
 	const handleGripClick = () => {
-		editor.store.setRoleDialogOpen(true)
+		store.setRoleDialogOpen(true)
 	}
 
 	// RENDER

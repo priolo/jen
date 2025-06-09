@@ -47,11 +47,13 @@ export type ElementImage = {
 } & ElementType
 
 export type TextType = {
-	link?: boolean
-	url?: string
 	bold?: boolean
 	italic?: boolean
 	code?: boolean
+
+	link?: boolean
+	url?: string
+	title?: string
 } & BaseText
 
 /** NODE tipizzato dell'editor */

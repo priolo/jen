@@ -6,9 +6,11 @@ import cls from "./PromptLeaf.module.css";
 
 
 interface Props extends RenderLeafProps {
+	store: any
 }
 
 const PromptLeaf: FunctionComponent<Props> = ({
+	store,
 	attributes,
 	leaf,
 	children,
