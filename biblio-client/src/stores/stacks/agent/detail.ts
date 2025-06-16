@@ -6,6 +6,7 @@ import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../editorBase"
 import { buildRoomDetailNew } from "../room/factory"
+import { buildEditorFromAgent } from "../editor/factory"
 
 
 
@@ -75,6 +76,12 @@ const setup = {
 		/** apertura della CARD ROOM */
 		openRoom(_: void, store?: AgentDetailStore) {
 			const view = buildRoomDetailNew(store.state.agent?.id)
+			store.state.group.addLink({ view, parent: store, anim: true })
+		},
+
+		/** apertura della CARD EDITOR */
+		openEditor(_: void, store?: AgentDetailStore) {
+			const view = buildEditorFromAgent( store.state.agent?.id)
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 

@@ -14,6 +14,7 @@ export const withJess = (editor: ReactEditor, ) => {
 	const { apply, insertData } = editor;
 
 	editor.apply = (operation: Operation) => {
+		console.log("apply", operation)
 		// sincronizza con il server 
 		sendCommands(se.docId, operation)
 		apply(operation);

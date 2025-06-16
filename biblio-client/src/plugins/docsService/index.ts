@@ -62,7 +62,7 @@ let idTimeout: NodeJS.Timeout
 /** chiamato dal componente SLATE su "apply"
  * memorizzo dei COMMANDs e li invio quando tutto è calmo
  */
-export function sendCommands(idDoc, operation: Operation) {
+export function sendCommands(idDoc:string, operation: Operation) {
 	if (Operation.isSelectionOperation(operation)) return
 	clientObjects.command(idDoc, operation)
 	clearTimeout(idTimeout)

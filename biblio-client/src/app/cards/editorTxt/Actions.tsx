@@ -2,12 +2,12 @@ import { Button, IconButton, TextInput, ListDialog } from "@priolo/jack"
 import LinkIcon from "@/icons/LinkIcon"
 import { TextEditorStore } from "@/stores/stacks/editor"
 import { NODE_CODE_SIZE, NODE_TYPES, NodeType } from "@/components/slate/elements/doc/types"
-import { SugarEditor } from "@/stores/stacks/editor/slate/withSugar"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useState } from "react"
 import { ReactEditor, useSlate } from "slate-react"
 import cls from "./View.module.css"
 import { Editor, Node, Transforms } from "slate"
+import { JessEditor } from "@/components/slate/editors/withJess"
 
 
 
@@ -25,7 +25,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	const state = useStore(store)
 
 	// HOOKs
-	const editor = useSlate() as SugarEditor
+	const editor = useSlate() as JessEditor
 	const [url, setUrl] = useState("")
 
 	// HANDLER
@@ -157,9 +157,9 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// RENDER
-	const node = editor.selection ? editor.node(editor.selection.focus, { depth: 1 })?.[0] as NodeType : null
+	const node = null// editor.selection ? editor.node(editor.selection.focus, { depth: 1 })?.[0] as NodeType : null
 	const type = node?.type
-	const marks = editor.getMarks()
+	const marks = null//editor.getMarks()
 	const isBold = marks?.["bold"] === true
 	const isItalic = marks?.["italic"] === true
 	const isLink = marks?.["link"] === true

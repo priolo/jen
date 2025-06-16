@@ -9,8 +9,11 @@ export interface Agent {
 	name: string
 	//type: AGENT_TYPE
 
+	/** utilizzato per la descrizione all'interno dei TOOL */
 	description: string
+	/** prompt di system */
 	systemPrompt: string
+	
 	contextPrompt: string
 	askInformation: boolean
 	killOnResponse: boolean

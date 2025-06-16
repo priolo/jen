@@ -70,7 +70,7 @@ const EditorView: FunctionComponent<Props> = ({
 	>
 		<Slate
 			editor={editor}
-			initialValue={[{ children: [{ text: '' }] }]}
+			initialValue={editor.children}
 		>
 			<ActionsCmp store={store} style={{ margin: '-10px -10px 5px -10px' }} />
 			<Editable

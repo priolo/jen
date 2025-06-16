@@ -28,6 +28,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	const handleCancelClick = () => store.restore()
 	const handleSaveClick = async () => store.save()
 	const handleRoomClick = () => store.openRoom()
+	const handleEditorClick = () => store.openEditor()
 
 
 	// LOADING
@@ -59,6 +60,10 @@ const ActionsCmp: FunctionComponent<Props> = ({
 			<Button
 				children="ROOM"
 				onClick={handleRoomClick}
+			/>
+			<Button
+				children="EDITOR"
+				onClick={handleEditorClick}
 			/>
 		</div>
 	}

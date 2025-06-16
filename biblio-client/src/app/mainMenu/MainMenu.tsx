@@ -23,6 +23,7 @@ import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
+import { buildEditorNew } from "@/stores/stacks/editor/factory"
 
 
 
@@ -82,16 +83,8 @@ const MainMenu: FunctionComponent<Props> = ({
 	}
 
 
-
-
-
-
-
 	const handleDoc = () => {
-		const view = buildStore({
-			type: DOC_TYPE.TEXT_EDITOR,
-			docId: "test-uuid",
-		} as TextEditorState) as TextEditorStore
+		const view = buildEditorNew()
 		deckCardsSo.add({ view, anim: true })
 	}
 
@@ -102,13 +95,13 @@ const MainMenu: FunctionComponent<Props> = ({
 		deckCardsSo.add({ view, anim: true })
 	}
 
-	const handleDocDev = () => {
-		const view = buildStore({
-			type: DOC_TYPE.TEXT_EDITOR,
-			initValue: [{ type: NODE_TYPES.CODE, children: [{ text: "var c = 67" }] }]
-		} as TextEditorState) as TextEditorStore
-		deckCardsSo.add({ view, anim: true })
-	}
+	// const handleDocDev = () => {
+	// 	const view = buildStore({
+	// 		type: DOC_TYPE.TEXT_EDITOR,
+	// 		initValue: [{ type: NODE_TYPES.CODE, children: [{ text: "var c = 67" }] }]
+	// 	} as TextEditorState) as TextEditorStore
+	// 	deckCardsSo.add({ view, anim: true })
+	// }
 
 	// RENDER
 	return <div style={style} className={cls.root}>
@@ -121,13 +114,13 @@ const MainMenu: FunctionComponent<Props> = ({
 
 			{/* <Button children="DOC NEW" onClick={handleDocNew} /> */}
 			<Button children="DOC" onClick={handleDoc} />
-			<Button children="EDIT" onClick={handleEdit} />
-			<Button children="REF" onClick={handleReflection} />
+			{/* <Button children="EDIT" onClick={handleEdit} /> */}
+			{/* <Button children="REF" onClick={handleReflection} /> */}
 			{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
 
 
 
-			<Button children="ACCOUNT" onClick={handleAccount} />
+			{/* <Button children="ACCOUNT" onClick={handleAccount} /> */}
 
 			<Button children="LLM" onClick={handleLlmList} />
 			<Button children="TOOLS" onClick={handleToolList} />
