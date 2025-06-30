@@ -8,7 +8,7 @@ import ToolListView from "@/app/cards/tool/ListView"
 import ToolDetailView from "@/app/cards/tool/detail/View"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import { AgentListStore } from "@/stores/stacks/agent/list"
-import { TextEditorStore } from "@/stores/stacks/editor"
+import { AgentEditorStore } from "@/stores/stacks/agentEditor"
 import { EditorCodeStore } from "@/stores/stacks/editorCode"
 import { LlmDetailStore } from "@/stores/stacks/llm/detail"
 import { LlmListStore } from "@/stores/stacks/llm/list"
@@ -23,7 +23,7 @@ import { DOC_TYPE } from "@/types"
 import { FunctionComponent, useMemo } from "react"
 import UserView from "../../app/cards/account/View"
 import EditorCodeView from "../../app/cards/editorCode/View"
-import TextEditorView from "../../app/cards/editorTxt/View"
+import TextEditorView from "../../app/cards/agentEditor/View"
 import ReflectionView from "../../app/cards/reflection/node/View"
 import UserDetailView from "../../app/cards/user/detail/View"
 import StreamsListView from "../../app/cards/user/list/ListView"
@@ -51,8 +51,8 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 			case DOC_TYPE.REFLECTION:
 				return <ReflectionView store={view as ReflectionStore} />
 
-			case DOC_TYPE.TEXT_EDITOR:
-				return <TextEditorView store={view as TextEditorStore} />
+			case DOC_TYPE.AGENT_EDITOR:
+				return <TextEditorView store={view as AgentEditorStore} />
 
 			case DOC_TYPE.ROOM_DETAIL:
 				return <RoomView store={view as RoomDetailStore} />

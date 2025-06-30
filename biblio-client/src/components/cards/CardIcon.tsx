@@ -29,7 +29,7 @@ const CardIcon: FunctionComponent<Props> = ({
 		case DOC_TYPE.REFLECTION:
 			return null
 
-		case DOC_TYPE.TEXT_EDITOR:
+		case DOC_TYPE.AGENT_EDITOR:
 			return null//<EditorIcon className={className} style={style} />
 
 

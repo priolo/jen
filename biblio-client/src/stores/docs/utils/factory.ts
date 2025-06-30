@@ -1,7 +1,7 @@
 import accountSetup from "@/stores/stacks/account";
 import agentDetailSetup from "@/stores/stacks/agent/detail";
 import agentListSetup from "@/stores/stacks/agent/list";
-import txtEditorSetup from "@/stores/stacks/editor";
+import agentEditorSetup from "@/stores/stacks/agentEditor";
 import editCodeSetup from "@/stores/stacks/editorCode";
 import llmDetailSetup from "@/stores/stacks/llm/detail";
 import llmListSetup from "@/stores/stacks/llm/list";
@@ -39,7 +39,7 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 		[DOC_TYPE.USERS]: usersSetup,
 		[DOC_TYPE.USER]: userSetup,
 
-		[DOC_TYPE.TEXT_EDITOR]: txtEditorSetup,
+		[DOC_TYPE.AGENT_EDITOR]: agentEditorSetup,
 
 
 		[DOC_TYPE.ROOM_DETAIL]: roomDetailSetup,

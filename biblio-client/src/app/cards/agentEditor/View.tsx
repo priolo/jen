@@ -1,10 +1,10 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { mdDecor } from "@/components/slate/decorators/mdDecor"
-import PromptElement from "@/components/slate/elements/room/PromptElement"
-import PromptLeaf from "@/components/slate/elements/room/PromptLeaf"
+import PromptElement from "@/components/slate/elements/agent/PromptElement"
+import PromptLeaf from "@/components/slate/elements/agent/PromptLeaf"
 import { docOnKeyDown } from "@/components/slate/utils/docOnKeyDown"
 import SendIcon from "@/icons/SendIcon"
-import { TextEditorStore } from "@/stores/stacks/editor"
+import { AgentEditorStore } from "@/stores/stacks/agentEditor"
 import { FloatButton } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
@@ -18,10 +18,10 @@ import RoleDialog from "./RoleDialog"
 
 
 interface Props {
-	store?: TextEditorStore
+	store?: AgentEditorStore
 }
 
-const EditorView: FunctionComponent<Props> = ({
+const AgentEditorView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
@@ -105,6 +105,6 @@ const EditorView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default EditorView
+export default AgentEditorView
 
 

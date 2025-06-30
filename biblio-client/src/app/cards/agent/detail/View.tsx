@@ -14,6 +14,7 @@ import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import LlmDialog from "./LlmDialog"
 import ToolsDialog from "./ToolsDialog"
+import { Llm } from "@/types/Llm"
 
 
 
@@ -119,8 +120,8 @@ const AgentView: FunctionComponent<Props> = ({
 					select={llmSelected}
 					items={llm}
 					readOnly={inRead}
-					fnGetId={(item: Tool) => item?.id}
-					fnGetString={(item: Tool) => item?.name}
+					fnGetId={(item: Llm) => item?.id}
+					fnGetString={(item: Llm) => item?.name}
 					onChangeSelect={handleLlmChange}
 				/>
 			</div>

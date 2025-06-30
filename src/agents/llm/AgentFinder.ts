@@ -2,7 +2,7 @@ import { tool, Tool, ToolSet } from 'ai';
 import { z } from "zod";
 import { DOC_TYPE, NodeDoc } from '../../types.js';
 import { getAllIndex, getDocumentByRef, getItemById, multiWordDBSearch, nodeToString, vectorDBSearch } from '../db/manage.js';
-import Agent, { AgentOptions } from './Agent.js';
+import AgentExecutor, { AgentOptions } from './Agent.js';
 
 
 
@@ -17,7 +17,7 @@ interface AgentFinderOptions extends AgentOptions {
 	searchDocEnabled?: boolean
 }
 
-class AgentFinder extends Agent {
+class AgentFinder extends AgentExecutor {
 
 	constructor(
 		public name: string,

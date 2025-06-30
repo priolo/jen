@@ -20,7 +20,7 @@ export function buildRoomDetailNew( agentId?: string ) {
 		editState: EDIT_STATE.NEW,
 		size: VIEW_SIZE.NORMAL,
 		sizeForce: true,
-		room: { agentId }
+		room: { agentId	}
 	} as RoomDetailState) as RoomDetailStore;
 	return store;
 }

@@ -80,9 +80,9 @@ function buildNodeConfig() {
 					port: 3100,
 					children: [
 						// { class: "npm:@priolo/julian-ws-reflection" }
-						// <WSRoomsConf>{ 
-						// 	class: WSRoomsService 
-						// },
+						<WSRoomsConf>{ 
+							class: WSRoomsService 
+						},
 						<WSDocConf>{ 
 							class: WSDocService 
 						}

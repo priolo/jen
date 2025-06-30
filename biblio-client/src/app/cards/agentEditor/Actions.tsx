@@ -1,6 +1,6 @@
 import { Button, IconButton, TextInput, ListDialog } from "@priolo/jack"
 import LinkIcon from "@/icons/LinkIcon"
-import { TextEditorStore } from "@/stores/stacks/editor"
+import { AgentEditorStore } from "@/stores/stacks/agentEditor"
 import { NODE_CODE_SIZE, NODE_TYPES, NodeType } from "@/components/slate/elements/doc/types"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useState } from "react"
@@ -12,7 +12,7 @@ import { JessEditor } from "@/components/slate/editors/withJess"
 
 
 interface Props {
-	store?: TextEditorStore
+	store?: AgentEditorStore
 	style?: React.CSSProperties
 }
 

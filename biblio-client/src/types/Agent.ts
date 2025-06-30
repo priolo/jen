@@ -13,8 +13,9 @@ export interface Agent {
 	description: string
 	/** prompt di system */
 	systemPrompt: string
-	
+	/** prompt user di descrizione del contesto */
 	contextPrompt: string
+	
 	askInformation: boolean
 	killOnResponse: boolean
 

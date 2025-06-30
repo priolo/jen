@@ -1,7 +1,7 @@
 import { Node, Operation } from "slate"
 import { ReactEditor } from "slate-react"
 import { RoomDetailStore } from "../../../stores/stacks/room/detail/detail"
-import { NodeType, PROMPT_ROLES } from "../elements/room/types"
+import { NodeType, PROMPT_ROLES } from "../elements/agent/types"
 
 
 /**

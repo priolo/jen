@@ -9,7 +9,7 @@ import { EditorState } from "../editorBase"
 import { SlateApplicator } from "@priolo/jess"
 import { DragDoc } from "@priolo/jack"
 import { JessEditor, withJess } from "@/components/slate/editors/withJess"
-import { NodeType, PROMPT_ROLES } from "@/components/slate/elements/room/types"
+import { NodeType, PROMPT_ROLES } from "@/components/slate/elements/agent/types"
 import { NODE_TYPES } from "@/components/slate/elements/doc/types"
 import { createUUID } from "@/stores/docs/utils/factory"
 
@@ -54,7 +54,7 @@ const setup = {
 		//#region VIEWBASE
 
 		onDrop: (data: DragDoc, store?: ViewStore) => {
-			const editorSo = store as TextEditorStore
+			const editorSo = store as AgentEditorStore
 			const editor = editorSo.state.editor
 			if (!data.source?.view) return
 
@@ -66,7 +66,7 @@ const setup = {
 			} else {
 				// è un NODE di una CARD esterna
 				if (data.source.index) {
-					const sourceEditor = (<TextEditorStore>data.source.view).state.editor
+					const sourceEditor = (<AgentEditorStore>data.source.view).state.editor
 					if (!sourceEditor) return
 					const [node] = sourceEditor.node([data.source.index])
 					editor.insertNode(node, { at: [data.destination.index] })
@@ -86,7 +86,7 @@ const setup = {
 
 		/** chiamata dalla build dello stesso store */
 		onCreated: async (_: void, store?: ViewStore) => {
-			const editorSo = store as TextEditorStore
+			const editorSo = store as AgentEditorStore
 
 			if (!editorSo.state.historyId) {
 				editorSo.state.historyId = createUUID()
@@ -136,7 +136,7 @@ const setup = {
 
 		/** Sostituisce tutto il contenuto dell'editor utilizzando le API native di Slate */
 		setEditorContent: (content: NodeType[], store?: ViewStore) => {
-			const editorSo = store as TextEditorStore
+			const editorSo = store as AgentEditorStore
 			const editor = editorSo.state.editor
 
 			if (!editor) {
@@ -172,17 +172,17 @@ const setup = {
 	},
 }
 
-export type TextEditorState = typeof setup.state & ViewState & EditorState
-export type TextEditorGetters = typeof setup.getters
-export type TextEditorActions = typeof setup.actions
-export type TextEditorMutators = typeof setup.mutators
-export interface TextEditorStore extends ViewStore, TextEditorGetters, TextEditorActions, TextEditorMutators {
-	state: TextEditorState
+export type AgentEditorState = typeof setup.state & ViewState & EditorState
+export type AgentEditorGetters = typeof setup.getters
+export type AgentEditorActions = typeof setup.actions
+export type AgentEditorMutators = typeof setup.mutators
+export interface AgentEditorStore extends ViewStore, AgentEditorGetters, AgentEditorActions, AgentEditorMutators {
+	state: AgentEditorState
 	onCreated: (_: void, store?: ViewStore) => Promise<void>;
 	setEditorContent: (content: NodeType[], store?: ViewStore) => void;
 }
-const txtEditorSetup = mixStores(viewSetup, setup)
-export default txtEditorSetup
+const agentEditorSetup = mixStores(viewSetup, setup)
+export default agentEditorSetup
 
 //const initValue = [{ type: NODE_TYPES.TEXT, children: [{ text: "" }] }]
 // const initValue = [

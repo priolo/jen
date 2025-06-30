@@ -12,9 +12,9 @@ export class Llm {
 	name: string;
 
 	@Column({ type: 'text' })
-	key: string;
+	key?: string;
 
 	/** agenti che implementano questo llm */
 	@OneToMany(() => Agent, (agent) => agent.llm)
-    agents: Agent[];
+    agents?: Agent[];
 }

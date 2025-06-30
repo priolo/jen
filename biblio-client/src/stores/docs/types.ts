@@ -19,7 +19,7 @@ export enum DOC_TYPE {
 	TOOL_DETAIL = "tool_detail",
 
 
-	TEXT_EDITOR = "text_editor",
+	AGENT_EDITOR = "text_editor",
 	CODE_EDITOR = "code_editor",
 
 

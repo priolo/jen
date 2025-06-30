@@ -1,6 +1,6 @@
 import { Range } from "slate"
 import { NODE_TYPES, NodeType } from "../elements/doc/types"
-import { SugarEditor } from "../../../stores/stacks/editor/slate/withSugar"
+import { SugarEditor } from "../../../stores/stacks/agentEditor/slate/withSugar"
 
 
 /** gestisce l'evento ON KEY DOWN sulla card in base ai tipi di NODE */

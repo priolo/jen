@@ -3,7 +3,7 @@ import { forEachViews } from "@/stores/docs/utils/manage";
 import { Path } from "slate";
 import { RoomDetailStore } from "../../../stores/stacks/room/detail/detail";
 import { ViewStore } from "../../../stores/stacks/viewBase";
-import { PROMPT_ROLES, NodeType } from "../elements/room/types";
+import { PROMPT_ROLES, NodeType } from "../elements/agent/types";
 import { StoreEditor } from "../editors/withStore";
 
 

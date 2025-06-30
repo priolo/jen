@@ -6,7 +6,7 @@ import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-rea
 import Drop from "./Drop";
 import { ElementCode, NODE_TYPES } from "./types";
 import { Editor, Element, Node, NodeEntry } from "slate";
-import { normalizeTokens } from "../../../../app/cards/editorTxt/utils/normalize-tokens";
+import { normalizeTokens } from "../../../../app/cards/agentEditor/utils/normalize-tokens";
 
 
 

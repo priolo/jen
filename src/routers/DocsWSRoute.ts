@@ -38,8 +38,10 @@ export class WSDocService extends ws.route {
 	 * Handle incoming WebSocket messages
 	 */
 	async onMessage(client: ws.IClient, message: string) {
-		console.log("ws/route onMessage", message)
-		server.receive(message.toString(), client)
+		const messages = JSON.parse(message)
+		// [II] per il momento discrimino solo per messaggi array. Devo trovare una soluzione migliore
+		if (!Array.isArray(messages)) return
+		server.receiveMessages(messages, client)
 		clearTimeout(timeoutId)
 		timeoutId = setTimeout(() => server.update(), 1000)
 		super.onMessage(client, message)

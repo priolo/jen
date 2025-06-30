@@ -1,6 +1,9 @@
-import { AppendMessageS2C, BaseC2S, BaseS2C, ROOM_ACTION_C2S, ROOM_ACTION_S2C, UserEnterC2S, UserEnteredS2C, UserMessageC2S } from "@/types/WSMessages.js"
+import { AppendMessageS2C, BaseC2S, BaseS2C, CompleteC2S, ROOM_ACTION_C2S, ROOM_ACTION_S2C, UserEnterC2S, UserEnteredS2C, UserMessageC2S } from "@/types/RoomActions.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { Room } from "../repository/Room.js"
+import AgentExecutor, { AgentOptions } from "@/agents/llm/Agent.js"
+import { complete } from "@/components/Meet.js"
+
 
 
 
@@ -29,10 +32,23 @@ export class WSRoomsService extends ws.route {
 
 	async onConnect(client: ws.IClient) {
 		// qua posso mettere tutti i dati utili al client
-
-
 		console.log(`Client connected: ${client.remoteAddress}`)
 		super.onConnect(client)
+	}
+
+	/**
+	 * Handle client disconnection
+	 */
+	onDisconnect(client: ws.IClient) {
+		// rimuovo il client dalla room
+		for (const roomInstance of this.rooms) {
+			roomInstance.clients.delete(client.remoteAddress)
+			// se non ci sono piu' client nella room la elimino
+			if (roomInstance.clients.size === 0) {
+				this.rooms = this.rooms.filter(r => r !== roomInstance)
+			}
+		}
+		super.onDisconnect(client)
 	}
 
 	/**
@@ -62,16 +78,6 @@ export class WSRoomsService extends ws.route {
 	}
 
 	/**
-	 * Handle client disconnection
-	 */
-	onDisconnect(client: ws.IClient) {
-		// TO DO
-		super.onDisconnect(client)
-	}
-
-
-
-	/**
 	 * Handle client entering a room
 	 */
 	private async handleEnter(client: ws.IClient, msg: UserEnterC2S) {
@@ -82,7 +88,7 @@ export class WSRoomsService extends ws.route {
 			roomInstance = await this.createRoom()
 			// altrimenti cerco l'istanza della room
 		} else {
-			roomInstance = this.rooms.find(r => r.room.id === msg.roomId)
+			roomInstance = this.getRoomById(msg.roomId)
 			// se la room non c'e la carico e la inserisco
 			if (!roomInstance) {
 				roomInstance = await this.loadRoom(msg.roomId)
@@ -99,11 +105,30 @@ export class WSRoomsService extends ws.route {
 	}
 
 	private async handleUserMessage(client: ws.IClient, msg: UserMessageC2S) {
+		const roomInstance = this.getRoomById(msg.roomId)
+		roomInstance.room.history.push({
+			role: "user",
+			text: msg.text,
+		})
 		this.sendToRoom(<AppendMessageS2C>{
 			action: ROOM_ACTION_S2C.APPEND_MESSAGE,
 			roomId: msg.roomId,
 			text: msg.text,
 		})
+		if ( !!msg.complete ) {
+			this.complete(roomInstance)
+		}
+	}
+
+	private async complete(roomIns:RoomInstance): Promise<void> {
+				
+		const response = await complete(roomIns.room)
+
+		const agent = new AgentExecutor(roomIns)
+	}
+
+	private getRoomById(roomId: string): RoomInstance | undefined {
+		return this.rooms.find(r => r.room.id === roomId)
 	}
 
 	private sendToRoom(message: BaseS2C) {

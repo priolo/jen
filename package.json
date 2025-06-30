@@ -9,6 +9,7 @@
   "main": "dist/start.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production tsx src/start.ts",
+    "start2": "tsx src/start2.ts",
     "start:dev": "cross-env NODE_ENV=development tsx src/start.ts",
     "test": "node --experimental-vm-modules --inspect-brk ./node_modules/jest/bin/jest.js"
   },
@@ -30,12 +31,12 @@
     "slate": "^0.103.0",
     "typeorm": "^0.3.23",
 
-    "@ai-sdk/cohere": "^1.2.8",
-    "@ai-sdk/google": "^1.2.11",
-    "@ai-sdk/mistral": "^1.2.7",
+    "@ai-sdk/cohere": "^1.2.10",
+    "@ai-sdk/google": "^1.2.19",
+    "@ai-sdk/mistral": "^1.2.8",
     "@lancedb/lancedb": "^0.19.0",
     "@langchain/core": "^0.3.51",
-    "ai": "^4.3.15",
+    "ai": "^4.3.16",
     "apache-arrow": "^18.1.0",
     "langchain": "^0.3.21",
     "pdfjs-dist": "^5.1.91",

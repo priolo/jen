@@ -1,5 +1,5 @@
-import { PROMPT_ROLES } from "@/components/slate/elements/room/types"
-import { TextEditorStore } from "@/stores/stacks/editor"
+import { PROMPT_ROLES } from "@/components/slate/elements/agent/types"
+import { AgentEditorStore } from "@/stores/stacks/agentEditor"
 import { RoomDetailState, RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { Dialog, List } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -8,7 +8,7 @@ import { FunctionComponent } from "react"
 
 
 interface Props {
-	store?: TextEditorStore
+	store?: AgentEditorStore
 }
 
 const RoleDialog: FunctionComponent<Props> = ({

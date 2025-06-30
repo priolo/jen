@@ -25,6 +25,7 @@ export type UserLeaveC2S = BaseC2S & {
 export type UserMessageC2S = BaseC2S & {
 	action: ROOM_ACTION_C2S.USER_MESSAGE
 	text: string
+	complete?: boolean
 }
 
 export type CompleteC2S = BaseC2S & {
@@ -38,7 +39,6 @@ export type CompleteC2S = BaseC2S & {
 //#region SERVER TO CLIENT
 
 export enum ROOM_ACTION_S2C {
-	CREATED = "created",
 	ENTERED = "entered",
 	LEAVE = "leave",
 	APPEND_MESSAGE = "append-message"
@@ -47,10 +47,6 @@ export enum ROOM_ACTION_S2C {
 export type BaseS2C = {
 	action: ROOM_ACTION_S2C
 	roomId: string
-}
-
-export type CreatedS2C = BaseS2C & {
-	action: ROOM_ACTION_S2C.CREATED
 }
 
 export type UserEnteredS2C = BaseS2C & {

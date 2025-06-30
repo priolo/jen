@@ -13,7 +13,7 @@ import { useStore } from "@priolo/jon"
 import React, { FunctionComponent } from "react"
 import { buildStore } from "../../stores/docs/utils/factory"
 import { AccountState, AccountStore } from "../../stores/stacks/account"
-import { TextEditorState, TextEditorStore } from "../../stores/stacks/editor"
+import { AgentEditorState, AgentEditorStore } from "../../stores/stacks/agentEditor"
 import { NODE_TYPES } from "../../components/slate/elements/doc/types"
 import { buildCodeEditor } from "../../stores/stacks/editorCode/factory"
 import { ReflectionState, ReflectionStore } from "../../stores/stacks/reflection"
@@ -23,7 +23,7 @@ import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
-import { buildEditorNew } from "@/stores/stacks/editor/factory"
+import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
 
 
 

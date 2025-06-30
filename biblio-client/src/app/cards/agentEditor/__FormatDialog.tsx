@@ -3,7 +3,7 @@ import IconButton from "@/components/buttons/IconButton"
 import Dialog from "@/components/dialogs/Dialog"
 import TextInput from "@/components/input/TextInput"
 import ClearIcon from "@/icons/ClearIcon"
-import { TextEditorState, TextEditorStore } from "@/stores/stacks/editor"
+import { AgentEditorState, AgentEditorStore } from "@/stores/stacks/agentEditor"
 import { NODE_TYPES, NodeType } from "@/components/slate/elements/doc/types"
 import { SugarEditor } from "@/stores/stacks/editor/slate/withSugar"
 import { useStore } from "@priolo/jon"
@@ -14,7 +14,7 @@ import cls from "./FormatDialog.module.css"
 
 
 interface Props {
-	store?: TextEditorStore
+	store?: AgentEditorStore
 }
 
 const FormatDialog: FunctionComponent<Props> = ({
@@ -22,7 +22,7 @@ const FormatDialog: FunctionComponent<Props> = ({
 }) => {
 
 	// STORE
-	const state = useStore(store) as TextEditorState
+	const state = useStore(store) as AgentEditorState
 
 	// HOOKs
 	const editor = useSlate() as SugarEditor

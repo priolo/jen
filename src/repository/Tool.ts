@@ -16,7 +16,7 @@ export class Tool {
 	description: string;
 
 	@Column({ type: 'json', nullable: true })
-    parameters: string;
+    parameters: object;
 
 	@Column({ type: 'varchar', default: '' })
 	code: string;

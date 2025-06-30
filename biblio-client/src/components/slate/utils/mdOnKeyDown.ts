@@ -1,5 +1,5 @@
 import { Editor, Element, Range, Transforms } from "slate";
-import { NodeType, PROMPT_ROLES } from "../elements/room/types";
+import { NodeType, PROMPT_ROLES } from "../elements/agent/types";
 import { StoreEditor } from "../editors/withStore";
 
 

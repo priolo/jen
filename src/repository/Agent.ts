@@ -35,15 +35,9 @@ export class Agent {
     // RELATIONSHIPS
 
     // LLM
-    /** ID LLM utilizzato per questo agente*/
-    @Column({ type: 'uuid', nullable: true }) 
-    llmId: string | null
-
-    /** LLM utilizzato per questo agente*/
-    @ManyToOne(() => Llm, (llm) => llm.agents, { nullable: true, onDelete: 'SET NULL' })
-    @JoinColumn({ name: 'llmId' })
-    llm: Llm | null
-
+    /** il nome dell'LLM utilizzato di default */
+    @Column({ type: 'string', nullable: true }) 
+    llmDefault: string | null
 
     // AGENT BASE (inheritance relationship)
     /** ID dell'agente base da cui è derivato questo agente */
@@ -73,7 +67,7 @@ export class Agent {
             referencedColumnName: "id"
         }
     })
-    subAgents: Agent[]
+    subAgents: Partial<Agent>[]
 
     // Parent agents (inverse side of subAgents)
     @ManyToMany(() => Agent, (agent) => agent.subAgents)
@@ -93,7 +87,7 @@ export class Agent {
             referencedColumnName: "id"
         }
     })
-    tools: Tool[]
+    tools: Partial<Tool>[]
 
     // ROOMS 
     /** rooms where is used this agent */

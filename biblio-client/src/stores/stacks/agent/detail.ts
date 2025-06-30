@@ -6,7 +6,7 @@ import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../editorBase"
 import { buildRoomDetailNew } from "../room/factory"
-import { buildEditorFromAgent } from "../editor/factory"
+import { buildEditorFromAgent } from "../agentEditor/factory"
 
 
 
