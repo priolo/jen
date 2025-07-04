@@ -1,5 +1,4 @@
 import { Uuid } from "./global"
-import { Llm } from "./Llm"
 import { Tool } from "./Tool"
 
 
@@ -19,8 +18,7 @@ export interface Agent {
 	askInformation: boolean
 	killOnResponse: boolean
 
-	llm?: Partial<Llm>
-	llmId?: string
+	llmDefault?: string
 
 	baseId?: string
 	base?: Partial<Agent>

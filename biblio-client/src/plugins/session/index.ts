@@ -36,7 +36,7 @@ export async function StartSession() {
 	if (import.meta.env.DEV) await delay(1000)
 
 	// LOAD SINGLETONE STORES
-	await llmSo.fetch()
+	//await llmSo.fetch()
 	await toolSo.fetch()
 	await agentSo.fetch()
 

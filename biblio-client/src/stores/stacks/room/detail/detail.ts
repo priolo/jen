@@ -50,7 +50,15 @@ const setup = {
 			// mi metto in scolto sui messaggi della stanza
 			wsConnection.emitter.on("message", roomSo.onMessage)
 			// entro in una stanza nuova
-			roomSo.sendEnter()
+			//roomSo.sendEnter()
+			const message: UserEnterC2S = {
+				action: ROOM_ACTION_C2S.ENTER,
+				roomId: null,
+				setup: {
+					agentId: roomSo.state.room?.agentId,
+				},
+			}
+			wsConnection.send(JSON.stringify(message))
 		},
 
 		onRemoval(_: void, store?: ViewStore) {
@@ -108,7 +116,11 @@ const setup = {
 
 				case ROOM_ACTION_S2C.ENTERED: {
 					const enteredMsg: UserEnteredS2C = message as UserEnteredS2C
-					store.setRoom({ ...store.state.room, id: enteredMsg.roomId })
+					store.setRoom({ 
+						...store.state.room, 
+						id: enteredMsg.roomId,
+						agentId: enteredMsg.setup?.agentId ?? store.state.room.agentId,
+					})
 					store.setRoomState(ROOM_STATE.ONLINE)
 					break
 				}
@@ -118,10 +130,7 @@ const setup = {
 
 					const appendMsg: AppendMessageS2C = message as AppendMessageS2C
 					if ( !store.state.room.history ) store.state.room.history = []
-					store.state.room.history.push({
-						role: "user",
-						text: appendMsg.text,
-					})
+					store.state.room.history.push(...appendMsg.content)
 					store.setRoom({ ...store.state.room })
 					break
 				}

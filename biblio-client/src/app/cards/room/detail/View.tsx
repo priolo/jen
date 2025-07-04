@@ -4,16 +4,14 @@ import agentSo from "@/stores/stacks/agent/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { EDIT_STATE } from "@/types"
 import { Agent } from "@/types/Agent"
-import { Button, FloatButton, ListDialog2, TextInput, TitleAccordion } from "@priolo/jack"
+import { Button, FloatButton, ListDialog2, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { FunctionComponent, useEffect } from "react"
+import { FunctionComponent } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import RoleDialog from "./RoleDialog"
 import cls from "./View.module.css"
-import { Llm } from "@/types/Llm"
-import llmSo from "@/stores/stacks/llm/repo"
 
 
 
@@ -41,15 +39,8 @@ const RoomView: FunctionComponent<Props> = ({
 		store.sendPrompt()
 	}
 
-	const handleLlmChange = (id: string) => {
-		store.state.room.agent.llmId = id
-		store._update()
-	}
-
-
 
 	// RENDER
-	const llm = llmSo.state.all ?? []
 	const history = store.state.room?.history ?? []
 	const agents = agentSo.state.all ?? []
 	const selectedAgentId = store.state.room?.agentId
@@ -63,7 +54,6 @@ const RoomView: FunctionComponent<Props> = ({
 		actionsRender={<ActionsCmp store={store} />}
 		iconizedRender={null}
 	>
-
 
 		<div className="lyt-v">
 			<div className="jack-lbl-prop">AGENT</div>
@@ -81,12 +71,11 @@ const RoomView: FunctionComponent<Props> = ({
 			>Open</Button>
 		</div>
 
-
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
 			{history.map((msg, index) => (
 				<div key={index} className={cls.historyItem}>
 					<div className={cls.historyRole}>{msg.role}</div>
-					<div className={cls.historyText}>{msg.text}</div>
+					<div className={cls.historyText}>{msg.content.toString() as string}</div>
 				</div>
 			))}
 		</div>

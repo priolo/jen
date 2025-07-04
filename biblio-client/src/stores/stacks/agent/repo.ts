@@ -19,6 +19,9 @@ const setup = {
 			if (!id) return null
 			return store.state.all?.find(llm => llm.id == id) ?? null
 		},
+		/**
+		 * Restituisce tutti i parent di "agentId" fino al primo agente base.
+		 */
 		getAllBaseAgents(agentId: string, store?: AgentStore): Agent[] {
 			let nextAgent = store.getById(agentId)
 			const agents:Agent[] = []

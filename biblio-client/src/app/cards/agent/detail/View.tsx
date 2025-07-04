@@ -31,8 +31,15 @@ const AgentView: FunctionComponent<Props> = ({
 
 	// HOOKs
 	useEffect(() => {
-		store.fetchIfVoid()
+		//store.fetchIfVoid()
+		const agent = agentSo.getById(store.state.agent?.id)
+		store.setAgent(agent)
 	}, [])
+
+	const baseAgents = useMemo(() =>
+		agentSo.getAllBaseAgents(store.state.agent?.id),
+		[agentSo.state.all, store.state.agent]
+	)
 
 	// HANDLER
 	// const handleTypeChange = (index: number) => {
@@ -40,8 +47,8 @@ const AgentView: FunctionComponent<Props> = ({
 	// 	store.setAgent({ ...store.state.agent, type })
 	// }
 
-	const handleLlmChange = (id: string) => {
-		store.setAgent({ ...store.state.agent, llm: { id } })
+	const handleLlmChange = (llmDefault: string) => {
+		store.setAgent({ ...store.state.agent, llmDefault })
 	}
 
 	const handleBaseAgentChange = (baseId: string) => {
@@ -63,14 +70,11 @@ const AgentView: FunctionComponent<Props> = ({
 	}
 
 	// RENDER
-	const llm = llmSo.state.all ?? []
-	const llmSelected = store.state.agent.llm?.id
+	if ( !store.state.agent?.name) return null
 
+	const llm = ["gemini-2.0-flash"]
+	const llmSelected = store.state.agent.llmDefault
 	const agents = agentSo.state.all ?? []
-	const baseAgents = useMemo(() =>
-		agentSo.getAllBaseAgents(store.state.agent?.id),
-		[agentSo.state.all, store.state.agent]
-	)
 	const agentBaseId = store.state.agent?.baseId
 	const subAgentsSelected = store.state.agent?.subAgents?.map(agent => agent.id) ?? []
 
@@ -120,8 +124,8 @@ const AgentView: FunctionComponent<Props> = ({
 					select={llmSelected}
 					items={llm}
 					readOnly={inRead}
-					fnGetId={(item: Llm) => item?.id}
-					fnGetString={(item: Llm) => item?.name}
+					// fnGetId={(item: Llm) => item?.id}
+					// fnGetString={(item: Llm) => item?.name}
 					onChangeSelect={handleLlmChange}
 				/>
 			</div>

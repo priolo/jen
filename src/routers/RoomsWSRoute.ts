@@ -1,9 +1,10 @@
-import { AppendMessageS2C, BaseC2S, BaseS2C, CompleteC2S, ROOM_ACTION_C2S, ROOM_ACTION_S2C, UserEnterC2S, UserEnteredS2C, UserMessageC2S } from "@/types/RoomActions.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
+import AgentExe, { Resolver } from "../agents/llm/AgentExe.js"
+import { Agent } from "../repository/Agent.js"
 import { Room } from "../repository/Room.js"
-import AgentExecutor, { AgentOptions } from "@/agents/llm/Agent.js"
-import { complete } from "@/components/Meet.js"
-
+import { Tool } from "../repository/Tool.js"
+import { AppendMessageS2C, BaseC2S, BaseS2C, ROOM_ACTION_C2S, ROOM_ACTION_S2C, RoomSetup, UserEnterC2S, UserEnteredS2C, UserMessageC2S } from "../types/RoomActions.js"
+import { CoreMessage, CoreUserMessage } from "ai"
 
 
 
@@ -85,46 +86,117 @@ export class WSRoomsService extends ws.route {
 
 		// se non c'e' l'id allora creo un istanza nuova
 		if (!msg.roomId) {
-			roomInstance = await this.createRoom()
+			roomInstance = await this.createChat()
 			// altrimenti cerco l'istanza della room
 		} else {
 			roomInstance = this.getRoomById(msg.roomId)
-			// se la room non c'e la carico e la inserisco
+			// se la room non c'e la carico dal DB e la inserisco
 			if (!roomInstance) {
 				roomInstance = await this.loadRoom(msg.roomId)
 			}
 		}
+
+		// se c'e' metto il SETUP
+		if (msg.setup) {
+			this.setRoomSetup(roomInstance.room, msg.setup)
+		}
+
+		// aggiungo il client alla room
 		roomInstance.clients.add(client.remoteAddress)
 
-		// creo e invio il messaggio
+		// creo e invio il messaggio di entrata
 		const message: UserEnteredS2C = {
 			action: ROOM_ACTION_S2C.ENTERED,
 			roomId: roomInstance.room.id,
+			setup: this.getRoomSetup(roomInstance.room),
 		}
 		this.sendToRoom(message)
 	}
 
+	private setRoomSetup(room: Room, setup: RoomSetup): void {
+		room.agentId = setup.agentId
+		// // salvataggio nel DB
+		// await new Bus(this, this.state.repository).dispatch({
+		// 	type: typeorm.RepoRestActions.SAVE,
+		// 	payload: roomInstance.room
+		// })
+	}
+	private getRoomSetup(room: Room): RoomSetup {
+		return {
+			agentId: room.agentId
+		}
+		// // salvataggio nel DB
+		// await new Bus(this, this.state.repository).dispatch({
+		// 	type: typeorm.RepoRestActions.SAVE,
+		// 	payload: roomInstance.room
+		// })
+	}
+
 	private async handleUserMessage(client: ws.IClient, msg: UserMessageC2S) {
 		const roomInstance = this.getRoomById(msg.roomId)
-		roomInstance.room.history.push({
-			role: "user",
-			text: msg.text,
-		})
-		this.sendToRoom(<AppendMessageS2C>{
-			action: ROOM_ACTION_S2C.APPEND_MESSAGE,
-			roomId: msg.roomId,
-			text: msg.text,
-		})
-		if ( !!msg.complete ) {
-			this.complete(roomInstance)
+		if (!!msg.complete) {
+			this.complete(roomInstance, msg.text)
+		} else {
+			const item: CoreUserMessage = {
+				role: "user",
+				content: msg.text,
+			}
+			roomInstance.room.history.push(item)
+			this.sendToRoom(<AppendMessageS2C>{
+				action: ROOM_ACTION_S2C.APPEND_MESSAGE,
+				roomId: msg.roomId,
+				content: [item],
+			})
 		}
 	}
 
-	private async complete(roomIns:RoomInstance): Promise<void> {
-				
-		const response = await complete(roomIns.room)
-
-		const agent = new AgentExecutor(roomIns)
+	private async complete(roomIns: RoomInstance, prompt: string): Promise<void> {
+		const agentId = roomIns.room.agentId
+		const resolver: Resolver = {
+			getAgent: async (id: string) => {
+				const agent: Agent = await new Bus(this, "/typeorm/agents").dispatch({
+					type: typeorm.Actions.FIND_ONE,
+					payload: {
+						where: { id },
+						relations: ["tools", "subAgents"],
+						select: {
+							subAgents: { id: true },
+							tools: { id: true }
+						}
+					}
+				})
+				return agent
+			},
+			getTools: async (id: string) => {
+				const tool: Tool = await new Bus(this, "/typeorm/tools").dispatch({
+					type: typeorm.RepoRestActions.GET_BY_ID,
+					payload: id
+				})
+				return tool
+			},
+			getHistory: (id: string) => {
+				if (!roomIns?.room) return []
+				return roomIns.room.history
+			},
+			onHistoryChange: (history: CoreMessage[]) => {
+				const newMsgs = history.slice(roomIns.room.history.length)
+				roomIns.room.history = history
+				// salvataggio nel DB
+				// new Bus(this, this.state.repository).dispatch({
+				// 	type: typeorm.RepoRestActions.SAVE,
+				// 	payload: roomIns.room
+				// })
+				const appendMessage: AppendMessageS2C = {
+					action: ROOM_ACTION_S2C.APPEND_MESSAGE,
+					roomId: roomIns.room.id,
+					content: newMsgs,
+				}
+				this.sendToRoom(appendMessage)
+			}
+		}
+		const agent = new AgentExe({ id: agentId }, resolver)
+		// creo l'istanza dell'agente
+		const response = await agent.ask(prompt)
 	}
 
 	private getRoomById(roomId: string): RoomInstance | undefined {
@@ -143,7 +215,7 @@ export class WSRoomsService extends ws.route {
 		}
 	}
 
-	private async createRoom(): Promise<RoomInstance> {
+	private async createChat(): Promise<RoomInstance> {
 		const room: Room = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: { name: "New Room" } // TODO: prendere il nome dal client

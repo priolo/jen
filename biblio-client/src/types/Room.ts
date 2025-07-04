@@ -1,3 +1,4 @@
+import { CoreMessage } from "ai";
 import { Agent } from "./Agent";
 import { Uuid } from "./global";
 
@@ -6,12 +7,7 @@ import { Uuid } from "./global";
 export class Room {
 	id: Uuid
 	name: string
-	history: HistoryItem[]
+	history: CoreMessage[]
 	agentId?: Uuid
 	agent?: Agent
-}
-
-export interface HistoryItem {
-    role: "user" | "llm";
-    text: string;
 }

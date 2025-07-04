@@ -1,13 +1,10 @@
+import { Agent } from '@/repository/Agent.js';
+import { Tool } from '@/repository/Tool.js';
 import { google } from '@ai-sdk/google';
-import { mistral } from "@ai-sdk/mistral"
-import { cohere } from "@ai-sdk/cohere"
-import { CoreMessage, generateText, tool, ToolSet, jsonSchema } from "ai";
+import { CoreMessage, generateText, jsonSchema, tool, ToolSet } from "ai";
 import dotenv from 'dotenv';
 import { z } from "zod";
 import { colorPrint, ColorType } from '../utils/index.js';
-import { Agent } from '@/repository/Agent.js';
-import { Llm } from '@/repository/Llm.js';
-import { Tool } from '@/repository/Tool.js';
 
 dotenv.config();
 
@@ -25,11 +22,11 @@ export interface Response {
 }
 
 export interface Resolver {
-	fnGetLlm: (id: string) => Llm
-	fnGetAgent: (id: string) => Agent
-	fnGetTools: (id: string) => Tool
+	getAgent: (id: string) => Promise<Agent>
+	getTools: (id: string) => Promise<Tool>
+	getHistory: (id: string) => CoreMessage[]
+	onHistoryChange: (history: CoreMessage[]) => void
 }
-
 
 /**
  * Co-ReAct agent that can solve problems by thinking step by step.
@@ -42,34 +39,29 @@ class AgentExe {
 	constructor(
 		//public name: string,
 		public agent: Partial<Agent>,
-		public history: CoreMessage[] = [],
+		//public history: CoreMessage[] = [],
 		public resolver: Resolver,
 		public parent?: AgentExe,
 	) {
+
 	}
 
 	strategy: string = ""
 
-	protected agentResolve(): Agent {
+	protected async agentResolve(): Promise<Agent> {
 		if (!this.agent?.name) {
-			this.agent = this.resolver.fnGetAgent(this.agent.id)
+			this.agent = await this.resolver.getAgent(this.agent.id)
 		}
 		return this.agent as Agent
 	}
 
-	protected addPrompt(prompt: string) {
-		if (!this.history) this.history = []
-		if (prompt) {
-			this.history.push({ role: "user", content: prompt })
-		}
-	}
 
+	async ask(prompt?: string, fromAgent?: boolean): Promise<Response> {
+		let history = this.resolver.getHistory(this.agent.id)
+		if (!history?.length && !prompt) return null
 
-	async ask(prompt: string, fromAgent?: boolean): Promise<Response> {
-
-		this.agentResolve()
-		const llm = this.resolver.fnGetLlm(this.agent.llmId)
-		const model = google('gemini-2.0-flash', { } )
+		await this.agentResolve()
+		const model = google('gemini-2.0-flash', {})
 		//this.model = google('gemini-2.5-pro-exp-03-25')
 		//this.model = google('gemini-2.0-flash')
 		//this.model = mistral('mistral-large-latest')
@@ -78,19 +70,22 @@ class AgentExe {
 		const systemPrompt = this.getReactSystemPrompt()
 
 		const systemTools = this.getSystemTools()
-		const subagentTools = this.createSubAgentsTools()
-		const agentTools = this.createTools()
+		const subagentTools = await this.createSubAgentsTools()
+		const agentTools = await this.createTools()
 		const tools = { ...agentTools, ...subagentTools, ...systemTools }
 
 		// START USER PROMPT
-		if (this.history.length == 0) {
+		if (history.length == 0) {
 			prompt = this.getContextPrompt()
 				//+ (this.options.contextAnswerPrompt ? "\n" + this.options.contextAnswerPrompt : "")
 				//+ ((!!this.parent?.strategy) ? `\n## The USER's strategy that he would like to carry out is:\n${this.parent?.strategy}` : "")
 				+ "\n## Please solve the following problem using MAIN PROCESS:\n"
 				+ prompt;
 		}
-		this.history.push({ role: "user", content: `${prompt}` })
+		if (!!prompt) {
+			history = [...history, { role: "user", content: prompt }]
+			this.resolver.onHistoryChange(history)
+		}
 
 		// LOOP
 		for (let i = 0; i < 10; i++) {
@@ -99,7 +94,7 @@ class AgentExe {
 				model: model,
 				temperature: 0,
 				system: systemPrompt,
-				messages: this.history,
+				messages: history,
 				//toolChoice: !this.parent? "auto": "required",
 				//toolChoice: this.history.length > 2 && !!this.parent ? "auto" : "required",
 				toolChoice: "required",
@@ -108,7 +103,8 @@ class AgentExe {
 			})
 
 			const lastMessage = r.response.messages[r.response.messages.length - 1]
-			this.history.push(...r.response.messages)
+			history = [...history, ...r.response.messages]
+			this.resolver.onHistoryChange(history)
 
 			if (lastMessage.role == "tool") {
 				const content = lastMessage.content[0]
@@ -135,7 +131,7 @@ class AgentExe {
 
 				// ANOTHER TOOL
 				if (functionName != "update_strategy" && functionName != "get_reasoning" && !functionName.startsWith("chat_with_")) {
-					const funArgs = this.history[this.history.length - 2]?.content[0]?.["args"]
+					const funArgs = history[history.length - 2]?.content[0]?.["args"]
 					colorPrint([this.agent.name, ColorType.Blue], " : function : ", [functionName, ColorType.Yellow], " : ", [JSON.stringify(funArgs), ColorType.Green])
 				}
 
@@ -144,7 +140,7 @@ class AgentExe {
 				colorPrint([this.agent.name, ColorType.Blue], " : reasoning : ", [JSON.stringify(lastMessage.content), ColorType.Magenta])
 			}
 
-			await new Promise(resolve => setTimeout(resolve, 5000)) // wait 1 second
+			//await new Promise(resolve => setTimeout(resolve, 5000)) // wait 1 second
 
 		}
 
@@ -209,15 +205,24 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 		return tools
 	}
 
-	createSubAgentsTools() {
+	async createSubAgentsTools() {
 		if (!(this.agent?.subAgents?.length > 0)) return {}
 
-		const structs = this.agent.subAgents.reduce<ToolSet>((acc, subAgent) => {
+		const structs: ToolSet = {}
 
-			const subAgentExe = new AgentExe(subAgent, [], this.resolver, this)
-			subAgentExe.agentResolve()
+		for (const subAgent of this.agent.subAgents) {
 
-			acc[`chat_with_${subAgentExe.agent.name}`] = tool({
+			let history: CoreMessage[] = []
+			const resolver: Resolver = {
+				getAgent: this.resolver.getAgent,
+				getTools: this.resolver.getTools,
+				getHistory: (id: string) => history,
+				onHistoryChange: (h: CoreMessage[]) => history = h,
+			}
+			const subAgentExe = new AgentExe(subAgent, resolver, this)
+			await subAgentExe.agentResolve()
+
+			structs[`chat_with_${subAgentExe.agent.name}`] = tool({
 				description: `Ask agent ${subAgentExe.agent.name} for info.\n${subAgentExe.agent.description ?? ""}`,
 				// parameters: z.object({
 				// 	question: z.string().describe(`The question to ask the agent. Fill in all the information needed for a complete answer.`),
@@ -242,7 +247,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 					const response = await subAgentExe.ask(question)
 
 					if (subAgentExe.agent.killOnResponse) {
-						subAgentExe.history = []
+						resolver.onHistoryChange([])
 						colorPrint([subAgentExe.agent.name, ColorType.Blue], " : ", ["killed", ColorType.Red])
 					}
 					if (response.type == RESPONSE_TYPE.REQUEST) {
@@ -256,26 +261,30 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 				},
 			})
 
-			return acc
-		}, {})
+		}
 		return structs
 	}
 
-	createTools(): ToolSet {
-		return this.agent.tools?.reduce<ToolSet>((acc, toolPart) => {
-			const toolPoco = this.resolver.fnGetTools(toolPart.id)
+	async createTools(): Promise<ToolSet> {
+		const structs: ToolSet = {}
+		if (!this.agent?.tools) return structs
+
+		for (const toolPart of this.agent.tools) {
+
+			const toolPoco = await this.resolver.getTools(toolPart.id)
 			const func = new Function("args", toolPoco.code)
-			acc[toolPoco.name] = tool({
+			structs[toolPoco.name] = tool({
 				description: toolPoco.description,
 				parameters: jsonSchema(toolPoco.parameters),
 				execute: async (args) => {
 					colorPrint([this.agent.name, ColorType.Blue], " : tool : ", [toolPoco.name, ColorType.Yellow], " : ", [JSON.stringify(args), ColorType.Green])
-					const ret =  func(args)
+					const ret = func(args)
 					return ret instanceof Promise ? await ret : ret
 				}
 			})
-			return acc
-		}, {} as ToolSet) ?? {}
+
+		}
+		return structs
 	}
 
 

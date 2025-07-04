@@ -1,8 +1,8 @@
-import { RootService } from "@priolo/julian";
-import buildNodeConfig, { PORT } from "../config"
-import axios, { AxiosInstance } from "axios"
-import { Llm } from "../repository/Llm";
-import {http } from "@priolo/julian";
+import { http, RootService } from "@priolo/julian";
+import axios, { AxiosInstance } from "axios";
+import buildNodeConfig, { PORT } from "../config";
+import { Agent } from "../repository/Agent";
+
 
 
 describe("Test on AGENT router", () => {
@@ -33,69 +33,77 @@ describe("Test on AGENT router", () => {
 	test("posso accedere all'endpoint?", async () => {
 
 		// creo un agent nuovo
-		const agent1 = await axiosIstance.post(`/api/agents`, {
-			name: "name",
+		let agentData: Partial<Agent> = {
+			name: "name1",
 			description: "description",
 			systemPrompt: "systemPrompt",
 			contextPrompt: "contextPrompt",
 			askInformation: false,
 			killOnResponse: true,
-			agents: [],
+			subAgents: [],
 			tools: []
-		})
-		expect(agent1.status).toBe(200)
-		expect(agent1.data).toHaveProperty("id")
+		}
+		const res1 = await axiosIstance.post(`/api/agents`, agentData)
+		expect(res1.status).toBe(200)
+		const agent1 = res1.data
+		expect(agent1).toHaveProperty("id")
 
 		// creo un altro agente
-		const agent2 = await axiosIstance.post(`/api/agents`, {
+		agentData = {
 			name: "name2",
 			description: "description2",
 			systemPrompt: "systemPrompt2",
 			contextPrompt: "contextPrompt2",
 			askInformation: false,
 			killOnResponse: true,
-			agents: [],
+			subAgents: [{ id: agent1.id }],
 			tools: []
-		})
-		expect(agent2.status).toBe(200)
-		expect(agent2.data).toHaveProperty("id")
+		}
+		const res2 = await axiosIstance.post(`/api/agents`, agentData)
+		expect(res2.status).toBe(200)
+		const agent2 = res2.data
+		expect(agent2).toHaveProperty("id")
+
+		// recupero un AGENT
+		const res2_ = await axiosIstance.get(`/api/agents/${agent2.id}`)
+		expect(res2_.status).toBe(200)
+		const agent2_ = res2.data
+		expect(agent2_).toHaveProperty("id")
+		expect(agent2_).toHaveProperty("subAgents")
+		expect(agent2_.subAgents.length).toBe(1)
+
 
 		// recupero gli agenti
 		const allAgents = await axiosIstance.get(`/api/agents`)
 		expect(allAgents.status).toBe(200)
 		expect(allAgents.data?.length).toBe(2)
+		expect(allAgents.data?.[1]?.subAgents?.[0]).toHaveProperty("id")
 
 		// recupero un agente
-		const agent1_ = await axiosIstance.get(`/api/agents/${agent1.data.id}`)
+		const agent1_ = await axiosIstance.get(`/api/agents/${agent1.id}`)
 		expect(agent1_.status).toBe(200)
 		expect(agent1_.data).toHaveProperty("id")
 
 		// aggiorno l'agente
-		const agentUpdate = await axiosIstance.patch(`/api/agents/${agent1.data.id}`, {
+		const agentUpdate = await axiosIstance.patch(`/api/agents/${agent1.id}`, {
 			name: "name3",
 			description: "description3",
 		})
 		expect(agentUpdate.status).toBe(200)
 
 		// cancello l'agente
-		const agentDelete = await axiosIstance.delete(`/api/agents/${agent1.data.id}`)
+		const agentDelete = await axiosIstance.delete(`/api/agents/${agent1.id}`)
 		expect(agentDelete.status).toBe(200)
 
 	}, 100000)
 
-	test("can create an agent with relationships to Llm, Tool, and other Agents", async () => {
-		let llmId: string | null = null;
+	
+
+
+	test("can create an agent with relationships to Tool, and other Agents", async () => {
 		let toolId: string | null = null;
 		let childAgentId: string | null = null;
 		let parentAgentId: string | null = null;
-
-
-		// 1. Create an Llm
-		const llmPayload = { name: "Test LLM", key: "test-key" };
-		const llmRes = await axiosIstance.post(`/api/llm`, { llm: llmPayload });
-		expect(llmRes.status).toBe(200);
-		expect(llmRes.data).toHaveProperty("id");
-		llmId = llmRes.data.id;
 
 		// 2. Create a Tool
 		const toolPayload = { name: "Test Tool", description: "A tool for testing" };
@@ -113,24 +121,24 @@ describe("Test on AGENT router", () => {
 			askInformation: false,
 			killOnResponse: true,
 		};
-		const childAgentRes = await axiosIstance.post(`/api/agents`, {agent: childAgentPayload});
+		const childAgentRes = await axiosIstance.post(`/api/agents`, { agent: childAgentPayload });
 		expect(childAgentRes.status).toBe(200);
 		expect(childAgentRes.data).toHaveProperty("id");
 		childAgentId = childAgentRes.data.id;
 
 		// 4. Create a parent Agent with relationships
-		const parentAgentPayload = {
+		const parentAgentPayload: Partial<Agent> = {
 			name: "Parent Agent",
 			description: "A parent agent with relationships",
 			systemPrompt: "Parent system prompt",
 			contextPrompt: "Parent context prompt",
 			askInformation: false,
 			killOnResponse: true,
-			llm: { id: llmId },
-			tools: [{ id: toolId }],
-			agents: [{ id: childAgentId }],
+			llmDefault: "gemini-2.0-flash",
+			tools: toolId ? [{ id: toolId }] : [],
+			subAgents: childAgentId ? [{ id: childAgentId }] : [],
 		};
-		const parentAgentRes = await axiosIstance.post(`/api/agents`, {agent: parentAgentPayload});
+		const parentAgentRes = await axiosIstance.post(`/api/agents`, { agent: parentAgentPayload });
 		expect(parentAgentRes.status).toBe(200);
 		expect(parentAgentRes.data).toHaveProperty("id");
 		parentAgentId = parentAgentRes.data.id;
@@ -139,10 +147,6 @@ describe("Test on AGENT router", () => {
 		const fetchedAgentRes = await axiosIstance.get(`/api/agents/${parentAgentId}?relations=llm,tools,agents`);
 		expect(fetchedAgentRes.status).toBe(200);
 		const fetchedAgent = fetchedAgentRes.data;
-
-		// Verify Llm relationship
-		expect(fetchedAgent.llm).toBeDefined();
-		expect(fetchedAgent.llm.id).toBe(llmId);
 
 		// Verify Tool relationship
 		expect(fetchedAgent.tools).toBeDefined();

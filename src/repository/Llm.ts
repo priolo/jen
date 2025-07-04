@@ -1,5 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Agent } from './Agent.js'; // Import Agent entity
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 
 
@@ -14,7 +13,7 @@ export class Llm {
 	@Column({ type: 'text' })
 	key?: string;
 
-	/** agenti che implementano questo llm */
-	@OneToMany(() => Agent, (agent) => agent.llm)
-    agents?: Agent[];
+	// /** agenti che implementano questo llm */
+	// @OneToMany(() => Agent, (agent) => agent.llm)
+    // agents?: Agent[];
 }

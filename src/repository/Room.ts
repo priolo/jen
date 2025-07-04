@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
 import { Agent } from './Agent.js';
+import { CoreMessage } from 'ai';
 
 
 
@@ -16,7 +17,7 @@ export class Room {
 
     /** History of prompt conversation */
     @Column({ type: 'json', default: '[]' })
-    history: HistroyMessage[];
+    history: CoreMessage[];
 
     // RELATIONSHIPS
 
@@ -28,9 +29,10 @@ export class Room {
     @ManyToOne(() => Agent, agent => agent.rooms, { nullable: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'agentId' })
     agent: Relation<Agent> | null;
-}
 
-export interface HistroyMessage {
-    role: "user" | "assistant" | "system"
-    text: string
+    /** ID of the parent room, if this room is a sub-room */
+    parentRoomId: string | null;
+
+    /** id del messaggio a cui si aggancia questa ROOM */
+    messageId: string | null;
 }

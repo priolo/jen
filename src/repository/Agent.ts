@@ -1,7 +1,8 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Tool } from './Tool.js';
-import { Llm } from './Llm.js';
 import { Room } from './Room.js';
+import { Tool } from './Tool.js';
+
+
 
 @Entity('agents')
 export class Agent {
@@ -36,7 +37,7 @@ export class Agent {
 
     // LLM
     /** il nome dell'LLM utilizzato di default */
-    @Column({ type: 'string', nullable: true }) 
+    @Column({ type: 'varchar', nullable: true }) 
     llmDefault: string | null
 
     // AGENT BASE (inheritance relationship)

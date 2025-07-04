@@ -47,7 +47,7 @@ async function Start() {
 
 	const agent1 = new Agent()
 	agent1.id = "agent-01"
-	agent1.name = "Test"
+	agent1.name = "MATH"
 	agent1.description = "This agent can add and multiply numbers"
 	agent1.systemPrompt = "You are a test agent that can add and multiply numbers."
 	agent1.contextPrompt = ""
@@ -58,7 +58,7 @@ async function Start() {
 
 	const agent2 = new Agent()
 	agent2.id = "agent-02"
-	agent2.name = "Leader"
+	agent2.name = "LEADER"
 	agent2.description = "This agent can resolve all problem"
 	agent2.systemPrompt = ""
 	agent2.contextPrompt = ""
@@ -71,9 +71,8 @@ async function Start() {
 	const tools = [tool1, tool2]
 
 	const resolver = {
-		fnGetAgent: (id: string) => agents.find(a => a.id === id),
-		fnGetLlm: (id: string) => llms.find(l => l.id === id),
-		fnGetTools: (id: string) => tools.find(t => t.id === id),
+		fnGetAgent: async (id: string) => agents.find(a => a.id === id),
+		fnGetTools: async (id: string) => tools.find(t => t.id === id),
 	}
 
 

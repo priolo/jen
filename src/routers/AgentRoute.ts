@@ -24,7 +24,14 @@ class AgentRoute extends httpRouter.Service {
 
 	async getAll(req: Request, res: Response) {
 		const agents = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.ALL
+			type: typeorm.RepoRestActions.ALL,
+			payload: {
+				relations: ["tools", "subAgents"],
+				select: {
+					subAgents: { id: true },
+					tools: { id: true }
+				}
+			}
 		})
 		res.json(agents)
 	}
@@ -35,9 +42,10 @@ class AgentRoute extends httpRouter.Service {
 			type: typeorm.Actions.FIND_ONE,
 			payload: {
 				where: { id },
-				relations: ["tools", "llm", "subAgents"],
+				relations: ["tools", "subAgents"],
 				select: {
-					subAgents: { id: true, name: true },
+					subAgents: { id: true },
+					tools: { id: true }
 				}
 			}
 		})
@@ -46,7 +54,7 @@ class AgentRoute extends httpRouter.Service {
 
 
 	async create(req: Request, res: Response) {
-		const { agent }: { agent: Agent } = req.body
+		const agent: Agent = req.body
 		const agentNew: Agent = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: agent
