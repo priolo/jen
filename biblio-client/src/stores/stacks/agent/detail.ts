@@ -74,7 +74,7 @@ const setup = {
 
 
 		/** apertura della CARD ROOM */
-		openRoom(_: void, store?: AgentDetailStore) {
+		openChatRoom(_: void, store?: AgentDetailStore) {
 			const view = buildRoomDetailNew(store.state.agent?.id)
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},

@@ -4,10 +4,12 @@ import { Uuid } from "./global";
 
 
 
-export class Room {
+export interface Room {
 	id: Uuid
 	name: string
 	history: CoreMessage[]
 	agentId?: Uuid
 	agent?: Agent
+	parentRoomId?: string | null;
+    messageId?: string | null;
 }

@@ -2,8 +2,7 @@ import { wsConnection } from "@/plugins/session"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { EDIT_STATE } from "@/types"
 import { Room } from "@/types/Room"
-import { AppendMessageS2C, BaseS2C, CompleteC2S, ROOM_ACTION_C2S, ROOM_ACTION_S2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserMessageC2S } from "@/types/RoomActions"
-import { MESSAGE_TYPE } from "@priolo/jack"
+import { AppendMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S } from "@/types/RoomActions"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../../editorBase"
 import { ROOM_STATE } from "../types"
@@ -14,9 +13,10 @@ const setup = {
 
 	state: {
 
+		chatId: <string>null,
 		room: <Partial<Room>>null,
 		editState: EDIT_STATE.READ,
-		roomState: ROOM_STATE.OFFLINE,
+		chatState: ROOM_STATE.OFFLINE,
 
 		prompt: "",
 
@@ -49,14 +49,13 @@ const setup = {
 			const roomSo = store as RoomDetailStore
 			// mi metto in scolto sui messaggi della stanza
 			wsConnection.emitter.on("message", roomSo.onMessage)
-			// entro in una stanza nuova
-			//roomSo.sendEnter()
+			// se NON è una ROOT-ROOM mando il segnale di entrare in CHAT
+			if (!!roomSo.state.room?.parentRoomId) return
+			// se è una ROOT-ROOM invio il messaggio di enter
 			const message: UserEnterC2S = {
-				action: ROOM_ACTION_C2S.ENTER,
-				roomId: null,
-				setup: {
-					agentId: roomSo.state.room?.agentId,
-				},
+				action: CHAT_ACTION_C2S.ENTER,
+				chatId: roomSo.state.chatId,
+				agentId: roomSo.state.room?.agentId,
 			}
 			wsConnection.send(JSON.stringify(message))
 		},
@@ -65,33 +64,21 @@ const setup = {
 			const roomSo = store as RoomDetailStore
 			wsConnection.emitter.off("message", roomSo.onMessage)
 			// invio il messaggio di leave
-			roomSo.sendLeave()
+			const message: UserLeaveC2S = {
+				action: CHAT_ACTION_C2S.LEAVE,
+				chatId: roomSo.state.chatId,
+			}
+			wsConnection.send(JSON.stringify(message))
 		},
 
 		//#endregion
 
-		sendEnter: async (roomId?: string, store?: RoomDetailStore) => {
-			const message: UserEnterC2S = {
-				action: ROOM_ACTION_C2S.ENTER,
-				roomId,
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
-		
-		sendLeave: async (_: void, store?: RoomDetailStore) => {
-			const message: UserLeaveC2S = {
-				action: ROOM_ACTION_C2S.LEAVE,
-				roomId: store.state.room.id,
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
-
 		sendPrompt: async (_: void, store?: RoomDetailStore) => {
 			const prompt = store.state.prompt?.trim()
-			if ( !prompt || prompt.length == 0) return
+			if (!prompt || prompt.length == 0) return
 			const message: UserMessageC2S = {
-				action: ROOM_ACTION_C2S.USER_MESSAGE,
-				roomId: store.state.room.id,
+				action: CHAT_ACTION_C2S.USER_MESSAGE,
+				chatId: store.state.chatId,
 				text: prompt,
 				complete: true,
 			}
@@ -101,54 +88,60 @@ const setup = {
 			wsConnection.send(JSON.stringify(message))
 		},
 
-		sendComplete: async (_: void, store?: RoomDetailStore) => {
-			const message: CompleteC2S = {
-				action: ROOM_ACTION_C2S.COMPLETE,
-				roomId: store.state.room.id,
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
-
 		onMessage: (data: any, store?: RoomDetailStore) => {
 			const message: BaseS2C = JSON.parse(data.payload)
+			if (message.chatId != store.state.chatId) return
 
 			switch (message?.action) {
 
-				case ROOM_ACTION_S2C.ENTERED: {
-					const enteredMsg: UserEnteredS2C = message as UserEnteredS2C
-					store.setRoom({ 
-						...store.state.room, 
-						id: enteredMsg.roomId,
-						agentId: enteredMsg.setup?.agentId ?? store.state.room.agentId,
+				case CHAT_ACTION_S2C.ENTERED: {
+					const msg = message as UserEnteredS2C
+					store.setRoom({
+						...store.state.room,
+						id: msg.roomId,
+						agentId: msg.agentId ?? store.state.room.agentId,
 					})
-					store.setRoomState(ROOM_STATE.ONLINE)
+					store.setChatState(ROOM_STATE.ONLINE)
 					break
 				}
 
-				case ROOM_ACTION_S2C.APPEND_MESSAGE: {
-					if ( message.roomId != store.state.room?.id) return
+				case CHAT_ACTION_S2C.LEAVE: {
+					const msg = message as UserLeaveS2C
+					// ???
+					break
+				}
 
-					const appendMsg: AppendMessageS2C = message as AppendMessageS2C
-					if ( !store.state.room.history ) store.state.room.history = []
-					store.state.room.history.push(...appendMsg.content)
+				case CHAT_ACTION_S2C.APPEND_MESSAGE: {
+					const msg: AppendMessageS2C = message as AppendMessageS2C
+					if (store.state.room?.id != msg.roomId) return
+					if (!store.state.room.history) store.state.room.history = []
+					store.state.room.history.push(...msg.content)
 					store.setRoom({ ...store.state.room })
 					break
 				}
-				
+
+				case CHAT_ACTION_S2C.NEW_ROOM: {
+					const msg = message as NewRoomS2C
+					
+					break
+				}
+
 			}
 		},
 
 	},
 
 	mutators: {
+		setChatId: (chatId: string) => ({ chatId }),
+		setChatState: (chatState: ROOM_STATE) => ({ chatState }),
 		setRoom: (room: Partial<Room>) => ({ room }),
+		setPrompt: (prompt: string) => ({ prompt }),
+
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
+
 		setRoleDialogOpen: (roleDialogOpen: boolean) => ({ roleDialogOpen }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),
 		setLlmDialogOpen: (llmDialogOpen: boolean) => ({ llmDialogOpen }),
-
-		setPrompt: (prompt: string) => ({ prompt }),
-		setRoomState: (roomState: ROOM_STATE) => ({ roomState }),
 	},
 
 }

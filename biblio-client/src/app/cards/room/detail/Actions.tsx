@@ -43,7 +43,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 			className={cls.actions}
 			style={style}
 		>
-			{store.state.roomState}
+			{store.state.chatState}
 			<Button
 				children="CREATE"
 				onClick={handleSaveClick}

@@ -4,71 +4,72 @@ import { CoreMessage } from "ai"
 
 //#region CLIENT TO SERVER
 
-export enum ROOM_ACTION_C2S {
+export enum CHAT_ACTION_C2S {
 	ENTER = "enter",
 	LEAVE = "leave",
-	SETUP = "setup",
-	USER_MESSAGE = "history-add",
-	COMPLETE = "complete"
+	USER_MESSAGE = "user-message",
 }
 
 export type BaseC2S = {
-	action: ROOM_ACTION_C2S
-	/** ID of the room to enter */
-	roomId: string
+	action: CHAT_ACTION_C2S
+	/** Rifrimento alla CHAT */
+	chatId: string
 }
 
-/** un CLIENT entra nella ROOM */
+/** un CLIENT entra nella CHAT */
 export type UserEnterC2S = BaseC2S & {
-	action: ROOM_ACTION_C2S.ENTER
-	setup?: RoomSetup
+	action: CHAT_ACTION_C2S.ENTER
+	agentId?: string
 }
 
 export type UserLeaveC2S = BaseC2S & {
-	action: ROOM_ACTION_C2S.LEAVE
+	action: CHAT_ACTION_C2S.LEAVE
 }
 
 export type UserMessageC2S = BaseC2S & {
-	action: ROOM_ACTION_C2S.USER_MESSAGE
+	action: CHAT_ACTION_C2S.USER_MESSAGE
 	text: string
 	complete?: boolean
 }
 
-export type CompleteC2S = BaseC2S & {
-	action: ROOM_ACTION_C2S.COMPLETE
-}
-
 //#endregion
 
-export interface RoomSetup {
-	agentId?: string	
-}
+
+
 
 //#region SERVER TO CLIENT
 
-export enum ROOM_ACTION_S2C {
+export enum CHAT_ACTION_S2C {
 	ENTERED = "entered",
 	LEAVE = "leave",
-	SETUP = "setup",
-	APPEND_MESSAGE = "append-message"
+	APPEND_MESSAGE = "append-message",
+	NEW_ROOM = "new-room",
 }
 
 export type BaseS2C = {
-	action: ROOM_ACTION_S2C
-	roomId: string
+	action: CHAT_ACTION_S2C
+	chatId: string
 }
 
 export type UserEnteredS2C = BaseS2C & {
-	action: ROOM_ACTION_S2C.ENTERED
-	setup: RoomSetup
+	action: CHAT_ACTION_S2C.ENTERED
+	roomId: string
+	agentId: string
 }
 
 export type UserLeaveS2C = BaseS2C & {
-	action: ROOM_ACTION_S2C.LEAVE
+	action: CHAT_ACTION_S2C.LEAVE
 }
 
-export type AppendMessageS2C = {
-	action: ROOM_ACTION_S2C.APPEND_MESSAGE
+export type NewRoomS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.NEW_ROOM
+	roomId: string
+	parentRoomId?: string
+	parentMessageId?: string
+}
+
+export type AppendMessageS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.APPEND_MESSAGE
 	roomId: string
 	content: CoreMessage[]
 }

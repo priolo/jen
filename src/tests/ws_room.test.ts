@@ -1,10 +1,10 @@
+import { RootService } from "@priolo/julian"
+import axios, { AxiosInstance } from "axios"
 import { WebSocket } from "ws"
 import buildNodeConfig, { PORT } from "../config.js"
-import { RootService } from "@priolo/julian"
-import { seeding } from "../seeding.js"
-import { AppendMessageS2C, BaseC2S, BaseS2C, ROOM_ACTION_C2S, ROOM_ACTION_S2C, UserEnterC2S, UserMessageC2S } from "../types/RoomActions.js"
-import axios, { AxiosInstance } from "axios"
 import { Agent } from "../repository/Agent.js"
+import { seeding } from "../seeding.js"
+import { AppendMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserMessageC2S } from "../types/RoomActions.js"
 
 
 describe("Test on WS ROOT", () => {
@@ -43,10 +43,8 @@ describe("Test on WS ROOT", () => {
 
 			ws.on('open', function open() {
 				ws.send(JSON.stringify(<UserEnterC2S>{
-					action: ROOM_ACTION_C2S.ENTER,
-					setup: {
-						agentId: agentLeader?.id
-					}
+					action: CHAT_ACTION_C2S.ENTER,
+					agentId: agentLeader?.id
 				}))
 			})
 
@@ -55,10 +53,10 @@ describe("Test on WS ROOT", () => {
 
 				switch (msg.action) {
 					
-					case ROOM_ACTION_S2C.ENTERED: {
+					case CHAT_ACTION_S2C.ENTERED: {
 						const toSend: UserMessageC2S = {
-							action: ROOM_ACTION_C2S.USER_MESSAGE,
-							roomId: msg.roomId,
+							action: CHAT_ACTION_C2S.USER_MESSAGE,
+							chatId: msg.chatId,
 							text: "What is the result of adding 5 and 10, then multiplying by 2? Reply with the number only.",
 							complete: true,
 						}
@@ -66,9 +64,14 @@ describe("Test on WS ROOT", () => {
 						break
 					}
 
-					case ROOM_ACTION_S2C.APPEND_MESSAGE:
+					case CHAT_ACTION_S2C.APPEND_MESSAGE:
 						const appendMsg = msg as AppendMessageS2C
 						console.log("Append message:", appendMsg.content)
+						break
+
+					case CHAT_ACTION_S2C.NEW_ROOM:
+						const newRoomMsg = msg as NewRoomS2C
+						console.log("New room created:", newRoomMsg.roomId, "Parent:", newRoomMsg.parentRoomId, "Message ID:", newRoomMsg.parentMessageId)
 						break
 
 					default:

@@ -24,8 +24,9 @@ export interface Response {
 export interface Resolver {
 	getAgent: (id: string) => Promise<Agent>
 	getTools: (id: string) => Promise<Tool>
-	getHistory: (id: string) => CoreMessage[]
-	onHistoryChange: (history: CoreMessage[]) => void
+	//getHistory: (id: string) => CoreMessage[]
+	onCreateNewRoom: (agentId:string, parentRoomId:string, messageId: string) => string
+	onMessage: ( agentId:string, messages?: CoreMessage[], roomId? :string) => CoreMessage[]
 }
 
 /**
@@ -37,16 +38,14 @@ export interface Resolver {
 class AgentExe {
 
 	constructor(
-		//public name: string,
 		public agent: Partial<Agent>,
-		//public history: CoreMessage[] = [],
 		public resolver: Resolver,
 		public parent?: AgentExe,
 	) {
-
 	}
 
-	strategy: string = ""
+	public strategy: string = ""
+	public roomId: string = null
 
 	protected async agentResolve(): Promise<Agent> {
 		if (!this.agent?.name) {
@@ -57,7 +56,7 @@ class AgentExe {
 
 
 	async ask(prompt?: string, fromAgent?: boolean): Promise<Response> {
-		let history = this.resolver.getHistory(this.agent.id)
+		let history = this.resolver.onMessage(this.agent.id, null, this.roomId)
 		if (!history?.length && !prompt) return null
 
 		await this.agentResolve()
@@ -83,8 +82,8 @@ class AgentExe {
 				+ prompt;
 		}
 		if (!!prompt) {
-			history = [...history, { role: "user", content: prompt }]
-			this.resolver.onHistoryChange(history)
+			//history = [...history, { role: "user", content: prompt }]
+			history = this.resolver.onMessage(this.agent.id, [{ role: "user", content: prompt }], this.roomId)
 		}
 
 		// LOOP
@@ -103,8 +102,8 @@ class AgentExe {
 			})
 
 			const lastMessage = r.response.messages[r.response.messages.length - 1]
-			history = [...history, ...r.response.messages]
-			this.resolver.onHistoryChange(history)
+			//history = [...history, ...r.response.messages]
+			history = this.resolver.onMessage(this.agent.id, r.response.messages, this.roomId)
 
 			if (lastMessage.role == "tool") {
 				const content = lastMessage.content[0]
@@ -211,15 +210,8 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 		const structs: ToolSet = {}
 
 		for (const subAgent of this.agent.subAgents) {
-
-			let history: CoreMessage[] = []
-			const resolver: Resolver = {
-				getAgent: this.resolver.getAgent,
-				getTools: this.resolver.getTools,
-				getHistory: (id: string) => history,
-				onHistoryChange: (h: CoreMessage[]) => history = h,
-			}
-			const subAgentExe = new AgentExe(subAgent, resolver, this)
+			
+			const subAgentExe = new AgentExe(subAgent, this.resolver, this)
 			await subAgentExe.agentResolve()
 
 			structs[`chat_with_${subAgentExe.agent.name}`] = tool({
@@ -238,6 +230,10 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 					required: ["question"],
 				}),
 				execute: async (args, options) => {
+					const lastMessage = this.resolver.onMessage(this.agent.id, null, this.roomId).slice(-1)[0]
+					const roomId = this.resolver.onCreateNewRoom?.(subAgentExe.agent.id, this.roomId, lastMessage["id"])
+					subAgentExe.roomId = roomId
+					
 					const { question } = args as { question: string };
 					colorPrint([subAgentExe.agent.name, ColorType.Blue],
 						" : chat_with : ", [subAgentExe.agent.name, ColorType.Blue],
@@ -246,10 +242,9 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 
 					const response = await subAgentExe.ask(question)
 
-					if (subAgentExe.agent.killOnResponse) {
-						resolver.onHistoryChange([])
-						colorPrint([subAgentExe.agent.name, ColorType.Blue], " : ", ["killed", ColorType.Red])
-					}
+					// if (subAgentExe.agent.killOnResponse) {
+					// 	colorPrint([subAgentExe.agent.name, ColorType.Blue], " : ", ["killed", ColorType.Red])
+					// }
 					if (response.type == RESPONSE_TYPE.REQUEST) {
 						return `Helpful information to answer:\n${response.text}`
 

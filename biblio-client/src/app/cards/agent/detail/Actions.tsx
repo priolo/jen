@@ -27,7 +27,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	const handleEditClick = async () => store.setEditState(EDIT_STATE.EDIT)
 	const handleCancelClick = () => store.restore()
 	const handleSaveClick = async () => store.save()
-	const handleRoomClick = () => store.openRoom()
+	const handleRoomClick = () => store.openChatRoom()
 	const handleEditorClick = () => store.openEditor()
 
 

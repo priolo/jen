@@ -24,6 +24,16 @@ export function buildRoomDetailNew( agentId?: string ) {
 	} as RoomDetailState) as RoomDetailStore;
 	return store;
 }
+export function buildSubRoomDetailNew( agentId?: string ) {
+	const store = buildStore({
+		type: DOC_TYPE.ROOM_DETAIL,
+		editState: EDIT_STATE.NEW,
+		size: VIEW_SIZE.NORMAL,
+		sizeForce: true,
+		room: { agentId	}
+	} as RoomDetailState) as RoomDetailStore;
+	return store;
+}
 
 export function buildRoomList() {
 	const store = buildStore({

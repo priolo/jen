@@ -28,7 +28,7 @@ export class Room {
     /** The agent associated with this room */
     @ManyToOne(() => Agent, agent => agent.rooms, { nullable: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'agentId' })
-    agent: Relation<Agent> | null;
+    agent?: Relation<Agent> | null;
 
     /** ID of the parent room, if this room is a sub-room */
     parentRoomId: string | null;
