@@ -10,6 +10,7 @@ import { FunctionComponent } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
+import MessageCmp from "./MessageCmp"
 import RoleDialog from "./RoleDialog"
 import cls from "./View.module.css"
 
@@ -44,8 +45,6 @@ const RoomView: FunctionComponent<Props> = ({
 	const history = store.state.room?.history ?? []
 	const agents = agentSo.state.all ?? []
 	const selectedAgentId = store.state.room?.agentId
-	const inRead = store.state.editState === EDIT_STATE.READ
-
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -61,7 +60,7 @@ const RoomView: FunctionComponent<Props> = ({
 				store={store}
 				select={selectedAgentId}
 				items={agents}
-				readOnly={inRead}
+				readOnly={true}
 				fnGetId={(item: Agent) => item?.id}
 				fnGetString={(item: Agent) => item?.name}
 				onChangeSelect={handleAgentChange}
@@ -72,11 +71,11 @@ const RoomView: FunctionComponent<Props> = ({
 		</div>
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
-			{history.map((msg, index) => (
-				<div key={index} className={cls.historyItem}>
-					<div className={cls.historyRole}>{msg.role}</div>
-					<div className={cls.historyText}>{msg.content.toString() as string}</div>
-				</div>
+			{history.map((msg) => (
+				<MessageCmp
+					key={msg.id}
+					message={msg}
+				/>
 			))}
 		</div>
 

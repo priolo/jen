@@ -1,11 +1,13 @@
 import { wsConnection } from "@/plugins/session"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { EDIT_STATE } from "@/types"
 import { Room } from "@/types/Room"
 import { AppendMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S } from "@/types/RoomActions"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../../editorBase"
 import { ROOM_STATE } from "../types"
+import { buildRoomDetail } from "../factory"
+import { VIEW_SIZE } from "@priolo/jack"
+import mockHistory1 from "./mockHistory1"
 
 
 
@@ -15,7 +17,6 @@ const setup = {
 
 		chatId: <string>null,
 		room: <Partial<Room>>null,
-		editState: EDIT_STATE.READ,
 		chatState: ROOM_STATE.OFFLINE,
 
 		prompt: "",
@@ -49,12 +50,15 @@ const setup = {
 			const roomSo = store as RoomDetailStore
 			// mi metto in scolto sui messaggi della stanza
 			wsConnection.emitter.on("message", roomSo.onMessage)
-			// se NON è una ROOT-ROOM mando il segnale di entrare in CHAT
-			if (!!roomSo.state.room?.parentRoomId) return
-			// se è una ROOT-ROOM invio il messaggio di enter
+			// se sono nella ROOT invio il messaggio di ENTER
+			if ( !!roomSo.state.room?.parentRoomId ) return
 			const message: UserEnterC2S = {
 				action: CHAT_ACTION_C2S.ENTER,
+				// se è nuova sara' null
 				chatId: roomSo.state.chatId,
+				// se è nuova sara' null
+				roomId: roomSo.state.room?.id,
+				// nel caso sia una nuova CHAT devo indicare l'agent
 				agentId: roomSo.state.room?.agentId,
 			}
 			wsConnection.send(JSON.stringify(message))
@@ -63,7 +67,8 @@ const setup = {
 		onRemoval(_: void, store?: ViewStore) {
 			const roomSo = store as RoomDetailStore
 			wsConnection.emitter.off("message", roomSo.onMessage)
-			// invio il messaggio di leave
+			// se sono nella ROOT invio il messaggio di LEAVE
+			if ( !!roomSo.state.room?.parentRoomId ) return
 			const message: UserLeaveC2S = {
 				action: CHAT_ACTION_C2S.LEAVE,
 				chatId: roomSo.state.chatId,
@@ -90,16 +95,21 @@ const setup = {
 
 		onMessage: (data: any, store?: RoomDetailStore) => {
 			const message: BaseS2C = JSON.parse(data.payload)
-			if (message.chatId != store.state.chatId) return
+			if (!message 
+				|| (message.action != CHAT_ACTION_S2C.ENTERED && message.chatId != store.state.chatId)
+			) return
 
-			switch (message?.action) {
+			switch (message.action) {
 
 				case CHAT_ACTION_S2C.ENTERED: {
 					const msg = message as UserEnteredS2C
+					store.setChatId(msg.chatId)
 					store.setRoom({
 						...store.state.room,
 						id: msg.roomId,
-						agentId: msg.agentId ?? store.state.room.agentId,
+						//history: mockHistory1,
+						history: [],
+						//agentId: msg.agentId ?? store.state.room.agentId,
 					})
 					store.setChatState(ROOM_STATE.ONLINE)
 					break
@@ -122,7 +132,18 @@ const setup = {
 
 				case CHAT_ACTION_S2C.NEW_ROOM: {
 					const msg = message as NewRoomS2C
-					
+					const view = buildRoomDetail({
+						chatId: msg.chatId,
+						room: {
+							id: msg.roomId,
+							agentId: msg.agentId,
+							parentRoomId: msg.parentRoomId,
+							messageId: msg.parentMessageId,
+							history: [],
+						},
+						size: VIEW_SIZE.NORMAL
+					})
+					store.state.group.addLink({ view, parent: store, anim: true })
 					break
 				}
 
@@ -136,8 +157,6 @@ const setup = {
 		setChatState: (chatState: ROOM_STATE) => ({ chatState }),
 		setRoom: (room: Partial<Room>) => ({ room }),
 		setPrompt: (prompt: string) => ({ prompt }),
-
-		setEditState: (editState: EDIT_STATE) => ({ editState }),
 
 		setRoleDialogOpen: (roleDialogOpen: boolean) => ({ roleDialogOpen }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),

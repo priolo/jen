@@ -17,17 +17,6 @@ export function buildRoomDetail(state: Partial<RoomDetailState>) {
 export function buildRoomDetailNew( agentId?: string ) {
 	const store = buildStore({
 		type: DOC_TYPE.ROOM_DETAIL,
-		editState: EDIT_STATE.NEW,
-		size: VIEW_SIZE.NORMAL,
-		sizeForce: true,
-		room: { agentId	}
-	} as RoomDetailState) as RoomDetailStore;
-	return store;
-}
-export function buildSubRoomDetailNew( agentId?: string ) {
-	const store = buildStore({
-		type: DOC_TYPE.ROOM_DETAIL,
-		editState: EDIT_STATE.NEW,
 		size: VIEW_SIZE.NORMAL,
 		sizeForce: true,
 		room: { agentId	}

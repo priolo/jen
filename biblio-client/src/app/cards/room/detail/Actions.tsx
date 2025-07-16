@@ -1,6 +1,5 @@
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
-import { EDIT_STATE } from "@/types"
-import { Button, CircularLoadingCmp } from "@priolo/jack"
+import { CircularLoadingCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
 import cls from "./View.module.css"
@@ -26,9 +25,6 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleEditClick = async () => store.setEditState(EDIT_STATE.EDIT)
-	const handleCancelClick = () => store.restore()
-	const handleSaveClick = async () => store.save()
 	
 
 	// LOADING
@@ -38,42 +34,11 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 	
 	// RENDER
-	if (roomDetailSa.editState == EDIT_STATE.NEW) {
-		return <div
-			className={cls.actions}
-			style={style}
-		>
-			{store.state.chatState}
-			<Button
-				children="CREATE"
-				onClick={handleSaveClick}
-			/>
-		</div>
-
-	} else if (roomDetailSa.editState == EDIT_STATE.READ) {
-		return <div
-			className={cls.actions}
-			style={style}
-		>
-			<Button
-				children="EDIT"
-				onClick={handleEditClick}
-			/>
-		</div>
-	}
-
 	return (<div
 		className={cls.actions}
 		style={style}
 	>
-		<Button
-			children="SAVE"
-			onClick={handleSaveClick}
-		/>
-		<Button
-			children="CANCEL"
-			onClick={handleCancelClick}
-		/>
+		
 	</div>)
 }
 

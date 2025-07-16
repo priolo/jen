@@ -1,11 +1,11 @@
 import { Bus, typeorm, ws } from "@priolo/julian"
+import { CoreUserMessage } from "ai"
+import { randomUUID } from "crypto"
 import AgentExe, { Resolver } from "../agents/llm/AgentExe.js"
 import { Agent } from "../repository/Agent.js"
 import { Room } from "../repository/Room.js"
 import { Tool } from "../repository/Tool.js"
-import { AppendMessageS2C, BaseC2S, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S } from "../types/RoomActions.js"
-import { CoreMessage, CoreUserMessage } from "ai"
-import { randomUUID } from "crypto"
+import { AppendMessageS2C, BaseC2S, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatMessage, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserMessageC2S } from "../types/RoomActions.js"
 
 
 
@@ -86,7 +86,7 @@ export class WSRoomsService extends ws.route {
 
 		// se non c'e' l'id allora creo una CHAT nuova
 		if (!msg.chatId) {
-			chat = await createNewChat(msg.agentId )
+			chat = await createNewChat(msg.agentId)
 			this.chats.push(chat)
 			// altrimenti cerco l'istanza della CHAT
 		} else {
@@ -105,7 +105,7 @@ export class WSRoomsService extends ws.route {
 			action: CHAT_ACTION_S2C.ENTERED,
 			chatId: chat.id,
 			roomId: getRootRoom(chat).id,
-			agentId: getRootRoom(chat)?.agentId,
+			//agentId: getRootRoom(chat)?.agentId,
 		}
 		this.sendToChat(message)
 	}
@@ -181,11 +181,19 @@ export class WSRoomsService extends ws.route {
 			},
 			onCreateNewRoom: (agentId: string, parentRoomId: string, parentMessageId: string): string => {
 				// creo una nuova room
-				const newRoom = createNewRoom(agentId, parentRoomId, parentMessageId)
+				const newRoom = {
+					id: randomUUID() as string,
+					name: "",
+					history: [],
+					agentId,
+					parentRoomId,
+					messageId: parentMessageId,
+				}
 				chat.rooms.push(newRoom)
 
 				// [II] salvataggio nel DB
-				
+
+				// invia messaggio al CLIENT
 				const msg: NewRoomS2C = {
 					action: CHAT_ACTION_S2C.NEW_ROOM,
 					chatId: chat.id,
@@ -198,18 +206,16 @@ export class WSRoomsService extends ws.route {
 				return newRoom.id
 			},
 			// quando l'agente invia un messaggio	
-			onMessage: (agentId: string, messages?: CoreMessage[], roomId?: string): CoreMessage[] => {
+			onMessage: (agentId: string, messages?: ChatMessage[], roomId?: string): ChatMessage[] => {
 				const room = getRoomById(chat, roomId)
 				if (!messages || !messages.length) {
 					return room.history
 				}
 				room.history.push(...messages)
 
-				// salvataggio nel DB
-				// new Bus(this, this.state.repository).dispatch({
-				// 	type: typeorm.RepoRestActions.SAVE,
-				// 	payload: roomIns.room
-				// })
+				// [TODO] salvataggio nel DB
+
+				// invia messaggio al CLIENT
 				const msg: AppendMessageS2C = {
 					action: CHAT_ACTION_S2C.APPEND_MESSAGE,
 					chatId: chat.id,
@@ -236,8 +242,8 @@ export class WSRoomsService extends ws.route {
 	 */
 	private sendToChat(message: BaseS2C) {
 		if (!message || !message.chatId) return this.log("missing roomId in message")
-		const chat = this.chats.find(c => c.id === message.chatId)
-		if (!chat) return this.log(`Room not found: ${chat.id}`)
+		const chat = this.chats.find(c => c.id == message.chatId)
+		if (!chat) return this.log(`CHAT not found: ${message.chatId}`)
 
 		for (const clientAddress of chat.clients) {
 			const client = this.getClient(clientAddress)
@@ -269,25 +275,17 @@ export interface Chat {
 
 
 async function createNewChat(agentId: string): Promise<Chat> {
-	const room = createNewRoom(agentId, null, null)
+	const room:Room = {
+		id: randomUUID() as string,
+		history: [],
+		agentId,
+	}
 	const chat: Chat = {
 		id: randomUUID(),
 		rooms: [room],
 		clients: new Set(),
 	}
 	return chat
-}
-
-function createNewRoom(agentId: string, parentRoomId: string, messageId: string): Room {
-	const newRoom: Room = {
-		id: randomUUID() as string,
-		name: "",
-		history: [],
-		agentId,
-		parentRoomId,
-		messageId,
-	}
-	return newRoom
 }
 
 function getRoomById(chat: Chat, roomId?: string): Room {

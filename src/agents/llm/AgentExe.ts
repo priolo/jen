@@ -1,10 +1,12 @@
 import { Agent } from '@/repository/Agent.js';
 import { Tool } from '@/repository/Tool.js';
+import { ChatMessage } from '@/types/RoomActions.js';
 import { google } from '@ai-sdk/google';
-import { CoreMessage, generateText, jsonSchema, tool, ToolSet } from "ai";
+import { generateText, jsonSchema, tool, ToolSet } from "ai";
 import dotenv from 'dotenv';
 import { z } from "zod";
 import { colorPrint, ColorType } from '../utils/index.js';
+import { last } from 'slate';
 
 dotenv.config();
 
@@ -24,9 +26,8 @@ export interface Response {
 export interface Resolver {
 	getAgent: (id: string) => Promise<Agent>
 	getTools: (id: string) => Promise<Tool>
-	//getHistory: (id: string) => CoreMessage[]
 	onCreateNewRoom: (agentId:string, parentRoomId:string, messageId: string) => string
-	onMessage: ( agentId:string, messages?: CoreMessage[], roomId? :string) => CoreMessage[]
+	onMessage: ( agentId:string, messages?: ChatMessage[], roomId? :string) => ChatMessage[]
 }
 
 /**
@@ -102,6 +103,14 @@ class AgentExe {
 			})
 
 			const lastMessage = r.response.messages[r.response.messages.length - 1]
+
+			// controllo che ci sia stata una richiesta "chat_with_<agent_name>"
+			const callSubagentMsg = r.response.messages.find ( msg => msg.role=="assistant" && msg.content[0]?.toolName?.startsWith("chat_with_"))
+			if ( callSubagentMsg) {
+				callSubagentMsg.
+			}
+			
+
 			//history = [...history, ...r.response.messages]
 			history = this.resolver.onMessage(this.agent.id, r.response.messages, this.roomId)
 
@@ -230,8 +239,10 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 					required: ["question"],
 				}),
 				execute: async (args, options) => {
+					
 					const lastMessage = this.resolver.onMessage(this.agent.id, null, this.roomId).slice(-1)[0]
-					const roomId = this.resolver.onCreateNewRoom?.(subAgentExe.agent.id, this.roomId, lastMessage["id"])
+					const roomId = this.resolver.onCreateNewRoom?.(subAgentExe.agent.id, this.roomId, lastMessage.id)
+					lastMessage.subroomId = roomId
 					subAgentExe.roomId = roomId
 					
 					const { question } = args as { question: string };
@@ -239,7 +250,6 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 						" : chat_with : ", [subAgentExe.agent.name, ColorType.Blue],
 						" : ", [question, ColorType.Green],
 					)
-
 					const response = await subAgentExe.ask(question)
 
 					// if (subAgentExe.agent.killOnResponse) {

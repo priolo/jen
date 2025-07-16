@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
 import { Agent } from './Agent.js';
-import { CoreMessage } from 'ai';
+import { ChatMessage } from '@/types/RoomActions.js';
 
 
 
@@ -12,12 +12,12 @@ export class Room {
     id: string;
 
     /**name of ROOM (maiby can are void) */
-    @Column({ type: 'varchar' })
-    name: string;
+    // @Column({ type: 'varchar' })
+    // name?: string;
 
     /** History of prompt conversation */
     @Column({ type: 'json', default: '[]' })
-    history: CoreMessage[];
+    history: ChatMessage[];
 
     // RELATIONSHIPS
 
@@ -31,8 +31,8 @@ export class Room {
     agent?: Relation<Agent> | null;
 
     /** ID of the parent room, if this room is a sub-room */
-    parentRoomId: string | null;
+    parentRoomId?: string | null;
 
     /** id del messaggio a cui si aggancia questa ROOM */
-    messageId: string | null;
+    messageId?: string | null;
 }
