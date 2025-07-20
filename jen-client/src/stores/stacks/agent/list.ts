@@ -1,9 +1,9 @@
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { AgentDetailStore } from "./detail"
+import { AgentDetailStore } from "./detail.js"
 import { buildAgentDetail, buildAgentDetailNew } from "./factory.js"
-import agentSo from "./repo"
+import agentSo from "./repo.js"
 import { Agent } from "@/types/Agent"
 
 

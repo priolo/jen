@@ -27,7 +27,7 @@ import "@priolo/jack/dist/jack.css";
 
 //#region PLUGIN
 //import '@/plugins/msw';
-import "./plugins/session";
+import "./plugins/session/index.ts";
 //#endregion
 
 
