@@ -70,7 +70,7 @@ const AgentView: FunctionComponent<Props> = ({
 	}
 
 	// RENDER
-	if ( !store.state.agent?.name) return null
+	if ( !store.state.agent ) return null
 
 	const llm = ["gemini-2.0-flash"]
 	const llmSelected = store.state.agent.llmDefault

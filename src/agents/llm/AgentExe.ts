@@ -26,7 +26,7 @@ export interface Response {
 export interface Resolver {
 	getAgent: (id: string) => Promise<Agent>
 	getTools: (id: string) => Promise<Tool>
-	onCreateNewRoom: (agentId:string, parentRoomId:string, messageId: string) => string
+	onCreateNewRoom: (agentId:string, parentRoomId:string) => string
 	onMessage: ( agentId:string, messages?: ChatMessage[], roomId? :string) => ChatMessage[]
 }
 
@@ -47,6 +47,7 @@ class AgentExe {
 
 	public strategy: string = ""
 	public roomId: string = null
+	public lastSubagentCall: AgentExe = null
 
 	protected async agentResolve(): Promise<Agent> {
 		if (!this.agent?.name) {
@@ -90,6 +91,8 @@ class AgentExe {
 		// LOOP
 		for (let i = 0; i < 10; i++) {
 
+
+
 			const r = await generateText({
 				model: model,
 				temperature: 0,
@@ -102,20 +105,27 @@ class AgentExe {
 				maxSteps: 1,
 			})
 
-			const lastMessage = r.response.messages[r.response.messages.length - 1]
 
+
+			const lastMsg:ChatMessage = r.response.messages[r.response.messages.length - 1]
 			// controllo che ci sia stata una richiesta "chat_with_<agent_name>"
-			const callSubagentMsg = r.response.messages.find ( msg => msg.role=="assistant" && msg.content[0]?.toolName?.startsWith("chat_with_"))
-			if ( callSubagentMsg) {
-				callSubagentMsg.
-			}
 			
+			if ( !!this.lastSubagentCall ) {
+				//const callSubagentMsg:ChatMessage = r.response.messages.find ( msg => msg.role=="assistant" && msg.content[0]?.toolName?.startsWith("chat_with_"))
+				const callSubagentMsg:ChatMessage = r.response.messages[0]
+				callSubagentMsg.subroomId = this.lastSubagentCall.roomId
+			}
+			this.lastSubagentCall = null
+			
+
 
 			//history = [...history, ...r.response.messages]
 			history = this.resolver.onMessage(this.agent.id, r.response.messages, this.roomId)
 
-			if (lastMessage.role == "tool") {
-				const content = lastMessage.content[0]
+
+
+			if (lastMsg.role == "tool") {
+				const content = lastMsg.content[0]
 				const functionName = content.toolName
 				const result = content.result as string
 
@@ -145,7 +155,7 @@ class AgentExe {
 
 				// CONTINUE RAESONING
 			} else {
-				colorPrint([this.agent.name, ColorType.Blue], " : reasoning : ", [JSON.stringify(lastMessage.content), ColorType.Magenta])
+				colorPrint([this.agent.name, ColorType.Blue], " : reasoning : ", [JSON.stringify(lastMsg.content), ColorType.Magenta])
 			}
 
 			//await new Promise(resolve => setTimeout(resolve, 5000)) // wait 1 second
@@ -240,10 +250,10 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 				}),
 				execute: async (args, options) => {
 					
-					const lastMessage = this.resolver.onMessage(this.agent.id, null, this.roomId).slice(-1)[0]
-					const roomId = this.resolver.onCreateNewRoom?.(subAgentExe.agent.id, this.roomId, lastMessage.id)
-					lastMessage.subroomId = roomId
+					//const lastMessage = this.resolver.onMessage(this.agent.id, null, this.roomId).slice(-1)[0]
+					const roomId = this.resolver.onCreateNewRoom?.(subAgentExe.agent.id, this.roomId/*, lastMessage.id*/)
 					subAgentExe.roomId = roomId
+					this.lastSubagentCall = subAgentExe
 					
 					const { question } = args as { question: string };
 					colorPrint([subAgentExe.agent.name, ColorType.Blue],

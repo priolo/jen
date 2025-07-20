@@ -138,7 +138,6 @@ const setup = {
 							id: msg.roomId,
 							agentId: msg.agentId,
 							parentRoomId: msg.parentRoomId,
-							messageId: msg.parentMessageId,
 							history: [],
 						},
 						size: VIEW_SIZE.NORMAL

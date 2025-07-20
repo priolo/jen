@@ -84,7 +84,6 @@ export type NewRoomS2C = BaseS2C & {
 
 	roomId: string
 	parentRoomId?: string
-	parentMessageId?: string
 	agentId?: string
 }
 

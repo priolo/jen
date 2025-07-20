@@ -11,10 +11,6 @@ export class Room {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    /**name of ROOM (maiby can are void) */
-    // @Column({ type: 'varchar' })
-    // name?: string;
-
     /** History of prompt conversation */
     @Column({ type: 'json', default: '[]' })
     history: ChatMessage[];
@@ -33,6 +29,4 @@ export class Room {
     /** ID of the parent room, if this room is a sub-room */
     parentRoomId?: string | null;
 
-    /** id del messaggio a cui si aggancia questa ROOM */
-    messageId?: string | null;
 }

@@ -113,7 +113,7 @@ const MainMenu: FunctionComponent<Props> = ({
 			<Button children="RESET" onClick={() => ClearSession()} />
 
 			{/* <Button children="DOC NEW" onClick={handleDocNew} /> */}
-			<Button children="DOC" onClick={handleDoc} />
+			{/* <Button children="DOC" onClick={handleDoc} /> */}
 			{/* <Button children="EDIT" onClick={handleEdit} /> */}
 			{/* <Button children="REF" onClick={handleReflection} /> */}
 			{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
@@ -125,7 +125,7 @@ const MainMenu: FunctionComponent<Props> = ({
 			<Button children="LLM" onClick={handleLlmList} />
 			<Button children="TOOLS" onClick={handleToolList} />
 			<Button children="AGENTS" onClick={handleAgentList} />
-			<Button children="ROOM" onClick={handleRoom} />
+			{/* <Button children="ROOM" onClick={handleRoom} /> */}
 
 		</>}
 		{/* *** DEBUG *** */}

@@ -2,7 +2,6 @@ import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
 import agentSo from "@/stores/stacks/agent/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
-import { EDIT_STATE } from "@/types"
 import { Agent } from "@/types/Agent"
 import { Button, FloatButton, ListDialog2, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -12,7 +11,6 @@ import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import MessageCmp from "./MessageCmp"
 import RoleDialog from "./RoleDialog"
-import cls from "./View.module.css"
 
 
 
@@ -44,6 +42,7 @@ const RoomView: FunctionComponent<Props> = ({
 	// RENDER
 	const history = store.state.room?.history ?? []
 	const agents = agentSo.state.all ?? []
+	const agentSelected = agentSo.state.all.find((a: Agent) => a.id === store.state.room?.agentId)
 	const selectedAgentId = store.state.room?.agentId
 
 	return <FrameworkCard
@@ -56,19 +55,14 @@ const RoomView: FunctionComponent<Props> = ({
 
 		<div className="lyt-v">
 			<div className="jack-lbl-prop">AGENT</div>
-			<ListDialog2
-				store={store}
-				select={selectedAgentId}
-				items={agents}
-				readOnly={true}
-				fnGetId={(item: Agent) => item?.id}
-				fnGetString={(item: Agent) => item?.name}
-				onChangeSelect={handleAgentChange}
-			/>
-			<Button
-				onClick={() => console.log("Open agent dialog")}
-			>Open</Button>
+			<div className="jack-lbl-readonly">{agentSelected?.name ?? "--"}</div>
+			<div className="jack-lbl-prop">ROOM ID</div>
+			<div className="jack-lbl-readonly">{store.state.room?.id ?? "--"}</div>
+			<div className="jack-lbl-prop">ROOM PARENT ID</div>
+			<div className="jack-lbl-readonly">{store.state.room?.parentRoomId ?? "--"}</div>
 		</div>
+
+
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
 			{history.map((msg) => (
@@ -78,6 +72,8 @@ const RoomView: FunctionComponent<Props> = ({
 				/>
 			))}
 		</div>
+
+
 
 		<TextInput
 			value={store.state.prompt}

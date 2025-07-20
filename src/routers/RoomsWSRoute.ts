@@ -179,7 +179,7 @@ export class WSRoomsService extends ws.route {
 				})
 				return tool
 			},
-			onCreateNewRoom: (agentId: string, parentRoomId: string, parentMessageId: string): string => {
+			onCreateNewRoom: (agentId: string, parentRoomId: string): string => {
 				// creo una nuova room
 				const newRoom = {
 					id: randomUUID() as string,
@@ -187,7 +187,6 @@ export class WSRoomsService extends ws.route {
 					history: [],
 					agentId,
 					parentRoomId,
-					messageId: parentMessageId,
 				}
 				chat.rooms.push(newRoom)
 
@@ -199,7 +198,7 @@ export class WSRoomsService extends ws.route {
 					chatId: chat.id,
 					roomId: newRoom.id,
 					parentRoomId,
-					parentMessageId,
+					agentId,
 				}
 				this.sendToChat(msg)
 
