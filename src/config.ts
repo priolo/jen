@@ -12,6 +12,8 @@ import LlmRoute from "./routers/LlmRoute.js";
 import RoomRoute from "./routers/RoomRoute.js";
 import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
+import McpServerRoute from "./routers/MCPServerRoute.js";
+
 
 
 
@@ -45,10 +47,10 @@ function buildNodeConfig() {
 
 	return [
 
-		<log.conf>{ 
+		<log.conf>{
 			class: "log",
 			onLog: (msg) => {
-				if ( msg.type == "error") {
+				if (msg.type == "error") {
 					console.error(msg)
 				}
 			}
@@ -59,6 +61,8 @@ function buildNodeConfig() {
 			port: PORT,
 			children: [
 
+				{ class: "npm:@priolo/julian-mcp" },
+
 				<httpRouter.conf>{
 					class: "http-router",
 					path: "/api",
@@ -68,10 +72,11 @@ function buildNodeConfig() {
 						// "credentials": true,
 					},
 					children: [
-						{ class: AgentRoute },
+						{ class: McpServerRoute },
 						{ class: LlmRoute },
 						{ class: ToolRoute },
-						{ class: RoomRoute },
+						{ class: AgentRoute },
+						//{ class: RoomRoute },
 					],
 				},
 
@@ -80,11 +85,11 @@ function buildNodeConfig() {
 					port: 3100,
 					children: [
 						// { class: "npm:@priolo/julian-ws-reflection" }
-						<WSRoomsConf>{ 
-							class: WSRoomsService 
+						<WSRoomsConf>{
+							class: WSRoomsService
 						},
-						<WSDocConf>{ 
-							class: WSDocService 
+						<WSDocConf>{
+							class: WSDocService
 						}
 					]
 				}

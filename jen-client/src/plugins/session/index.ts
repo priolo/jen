@@ -3,6 +3,7 @@ import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
 import { delay } from "../../utils/time"
 import { SocketService } from "../SocketService"
+import mcpServerSo from "@/stores/stacks/mcpServer/repo"
 
 
 
@@ -36,7 +37,8 @@ export async function StartSession() {
 	if (import.meta.env.DEV) await delay(1000)
 
 	// LOAD SINGLETONE STORES
-	//await llmSo.fetch()
+	await mcpServerSo.fetch()
+	await llmSo.fetch()
 	await toolSo.fetch()
 	await agentSo.fetch()
 

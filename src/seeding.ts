@@ -1,12 +1,25 @@
 import { RootService, Bus } from "@priolo/julian";
 import { typeorm } from "@priolo/julian";
 import { Agent } from "./repository/Agent.js";
+import { Tool } from "./repository/Tool.js";
+import { McpServer } from "./repository/MCPServer.js";
 
 
 
 export async function seeding(root: RootService) {
 
-	const tools = await (new Bus(root, "/typeorm/tools")).dispatch({
+	const mcpServers = await new Bus(root, "/typeorm/mcp_servers").dispatch<McpServer[]>({
+		type: typeorm.RepoStructActions.SEED,
+		payload: [
+			{ type: typeorm.RepoStructActions.TRUNCATE },
+			<McpServer>{
+				name: "test",
+				host: "https://text-extractor.mcp.inevitable.fyi/mcp",
+			},
+		]
+	});
+
+	const tools = await new Bus(root, "/typeorm/tools").dispatch<Tool[]>({
 		type: typeorm.RepoStructActions.SEED,
 		payload: [
 			{ type: typeorm.RepoStructActions.TRUNCATE },
@@ -39,7 +52,7 @@ export async function seeding(root: RootService) {
 		]
 	});
 
-	const [agentMath] = await (new Bus(root, "/typeorm/agents")).dispatch({
+	const [agentMath] = await (new Bus(root, "/typeorm/agents")).dispatch<Agent[]>({
 		type: typeorm.RepoStructActions.SEED,
 		payload: [
 			{ type: typeorm.RepoStructActions.TRUNCATE },

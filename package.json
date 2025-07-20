@@ -23,6 +23,7 @@
     "@priolo/jess": "file://C:/Users/ivano.iorio/Documents/jess",
     "@priolo/julian": "file://C:/Users/ivano.iorio/Documents/julian",
     "@priolo/julian-ws-reflection": "file://C:/Users/ivano.iorio/Documents/julian-libs/julian-ws-reflection",
+    "@priolo/julian-ws-mcp": "file://C:/Users/ivano.iorio/Documents/julian-libs/julian-mcp",
     "@priolo/jon-utils": "^0.5.3",
 
     "cross-env": "^7.0.3",
