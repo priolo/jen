@@ -9,11 +9,10 @@ import { Tool } from "./repository/Tool.js";
 import AgentRoute from './routers/AgentRoute.js';
 import { WSDocConf, WSDocService } from "./routers/DocsWSRoute.js";
 import LlmRoute from "./routers/LlmRoute.js";
-import RoomRoute from "./routers/RoomRoute.js";
 import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
-import McpServerRoute from "./routers/MCPServerRoute.js";
-
+import McpServerRoute from "./routers/McpServerRoute.js";
+import { McpServer } from "./repository/McpServer.js";
 
 
 
@@ -61,7 +60,36 @@ function buildNodeConfig() {
 			port: PORT,
 			children: [
 
-				{ class: "npm:@priolo/julian-mcp" },
+				{
+					class: "npm:@priolo/julian-mcp",
+					tools: [
+						{
+							name: "sum",
+							config: {
+								title: "Tool Somma",
+								description: "Esegue la somma di due numeri",
+								inputSchema: {
+									type: "object",
+									properties: {
+										a: { type: "number" },
+										b: { type: "number" }
+									},
+									required: ["a", "b"]
+								}
+							},
+							execute: async (args: { a: number, b: number }, extra: any) => {
+								return {
+									content: [
+										{
+											type: "text" as const,
+											text: String(args.a + args.b)
+										}
+									]
+								}
+							}
+						}
+					],
+				},
 
 				<httpRouter.conf>{
 					class: "http-router",
@@ -103,6 +131,11 @@ function buildNodeConfig() {
 				//entities: repositories
 			},
 			children: [
+				{
+					name: "mcp_servers",
+					class: "typeorm/repo",
+					model: McpServer,
+				},
 				{
 					name: "llm",
 					class: "typeorm/repo",

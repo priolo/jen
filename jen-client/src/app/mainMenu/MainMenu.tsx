@@ -24,6 +24,8 @@ import cls from "./MainMenu.module.css"
 import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
+import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
+import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
 
 
 
@@ -42,6 +44,11 @@ const MainMenu: FunctionComponent<Props> = ({
 	// HOOKS
 
 	// HANDLERS
+	const handleMcpServerList = () => {
+		const view = buildMcpServerList()
+		deckCardsSo.add({ view, anim: true })
+	}
+
 	const handleLlmList = () => {
 		const view = buildLlmList()
 		deckCardsSo.add({ view, anim: true })
@@ -95,6 +102,15 @@ const MainMenu: FunctionComponent<Props> = ({
 		deckCardsSo.add({ view, anim: true })
 	}
 
+	const JsonShema = () => {
+		const view = buildMcpToolDetail({
+			// mcpServerId: store.state.mcpServer.id,
+			// mcpTool: tool,
+		})
+		deckCardsSo.add({ view, anim: true })
+
+	}
+
 	// const handleDocDev = () => {
 	// 	const view = buildStore({
 	// 		type: DOC_TYPE.TEXT_EDITOR,
@@ -106,27 +122,25 @@ const MainMenu: FunctionComponent<Props> = ({
 	// RENDER
 	return <div style={style} className={cls.root}>
 
+		{/* <Button children="DOC NEW" onClick={handleDocNew} /> */}
+		{/* <Button children="DOC" onClick={handleDoc} /> */}
+		{/* <Button children="EDIT" onClick={handleEdit} /> */}
+		{/* <Button children="REF" onClick={handleReflection} /> */}
+		{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
+		{/* <Button children="ACCOUNT" onClick={handleAccount} /> */}
+		<Button children="MCP" onClick={handleMcpServerList} />
+		<Button children="LLM" onClick={handleLlmList} />
+		<Button children="TOOLS" onClick={handleToolList} />
+		<Button children="AGENTS" onClick={handleAgentList} />
+		{/* <Button children="ROOM" onClick={handleRoom} /> */}
+
+
 		{/* *** DEBUG *** */}
 		{process.env.NODE_ENV === 'development' && <>
+			<Button children="JSON" onClick={() => JsonShema()} />
 			<Button children="SAVE" onClick={() => EndSession()} />
 			<Button children="LOAD" onClick={() => StartSession()} />
 			<Button children="RESET" onClick={() => ClearSession()} />
-
-			{/* <Button children="DOC NEW" onClick={handleDocNew} /> */}
-			{/* <Button children="DOC" onClick={handleDoc} /> */}
-			{/* <Button children="EDIT" onClick={handleEdit} /> */}
-			{/* <Button children="REF" onClick={handleReflection} /> */}
-			{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
-
-
-
-			{/* <Button children="ACCOUNT" onClick={handleAccount} /> */}
-
-			<Button children="LLM" onClick={handleLlmList} />
-			<Button children="TOOLS" onClick={handleToolList} />
-			<Button children="AGENTS" onClick={handleAgentList} />
-			{/* <Button children="ROOM" onClick={handleRoom} /> */}
-
 		</>}
 		{/* *** DEBUG *** */}
 

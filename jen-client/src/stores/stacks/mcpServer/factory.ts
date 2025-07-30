@@ -1,36 +1,36 @@
 import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE, EDIT_STATE } from "@/types";
-import { LlmDetailState, LlmDetailStore } from "./detail";
 import { VIEW_SIZE } from "@priolo/jack";
-import { PROVIDER } from "@/types/Llm";
+import { McpServerDetailState, McpServerDetailStore } from "./detail";
 import { McpServerListState, McpServerListStore } from "./list";
 
 
 
-export function buildLlmDetail(state:Partial<LlmDetailState>) {
+export function buildMcpServerDetail(state:Partial<McpServerDetailState>) {
 	const store = buildStore({
-		type: DOC_TYPE.LLM_DETAIL,
+		type: DOC_TYPE.MCP_SERVER_DETAIL,
 		...state,
-	} as LlmDetailState) as LlmDetailStore;
+	} as McpServerDetailState) as McpServerDetailStore;
 	return store;
 }
 
-export function buildLlmDetailNew() {
+export function buildMcpServerDetailNew() {
 	const store = buildStore({
-		type: DOC_TYPE.LLM_DETAIL,
+		type: DOC_TYPE.MCP_SERVER_DETAIL,
 		editState: EDIT_STATE.NEW,
 		size: VIEW_SIZE.NORMAL,
 		sizeForce: true,
-		llm: {
-			provider: PROVIDER.GOOGLE,
+		mcpServer: {
+			name: "",
+			host: "",
 		},
-	} as LlmDetailState) as LlmDetailStore;
+	} as McpServerDetailState) as McpServerDetailStore;
 	return store;
 }
 
-export function buildLlmList() {
+export function buildMcpServerList() {
 	const store = buildStore({
-		type: DOC_TYPE.LLM_LIST,
+		type: DOC_TYPE.MCP_SERVER_LIST,
 	} as McpServerListState) as McpServerListStore
 	return store;
 }

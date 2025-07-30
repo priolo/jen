@@ -29,6 +29,12 @@ import UserDetailView from "../../app/cards/user/detail/View"
 import StreamsListView from "../../app/cards/user/list/ListView"
 import { AccountStore } from "../../stores/stacks/account"
 import { ReflectionStore } from "../../stores/stacks/reflection"
+import McpServerListView from "@/app/cards/mcpServer/ListView"
+import McpServerDetailView from "@/app/cards/mcpServer/detail/View"
+import { McpServerListStore } from "@/stores/stacks/mcpServer/list"
+import { McpServerDetailStore } from "@/stores/stacks/mcpServer/detail"
+import McpToolDetailView from "@/app/cards/mcpTool/detail/View"
+import { McpToolDetailStore } from "@/stores/stacks/mcpTool/detail"
 
 
 
@@ -68,6 +74,13 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 				return <LlmListView store={view as LlmListStore} />
 			case DOC_TYPE.LLM_DETAIL:
 				return <LlmDetailView store={view as LlmDetailStore} />
+
+			case DOC_TYPE.MCP_SERVER_LIST:
+				return <McpServerListView store={view as McpServerListStore} />
+			case DOC_TYPE.MCP_SERVER_DETAIL:
+				return <McpServerDetailView store={view as McpServerDetailStore} />
+			case DOC_TYPE.MCP_TOOL_DETAIL:
+				return <McpToolDetailView store={view as McpToolDetailStore} />
 
 			case DOC_TYPE.TOOL_LIST:
 				return <ToolListView store={view as ToolListStore} />

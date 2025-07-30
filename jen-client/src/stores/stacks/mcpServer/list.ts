@@ -1,10 +1,9 @@
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { Llm } from "@/types/Llm"
+import { McpServer } from "@/types/McpServer"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { EditorState } from "../editorBase"
-import { LlmDetailStore } from "./detail"
-import { buildLlmDetail, buildLlmDetailNew } from "./factory"
+import { McpServerDetailStore } from "./detail"
+import { buildMcpServerDetail, buildMcpServerDetailNew } from "./factory"
 import mcpServerSo from "./repo"
 
 
@@ -19,9 +18,12 @@ const setup = {
 	},
 
 	getters: {
+
 		//#region VIEWBASE
+
 		getTitle: (_: void, store?: ViewStore) => "MCP SERVERS",
 		getSubTitle: (_: void, store?: ViewStore) => "MCP servers list",
+		
 		//#endregion
 
 	},
@@ -29,11 +31,6 @@ const setup = {
 	actions: {
 
 		//#region OVERRIDE VIEWBASE
-
-		// setSerialization: (data: any, store?: LlmListStore) => {
-		// 	viewSetup.actions.setSerialization(data, store)
-		// 	const state = store.state as LlmListState
-		// },
 
 		//#endregion
 
@@ -46,33 +43,33 @@ const setup = {
 		//#endregion
 
 		/** apro/chiudo la CARD del dettaglio */
-		select(llmId: string, store?: McpServerListStore) {
+		select(id: string, store?: McpServerListStore) {
 			const detached = focusSo.state.shiftKey
-			const oldId = (store.state.linked as LlmDetailStore)?.state?.llm?.id
-			const newId = (llmId && oldId !== llmId) ? llmId : null
+			const oldId = (store.state.linked as McpServerDetailStore)?.state?.mcpServer?.id
+			const newId = (id && oldId !== id) ? id : null
 
 			if (detached) {
-				const view = buildLlmDetail({ llm: { id: llmId }, size: VIEW_SIZE.NORMAL })
+				const view = buildMcpServerDetail({ mcpServer: { id: id }, size: VIEW_SIZE.NORMAL })
 				store.state.group.add({ view, index: store.state.group.getIndexByView(store) + 1 })
 			} else {
-				const view = newId ? buildLlmDetail({ llm: { id: llmId } }) : null
+				const view = newId ? buildMcpServerDetail({ mcpServer: { id: id } }) : null
 				//store.setSelect(newId)
 				store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
 			}
 		},
 
 		create(_: void, store?: McpServerListStore) {
-			const view = buildLlmDetailNew()
+			const view = buildMcpServerDetailNew()
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
-		async delete(llmId: string, store?: McpServerListStore) {
+		async delete(id: string, store?: McpServerListStore) {
 			if (!await store.alertOpen({
 				title: "CONSUMER DELETION",
 				body: "This action is irreversible.\nAre you sure you want to delete the CONSUMER?",
 			})) return
 
-			mcpServerSo.delete(llmId)
+			mcpServerSo.delete(id)
 
 			store.state.group.addLink({ view: null, parent: store, anim: true })
 
@@ -86,7 +83,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Llm[]) => ({ all }),
+		setAll: (all: McpServer[]) => ({ all }),
 	},
 }
 

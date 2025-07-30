@@ -23,9 +23,10 @@
     "@priolo/jess": "file://C:/Users/ivano.iorio/Documents/jess",
     "@priolo/julian": "file://C:/Users/ivano.iorio/Documents/julian",
     "@priolo/julian-ws-reflection": "file://C:/Users/ivano.iorio/Documents/julian-libs/julian-ws-reflection",
-    "@priolo/julian-ws-mcp": "file://C:/Users/ivano.iorio/Documents/julian-libs/julian-mcp",
+    "@priolo/julian-mcp": "file://C:/Users/ivano.iorio/Documents/julian-libs/julian-mcp",
     "@priolo/jon-utils": "^0.5.3",
 
+    
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
     "google-auth-library": "^9.10.0",
@@ -33,6 +34,7 @@
     "slate": "^0.103.0",
     "typeorm": "^0.3.23",
 
+    "@modelcontextprotocol/sdk": "^1.16.0",
     "@ai-sdk/cohere": "^1.2.10",
     "@ai-sdk/google": "^1.2.19",
     "@ai-sdk/mistral": "^1.2.8",

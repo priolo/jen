@@ -11,9 +11,14 @@ const setup = {
 	},
 
 	getters: {
+		getById(id: string, store?: McpServerStore) {
+			if (!id) return null
+			return store.state.all?.find(mcpServer => mcpServer.id == id)
+		},
+
 		getIndexById(id: string, store?: McpServerStore) {
 			if (!id) return -1
-			return store.state.all?.findIndex(llm => llm.id == id)
+			return store.state.all?.findIndex(mcpServer => mcpServer.id == id)
 		},
 	},
 
@@ -24,14 +29,12 @@ const setup = {
 		//#endregion
 
 		//#region OVERWRITE
+
 		async fetch(_: void, store?: McpServerStore) {
-			//const s = <LlmStore>store
-			// const cnnStore = utils.findAll(docsSo.getAllCards(), { type: DOC_TYPE.CONNECTIONS })?.[0]
-			// socketPool.closeAll()
 			const mcpServers = await mcpServerApi.index({ store })
 			store.setAll(mcpServers)
-			//await loadBaseSetup.actions.fetch(_, store)
 		},
+
 		//#endregion
 
 		async fetchIfVoid(_: void, store?: McpServerStore) {
@@ -39,6 +42,19 @@ const setup = {
 			await store.fetch()
 		},
 
+		/**
+		 * Recupero e memorizzo le risorse di un MCP server
+		 */
+		fetchIfVoidResources: async (id: string, store?: McpServerStore) => {
+			const mcpServer = store.getById(id)
+			if (!mcpServer) return
+			if (!!mcpServer.tools) return
+
+			const resurces = await mcpServerApi.resources(mcpServer.id)
+			
+			mcpServer.tools = resurces.tools
+			store._update()
+		},
 
 		async save(mcpServer: Partial<McpServer>, store?: McpServerStore): Promise<McpServer> {
 			let mcpServerSaved: McpServer = null
@@ -58,7 +74,7 @@ const setup = {
 
 		async delete(id: string, store?: McpServerStore) {
 			await mcpServerApi.remove(id, { store })
-			store.setAll(store.state.all.filter(llm => llm.id != id))
+			store.setAll(store.state.all.filter(mcpServer => mcpServer.id != id))
 		},
 
 	},

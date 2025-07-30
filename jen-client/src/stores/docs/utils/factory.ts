@@ -5,6 +5,8 @@ import agentEditorSetup from "@/stores/stacks/agentEditor";
 import editCodeSetup from "@/stores/stacks/editorCode";
 import llmDetailSetup from "@/stores/stacks/llm/detail";
 import llmListSetup from "@/stores/stacks/llm/list";
+import mcpServerDetailSetup from "@/stores/stacks/mcpServer/detail";
+import mcpServerListSetup from "@/stores/stacks/mcpServer/list";
 import roomDetailSetup from "@/stores/stacks/room/detail/detail";
 import promptListSetup from "@/stores/stacks/room/list";
 import usersSetup from "@/stores/stacks/streams";
@@ -15,6 +17,7 @@ import { DOC_TYPE } from "@/types";
 import { createStore } from "@priolo/jon";
 import reflectionSetup from "../../stacks/reflection";
 import { ViewState, ViewStore } from "../../stacks/viewBase";
+import mcpToolDetailSetup from "@/stores/stacks/mcpTool/detail";
 
 
 
@@ -50,6 +53,10 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 
 		[DOC_TYPE.LLM_LIST]: llmListSetup,
 		[DOC_TYPE.LLM_DETAIL]: llmDetailSetup,
+
+		[DOC_TYPE.MCP_SERVER_LIST]: mcpServerListSetup,
+		[DOC_TYPE.MCP_SERVER_DETAIL]: mcpServerDetailSetup,
+		[DOC_TYPE.MCP_TOOL_DETAIL]: mcpToolDetailSetup,
 
 		[DOC_TYPE.TOOL_LIST]: toolListSetup,
 		[DOC_TYPE.TOOL_DETAIL]: toolDetailSetup,

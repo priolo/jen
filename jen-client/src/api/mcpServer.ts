@@ -1,5 +1,5 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
-import { McpServer } from "@/types/McpServer"
+import { McpServer, McpTool } from "@/types/McpServer"
 
 
 
@@ -14,20 +14,30 @@ function get(id: string, opt?: CallOptions): Promise<McpServer> {
 }
 
 /** CREATE NEW */
-function create(llm: Partial<McpServer>, opt?: CallOptions): Promise<McpServer> {
-	return ajax.post(`mcp_servers`, { llm }, opt)
+function create(mcpServer: Partial<McpServer>, opt?: CallOptions): Promise<McpServer> {
+	return ajax.post(`mcp_servers`, { mcpServer }, opt)
 }
 
 /** UPDATE */
-function update(llm: Partial<McpServer>, opt?: CallOptions): Promise<McpServer> {
-	return ajax.patch(`mcp_servers/${llm.id}`, { llm }, opt)
+function update(mcpServer: Partial<McpServer>, opt?: CallOptions): Promise<McpServer> {
+	return ajax.patch(`mcp_servers/${mcpServer.id}`, { mcpServer }, opt)
 }
 
 /** DELETE */
-function remove(llmId: string, opt?: CallOptions): Promise<void> {
-	return ajax.delete(`mcp_servers/${llmId}`, null, opt)
+function remove(id: string, opt?: CallOptions): Promise<void> {
+	return ajax.delete(`mcp_servers/${id}`, null, opt)
 }
 
+
+/** GET RESOURCES */
+function resources(id: string, opt?: CallOptions): Promise<{ tools: McpTool[] }> {
+	return ajax.get(`mcp_servers/${id}/resources`)
+}
+
+/** ESEGUE UN TOOL DEL MCP */
+async function execute(mcpServerId: string, mcpToolName: string, formData: any, opt?: CallOptions): Promise<void> {
+	return ajax.post(`mcp_servers/${mcpServerId}/${mcpToolName}/execute`, formData, opt)
+}
 
 const mcpServerApi = {
 	index,
@@ -35,5 +45,8 @@ const mcpServerApi = {
 	create,
 	update,
 	remove,
+
+	resources,
+	execute,
 }
 export default mcpServerApi

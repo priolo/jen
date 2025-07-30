@@ -1,12 +1,11 @@
-import llmApi from "@/api/llm"
+import mcpServerApi from "@/api/mcpServer"
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE, EDIT_STATE } from "@/types"
-import { Llm } from "@/types/Llm"
+import { McpServer } from "@/types/McpServer"
 import { MESSAGE_TYPE, utils } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { McpServerListState, McpServerListStore } from "./list"
+import { McpServerListStore } from "./list"
 import mcpServerSo from "./repo"
-
 
 
 
@@ -14,8 +13,8 @@ const setup = {
 
 	state: {
 
-		/** llm visualizzato */
-		llm: <Partial<Llm>>null,
+		/** MCP server visualizzato */
+		mcpServer: <Partial<McpServer>>null,
 
 		editState: EDIT_STATE.READ,
 
@@ -27,12 +26,20 @@ const setup = {
 	getters: {
 
 		//#region VIEWBASE
-		getTitle: (_: void, store?: ViewStore) => "LLM DETAIL",
+		getTitle: (_: void, store?: ViewStore) => "MCP SERVER DETAIL",
+		getSubTitle: (_: void, store?: ViewStore) => "MCP server detail",
 		//#endregion
 
-		getParentList: (_: void, store?: LlmDetailStore) => utils.findInRoot(store.state.group.state.all,
-			{ type: DOC_TYPE.LLM_LIST }
+		getParentList: (_: void, store?: McpServerDetailStore) => utils.findInRoot(store.state.group.state.all,
+			{ type: DOC_TYPE.MCP_SERVER_LIST }
 		) as McpServerListStore,
+
+		getMcpServer: (_: void, store?: McpServerDetailStore) => {
+			if (store.state.editState == EDIT_STATE.READ) {
+				return mcpServerSo.getById(store.state.mcpServer.id)
+			}
+			return store.state.mcpServer
+		},
 
 
 	},
@@ -42,51 +49,40 @@ const setup = {
 		//#region VIEWBASE
 		//#endregion
 
-		fetch: async (_: void, store?: LlmDetailStore) => {
-			if (!store.state.llm?.id) return
-			const llm = await llmApi.get(store.state.llm.id, { store, manageAbort: true })
-			store.setLlm(llm)
-			//await loadBaseSetup.actions.fetch(_, store)
-		},
-
-		async fetchIfVoid(_: void, store?: LlmDetailStore) {
-			if (!!store.state.llm.name) return
-			await store.fetch()
-		},
-
 		/** crea un nuovo CONSUMER-INFO tramite CONSUMER-CONFIG */
-		async save(_: void, store?: LlmDetailStore) {
-			const llmSaved = await mcpServerSo.save(store.state.llm)
+		async save(_: void, store?: McpServerDetailStore) {
+			const mcpServerSaved = await mcpServerSo.save(store.state.mcpServer)
 
-			store.setLlm(llmSaved)
+			store.setMcpServer(mcpServerSaved)
 			store.setEditState(EDIT_STATE.READ)
 			store.setSnackbar({
 				open: true, type: MESSAGE_TYPE.SUCCESS, timeout: 5000,
 				title: "SAVED",
-				body: "you can find it in the LLM list",
+				body: "you can find it in the MCP list",
 			})
 		},
 
 		/** reset ENTITY */
-		restore: (_: void, store?: LlmDetailStore) => {
-			store.fetch()
-			store.setEditState(EDIT_STATE.READ)
+		restore: (_: void, store?: McpServerDetailStore) => {
+			//store.fetch()
+			//store.setEditState(EDIT_STATE.READ)
+			store.setMcpServer(mcpServerSo.getById(store.state.mcpServer.id))
 		},
 
 	},
 
 	mutators: {
-		setLlm: (llm: Partial<Llm>) => ({ llm }),
+		setMcpServer: (mcpServer: Partial<McpServer>) => ({ mcpServer }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }
 
-export type LlmDetailState = typeof setup.state & ViewState
-export type LlmDetailGetters = typeof setup.getters
-export type LlmDetailActions = typeof setup.actions
-export type LlmDetailMutators = typeof setup.mutators & ViewMutators
-export interface LlmDetailStore extends ViewStore, LlmDetailGetters, LlmDetailActions, LlmDetailMutators {
-	state: LlmDetailState
+export type McpServerDetailState = typeof setup.state & ViewState
+export type McpServerDetailGetters = typeof setup.getters
+export type McpServerDetailActions = typeof setup.actions
+export type McpServerDetailMutators = typeof setup.mutators & ViewMutators
+export interface McpServerDetailStore extends ViewStore, McpServerDetailGetters, McpServerDetailActions, McpServerDetailMutators {
+	state: McpServerDetailState
 }
-const llmDetailSetup = mixStores(viewSetup, setup) as typeof setup
-export default llmDetailSetup
+const mcpServerDetailSetup = mixStores(viewSetup, setup) as typeof setup
+export default mcpServerDetailSetup
