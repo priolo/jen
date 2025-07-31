@@ -14,6 +14,7 @@ export enum DOC_TYPE {
 	MCP_SERVER_LIST = "mcp_server_list",
 	MCP_SERVER_DETAIL = "mcp_server_detail",
 	MCP_TOOL_DETAIL = "mcp_tool_detail",
+	MCP_TOOL_RESPONSES = "mcp_tool_responses",
 
 
 	TOOL_LIST = "tool_list",

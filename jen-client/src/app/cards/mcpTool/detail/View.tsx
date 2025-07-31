@@ -1,7 +1,7 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
-import ConnectionIcon from "../../../../icons/cards/ConnectionIcon"
+import ConnectionIcon from "@/icons/cards/ConnectionIcon"
 import clsGreen from "../../CardGreen.module.css"
 import McpToolDetailActions from "./Actions"
 import McpToolDetailForm from "./Form"

@@ -35,7 +35,7 @@ function resources(id: string, opt?: CallOptions): Promise<{ tools: McpTool[] }>
 }
 
 /** ESEGUE UN TOOL DEL MCP */
-async function execute(mcpServerId: string, mcpToolName: string, formData: any, opt?: CallOptions): Promise<void> {
+async function execute(mcpServerId: string, mcpToolName: string, formData: any, opt?: CallOptions): Promise<any> {
 	return ajax.post(`mcp_servers/${mcpServerId}/${mcpToolName}/execute`, formData, opt)
 }
 

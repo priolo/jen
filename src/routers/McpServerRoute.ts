@@ -80,8 +80,6 @@ class McpServerRoute extends httpRouter.Service {
 		const resp = await client.listTools()
 		this.log("mcp-server:tools", resp)
 
-
-
 		await client.close();
 
 		res.json(resp)

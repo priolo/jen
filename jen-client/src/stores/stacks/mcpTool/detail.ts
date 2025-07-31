@@ -3,6 +3,9 @@ import { McpTool } from "@/types/McpServer"
 import { mixStores } from "@priolo/jon"
 import mcpServerSo from "../mcpServer/repo"
 import mcpServerApi from "@/api/mcpServer"
+import { set } from "zod"
+import toolResponseSo from "./responseRepo"
+import { buildToolListResponses } from "./factory"
 
 
 const setup = {
@@ -40,16 +43,27 @@ const setup = {
 
 		//#region VIEWBASE
 		//#endregion
-		
+
 		async execute(_: void, store?: McpToolDetailStore) {
 			if (store.state.mcpTool == null) return
 			const resp = await mcpServerApi.execute(
-				store.state.mcpServerId, 
-				store.state.mcpTool.name, 
+				store.state.mcpServerId,
+				store.state.mcpTool.name,
 				store.state.request
 			)
-			
-			console.log("execute resp", resp)
+			store.setResponse(resp)
+			toolResponseSo.add({
+				mcpServerId: store.state.mcpServerId,
+				mcpTool: { ...store.state.mcpTool } as McpTool,
+				request: store.state.request,
+				response: resp,
+			})
+		},
+
+		async openMessages(_: void, store?: McpToolDetailStore) {
+			const view = buildToolListResponses({
+			})
+			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
 	},
@@ -57,6 +71,7 @@ const setup = {
 	mutators: {
 		setMcpTool: (mcpTool: Partial<McpTool>) => ({ mcpTool }),
 		setRequest: (request: any) => ({ request }),
+		setResponse: (response: any) => ({ response }),
 	},
 }
 

@@ -24,11 +24,7 @@ const McpToolDetailActions: FunctionComponent<Props> = ({
 	// HANDLER
 	const handleExecuteClick = async () => {
 		await store.execute()
-		if (store.state.mcpTool == null) return
-		const mcpServer = store.getMcpServer()
-		if (mcpServer == null) return
-		store.state.mcpServerId = mcpServer.id
-		store.setMcpTool(store.state.mcpTool)
+		store.openMessages()
 	}
 
 

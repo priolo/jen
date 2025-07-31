@@ -29,11 +29,7 @@ const McpServerDetailForm: FunctionComponent<Props> = ({
     }) => store.setMcpServer({ ...store.state.mcpServer, ...prop })
 
     const handleOpenTool = (tool: any) => {
-        const view = buildMcpToolDetail({
-            mcpServerId: store.state.mcpServer.id,
-            mcpTool: tool,
-        })
-        store.state.group.addLink({ view, parent: store, anim: true })
+        store.openTool(tool)
     }
 
 

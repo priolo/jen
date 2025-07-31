@@ -6,7 +6,7 @@ export interface ToolMessage {
 	/** server dove è presente il tool */
 	mcpServerId: string | null
 	/** tool utilizzato */
-	tool: McpTool | null
+	mcpTool: McpTool | null
 	/** i dati inviati */
 	request: any,
 	/** i dati ricevuti */

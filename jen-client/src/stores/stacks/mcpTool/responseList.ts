@@ -1,7 +1,6 @@
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { McpTool } from "@/types/McpServer"
 import { mixStores } from "@priolo/jon"
-import mcpServerSo from "../mcpServer/repo"
+import { ToolMessage } from "./types"
 
 
 /**
@@ -10,6 +9,8 @@ import mcpServerSo from "../mcpServer/repo"
 const setup = {
 
 	state: {
+
+		all: <ToolMessage[]>[],
 
 		//#region VIEWBASE
 		width: 200,
@@ -37,7 +38,7 @@ const setup = {
 	},
 
 	mutators: {
-		setMcpTool: (mcpTool: Partial<McpTool>) => ({ mcpTool }),
+		setAll: (all: ToolMessage[], store?: ToolResponseListStore) => ({ all }),
 	},
 }
 

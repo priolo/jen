@@ -1,11 +1,12 @@
 import mcpServerApi from "@/api/mcpServer"
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE, EDIT_STATE } from "@/types"
-import { McpServer } from "@/types/McpServer"
+import { McpServer, McpTool } from "@/types/McpServer"
 import { MESSAGE_TYPE, utils } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { McpServerListStore } from "./list"
 import mcpServerSo from "./repo"
+import { buildMcpToolDetail } from "../mcpTool/factory"
 
 
 
@@ -69,6 +70,13 @@ const setup = {
 			store.setMcpServer(mcpServerSo.getById(store.state.mcpServer.id))
 		},
 
+		openTool: (tool: Partial<McpTool>, store?: McpServerDetailStore) => {
+			const view = buildMcpToolDetail({
+				mcpServerId: store.state.mcpServer.id,
+				mcpTool: tool,
+			})
+			store.state.group.addLink({ view, parent: store, anim: true })
+		}
 	},
 
 	mutators: {

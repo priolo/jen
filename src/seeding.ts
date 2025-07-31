@@ -2,7 +2,8 @@ import { RootService, Bus } from "@priolo/julian";
 import { typeorm } from "@priolo/julian";
 import { Agent } from "./repository/Agent.js";
 import { Tool } from "./repository/Tool.js";
-import { McpServer } from "./repository/MCPServer.js";
+import { McpServer } from "./repository/McpServer.js";
+
 
 
 
@@ -12,6 +13,10 @@ export async function seeding(root: RootService) {
 		type: typeorm.RepoStructActions.SEED,
 		payload: [
 			{ type: typeorm.RepoStructActions.TRUNCATE },
+			<McpServer>{
+				name: "local",
+				host: "http://localhost:3000/mcp",
+			},
 			<McpServer>{
 				name: "test",
 				host: "https://text-extractor.mcp.inevitable.fyi/mcp",
