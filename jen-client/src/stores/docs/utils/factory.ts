@@ -18,7 +18,7 @@ import { createStore } from "@priolo/jon";
 import reflectionSetup from "../../stacks/reflection";
 import { ViewState, ViewStore } from "../../stacks/viewBase";
 import mcpToolDetailSetup from "@/stores/stacks/mcpTool/detail";
-import toolResponseListSetup from "@/stores/stacks/mcpTool/responseList";
+import toolMessageListSetup from "@/stores/stacks/mcpTool/messageList";
 
 
 
@@ -58,7 +58,7 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 		[DOC_TYPE.MCP_SERVER_LIST]: mcpServerListSetup,
 		[DOC_TYPE.MCP_SERVER_DETAIL]: mcpServerDetailSetup,
 		[DOC_TYPE.MCP_TOOL_DETAIL]: mcpToolDetailSetup,
-		[DOC_TYPE.MCP_TOOL_RESPONSES]: toolResponseListSetup,
+		[DOC_TYPE.MCP_TOOL_MESSAGE_LIST]: toolMessageListSetup,
 
 		[DOC_TYPE.TOOL_LIST]: toolListSetup,
 		[DOC_TYPE.TOOL_DETAIL]: toolDetailSetup,

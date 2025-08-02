@@ -1,7 +1,7 @@
 import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE } from "@/types";
 import { McpToolDetailState, McpToolDetailStore } from "./detail";
-import { ToolResponseListState, ToolResponseListStore } from "./responseList";
+import { ToolMessageListState, ToolMessageListStore } from "./messageList";
 
 
 
@@ -13,10 +13,10 @@ export function buildMcpToolDetail(state: Partial<McpToolDetailState>) {
 	return store;
 }
 
-export function buildToolListResponses(state: Partial<ToolResponseListState>) {
+export function buildToolListResponses(state: Partial<ToolMessageListState>) {
 	const store = buildStore({
-		type: DOC_TYPE.MCP_TOOL_RESPONSES,
+		type: DOC_TYPE.MCP_TOOL_MESSAGE_LIST,
 		...state,
-	} as ToolResponseListState) as ToolResponseListStore;
+	} as ToolMessageListState) as ToolMessageListStore;
 	return store;
 }

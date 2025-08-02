@@ -1,11 +1,11 @@
+import mcpServerApi from "@/api/mcpServer"
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { McpTool } from "@/types/McpServer"
 import { mixStores } from "@priolo/jon"
 import mcpServerSo from "../mcpServer/repo"
-import mcpServerApi from "@/api/mcpServer"
-import { set } from "zod"
-import toolResponseSo from "./responseRepo"
 import { buildToolListResponses } from "./factory"
+import toolMessageSo from "./messageRepo"
+import { McpToolResponse } from "./types"
 
 
 const setup = {
@@ -19,7 +19,7 @@ const setup = {
 		/** dati da inviare */
 		request: {},
 		/** dati ricevuti */
-		response: null,
+		response: <McpToolResponse>null,
 
 		//#region VIEWBASE
 		width: 200,
@@ -52,7 +52,7 @@ const setup = {
 				store.state.request
 			)
 			store.setResponse(resp)
-			toolResponseSo.add({
+			toolMessageSo.add({
 				mcpServerId: store.state.mcpServerId,
 				mcpTool: { ...store.state.mcpTool } as McpTool,
 				request: store.state.request,

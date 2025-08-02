@@ -54,7 +54,7 @@ const CardIcon: FunctionComponent<Props> = ({
 			return null
 		case DOC_TYPE.MCP_TOOL_DETAIL:
 			return null
-		case DOC_TYPE.MCP_TOOL_RESPONSES:
+		case DOC_TYPE.MCP_TOOL_MESSAGE_LIST:
 			return null
 
 		case DOC_TYPE.TOOL_LIST:

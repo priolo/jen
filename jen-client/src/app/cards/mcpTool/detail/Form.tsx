@@ -3,6 +3,9 @@ import { McpToolDetailStore } from "@/stores/stacks/mcpTool/detail"
 import { TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useState } from "react"
+import ToolResponseContentCmp from "../ToolResponseContentCmp"
+import { Tool } from "@/types/Tool"
+import ToolRequestCmp from "../ToolRequestCmp"
 
 
 
@@ -93,23 +96,23 @@ const McpToolDetailForm: FunctionComponent<Props> = ({
         </TitleAccordion>
 
         <TitleAccordion title="INPUT VALUE" open={false}>
-            <div className="jack-lbl-readonly" style={{
-                fontFamily: "monospace",
-                fontSize: "12px",
-                backgroundColor: "rgba(0,0,0,0.2)",
-                padding: "8px",
-                borderRadius: "4px",
-                whiteSpace: "pre-wrap"
-            }}>
-                {JSON.stringify(store.state.request, null, 2)}
-            </div>
+            <ToolRequestCmp
+                request={store.state.request}
+            />
         </TitleAccordion>
 
         <TitleAccordion title="OUTPUT VALUE" open={false}>
-
+            {store.state.response?.content?.map((content, index) => (
+                <ToolResponseContentCmp key={index}
+                    content={content}
+                />
+            ))}
         </TitleAccordion>
 
     </div>
 }
 
 export default McpToolDetailForm
+
+
+

@@ -1,7 +1,7 @@
 import { McpServerDetailStore } from "@/stores/stacks/mcpServer/detail"
 import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
 import { EDIT_STATE } from "@/types"
-import { TextInput } from "@priolo/jack"
+import { Button, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
 
@@ -40,7 +40,7 @@ const McpServerDetailForm: FunctionComponent<Props> = ({
     const host = mcpServer.host ?? ""
     const inRead = store.state.editState == EDIT_STATE.READ
     const inNew = store.state.editState == EDIT_STATE.NEW
-    const tools = mcpServer.tools ?? []
+    const tools = mcpServer.tools
 
     return <div className="jack-lyt-form var-dialog">
 
@@ -62,9 +62,14 @@ const McpServerDetailForm: FunctionComponent<Props> = ({
             />
         </div>
 
-        TOOLS
 
-        {tools.map(tool => (
+        <div>TOOLS</div>
+
+        <Button onClick={() => store.setEditState(EDIT_STATE.EDIT)} >
+            LOAD TOOLS
+        </Button>
+
+        {tools?.map(tool => (
             <div key={tool.name}
                 onClick={() => handleOpenTool(tool)}
             >
@@ -72,7 +77,9 @@ const McpServerDetailForm: FunctionComponent<Props> = ({
             </div>
         ))}
 
+        {tools?.length == 0 && <div className="jack-lbl-empty">NO TOOLS</div>}
 
+        {tools == null && <div>LOADING...</div>}
 
     </div>
 }
