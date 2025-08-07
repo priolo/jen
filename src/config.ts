@@ -13,12 +13,14 @@ import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
 import McpServerRoute from "./routers/McpServerRoute.js";
 import { McpServer } from "./repository/McpServer.js";
+import tools from "./config_tools.js";
 
 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export const PORT = process.env.PORT || 3000;
+export const PORT_WS = process.env.PORT_WS || 3010;
 
 class MyStateClass extends ServiceBase {
 	// definico lo STATE
@@ -62,33 +64,7 @@ function buildNodeConfig() {
 
 				{
 					class: "npm:@priolo/julian-mcp",
-					tools: [
-						{
-							name: "sum",
-							config: {
-								title: "Tool Somma",
-								description: "Esegue la somma di due numeri",
-								inputSchema: {
-									type: "object",
-									properties: {
-										a: { type: "number" },
-										b: { type: "number" }
-									},
-									required: ["a", "b"]
-								}
-							},
-							execute: async (args: { a: number, b: number }, extra: any) => {
-								return {
-									content: [
-										{
-											type: "text" as const,
-											text: String(args.a + args.b)
-										}
-									]
-								}
-							}
-						}
-					],
+					tools: tools,
 				},
 
 				<httpRouter.conf>{
@@ -110,7 +86,7 @@ function buildNodeConfig() {
 
 				<ws.conf>{
 					class: "ws",
-					port: 3100,
+					port: PORT_WS,
 					children: [
 						// { class: "npm:@priolo/julian-ws-reflection" }
 						<WSRoomsConf>{

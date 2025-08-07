@@ -22,7 +22,7 @@ export class Room {
     agentId: string | null;
 
     /** The agent associated with this room */
-    @ManyToOne(() => Agent, agent => agent.rooms, { nullable: true, onDelete: 'CASCADE' })
+    @ManyToOne(() => Agent, agent => agent.rooms, { nullable: true })
     @JoinColumn({ name: 'agentId' })
     agent?: Relation<Agent> | null;
 

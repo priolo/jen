@@ -4,7 +4,9 @@ import WebSocket from "ws";
 import buildNodeConfig from "../config";
 
 
-
+/**
+ * REFUSO!!!!
+ */
 describe("Test WSPromptService WebSocket", () => {
 	let axiosIstance: AxiosInstance;
 	let root: RootService;

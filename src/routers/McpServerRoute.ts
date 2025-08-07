@@ -1,7 +1,6 @@
+import { executeTool, getTools } from "@/mcp/utils.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js"
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 import { McpServer } from "../repository/McpServer.js";
 
 
@@ -66,22 +65,10 @@ class McpServerRoute extends httpRouter.Service {
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
-		if ( !mcpServer) return
+		if (!mcpServer) return
 
-		let client: Client = new Client({
-			name: 'streamable-http-client',
-			version: '1.0.0'
-		});
-		const transport = new StreamableHTTPClientTransport(new URL(mcpServer.host))
-		await client.connect(transport);
-		this.log("mcp-server:connected", mcpServer.host)
-
-		// Lista i tool disponibili
-		const resp = await client.listTools()
+		const resp = await getTools(mcpServer.host)
 		this.log("mcp-server:tools", resp)
-
-		await client.close();
-
 		res.json(resp)
 	}
 
@@ -92,24 +79,9 @@ class McpServerRoute extends httpRouter.Service {
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
-		if ( !mcpServer) return
+		if (!mcpServer) return
 
-		let client: Client = new Client({
-			name: 'streamable-http-client',
-			version: '1.0.0'
-		});
-		const transport = new StreamableHTTPClientTransport(new URL(mcpServer.host))
-		await client.connect(transport);
-		this.log("mcp-server:connected", mcpServer.host)
-
-		const resp = await client.callTool({
-			name: tool,
-			arguments: req.body || {}
-		})
-		this.log("mcp-server:execute", resp)
-
-		await client.close();
-
+		const resp = await executeTool(mcpServer.host, tool, req.body)
 		res.json(resp)
 	}
 

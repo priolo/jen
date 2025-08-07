@@ -1,11 +1,10 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import agentSo from "@/stores/stacks/agent/repo"
-import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
+import { EDIT_STATE } from "@/types"
 import { Agent } from "@/types/Agent"
 import { Tool } from "@/types/Tool"
-import { EDIT_STATE } from "@/types"
 import { IconToggle, ListDialog2, ListMultiDialog, MarkdownEditor, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect, useMemo } from "react"
@@ -47,8 +46,8 @@ const AgentView: FunctionComponent<Props> = ({
 	// 	store.setAgent({ ...store.state.agent, type })
 	// }
 
-	const handleLlmChange = (llmDefault: string) => {
-		store.setAgent({ ...store.state.agent, llmDefault })
+	const handleLlmChange = (llm: Llm) => {
+		store.setAgent({ ...store.state.agent, llm })
 	}
 
 	const handleBaseAgentChange = (baseId: string) => {
@@ -73,7 +72,7 @@ const AgentView: FunctionComponent<Props> = ({
 	if ( !store.state.agent ) return null
 
 	const llm = ["gemini-2.0-flash"]
-	const llmSelected = store.state.agent.llmDefault
+	const llmSelected = store.state.agent.llm
 	const agents = agentSo.state.all ?? []
 	const agentBaseId = store.state.agent?.baseId
 	const subAgentsSelected = store.state.agent?.subAgents?.map(agent => agent.id) ?? []

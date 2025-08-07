@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import { z } from "zod";
 import { colorPrint, ColorType } from '../utils/index.js';
 import { last } from 'slate';
+import { executeTool, getTools } from '@/mcp/utils.js';
 
 dotenv.config();
 
@@ -280,21 +281,53 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 		return structs
 	}
 
+
+	// async createTools(): Promise<ToolSet> {
+	// 	const structs: ToolSet = {}
+	// 	if (!this.agent?.tools) return structs
+
+	// 	for (const toolPart of this.agent.tools) {
+
+	// 		const toolPoco = await this.resolver.getTools(toolPart.id)
+	// 		const func = new Function("args", toolPoco.code)
+	// 		structs[toolPoco.name] = tool({
+	// 			description: toolPoco.description,
+	// 			parameters: jsonSchema(toolPoco.parameters),
+	// 			execute: async (args) => {
+	// 				colorPrint([this.agent.name, ColorType.Blue], " : tool : ", [toolPoco.name, ColorType.Yellow], " : ", [JSON.stringify(args), ColorType.Green])
+	// 				const ret = func(args)
+	// 				return ret instanceof Promise ? await ret : ret
+	// 			}
+	// 		})
+
+	// 	}
+	// 	return structs
+	// }
+
+
 	async createTools(): Promise<ToolSet> {
 		const structs: ToolSet = {}
 		if (!this.agent?.tools) return structs
 
 		for (const toolPart of this.agent.tools) {
 
+			// recupero dal DB
 			const toolPoco = await this.resolver.getTools(toolPart.id)
-			const func = new Function("args", toolPoco.code)
-			structs[toolPoco.name] = tool({
-				description: toolPoco.description,
-				parameters: jsonSchema(toolPoco.parameters),
+			// recupero il tool dal MCP server
+			const mcpTools = await getTools(toolPart.mcp.host)
+			const mcpTool = mcpTools.find(t => t.name == toolPoco.name)
+			const mcpHost = toolPart.mcp.host
+			const toolName = mcpTool.name
+			const inputSchema = mcpTool.inputSchema
+			const description = mcpTool.description
+
+			structs[toolName] = tool({
+				description: description,
+				parameters: jsonSchema(inputSchema),
 				execute: async (args) => {
-					colorPrint([this.agent.name, ColorType.Blue], " : tool : ", [toolPoco.name, ColorType.Yellow], " : ", [JSON.stringify(args), ColorType.Green])
-					const ret = func(args)
-					return ret instanceof Promise ? await ret : ret
+					colorPrint([this.agent.name, ColorType.Blue], " : tool : ", [toolName, ColorType.Yellow], " : ", [JSON.stringify(args), ColorType.Green])
+					const resp = await executeTool(mcpHost, toolName, args)
+					return resp.result
 				}
 			})
 

@@ -19,7 +19,7 @@ const setup = {
 		room: <Partial<Room>>null,
 		chatState: ROOM_STATE.OFFLINE,
 
-		prompt: "",
+		prompt: "5+6?",
 
 		/** indica che la dialog ROLE è aperto */
 		roleDialogOpen: false,

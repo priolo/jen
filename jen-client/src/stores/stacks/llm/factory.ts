@@ -1,8 +1,7 @@
 import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE, EDIT_STATE } from "@/types";
-import { LlmDetailState, LlmDetailStore } from "./detail";
 import { VIEW_SIZE } from "@priolo/jack";
-import { PROVIDER } from "@/types/Llm";
+import { LlmDetailState, LlmDetailStore } from "./detail";
 import { LlmListState, LlmListStore } from "./list";
 
 
@@ -21,9 +20,7 @@ export function buildLlmDetailNew() {
 		editState: EDIT_STATE.NEW,
 		size: VIEW_SIZE.NORMAL,
 		sizeForce: true,
-		llm: {
-			provider: PROVIDER.GOOGLE,
-		},
+		llm: {},
 	} as LlmDetailState) as LlmDetailStore;
 	return store;
 }

@@ -14,6 +14,7 @@ interface Props {
 	store?: PromptListStore
 }
 
+/** NON USATO */
 const RootListView: FunctionComponent<Props> = ({
 	store,
 }) => {
@@ -38,7 +39,7 @@ const RootListView: FunctionComponent<Props> = ({
 	// RENDER
 	const selectId = (store.state.linked as RoomDetailStore)?.state?.room?.id
 	const isSelected = (prompt: Room) => prompt.id == selectId
-	const prompts = store.state.all
+	const rooms = store.state.all
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -65,11 +66,11 @@ const RootListView: FunctionComponent<Props> = ({
 		</>}
 	>
 		<div className={clsCard.content}>
-			{prompts?.map((prompt) => {
-				return <div key={prompt.id} className={clsCard.item}>
+			{rooms?.map((room) => {
+				return <div key={room.id} className={clsCard.item}>
 					<div
-						onClick={(e) => handleSelect(prompt)}
-					>{prompt.name} {isSelected(prompt) ? "**" : ""}</div>
+						onClick={(e) => handleSelect(room)}
+					>{room.id} {isSelected(room) ? "**" : ""}</div>
 				</div>
 			})}
 		</div>

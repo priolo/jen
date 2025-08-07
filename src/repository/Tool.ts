@@ -1,29 +1,34 @@
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
 import { Agent } from './Agent.js';
+import { McpServer } from './McpServer.js';
 
 
 
+/**
+ * Rappresenta un tool utilizzabile dagli agenti
+ * E' collegato ad un MCP server
+ */
 @Entity('tools')
 export class Tool {
 	@PrimaryGeneratedColumn("uuid")
-	id: string;
+	id: string
 
-	@Column({ type: 'varchar' })
-	name: string;
-
-	/** Descrive il TOOL per l'utilizzo degli AGENT */
+	/** Il nome del tool (è univoco nello scope di MCP) */
 	@Column({ type: 'varchar', default: '' })
-	description: string;
-
-	@Column({ type: 'json', nullable: true })
-    parameters: object;
-
-	@Column({ type: 'varchar', default: '' })
-	code: string;
+	name: string
 	
-	
-    @ManyToMany(() => Agent, agent => agent.tools)
-    agents: Relation<Agent>[];
+    // Il server MCP 
+    @ManyToOne(() => McpServer, mcp => mcp.id)
+	@JoinColumn({ name: 'mcpId' })
+    mcp?: McpServer
+	@Column({ type: 'uuid', nullable: true })
+    mcpId: string
+
+
+	// RELATIONSHIPS
+	/** Agenti che utilizzano questo tool */
+	@ManyToMany(() => Agent, agent => agent.tools)
+	agents?: Relation<Agent[]>
 }
 
 

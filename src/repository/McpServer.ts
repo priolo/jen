@@ -2,6 +2,9 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 
 
+/**
+ * Rappresenta un server MCP
+ */
 @Entity('mcp_servers')
 export class McpServer {
 	@PrimaryGeneratedColumn("uuid")

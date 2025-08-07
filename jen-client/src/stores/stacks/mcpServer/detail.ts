@@ -65,8 +65,7 @@ const setup = {
 
 		/** reset ENTITY */
 		restore: (_: void, store?: McpServerDetailStore) => {
-			//store.fetch()
-			//store.setEditState(EDIT_STATE.READ)
+			store.setEditState(EDIT_STATE.READ)
 			store.setMcpServer(mcpServerSo.getById(store.state.mcpServer.id))
 		},
 
@@ -76,7 +75,8 @@ const setup = {
 				mcpTool: tool,
 			})
 			store.state.group.addLink({ view, parent: store, anim: true })
-		}
+		},
+
 	},
 
 	mutators: {

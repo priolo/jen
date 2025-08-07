@@ -33,7 +33,6 @@ const LlmDetailForm: FunctionComponent<Props> = ({
     const llm = store.state.llm
     if (llm == null) return null
     const name = llm.name ?? ""
-    const key = llm.key ?? ""
     const inRead = store.state.editState == EDIT_STATE.READ
     const inNew = store.state.editState == EDIT_STATE.NEW
 
@@ -48,7 +47,7 @@ const LlmDetailForm: FunctionComponent<Props> = ({
             />
         </div>
 
-        <div className="lyt-v">
+        {/* <div className="lyt-v">
             <div className="jack-lbl-prop">PROVIDER</div>
             <ListDialog width={80}
                 store={store}
@@ -67,7 +66,7 @@ const LlmDetailForm: FunctionComponent<Props> = ({
                 onChange={key => handlePropChange({ key })}
                 readOnly={inRead}
             />
-        </div>
+        </div> */}
 
     </div>
 }

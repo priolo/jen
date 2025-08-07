@@ -25,13 +25,15 @@ const McpServerDetailView: FunctionComponent<Props> = ({
 
 	// HOOKs
 	useEffect(() => {
-		mcpServerSo.fetchIfVoidResources(store.state.mcpServer?.id)
+		const mcpServer = store.getMcpServer()
+		if (mcpServer.tools?.length > 0) return
+		mcpServerSo.fetchResources(store.state.mcpServer?.id)
 	}, [])
 
 
 	// HANDLER
 
-	
+
 	// RENDER
 	return <FrameworkCard
 		className={clsGreen.root}

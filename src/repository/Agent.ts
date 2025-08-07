@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Room } from './Room.js';
 import { Tool } from './Tool.js';
+import { Llm } from './Llm.js';
 
 
 
@@ -33,25 +34,28 @@ export class Agent {
     @Column({ type: 'boolean', default: true })
     killOnResponse: boolean;
 
+
     // RELATIONSHIPS
 
     // LLM
     /** il nome dell'LLM utilizzato di default */
-    @Column({ type: 'varchar', nullable: true }) 
-    llmDefault: string | null
+    @ManyToOne(() => Llm, llm => llm.agents, { nullable: true })
+    @JoinColumn({ name: 'llmId' })
+    llm: Llm | null
+    @Column({ type: 'uuid', nullable: true })
+    llmId: string | null
+
 
     // AGENT BASE (inheritance relationship)
-    /** ID dell'agente base da cui è derivato questo agente */
-    @Column({ type: 'uuid', nullable: true })
-    baseId: string | null
-
     // Agente base da cui è derivato questo agente
-    @ManyToOne(() => Agent, (agent) => agent.derivedAgents, { nullable: true, onDelete: 'SET NULL' })
+    @ManyToOne(() => Agent, agent => agent.derivedAgents, { nullable: true })
     @JoinColumn({ name: 'baseId' })
-    base: Agent | null
+    base: Agent | null;
+    @Column({ type: 'uuid', nullable: true })
+    baseId: string | null;
 
-    // Agenti derivati da questo agente
-    @OneToMany(() => Agent, (agent) => agent.base)
+    // * Agenti derivati da questo agente
+    @OneToMany(() => Agent, (agent) => agent.base, { cascade: ['remove'] })
     derivedAgents: Agent[]
 
 
@@ -64,19 +68,18 @@ export class Agent {
             referencedColumnName: "id"
         },
         inverseJoinColumn: {
-            name: "subAgentId", 
+            name: "subAgentId",
             referencedColumnName: "id"
         }
     })
-    subAgents: Partial<Agent>[]
-
+    subAgents?: Partial<Agent>[]
     // Parent agents (inverse side of subAgents)
     @ManyToMany(() => Agent, (agent) => agent.subAgents)
-    parentAgents: Agent[]
+    parentAgents?: Agent[]
 
-    
+
     // TOOLS
-    @ManyToMany(() => Tool, tool => tool.agents,  { cascade: true })
+    @ManyToMany(() => Tool, tool => tool.agents, { cascade: true })
     @JoinTable({
         name: "agent_tools",
         joinColumn: {
@@ -88,10 +91,12 @@ export class Agent {
             referencedColumnName: "id"
         }
     })
-    tools: Partial<Tool>[]
+    tools?: Partial<Tool>[]
+
+
 
     // ROOMS 
     /** rooms where is used this agent */
-    @OneToMany(() => Room, prompt => prompt.agent)
+    @OneToMany(() => Room, room => room.agent, { cascade: ['remove'] })
     rooms: Room[]
 }

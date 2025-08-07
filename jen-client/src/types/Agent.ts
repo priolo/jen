@@ -1,4 +1,5 @@
 import { Uuid } from "./global"
+import { Llm } from "./Llm"
 import { Tool } from "./Tool"
 
 
@@ -25,7 +26,7 @@ export interface Agent {
 	killOnResponse: boolean
 
 	/** LLM che utilizza per le risposte */
-	llmDefault?: string
+	llm?: Llm
 
 	/** ID dell'agente base da cui è derivato questo agente */
 	baseId?: string
@@ -35,19 +36,4 @@ export interface Agent {
 
 	/** gli strumenti che questo AGENT puo' chiamare come tools */
 	tools: Partial<Tool>[]
-}
-
-export enum AGENT_TYPE {
-	REASONING = "REASONING",
-	FINDER = "FINDER",
-}
-
-
-
-// prompt
-
-export interface Message {
-	role: string
-	content: string
-	timestamp: string
 }

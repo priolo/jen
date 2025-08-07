@@ -1,4 +1,5 @@
 import { McpServerDetailStore } from "@/stores/stacks/mcpServer/detail"
+import mcpServerSo from "@/stores/stacks/mcpServer/repo"
 import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
 import { EDIT_STATE } from "@/types"
 import { Button, TextInput } from "@priolo/jack"
@@ -27,6 +28,10 @@ const McpServerDetailForm: FunctionComponent<Props> = ({
     const handlePropChange = (prop: {
         [name: string]: any
     }) => store.setMcpServer({ ...store.state.mcpServer, ...prop })
+
+    const handleToolsLoad = () => {
+        mcpServerSo.fetchResources(mcpServer.id)
+    }
 
     const handleOpenTool = (tool: any) => {
         store.openTool(tool)
@@ -62,24 +67,25 @@ const McpServerDetailForm: FunctionComponent<Props> = ({
             />
         </div>
 
+        {inRead && <>
+            <div>TOOLS</div>
 
-        <div>TOOLS</div>
+            <Button onClick={handleToolsLoad} >
+                LOAD TOOLS
+            </Button>
 
-        <Button onClick={() => store.setEditState(EDIT_STATE.EDIT)} >
-            LOAD TOOLS
-        </Button>
+            {tools?.map(tool => (
+                <div key={tool.name}
+                    onClick={() => handleOpenTool(tool)}
+                >
+                    <span>{tool.name} {tool.description}</span>
+                </div>
+            ))}
 
-        {tools?.map(tool => (
-            <div key={tool.name}
-                onClick={() => handleOpenTool(tool)}
-            >
-                <span>{tool.name} {tool.description}</span>
-            </div>
-        ))}
+            {tools?.length == 0 && <div className="jack-lbl-empty">NO TOOLS</div>}
 
-        {tools?.length == 0 && <div className="jack-lbl-empty">NO TOOLS</div>}
-
-        {tools == null && <div>LOADING...</div>}
+            {tools == null && <div>LOADING...</div>}
+        </>}
 
     </div>
 }

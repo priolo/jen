@@ -42,16 +42,17 @@ const setup = {
 			await store.fetch()
 		},
 
+
+
 		/**
 		 * Recupero e memorizzo le risorse di un MCP server
 		 */
-		fetchIfVoidResources: async (id: string, store?: McpServerStore) => {
+		fetchResources: async (id: string, store?: McpServerStore) => {
 			const mcpServer = store.getById(id)
 			if (!mcpServer) return
-			if (!!mcpServer.tools) return
-
+			mcpServer.tools = null
+			store._update()
 			const resurces = await mcpServerApi.resources(mcpServer.id)
-			
 			mcpServer.tools = resurces.tools
 			store._update()
 		},
