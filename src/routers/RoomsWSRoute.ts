@@ -1,10 +1,11 @@
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { CoreUserMessage } from "ai"
 import { randomUUID } from "crypto"
-import AgentExe, { Resolver } from "../agents/llm/AgentExe.js"
-import { Agent } from "../repository/Agent.js"
-import { Room } from "../repository/Room.js"
-import { Tool } from "../repository/Tool.js"
+import AgentLlm from "../agents/AgentLlm.js"
+import { Resolver } from '@/agents/types.js'
+import { AgentRepo } from "../repository/Agent.js"
+import { RoomRepo } from "../repository/Room.js"
+import { ToolRepo } from "../repository/Tool.js"
 import { AppendMessageS2C, BaseC2S, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatMessage, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserMessageC2S } from "../types/RoomActions.js"
 
 
@@ -159,7 +160,7 @@ export class WSRoomsService extends ws.route {
 		const agentId = rootRoom.agentId
 		const resolver: Resolver = {
 			getAgent: async (id: string) => {
-				const agent: Agent = await new Bus(this, "/typeorm/agents").dispatch({
+				const agent: AgentRepo = await new Bus(this, "/typeorm/agents").dispatch({
 					type: typeorm.Actions.FIND_ONE,
 					payload: {
 						where: { id },
@@ -173,7 +174,7 @@ export class WSRoomsService extends ws.route {
 				return agent
 			},
 			getTools: async (id: string) => {
-				const tool: Tool = await new Bus(this, "/typeorm/tools").dispatch({
+				const tool: ToolRepo = await new Bus(this, "/typeorm/tools").dispatch({
 					type: typeorm.RepoRestActions.GET_BY_ID,
 					payload: id
 				})
@@ -226,7 +227,7 @@ export class WSRoomsService extends ws.route {
 				return room.history
 			},
 		}
-		const agent = new AgentExe({ id: agentId }, resolver)
+		const agent = new AgentLlm({ id: agentId }, resolver)
 		agent.roomId = rootRoom.id // setto l'id della room nell'agente
 		// creo l'istanza dell'agente
 		const response = await agent.ask(prompt)
@@ -255,7 +256,7 @@ export class WSRoomsService extends ws.route {
 	// [II] DA FARE
 	private async loadChat(roomId: string): Promise<Chat> {
 		// [II] prendere 
-		const rooms: Room[] = [] //await new Bus(this, this.state.repository).dispatch({
+		const rooms: RoomRepo[] = [] //await new Bus(this, this.state.repository).dispatch({
 		//	type: typeorm.RepoRestActions.GET_BY_ID,
 		//	payload: roomId
 		//})
@@ -268,13 +269,13 @@ export class WSRoomsService extends ws.route {
 
 export interface Chat {
 	id: string
-	rooms: Room[]
+	rooms: RoomRepo[]
 	clients: Set<string>
 }
 
 
 async function createNewChat(agentId: string): Promise<Chat> {
-	const room:Room = {
+	const room:RoomRepo = {
 		id: randomUUID() as string,
 		history: [],
 		agentId,
@@ -287,9 +288,9 @@ async function createNewChat(agentId: string): Promise<Chat> {
 	return chat
 }
 
-function getRoomById(chat: Chat, roomId?: string): Room {
+function getRoomById(chat: Chat, roomId?: string): RoomRepo {
 	return chat?.rooms?.find(r => r.id == roomId)
 }
-function getRootRoom(chat: Chat): Room {
+function getRootRoom(chat: Chat): RoomRepo {
 	return chat?.rooms?.find(r => r.parentRoomId == null)
 }

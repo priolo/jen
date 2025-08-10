@@ -1,15 +1,15 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { split } from './cutter/fix.js';
-import { textCutterChapter } from './cutter/llm.js';
-import { breakWords } from './cutter/utils.js';
+import { split } from '../cutter/fix.js';
+import { textCutterChapter } from '../cutter/llm.js';
+import { breakWords } from '../cutter/utils.js';
 import { getEmbeddings } from './embedding.js';
-import fromHTMLToText from './textualize/html.js';
-import fromPDFToText from './textualize/pdf.js';
+import fromHTMLToText from '../textualize/html.js';
+import fromPDFToText from '../textualize/pdf.js';
 import { DOC_TYPE, NodeDoc } from "../types.js";
-import { vectorDBCreateAndStore } from "./db/manage.js";
-import { uuidv4 } from "../utils.js";
+import { vectorDBCreateAndStore } from "../db/manage.js";
+import { uuidv4 } from "../../types/utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -1,5 +1,5 @@
-import { Agent } from "@/repository/Agent.js";
-import { Tool } from "@/repository/Tool.js";
+import { AgentRepo } from "@/repository/Agent.js";
+import { ToolRepo } from "@/repository/Tool.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express"
 
@@ -31,7 +31,7 @@ class ToolRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const tool: Tool = await new Bus(this, this.state.repository).dispatch({
+		const tool: ToolRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
@@ -40,8 +40,8 @@ class ToolRoute extends httpRouter.Service {
 
 
 	async create(req: Request, res: Response) {
-		const { tool }: { tool: Tool } = req.body
-		const toolNew: Tool = await new Bus(this, this.state.repository).dispatch({
+		const { tool }: { tool: ToolRepo } = req.body
+		const toolNew: ToolRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: tool
 		})
@@ -59,7 +59,7 @@ class ToolRoute extends httpRouter.Service {
 
 	async update(req: Request, res: Response) {
 		const id = req.params["id"]
-		const { tool }: { tool: Tool } = req.body
+		const { tool }: { tool: ToolRepo } = req.body
 		if (!id || !tool) return
 		const toolUp = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,

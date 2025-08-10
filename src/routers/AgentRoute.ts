@@ -1,4 +1,4 @@
-import { Agent } from "@/repository/Agent.js";
+import { AgentRepo } from "@/repository/Agent.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { select } from "slate";
@@ -38,7 +38,7 @@ class AgentRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const agent: Agent = await new Bus(this, this.state.repository).dispatch({
+		const agent: AgentRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.Actions.FIND_ONE,
 			payload: {
 				where: { id },
@@ -54,8 +54,8 @@ class AgentRoute extends httpRouter.Service {
 
 
 	async create(req: Request, res: Response) {
-		const agent: Agent = req.body
-		const agentNew: Agent = await new Bus(this, this.state.repository).dispatch({
+		const agent: AgentRepo = req.body
+		const agentNew: AgentRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: agent
 		})
@@ -73,7 +73,7 @@ class AgentRoute extends httpRouter.Service {
 
 	async update(req: Request, res: Response) {
 		const id = req.params["id"]
-		const { agent }: { agent: Agent } = req.body
+		const { agent }: { agent: AgentRepo } = req.body
 
 		if (!id) {
 			return res.status(400).json({ error: "Agent ID is required for an update." });
@@ -83,7 +83,7 @@ class AgentRoute extends httpRouter.Service {
 		const payload = { ...agent, id };
 
 		try {
-			const updatedAgent: Agent = await new Bus(this, this.state.repository).dispatch({
+			const updatedAgent: AgentRepo = await new Bus(this, this.state.repository).dispatch({
 				type: typeorm.RepoRestActions.SAVE,
 				payload,
 			})

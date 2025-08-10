@@ -6,7 +6,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
  * Rappresenta un server MCP
  */
 @Entity('mcp_servers')
-export class McpServer {
+export class McpServerRepo {
 	@PrimaryGeneratedColumn("uuid")
 	id: string;
 
@@ -15,7 +15,6 @@ export class McpServer {
 
 	@Column({ type: 'varchar', default: '' })
 	host: string;
-	
 }
 
 

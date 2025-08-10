@@ -1,9 +1,9 @@
 import { RootService, Bus } from "@priolo/julian";
 import { typeorm } from "@priolo/julian";
-import { Agent } from "./repository/Agent.js";
-import { Tool } from "./repository/Tool.js";
-import { McpServer } from "./repository/McpServer.js";
-import { Llm } from "./repository/Llm.js";
+import { AgentRepo } from "./repository/Agent.js";
+import { ToolRepo } from "./repository/Tool.js";
+import { McpServerRepo } from "./repository/McpServer.js";
+import { LlmRepo } from "./repository/Llm.js";
 
 
 
@@ -11,9 +11,9 @@ import { Llm } from "./repository/Llm.js";
 export async function seeding(root: RootService) {
 
 
-	const llms = await new Bus(root, "/typeorm/llm").dispatch<Llm[]>({
+	const llms = await new Bus(root, "/typeorm/llm").dispatch<LlmRepo[]>({
 		type: typeorm.RepoStructActions.SEED,
-		payload: <Llm[]>[
+		payload: <LlmRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
 			{ name: "gemeni-2.0-flash" },
 			{ name: "gemini-2.0-pro" },
@@ -26,9 +26,9 @@ export async function seeding(root: RootService) {
 	});
 
 
-	const mcpServers = await new Bus(root, "/typeorm/mcp_servers").dispatch<McpServer[]>({
+	const mcpServers = await new Bus(root, "/typeorm/mcp_servers").dispatch<McpServerRepo[]>({
 		type: typeorm.RepoStructActions.SEED,
-		payload: <McpServer[]>[
+		payload: <McpServerRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
 			{
 				name: "local",
@@ -41,9 +41,9 @@ export async function seeding(root: RootService) {
 		]
 	});
 
-	const tools = await new Bus(root, "/typeorm/tools").dispatch<Tool[]>({
+	const tools = await new Bus(root, "/typeorm/tools").dispatch<ToolRepo[]>({
 		type: typeorm.RepoStructActions.SEED,
-		payload: <Tool[]>[
+		payload: <ToolRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
 			{
 				name: "sum",
@@ -56,9 +56,9 @@ export async function seeding(root: RootService) {
 		]
 	});
 
-	const [agentMath] = await (new Bus(root, "/typeorm/agents")).dispatch<Agent[]>({
+	const [agentMath] = await (new Bus(root, "/typeorm/agents")).dispatch<AgentRepo[]>({
 		type: typeorm.RepoStructActions.SEED,
-		payload: <Agent[]>[
+		payload: <AgentRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
 			{
 				name: "MATH",
@@ -77,7 +77,7 @@ export async function seeding(root: RootService) {
 
 	await (new Bus(root, "/typeorm/agents")).dispatch({
 		type: typeorm.RepoStructActions.SEED,
-		payload: <Agent[]>[
+		payload: <AgentRepo[]>[
 			{
 				name: "LEADER",
 				description: "This agent can resolve all problem",

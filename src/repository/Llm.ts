@@ -1,10 +1,10 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Agent } from './Agent.js';
+import { AgentRepo } from './Agent.js';
 
 
 
 @Entity('llm')
-export class Llm {
+export class LlmRepo {
 	@PrimaryGeneratedColumn("uuid")
 	id: string;
 
@@ -15,6 +15,6 @@ export class Llm {
 	// key?: string;
 
 	/** agenti che implementano questo llm */
-	@OneToMany(() => Agent, agent => agent.llm, { nullable: true })
-    agents?: Agent[];
+	@OneToMany(() => AgentRepo, agent => agent.llm, { nullable: true })
+    agents?: AgentRepo[];
 }

@@ -1,0 +1,377 @@
+import { AgentRepo } from '@/repository/Agent.js';
+import { ChatMessage } from '@/types/RoomActions.js';
+import { google } from '@ai-sdk/google';
+import { generateText, jsonSchema, tool, ToolResultPart, ToolSet } from "ai";
+import dotenv from 'dotenv';
+import { colorPrint, ColorType } from './utils/index.js';
+import { Response, RESPONSE_TYPE } from './types.js';
+
+dotenv.config();
+
+
+
+/**
+ * Co-ReAct agent that can solve problems by thinking step by step.
+ * The agent can use a set of tools and functions to reason and solve tasks.
+ * The agent can also interact with other agents to solve complex problems.
+ * Can ask info from the parent agent 
+ */
+class AgentLlm {
+
+	constructor(
+		public agent: Partial<AgentRepo>,
+	) {
+	}
+
+	public async ask(history: ChatMessage[]): Promise<Response> {
+
+		if (!history) return null
+
+		const model = google('gemini-2.0-flash', {})
+		//this.model = google('gemini-2.5-pro-exp-03-25')
+		//this.model = google('gemini-2.0-flash')
+		//this.model = mistral('mistral-large-latest')
+		//this.model = cohere('command-r-plus')
+
+		const systemPrompt = this.getReactSystemPrompt()
+		const systemTools = this.getSystemTools()
+		const subagentTools = this.createSubAgentsTools()
+		const agentTools = this.createTools()
+		const tools = { ...agentTools, ...subagentTools, ...systemTools }
+
+		// eseguo LLM
+		const r = await generateText({
+			model: model,
+			temperature: 0,
+			system: systemPrompt,
+			messages: history,
+			//toolChoice: !this.parent? "auto": "required",
+			//toolChoice: this.history.length > 2 && !!this.parent ? "auto" : "required",
+			toolChoice: "required",
+			tools,
+			maxSteps: 1,
+		})
+
+		// ricavo il messaggio di risposta
+		const messages = r.response.messages
+		const lastMsg: ChatMessage = messages[r.response.messages.length - 1]
+
+		// NON E' UN TOOL situazione imprevista... continua a ragionare 
+		if (lastMsg.role != "tool") {
+			colorPrint(
+				[this.agent.name, ColorType.Blue], " : unknown : ", 
+				[JSON.stringify(lastMsg.content), ColorType.Magenta]
+			)
+			return <Response>{
+				response: messages,
+				type: RESPONSE_TYPE.UNKNOWN,
+				continue: true,
+			}
+		}
+
+		// E' UN TOOL
+		const content:ToolResultPart = lastMsg.content[0]
+		const toolName:string = content.toolName
+		const result:any = content.result
+
+		// FINAL RESPONSE
+		if (toolName == "final_answer") {
+			colorPrint(
+				[this.agent.name, ColorType.Blue], " : final answer: ", 
+				[result, ColorType.Green]
+			)
+			return <Response>{
+				response: messages,
+				type: RESPONSE_TYPE.COMPLETED,
+				continue: false,
+				content: {
+					answer: result
+				},
+			}
+		}
+
+		// COLLECT INFORMATION
+		if (toolName == "ask_for_information") {
+			colorPrint(
+				[this.agent.name, ColorType.Blue], " : ask info: ", 
+				[result, ColorType.Green]
+			)
+			return <Response>{
+				type: RESPONSE_TYPE.ASK_TO,
+				response: messages,
+				continue: true,
+				content: {
+					question: result,
+					agentId: this.agent.id, // l'agente che ha chiesto l'informazione
+				},
+			}
+		}
+
+		// CALL AGENT
+		if (toolName.startsWith("chat_with_")) {
+			const { question, agentId } = result as { question: string, agentId: string }
+			colorPrint(
+				[this.agent.name, ColorType.Blue], " : call sub-agent: ", 
+				[agentId, ColorType.Green]
+			)
+			return <Response>{
+				type: RESPONSE_TYPE.ASK_TO,
+				response: messages,
+				continue: true,
+				content: {
+					agentId: agentId,
+					question: question,
+				},
+			}
+		}
+
+		// UPDATE STRATEGY
+		if (toolName == "update_strategy") {
+			colorPrint([
+				this.agent.name, ColorType.Blue], " : strategy : ", 
+				[JSON.stringify(result), ColorType.Magenta]
+			)
+			return <Response>{
+				type: RESPONSE_TYPE.STRATEGY,
+				response: messages,
+				continue: true,
+				content: {
+					strategy: result,
+				},
+			}
+		}
+
+		// REASONING 
+		if (toolName == "get_reasoning") {
+			colorPrint(
+				[this.agent.name, ColorType.Blue], " : reasoning : ", 
+				[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
+			)
+			return <Response>{
+				type: RESPONSE_TYPE.REASONING,
+				response: messages,
+				continue: true,
+				content: {
+					thought: result,
+				},
+			}
+		}
+
+		// E' un TOOL GENERICO
+		colorPrint(
+			[this.agent.name, ColorType.Blue], " : function : ", 
+			[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
+		)
+		return <Response>{
+			type: RESPONSE_TYPE.TOOL,
+			response: messages,
+			continue: true,
+			content: {
+				name: toolName,
+				args: result,
+			},
+		}
+
+	}
+
+
+	getSystemTools(): ToolSet {
+		const tools = {
+			final_answer: tool({
+				description: "Provide the final answer to the problem",
+				parameters: jsonSchema({
+					type: "object",
+					properties: { answer: { type: "string", description: "The complete, final answer to the problem" } },
+					required: ["answer"]
+				}),
+				execute: async (args: any) => {
+					return args.answer
+				}
+			}),
+
+			ask_for_information: tool({
+				description: `You can use this procedure if you don't have enough information from the user.
+For example: 
+User: "give me the temperature where I am now". You: "where are you now?", User: "I am in Paris"
+`,
+				parameters: jsonSchema({
+					type: "object",
+					properties: {
+						request: {
+							type: "string",
+							description: "The question to ask to get useful information."
+						}
+					},
+					required: ["request"]
+				}),
+				execute: async (args: any) => {
+					return args.request
+				}
+			}),
+
+			update_strategy: tool({
+				description: "Set up a strategy consisting of a list of steps to follow to solve the main problem.", // and try to minimize the use of tools preferring 'reasoning'. ",
+				parameters: jsonSchema({
+					type: "object",
+					properties: {
+						strategy: {
+							type: "string",
+							description: "The strategy divided into a list of steps."
+						}
+					},
+					required: ["strategy"]
+				}),
+				execute: async (args: any) => {
+					return args.strategy
+				}
+			}),
+
+			get_reasoning: tool({
+				description: "Process the available data and generate useful data to answer the main question. For example, you can filter the data, group it, find relationships and generate a new data set.",
+				parameters: jsonSchema({
+					type: "object",
+					properties: {
+						thought: {
+							type: "string",
+							description: `The new data elaborated by reasoning`,
+						},
+					},
+					required: ["thought"],
+				}),
+				execute: async (args: any) => {
+					return args.thought
+				}
+			}),
+		}
+
+		if (!this.agent.askInformation) delete tools.ask_for_information
+
+		return tools
+	}
+
+	createSubAgentsTools() {
+		if (!(this.agent?.subAgents?.length > 0)) return {}
+
+		const structs: ToolSet = {}
+		for (const subAgent of this.agent.subAgents) {
+			structs[`chat_with_${subAgent.name}`] = tool({
+				description: `Ask agent ${subAgent.name} for info.\n${subAgent.description ?? ""}`,
+				parameters: jsonSchema({
+					type: "object",
+					properties: {
+						question: {
+							type: "string",
+							description: `The question to ask the agent. Fill in all the information needed for a complete answer.`,
+						},
+					},
+					required: ["question"],
+				}),
+				execute: async (args, options) => {
+					const { question } = args as { question: string };
+					return { question, agentId: subAgent.id, }
+				},
+			})
+		}
+		return structs
+	}
+
+	createTools(): ToolSet {
+		const structs: ToolSet = {}
+		if (!this.agent?.tools) return structs
+
+		for (const toolPoco of this.agent.tools) {
+			structs[toolPoco.name] = tool({
+				description: toolPoco.description,
+				parameters: jsonSchema(toolPoco.parameters),
+				execute: async (args) => {
+					return args
+				}
+			})
+		}
+		return structs
+	}
+
+
+
+
+
+	//#region SYSTEM PROMPT
+
+	/** System instructions for ReAct agent  */
+	protected getReactSystemPrompt(): string {
+		const prompt = `# YOU ARE: ${this.agent.name}.
+${this.agent.description ?? ""}		
+You are a ReAct agent that solves problems by thinking step by step with reasoning.
+
+${this.getRulesPrompt()}
+
+${this.agent.systemPrompt ?? ""}
+
+Always be explicit in your reasoning. Break down complex problems into steps.
+`;
+		return prompt
+	}
+	// ## YOUR MAIN PROCESS:
+	// - Keep the focus on the main problem and the tools at your disposal
+	// - Break the main problem into smaller problems (steps)
+	// - Create a list of steps to follow to solve the main problem call the tool "update_strategy"
+	// - The steps are designed to minimize the tools used.
+
+	protected getRulesPrompt(): string {
+		const rules = []
+
+		//rules.push(`THOUGHT: Analyze the step problem and think about how to solve it.`)
+
+		rules.push(`REASONING: Process the information at your disposal with the "get_reasoning" tool`)
+
+		rules.push(`CHECK: If all the information obtained can answer the question, call the tool "final_answer" and answer the question`)
+
+		rules.push(`UPDATE STRATEGY: If necessary, update your strategy with the "update_strategy" tool and go to 1. REASONING. Otherwise go to the next step`)
+
+		//rules.push(`KEEP IN MIND: try to minimize the use of tools preferring 'reasoning' for example check if you have alredy all information for previus tools make filtering or grouping`)
+
+
+
+		const strategyTools = this.getToolsStrategyPrompt()
+		if (strategyTools.length > 0) {
+			rules.push(`TOOLS USAGE: Preferably use this strategy to call the tools:\n${strategyTools}`)
+		}
+		if (this.agent.subAgents?.length > 0) {
+			rules.push(`RETRIEVE INFORMATION: First use "chat_with_<agent_name>" if the agent can help you otherwise choose another available tool.`)
+		} else {
+			rules.push(`RETRIEVE INFORMATION: Choose one of the available tools to solve the problem.`)
+		}
+
+		//rules.push(`VERIFY: BE CAREFUL! If you already have all the information DO NOT call a tool again asking for the same thing. For example: If You ask a tool for all the numbers from 1 to 10 and then I have to remove the odd numbers. You don't have to ask the tool for the numbers from 1 to 10 again but do the exclusion of the odd numbers yourself!`)
+
+		// if (!this.options.noAskForInformation) {
+		// 	rules.push(`REQUEST INFORMATION: If you can't get information from the tools or you have doubts or think you can optimize your search, call the "ask_for_information" tool to ask for more information.`)
+		// }
+
+		//rules.push(`CHECK: Try to make exclusions or groupings and if by integrating the information obtained with the tools with those you already have at your disposal you can answer the question`)
+
+		rules.push(`LOOP: Repeat rules 1. REASONING until you can provide a FINAL ANSWER`)
+
+		//rules.push(`FINAL ANSWER: When ready, use the "final_answer" tool to provide your solution.`)
+
+		const rulesPrompt = rules.map((r, i) => `${i + 1}. ${r}`).join("\n")
+
+		return `## YOUR MAIN PROCESS: SO FOLLOW THESE RULES IN LOOP:\n${rulesPrompt}`
+	}
+
+	protected getToolsStrategyPrompt(): string {
+		return ""
+	}
+
+	//#endregion SYSTEM PROMPT
+
+	protected getContextPrompt(): string {
+		// const parentContextPrompt = this.agent.base?.getContextPrompt() ?? ""
+		// return `${parentContextPrompt}\n${this.agent.contextPrompt ?? ""}`
+
+		return this.agent.contextPrompt ?? ""
+	}
+
+}
+
+export default AgentLlm

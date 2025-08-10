@@ -1,11 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
-import { Agent } from './Agent.js';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { AgentRepo } from './Agent.js';
 import { ChatMessage } from '@/types/RoomActions.js';
 
 
 
 @Entity('rooms')
-export class Room {
+export class RoomRepo {
 
     /** Unique identifier for the room */
     @PrimaryGeneratedColumn("uuid")
@@ -17,14 +17,20 @@ export class Room {
 
     // RELATIONSHIPS
 
-    /** ID of the agent that respone in this room */
-    @Column({ type: 'uuid', nullable: true })
-    agentId: string | null;
-
-    /** The agent associated with this room */
-    @ManyToOne(() => Agent, agent => agent.rooms, { nullable: true })
-    @JoinColumn({ name: 'agentId' })
-    agent?: Relation<Agent> | null;
+    /** The agents associated with this room */
+    @ManyToMany(() => AgentRepo, agent => agent.rooms)
+    @JoinTable({
+        name: "room_agents",
+        joinColumn: {
+            name: "roomId",
+            referencedColumnName: "id"
+        },
+        inverseJoinColumn: {
+            name: "agentId",
+            referencedColumnName: "id"
+        }
+    })
+    agents?: Relation<AgentRepo>[];
 
     /** ID of the parent room, if this room is a sub-room */
     parentRoomId?: string | null;

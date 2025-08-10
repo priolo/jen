@@ -1,11 +1,11 @@
-import { Agent } from '@/repository/Agent.js';
-import { Tool } from '@/repository/Tool.js';
+import { AgentRepo } from '@/repository/Agent.js';
+import { ToolRepo } from '@/repository/Tool.js';
 import { ChatMessage } from '@/types/RoomActions.js';
 import { google } from '@ai-sdk/google';
 import { generateText, jsonSchema, tool, ToolSet } from "ai";
 import dotenv from 'dotenv';
 import { z } from "zod";
-import { colorPrint, ColorType } from '../utils/index.js';
+import { colorPrint, ColorType } from './utils/index.js';
 import { last } from 'slate';
 import { executeTool, getTools } from '@/mcp/utils.js';
 
@@ -25,8 +25,8 @@ export interface Response {
 }
 
 export interface Resolver {
-	getAgent: (id: string) => Promise<Agent>
-	getTools: (id: string) => Promise<Tool>
+	getAgent: (id: string) => Promise<AgentRepo>
+	getTools: (id: string) => Promise<ToolRepo>
 	onCreateNewRoom: (agentId:string, parentRoomId:string) => string
 	onMessage: ( agentId:string, messages?: ChatMessage[], roomId? :string) => ChatMessage[]
 }
@@ -37,24 +37,24 @@ export interface Resolver {
  * The agent can also interact with other agents to solve complex problems.
  * Can ask info from the parent agent 
  */
-class AgentExe {
+class AgentLlm {
 
 	constructor(
-		public agent: Partial<Agent>,
+		public agent: Partial<AgentRepo>,
 		public resolver: Resolver,
-		public parent?: AgentExe,
+		public parent?: AgentLlm,
 	) {
 	}
 
 	public strategy: string = ""
 	public roomId: string = null
-	public lastSubagentCall: AgentExe = null
+	public lastSubagentCall: AgentLlm = null
 
-	protected async agentResolve(): Promise<Agent> {
+	protected async agentResolve(): Promise<AgentRepo> {
 		if (!this.agent?.name) {
 			this.agent = await this.resolver.getAgent(this.agent.id)
 		}
-		return this.agent as Agent
+		return this.agent as AgentRepo
 	}
 
 
@@ -231,7 +231,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 
 		for (const subAgent of this.agent.subAgents) {
 			
-			const subAgentExe = new AgentExe(subAgent, this.resolver, this)
+			const subAgentExe = new AgentLlm(subAgent, this.resolver, this)
 			await subAgentExe.agentResolve()
 
 			structs[`chat_with_${subAgentExe.agent.name}`] = tool({
@@ -415,4 +415,4 @@ Always be explicit in your reasoning. Break down complex problems into steps.
 
 }
 
-export default AgentExe
+export default AgentLlm

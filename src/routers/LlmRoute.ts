@@ -1,4 +1,4 @@
-import { Llm } from "@/repository/Llm.js";
+import { LlmRepo } from "@/repository/Llm.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 
@@ -30,7 +30,7 @@ class LlmRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const llm: Llm = await new Bus(this, this.state.repository).dispatch({
+		const llm: LlmRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
@@ -39,8 +39,8 @@ class LlmRoute extends httpRouter.Service {
 
 
 	async create(req: Request, res: Response) {
-		const { llm }: { llm: Llm } = req.body
-		const llmNew: Llm = await new Bus(this, this.state.repository).dispatch({
+		const { llm }: { llm: LlmRepo } = req.body
+		const llmNew: LlmRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: llm
 		})
@@ -58,7 +58,7 @@ class LlmRoute extends httpRouter.Service {
 
 	async update(req: Request, res: Response) {
 		const id = req.params["id"]
-		const { llm }: { llm: Llm } = req.body
+		const { llm }: { llm: LlmRepo } = req.body
 		if (!id || !llm) return
 		const llmUp = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,

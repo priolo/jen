@@ -1,18 +1,18 @@
 import { http, httpRouter, log, ServiceBase, typeorm, ws } from "@priolo/julian";
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { Agent } from './repository/Agent.js';
+import { AgentRepo } from './repository/Agent.js';
 import { getDBConnectionConfig } from './repository/dbConfig.js';
-import { Llm } from "./repository/Llm.js";
-import { Room } from "./repository/Room.js";
-import { Tool } from "./repository/Tool.js";
+import { LlmRepo } from "./repository/Llm.js";
+import { RoomRepo } from "./repository/Room.js";
+import { ToolRepo } from "./repository/Tool.js";
 import AgentRoute from './routers/AgentRoute.js';
 import { WSDocConf, WSDocService } from "./routers/DocsWSRoute.js";
 import LlmRoute from "./routers/LlmRoute.js";
 import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
 import McpServerRoute from "./routers/McpServerRoute.js";
-import { McpServer } from "./repository/McpServer.js";
+import { McpServerRepo } from "./repository/McpServer.js";
 import tools from "./config_tools.js";
 
 
@@ -110,27 +110,27 @@ function buildNodeConfig() {
 				{
 					name: "mcp_servers",
 					class: "typeorm/repo",
-					model: McpServer,
+					model: McpServerRepo,
 				},
 				{
 					name: "llm",
 					class: "typeorm/repo",
-					model: Llm,
+					model: LlmRepo,
 				},
 				{
 					name: "agents",
 					class: "typeorm/repo",
-					model: Agent,
+					model: AgentRepo,
 				},
 				{
 					name: "tools",
 					class: "typeorm/repo",
-					model: Tool,
+					model: ToolRepo,
 				},
 				{
 					name: "rooms",
 					class: "typeorm/repo",
-					model: Room,
+					model: RoomRepo,
 				},
 			],
 		},

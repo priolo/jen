@@ -1,4 +1,4 @@
-import { Room } from "@/repository/Room.js";
+import { RoomRepo } from "@/repository/Room.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 
@@ -29,7 +29,7 @@ class RoomRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const room: Room = await new Bus(this, this.state.repository).dispatch({
+		const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
@@ -37,8 +37,8 @@ class RoomRoute extends httpRouter.Service {
 	}
 
 	async create(req: Request, res: Response) {
-		const { room }: { room: Room } = req.body
-		const roomNew: Room = await new Bus(this, this.state.repository).dispatch({
+		const { room }: { room: RoomRepo } = req.body
+		const roomNew: RoomRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: room
 		})
@@ -56,7 +56,7 @@ class RoomRoute extends httpRouter.Service {
 
 	async update(req: Request, res: Response) {
 		const id = req.params["id"]
-		const { room }: { room: Room } = req.body
+		const { room }: { room: RoomRepo } = req.body
 		if (!id || !room) return
 		const roomUp = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,

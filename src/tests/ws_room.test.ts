@@ -2,7 +2,7 @@ import { RootService } from "@priolo/julian"
 import axios, { AxiosInstance } from "axios"
 import { WebSocket } from "ws"
 import buildNodeConfig, { PORT, PORT_WS } from "../config.js"
-import { Agent } from "../repository/Agent.js"
+import { AgentRepo } from "../repository/Agent.js"
 import { seeding } from "../seeding.js"
 import { AppendMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserMessageC2S } from "../types/RoomActions.js"
 
@@ -31,7 +31,7 @@ describe("Test on WS ROOT", () => {
 	test("client connect/send/close", async () => {
 
 		expect(root).toBeDefined()
-		const allAgents = (await axiosIstance.get(`/api/agents`))?.data as Agent[]
+		const allAgents = (await axiosIstance.get(`/api/agents`))?.data as AgentRepo[]
 		expect(allAgents).toHaveLength(2)
 		const agentLeader = allAgents.find(a => a.name == "LEADER")
 		expect(agentLeader).toBeDefined()

@@ -1,11 +1,11 @@
-import AgentExe from "./agents/llm/AgentExe.js";
-import { Agent } from "./repository/Agent.js";
-import { Llm } from "./repository/Llm.js";
-import { Tool } from "./repository/Tool.js";
+import AgentLlm from "./agents/AgentLlm.js";
+import { AgentRepo } from "./repository/Agent.js";
+import { LlmRepo } from "./repository/Llm.js";
+import { ToolRepo } from "./repository/Tool.js";
 
 async function Start() {
 
-	const tool1 = new Tool()
+	const tool1 = new ToolRepo()
 	tool1.id = "tool-01"
 	tool1.name = "add"
 	tool1.description = "This tool adds two numbers together"
@@ -25,7 +25,7 @@ async function Start() {
 	}
 	tool1.code = `return args.a + args.b;`
 
-	const tool2 = new Tool()
+	const tool2 = new ToolRepo()
 	tool2.id = "tool-02"
 	tool2.name = "multiply"
 	tool2.description = "This tool multiplies two numbers together"
@@ -45,7 +45,7 @@ async function Start() {
 	}
 	tool2.code = `return args.a * args.b;`
 
-	const agent1 = new Agent()
+	const agent1 = new AgentRepo()
 	agent1.id = "agent-01"
 	agent1.name = "MATH"
 	agent1.description = "This agent can add and multiply numbers"
@@ -56,7 +56,7 @@ async function Start() {
 	agent1.llmDefault = "gemini-2.0-flash"
 	agent1.tools = [{ id: tool1.id }, { id: tool2.id }]
 
-	const agent2 = new Agent()
+	const agent2 = new AgentRepo()
 	agent2.id = "agent-02"
 	agent2.name = "LEADER"
 	agent2.description = "This agent can resolve all problem"
@@ -76,7 +76,7 @@ async function Start() {
 	}
 
 
-	const executer = new AgentExe(
+	const executer = new AgentLlm(
 		{ id: agent2.id },
 		[],
 		resolver,
