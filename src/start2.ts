@@ -1,4 +1,4 @@
-import AgentLlm from "./agents/AgentLlm.js";
+import AgentLlm from "./services/agents/AgentLlm.js";
 import { AgentRepo } from "./repository/Agent.js";
 import { LlmRepo } from "./repository/Llm.js";
 import { ToolRepo } from "./repository/Tool.js";

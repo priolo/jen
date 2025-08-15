@@ -167,8 +167,8 @@ class AgentLlm {
 			response: messages,
 			continue: true,
 			content: {
-				name: toolName,
-				args: result,
+				id: result.id,
+				args: result.args,
 			},
 		}
 
@@ -279,12 +279,12 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 		const structs: ToolSet = {}
 		if (!this.agent?.tools) return structs
 
-		for (const toolPoco of this.agent.tools) {
-			structs[toolPoco.name] = tool({
-				description: toolPoco.description,
-				parameters: jsonSchema(toolPoco.parameters),
+		for (const toolRepo of this.agent.tools) {
+			structs[toolRepo.name] = tool({
+				description: toolRepo.description,
+				parameters: jsonSchema(toolRepo.parameters),
 				execute: async (args) => {
-					return args
+					return {id: toolRepo.id, args}
 				}
 			})
 		}

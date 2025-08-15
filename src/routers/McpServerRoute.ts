@@ -1,4 +1,4 @@
-import { executeTool, getTools } from "@/mcp/utils.js";
+import { executeTool, getTools } from "@/services/mcp/utils.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { McpServerRepo } from "../repository/McpServer.js";

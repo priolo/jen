@@ -5,6 +5,7 @@
     // "target": "ESNext",
     // "module": "NodeNext",
     // "moduleResolution": "nodenext",
+    "isolatedModules": true,
 
     "outDir": "./dist",
     "rootDir": "./src",
@@ -30,7 +31,7 @@
   },
   "include": [
     "src"
-  ],
+, "tests"  ],
   "exclude": [
     "node_modules",
     "dist",

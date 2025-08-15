@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 import { z } from "zod";
 import { colorPrint, ColorType } from './utils/index.js';
 import { last } from 'slate';
-import { executeTool, getTools } from '@/mcp/utils.js';
+import { executeTool, getTools } from '@/services/mcp/utils.js';
 
 dotenv.config();
 

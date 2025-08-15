@@ -5,6 +5,12 @@ import { LlmRepo } from './Llm.js';
 
 
 
+export enum AGENT_TYPE {
+    REACT = 'react',
+    HUMAN = 'human',
+    FINDER = 'finder'
+}
+
 @Entity('agents')
 export class AgentRepo {
 
@@ -34,6 +40,8 @@ export class AgentRepo {
     @Column({ type: 'boolean', default: true })
     killOnResponse?: boolean;
 
+    @Column({ type: 'enum', enum: AGENT_TYPE, default: AGENT_TYPE.REACT })
+    type?: AGENT_TYPE;
 
     // RELATIONSHIPS
 

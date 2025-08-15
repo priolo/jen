@@ -1,8 +1,8 @@
 import { ToolResultPart } from "ai";
-import { IAgentRepo } from "../repository/Agent.js";
-import { ChatMessage } from "../types/RoomActions";
-import { ContentAskTo, ContentCompleted, ContentTool, Response, RESPONSE_TYPE } from '../agents/types.js';
-import AgentLlm from '../agents/AgentLlm.js';
+import { IAgentRepo } from "../src/repository/Agent.js";
+import { ChatMessage } from "../src/types/RoomActions.js";
+import { ContentAskTo, ContentCompleted, ContentTool, Response, RESPONSE_TYPE } from '../src/services/agents/types.js';
+import AgentLlm from '../src/services/agents/AgentLlm.js';
 
 
 
@@ -18,11 +18,11 @@ describe("Test on AGENT", () => {
 	test("Test semplice domanda", async () => {
 
 		// creo un agente
-		const agentPoco = {
+		const agentRepo = {
 			id: "id-1",
 			name: "generic",
 		}
-		const agent = new AgentLlm(agentPoco)
+		const agent = new AgentLlm(agentRepo)
 
 		const history: ChatMessage[] = [
 			{ role: "user", content: "write 42" },
@@ -37,7 +37,7 @@ describe("Test on AGENT", () => {
 
 	test("Test con tool", async () => {
 		// creo un agente
-		const agentPoco = <IAgentRepo>{
+		const agentRepo = <IAgentRepo>{
 			id: "id-1",
 			name: "gneric",
 			tools: [
@@ -55,7 +55,7 @@ describe("Test on AGENT", () => {
 				}
 			],
 		}
-		const agent = new AgentLlm(agentPoco)
+		const agent = new AgentLlm(agentRepo)
 
 		const history: ChatMessage[] = [
 			{ role: "user", content: "How much is 2+2? Just write the result." },
@@ -120,7 +120,6 @@ describe("Test on AGENT", () => {
 
 				const lastMsg = history[history.length - 1];
 				(<ToolResultPart>lastMsg.content[0]).result = (<ContentCompleted>respSub.content).answer;
-
 
 			}
 

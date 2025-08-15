@@ -42,9 +42,10 @@ class MyStateClass extends ServiceBase {
 	}
 }
 
-const myState = new MyStateClass();
 
-function buildNodeConfig() {
+
+
+function buildNodeConfig(noWs: boolean = false) {
 
 	return [
 
@@ -84,19 +85,20 @@ function buildNodeConfig() {
 					],
 				},
 
-				<ws.conf>{
-					class: "ws",
-					port: PORT_WS,
-					children: [
-						// { class: "npm:@priolo/julian-ws-reflection" }
-						<WSRoomsConf>{
-							class: WSRoomsService
-						},
-						<WSDocConf>{
-							class: WSDocService
-						}
-					]
-				}
+				noWs ? null
+					: <ws.conf>{
+						class: "ws",
+						port: PORT_WS,
+						children: [
+							// { class: "npm:@priolo/julian-ws-reflection" }
+							<WSRoomsConf>{
+								class: WSRoomsService
+							},
+							<WSDocConf>{
+								class: WSDocService
+							}
+						]
+					}
 			]
 		},
 

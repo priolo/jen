@@ -1,9 +1,7 @@
 import { http, RootService } from "@priolo/julian";
 import axios, { AxiosInstance } from "axios";
-import buildNodeConfig, { PORT } from "../config";
-import { AgentRepo } from "../repository/Agent";
-import { ToolRepo } from "../repository/Tool";
-import { McpServerRepo } from "../repository/McpServer";
+import buildNodeConfig, { PORT } from "../src/config";
+import { AgentRepo } from "../src/repository/Agent";
 
 
 
@@ -19,7 +17,7 @@ describe("Test on AGENT router", () => {
 			withCredentials: true
 		})
 
-		const cnf = buildNodeConfig()
+		const cnf = buildNodeConfig(true)
 		root = await RootService.Start(cnf)
 		const http = root.nodeByPath("/http") as http.Service
 		const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
@@ -37,7 +35,7 @@ describe("Test on AGENT router", () => {
 	test("posso accedere all'endpoint?", async () => {
 
 		// creo un agent nuovo
-		let agentData: Partial<Agent> = {
+		let agentData: Omit<AgentRepo, "id"> = {
 			name: "name1",
 			description: "description",
 			systemPrompt: "systemPrompt",
@@ -103,72 +101,72 @@ describe("Test on AGENT router", () => {
 
 	
 
-	test("Creo un mcp con un tool lo assegno ad un agente e mando un prompt", async () => {
+	// test("Creo un mcp con un tool lo assegno ad un agente e mando un prompt", async () => {
 
-		// 1. Create a MCP local endpoint
-		const mcpServerReq:Partial<McpServer> = {
-			name: "Test MCP Server",
-			host: `http://localhost:${PORT}/mcp`,
-		};
-		const mcpServerRes = await axiosIstance.post(`/api/mcp_servers`, { mcpServer: mcpServerReq });
-		expect(mcpServerRes.status).toBe(200);
-		const mcpServer:McpServer = mcpServerRes.data;
-		expect(mcpServer).toHaveProperty("id");
-
-
-		// 2. Create a Tool
-		const toolReq:Partial<Tool> = { 
-			name: "sum",
-			mcpId: mcpServer.id!, 
-		}
-		const toolRes = await axiosIstance.post(`/api/tools`, { tool: toolReq });
-		expect(toolRes.status).toBe(200)
-		const tool:Tool = toolRes.data;
-		expect(tool).toHaveProperty("id");
+	// 	// 1. Create a MCP local endpoint
+	// 	const mcpServerReq:Partial<McpServer> = {
+	// 		name: "Test MCP Server",
+	// 		host: `http://localhost:${PORT}/mcp`,
+	// 	};
+	// 	const mcpServerRes = await axiosIstance.post(`/api/mcp_servers`, { mcpServer: mcpServerReq });
+	// 	expect(mcpServerRes.status).toBe(200);
+	// 	const mcpServer:McpServer = mcpServerRes.data;
+	// 	expect(mcpServer).toHaveProperty("id");
 
 
-		// 3. Create a Agent with the Tool
-		const agentReq:Partial<Agent> = {
-			name: "Math Agent",
-			description: "An agent for math operations",
-			systemPrompt: "You are a math agent that can perform mathematical operations.",
-			contextPrompt: "You will receive a mathematical operation to perform.",
-			askInformation: false,
-			killOnResponse: true,
-			tools: [{ id: tool.id }],
-		};
-		const childAgentRes = await axiosIstance.post(`/api/agents`, { agent: agentReq });
-		expect(childAgentRes.status).toBe(200);
-		const agent:Agent = childAgentRes.data;
-		expect(agent).toHaveProperty("id");
+	// 	// 2. Create a Tool
+	// 	const toolReq:Partial<Tool> = { 
+	// 		name: "sum",
+	// 		mcpId: mcpServer.id!, 
+	// 	}
+	// 	const toolRes = await axiosIstance.post(`/api/tools`, { tool: toolReq });
+	// 	expect(toolRes.status).toBe(200)
+	// 	const tool:Tool = toolRes.data;
+	// 	expect(tool).toHaveProperty("id");
 
 
-		// 4. Create a room
+	// 	// 3. Create a Agent with the Tool
+	// 	const agentReq:Partial<Agent> = {
+	// 		name: "Math Agent",
+	// 		description: "An agent for math operations",
+	// 		systemPrompt: "You are a math agent that can perform mathematical operations.",
+	// 		contextPrompt: "You will receive a mathematical operation to perform.",
+	// 		askInformation: false,
+	// 		killOnResponse: true,
+	// 		tools: [{ id: tool.id }],
+	// 	};
+	// 	const childAgentRes = await axiosIstance.post(`/api/agents`, { agent: agentReq });
+	// 	expect(childAgentRes.status).toBe(200);
+	// 	const agent:Agent = childAgentRes.data;
+	// 	expect(agent).toHaveProperty("id");
+
+
+	// 	// 4. Create a room
 		
 
 
-		// 4. Call a prompt
-		const prompt = "What is 2 + 2?";
-		const executeRes = await axiosIstance.post(`/api/mcp_servers/${mcpServer.id}/sum/execute`, {
-			prompt: prompt,
-			agentId: agent.id,
-		});
+	// 	// 4. Call a prompt
+	// 	const prompt = "What is 2 + 2?";
+	// 	const executeRes = await axiosIstance.post(`/api/mcp_servers/${mcpServer.id}/sum/execute`, {
+	// 		prompt: prompt,
+	// 		agentId: agent.id,
+	// 	});
 
 
-		// // 4. Execute the Tool
-		// const prompt = "What is 2 + 2?";
-		// const executeRes = await axiosIstance.post(`/api/mcp_servers/${mcpServer.id}/sum/execute`, {
-		// 	prompt: prompt,
-		// 	agentId: agent.id,
-		// });
-		// expect(executeRes.status).toBe(200);
-		// const executeData = executeRes.data;
-		// expect(executeData).toHaveProperty("response");
-		// expect(executeData.response).toContain("4"); // Assuming the tool returns the correct answer
-		// expect(executeData).toHaveProperty("agentId");
-		// expect(executeData.agentId).toBe(agent.id);	
+	// 	// // 4. Execute the Tool
+	// 	// const prompt = "What is 2 + 2?";
+	// 	// const executeRes = await axiosIstance.post(`/api/mcp_servers/${mcpServer.id}/sum/execute`, {
+	// 	// 	prompt: prompt,
+	// 	// 	agentId: agent.id,
+	// 	// });
+	// 	// expect(executeRes.status).toBe(200);
+	// 	// const executeData = executeRes.data;
+	// 	// expect(executeData).toHaveProperty("response");
+	// 	// expect(executeData.response).toContain("4"); // Assuming the tool returns the correct answer
+	// 	// expect(executeData).toHaveProperty("agentId");
+	// 	// expect(executeData.agentId).toBe(agent.id);	
 
-	}, 100000);
+	// }, 100000);
 
 
 

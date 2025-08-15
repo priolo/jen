@@ -8,7 +8,7 @@ const route = process.env.NODE_ENV == ENV_TYPE.TEST ? {
 	routers: [
 		{
 			path: "/reset", verb: "post", method: async function (req, res, next) {
-				const {default:users} = await import("../tests/seed/users.js")
+				const {default:users} = await import("../../tests/seed/users.js")
 
 				await new Bus(this, "/typeorm/users").dispatch({
 					type: RepoStructActions.SEED,

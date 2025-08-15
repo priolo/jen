@@ -1,5 +1,5 @@
 import fs from "fs";
-import { ENV_TYPE } from "../types/utils.js";
+import { ENV_TYPE } from "../types/env.js";
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import dotenv from "dotenv";
