@@ -1,11 +1,9 @@
-import { Node } from "@priolo/julian";
-import RoomTurnBased from "./RoomTurnBased.js";
-import AgentLlm from "../agents/AgentLlm.js";
-import { WSRoomsService } from "@/routers/RoomsWSRoute.js";
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
+import { WSRoomsService } from "@/routers/RoomsWSRoute.js";
 import { AppendMessageS2C, BaseS2C, CHAT_ACTION_S2C, UserEnteredS2C } from "@/types/RoomActions.js";
 import { Response } from '../agents/types.js';
+import RoomTurnBased from "./RoomTurnBased.js";
 
 
 
@@ -36,7 +34,7 @@ class ChatNode {
 		// creo una nuova room se non esiste
 		let room: RoomTurnBased = this.getRootRoom()
 		if (!room) {
-			const roomRepo = await this.node.createRoom()
+			const roomRepo = await this.node.createRoomRepo()
 			room = new RoomTurnBased(roomRepo)
 			this.rooms.push(room);
 		}
@@ -107,18 +105,27 @@ class ChatNode {
 
 	async recursiveRequest(room: RoomTurnBased, question?: string): Promise<Response> {
 
-		room.onTool = (toolId:string, args: any) => this.node.executeTool(toolId, args)
+		room.onTool = (toolId: string, args: any) => this.node.executeTool(toolId, args)
 		room.onSubAgent = async (agentId, question) => {
 			const agentRepo: AgentRepo = await this.node.getAgentRepoById(agentId)
 			if (!agentRepo) return null;
-			const subRoomRepo: RoomRepo = await this.node.createRoom([agentRepo], room.room.id)
+			const subRoomRepo: RoomRepo = await this.node.createRoomRepo([agentRepo], room.room.id)
 			const subRoom = new RoomTurnBased(subRoomRepo)
 			this.rooms.push(subRoom);
 			const resp = await this.recursiveRequest(subRoom, question)
 			return resp
 		}
-		room.onLoop = (roomId:string, agentId: string, result: any) => {
-			this.node.agentMessage(roomId, agentId, result)
+		room.onLoop = (roomId: string, agentId: string, result: any) => {
+			// INVIO
+			const msgToClient: AppendMessageS2C = {
+				action: CHAT_ACTION_S2C.APPEND_MESSAGE,
+				chatId: this.id,
+				agentId: agentId,
+				roomId: roomId,
+				content: [{ role: "assistant", content: result }],
+			}
+			this.sendMessageToClients(msgToClient)
+			// ---
 		}
 		if (!!question) room.addUserMessage(question)
 

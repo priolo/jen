@@ -1,5 +1,6 @@
 import { IAgentRepo } from "../src/repository/Agent.js";
 import { RoomRepo } from "../src/repository/Room.js";
+import { ToolRepo } from "../src/repository/Tool.js";
 import { ContentCompleted, Response, RESPONSE_TYPE } from '../src/services/agents/types.js';
 import RoomTurnBased from '../src/services/rooms/RoomTurnBased.js';
 
@@ -7,7 +8,8 @@ import RoomTurnBased from '../src/services/rooms/RoomTurnBased.js';
 
 describe("Test on ROOM", () => {
 
-	const addTool = {
+	const addTool:ToolRepo = {
+		id: "id-tool-1",
 		name: "addition",
 		description: "A simple tool that adds two numbers",
 		parameters: {
@@ -19,9 +21,9 @@ describe("Test on ROOM", () => {
 			required: ["a", "b"]
 		}
 	}
-	const toolsExe = (name: string, args: any) => ({
-		"addition": (args: any) => (args.a + args.b).toString()
-	}[name]?.(args) ?? null)
+	const toolsExe = (id: string, args: any) => ({
+		"id-tool-1": (args: any) => (args.a + args.b).toString()
+	}[id]?.(args) ?? null)
 
 	beforeAll(async () => {
 	})
@@ -66,7 +68,7 @@ describe("Test on ROOM", () => {
 			agents: [agentRepo],
 		}
 		const room = new RoomTurnBased(roomRepo)
-		room.onTool = (name, args) => toolsExe(name, args)
+		room.onTool = (toolId:string, args:any) => toolsExe(toolId, args)
 
 		room.addUserMessage("How much is 2+2? Just write the result.")
 		const resp = await room.getResponse()
@@ -161,7 +163,7 @@ describe("Test on ROOM", () => {
 			agentTimeline.push(roomRepo?.agents?.[0]?.id ?? "")
 
 			const room = new RoomTurnBased(roomRepo)
-			room.onTool = (name, args) => toolsExe(name, args)
+			room.onTool = (toolId, args) => toolsExe(toolId, args)
 			room.onSubAgent = async (agentId, question) => {
 				const agentRepo = agentsRepo.find(a => a.id === agentId);
 				if (!agentRepo) return null;

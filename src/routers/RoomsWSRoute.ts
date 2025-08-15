@@ -88,20 +88,6 @@ export class WSRoomsService extends ws.route {
 		this.chats.push(chat)
 		chat.enterClient(client.remoteAddress, msg.agentId)
 
-		// // se non c'e' l'id allora creo una CHAT nuova
-		// if (!msg.chatId) {
-		// 	chat = await createNewChat(msg.agentId)
-		// 	this.chats.push(chat)
-		// 	// altrimenti cerco l'istanza della CHAT
-		// } else {
-		// 	chat = this.getChatById(msg.chatId)
-		// 	// se la CHAT non c'e la carico dal DB e la inserisco
-		// 	if (!chat) {
-		// 		chat = await this.loadChat(msg.chatId)
-		// 	}
-		// }
-		// aggiungo il client alla room
-		//chat.clients.add(client.remoteAddress)
 
 		// // creo e invio il messaggio di entrata
 		// const message: UserEnteredS2C = {
@@ -132,9 +118,11 @@ export class WSRoomsService extends ws.route {
 		if (!chat) return this.log(`Chat not found: ${msg.chatId}`)
 
 		chat.userMessage(client.remoteAddress, msg.text)
-		// if (!!msg.complete) {
-		// 	this.complete(chat, msg.text)
-		// } else {
+
+		if (!!msg.complete) {
+			chat.complete()
+		}
+		//else {
 		// 	const item: CoreUserMessage = {
 		// 		role: "user",
 		// 		content: msg.text,
@@ -157,7 +145,7 @@ export class WSRoomsService extends ws.route {
 
 	//#region  OVERWRITE
 
-	public async createRoom(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null> {
+	public async createRoomRepo(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null> {
 		// per il momento non salvo in DB
 		// const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
 		// 	type: typeorm.RepoRestActions.SAVE,
@@ -201,22 +189,6 @@ export class WSRoomsService extends ws.route {
 		return "42"
 	}
 
-	//[TO DO]
-	public agentMessage(roomId: string, agentId: string, response: Response): void {
-		//INVIA IL MESSAGGIO AL CLIENT;
-		console.log(`Agent ${agentId} in room ${roomId} responded:`, response)
-
-		// invia messaggio al CLIENT
-		// const msg: AppendMessageS2C = {
-		// 	action: CHAT_ACTION_S2C.APPEND_MESSAGE,
-		// 	chatId: chat.id,
-		// 	roomId: room.id,
-		// 	content: messages,
-		// }
-		// this.sendToChat(msg)
-
-	}
-
 	/**
 	 * Quando un CLIENT lascia la chat se è vuota la rimuove
 	 */
@@ -230,7 +202,11 @@ export class WSRoomsService extends ws.route {
 		}
 	}
 
-
+	public sendMessageToClient(clientAddress: string, message: string) {
+		const client = this.getClient(clientAddress)
+		if (!client) return
+		this.sendToClient(client, JSON.stringify(message))
+	}
 
 	//#endregion OVERWRITE
 
@@ -240,11 +216,7 @@ export class WSRoomsService extends ws.route {
 
 
 
-	public sendMessageToClient(clientAddress: string, message: string) {
-		const client = this.getClient(clientAddress)
-		if (!client) return
-		this.sendToClient(client, JSON.stringify(message))
-	}
+
 
 	private getChatById(chatId: string): ChatNode | undefined {
 		return this.chats.find(c => c.id === chatId)

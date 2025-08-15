@@ -16,11 +16,11 @@ export class ToolRepo {
 
 	/** Il nome del tool (è univoco nello scope di MCP) */
 	@Column({ type: 'varchar', default: '' })
-	name: string
+	name?: string
 
 	/** descrizione del TOOL (sovrascrive quella del MCP) */
 	@Column({ type: 'varchar', default: '' })
-	description: string
+	description?: string
 
 	/** Parametri del tool in formato JSON */
 	@Column({ type: 'json', nullable: true })
@@ -31,12 +31,12 @@ export class ToolRepo {
 	@JoinColumn({ name: 'mcpId' })
     mcp?: McpServerRepo
 	@Column({ type: 'uuid', nullable: true })
-    mcpId: string
+    mcpId?: string
 
 	// RELATIONSHIPS
 	/** Agenti che utilizzano questo tool */
 	@ManyToMany(() => AgentRepo, agent => agent.tools)
-	agents?: Relation<AgentRepo[]>
+	agents?: AgentRepo[]
 
 
 	execute?: (args:any) => Promise<any>

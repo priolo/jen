@@ -75,6 +75,8 @@ export type UserLeaveS2C = BaseS2C & {
 export type AppendMessageS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.APPEND_MESSAGE
 	roomId: string
+	/** se il messaggio è stato inserito da un agente, contiene l'id dell'agente */
+	agentId?: string 
 	content: ChatMessage[]
 }
 
