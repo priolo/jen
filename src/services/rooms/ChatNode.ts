@@ -103,7 +103,7 @@ class ChatNode {
 
 
 
-	async recursiveRequest(room: RoomTurnBased, question?: string): Promise<Response> {
+	private async recursiveRequest(room: RoomTurnBased, question?: string): Promise<Response> {
 
 		room.onTool = (toolId: string, args: any) => this.node.executeTool(toolId, args)
 		room.onSubAgent = async (agentId, question) => {
@@ -132,23 +132,11 @@ class ChatNode {
 		return room.getResponse()
 	}
 
-
-
-
-
-
-	getRootRoom(): RoomTurnBased {
+	private getRootRoom(): RoomTurnBased {
 		return this.rooms.find(room => room.room.parentRoomId == null)
 	}
-	// getRoomById(roomId: string): RoomTurnBased {
-	// 	const room = this.rooms.find(room => room.room.id === roomId)
-	// 	if (!!room) return room
-	// 	const roomRepo = await this.node.createRoom(roomId)
-	// }
-
-
-
-	sendMessageToClients(message: BaseS2C): void {
+	
+	private sendMessageToClients(message: BaseS2C): void {
 		for (const clientId of this.clientsIds) {
 			this.node.sendMessageToClient(clientId, JSON.stringify(message));
 		}

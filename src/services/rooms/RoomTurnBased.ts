@@ -2,7 +2,7 @@ import { RoomRepo } from "@/repository/Room.js";
 import { ChatMessage } from "@/types/RoomActions.js";
 import AgentLlm from "../agents/AgentLlm.js";
 import { ContentAskTo, ContentTool, Response, RESPONSE_TYPE } from '../agents/types.js';
-import { ToolResultPart } from "ai";
+import { tool, ToolResultPart } from "ai";
 
 
 
@@ -33,41 +33,29 @@ class RoomTurnBased {
 		do {
 			response = await agent.ask(this.room.history)
 			this.room.history.push(...response.response)
-			let result:any;
 
 			if (response.type === RESPONSE_TYPE.TOOL) {
 				const content = <ContentTool>response.content
-				result = await this.onTool?.(content.id, content.args);
-				const lastMsg = this.room.history[this.room.history.length - 1];
-				(lastMsg.content[0] as ToolResultPart).result = result
+				const result = await this.onTool?.(content.id, content.args)
+				// inserisco il risultato nel "tool-result"
+				const toolContent = response.response.find(r => r.role == "tool")?.content?.find( c => c.type == "tool-result")
+				toolContent.result = result;
+				//const lastMsg = this.room.history[this.room.history.length - 1];
+				//(lastMsg.content[0] as ToolResultPart).result = result
 			}
 
 			if (response.type === RESPONSE_TYPE.ASK_TO) {
 
 				const content = <ContentAskTo>response.content
-				result = await this.onSubAgent?.(content.agentId, content.question)
-				const lastMsg = this.room.history[this.room.history.length - 1];
-				(lastMsg.content[0] as ToolResultPart).result = result
-
-
-				// const agentSub = new AgentLlm(agentsRepo.find(a => a.id === (<ContentAskTo>resp.content).agentId))
-				// const historySub: ChatMessage[] = [
-				// 	{ role: "user", content: (<ContentAskTo>resp.content).question },
-				// ]
-				// let respSub:Response;
-				// do {
-				// 	respSub = await agentSub.ask(historySub)
-				// 	historySub.push(...respSub.response)
-
-				// } while (respSub.continue);
-				// // ---
-
-				// const lastMsg = history[history.length - 1];
-				// (<ToolResultPart>lastMsg.content[0]).result = (<ContentCompleted>respSub.content).answer;
-
+				const result = await this.onSubAgent?.(content.agentId, content.question)
+				// inserisco il risultato nel "tool-result"
+				const toolContent = response.response.find(r => r.role == "tool")?.content?.find( c => c.type == "tool-result")
+				toolContent.result = result;
+				// const lastMsg = this.room.history[this.room.history.length - 1];
+				// (lastMsg.content[0] as ToolResultPart).result = result
 			}
 
-			this.onLoop?.(this.room.id, agent.agent.id, result)
+			this.onLoop?.(this.room.id, agent.agent.id, response)
 
 		} while (response.continue)
 

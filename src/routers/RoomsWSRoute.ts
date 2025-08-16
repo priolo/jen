@@ -1,11 +1,11 @@
-import ChatNode from "@/services/rooms/ChatWs.js"
+import ChatNode from "@/services/rooms/ChatNode.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { ToolRepo } from "../repository/Tool.js"
-import { Response } from '../services/agents/types.js'
 import { BaseC2S, CHAT_ACTION_C2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/RoomActions.js"
+import RoomsChats from "./RoomsChats.js"
 
 
 
@@ -14,7 +14,7 @@ export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
 /**
  * WebSocket service for managing prompt chat rooms
  */
-export class WSRoomsService extends ws.route {
+export class WSRoomsService extends ws.route implements RoomsChats {
 
 	private chats: ChatNode[] = []
 
@@ -119,31 +119,16 @@ export class WSRoomsService extends ws.route {
 
 		chat.userMessage(client.remoteAddress, msg.text)
 
-		if (!!msg.complete) {
-			chat.complete()
-		}
-		//else {
-		// 	const item: CoreUserMessage = {
-		// 		role: "user",
-		// 		content: msg.text,
-		// 	}
-		// 	const rootRoom = getRootRoom(chat)
-		// 	rootRoom.history.push(item)
-		// const msgToClient: AppendMessageS2C = {
-		// 	action: CHAT_ACTION_S2C.APPEND_MESSAGE,
-		// 	chatId: chat.id,
-		// 	roomId: rootRoom.id,
-		// 	content: [item],
-		// }
-		// this.sendToChat(msgToClient)
-		//}
+		if (!msg?.complete) return
+		chat.complete()
+		
 	}
 
 
 
 
 
-	//#region  OVERWRITE
+	//#region IMPLEMENTATION OF RoomsChats INTERFACE
 
 	public async createRoomRepo(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null> {
 		// per il momento non salvo in DB
@@ -161,14 +146,6 @@ export class WSRoomsService extends ws.route {
 			agents: agents,
 		}
 	}
-
-	// public async getRoomById(roomId: string): Promise<RoomRepo> {
-	// 	const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
-	// 		type: typeorm.RepoRestActions.GET_BY_ID,
-	// 		payload: roomId
-	// 	})
-	// 	return room
-	// }
 
 	public async getAgentRepoById(agentId: string): Promise<AgentRepo> {
 		const agent: AgentRepo = await new Bus(this, this.state.agentRepository).dispatch({
@@ -208,7 +185,7 @@ export class WSRoomsService extends ws.route {
 		this.sendToClient(client, JSON.stringify(message))
 	}
 
-	//#endregion OVERWRITE
+	//#endregion
 
 
 

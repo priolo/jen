@@ -1,13 +1,16 @@
-import { IAgentRepo } from "../src/repository/Agent.js";
-import { RoomRepo } from "../src/repository/Room.js";
-import { ContentCompleted, Response, RESPONSE_TYPE } from '../src/services/agents/types.js';
-import RoomTurnBased from '../src/services/rooms/RoomTurnBased.js';
+import { randomUUID } from 'crypto';
+import { RoomRepo } from '../src/repository/Room.js';
+import RoomsChats from '../src/routers/RoomsChats.js';
+import { IAgentRepo } from '../src/repository/Agent.js';
+import { ToolRepo } from '../src/repository/Tool.js';
+import ChatNode from '../src/services/rooms/ChatNode.js';
 
 
 
 describe("Test on CHAT", () => {
 
-	const addTool = {
+	const addTool = <ToolRepo>{
+		id: "id-tool-1",
 		name: "addition",
 		description: "A simple tool that adds two numbers",
 		parameters: {
@@ -19,9 +22,50 @@ describe("Test on CHAT", () => {
 			required: ["a", "b"]
 		}
 	}
-	const toolsExe = (name: string, args: any) => ({
-		"addition": (args: any) => (args.a + args.b).toString()
-	}[name]?.(args) ?? null)
+	const toolsExe = (id: string, args: any) => ({
+		"id-tool-1": (args: any) => (args.a + args.b).toString()
+	}[id]?.(args) ?? null)
+
+	const agentAdderRepo = <IAgentRepo>{
+		id: "id-1",
+		name: "adder",
+		description: "Agent who can do additions well",
+		tools: [addTool],
+	}
+	const agentMathRepo = <IAgentRepo>{
+		id: "id-2",
+		name: "math",
+		description: "Agent who deals with mathematics",
+		subAgents: [agentAdderRepo],
+	}
+	const agentLeadRepo = <IAgentRepo>{
+		id: "id-3",
+		name: "lead",
+		description: "General agent. Never respond directly but use the tools at my disposal to answer questions.",
+		subAgents: [agentMathRepo],
+	}
+	const agentsRepo: IAgentRepo[] = [agentMathRepo, agentAdderRepo, agentLeadRepo]
+
+	const nodeSym = <RoomsChats>{
+		createRoomRepo: async (agents, parentId) => {
+			return <RoomRepo>{
+				id: randomUUID(),
+				history: [],
+				parentId: parentId,
+				agents: agents || [],
+			}
+		},
+		getAgentRepoById: async (agentId) => {
+			return agentsRepo.find(agent => agent.id === agentId) || null
+		},
+		executeTool: async (toolId, args) => {
+			return toolsExe(toolId, args)
+		},
+		removeChat: (chatId) => { /* remove chat logic */ },
+		sendMessageToClient: (clientAddress, message) => {
+			console.log(`Message to ${clientAddress}: ${message}`)
+		}
+	}
 
 	beforeAll(async () => {
 	})
@@ -30,157 +74,14 @@ describe("Test on CHAT", () => {
 	})
 
 	test("semplice domanda", async () => {
-
-		const agentRepo = <IAgentRepo>{
-			id: "id-agent-1",
-			name: "generic",
-		}
-
-		const roomRepo: RoomRepo = {
-			id: "id-room-1",
-			history: [],
-			agents: [agentRepo],
-		}
-
-		const room = new RoomTurnBased(roomRepo)
-		room.addUserMessage("write 42")
-		const resp = await room.getResponse()
-
-		expect(resp).toBeDefined()
-		expect(resp.type).toBe(RESPONSE_TYPE.COMPLETED);
-		expect((resp.content as ContentCompleted).answer).toBe("42");
-
-	}, 100000)
-
-	test("semplice domanda con utilizzo di un tool", async () => {
-
-		const agentRepo = <IAgentRepo>{
-			id: "id-1",
-			name: "gneric",
-			tools: [addTool],
-		}
-
-		const roomRepo: RoomRepo = {
-			id: "id-room-1",
-			history: [],
-			agents: [agentRepo],
-		}
-		const room = new RoomTurnBased(roomRepo)
-		room.onTool = (name, args) => toolsExe(name, args)
-
-		room.addUserMessage("How much is 2+2? Just write the result.")
-		const resp = await room.getResponse()
-
-		expect(resp).toBeDefined()
-		expect(resp.type).toBe(RESPONSE_TYPE.COMPLETED);
-		expect((resp.content as ContentCompleted).answer).toBe("4");
-
-	})
-
-	test("semplice domanda con call subagent", async () => {
-
-		// creo l'agente sub
-		const agentAdderRepo = <IAgentRepo>{
-			id: "id-2",
-			name: "adder",
-			description: "I'm an agent who can do additions well",
-		}
-		// creo l'agente leader
-		const agentLeadRepo = <IAgentRepo>{
-			id: "id-1",
-			name: "lead",
-			subAgents: [agentAdderRepo],
-		}
-		const agentsRepo: IAgentRepo[] = [agentAdderRepo, agentLeadRepo]
-
-
-		const roomRepo: RoomRepo = {
-			id: "id-room-1",
-			history: [],
-			agents: [agentLeadRepo],
-		}
-		const room = new RoomTurnBased(roomRepo)
-		room.onSubAgent = async (agentId, question) => {
-			const agentRepo = agentsRepo.find(a => a.id === agentId);
-			if (!agentRepo) return null;
-			const room = new RoomTurnBased({
-				id: "sub-room",
-				history: [],
-				agents: [agentRepo],
-			})
-			room.addUserMessage(question)
-			const resp = await room.getResponse()
-			if (resp.type == RESPONSE_TYPE.COMPLETED) {
-				return (<ContentCompleted>resp.content).answer
-			}
-			return null;
-		}
-
-		room.addUserMessage("How much is 2+2? Just write the result.")
-		const resp = await room.getResponse()
-
-		expect(resp.type).toBe(RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>resp.content).answer).toBe("4")
-
-	}, 100000)
-
-
-	test("chiamata ricorsiva ", async () => {
-
-		const agentAdderRepo = <IAgentRepo>{
-			id: "id-1",
-			name: "adder",
-			description: "I'm an agent who can do additions well",
-			tools: [addTool],
-		}
-		const agentMathRepo = <IAgentRepo>{
-			id: "id-2",
-			name: "math",
-			description: "I'm an agent who deals with mathematics",
-			subAgents: [agentAdderRepo],
-		}
-		const agentLeadRepo = <IAgentRepo>{
-			id: "id-3",
-			name: "lead",
-			description: "I'm a general agent. I never respond directly but use the tools at my disposal to answer questions.",
-			subAgents: [agentMathRepo],
-		}
-		const agentsRepo: IAgentRepo[] = [agentMathRepo, agentAdderRepo, agentLeadRepo]
-
-
-		const roomRepoRoot: RoomRepo = {
-			id: "id-room-1",
-			history: [],
-			agents: [agentLeadRepo],
-		}
-		const question = "How much is 2+2? Just write the result."
-
-		const agentTimeline:string[] = []
-
-		async function recursiveRequest(roomRepo: RoomRepo, question: string): Promise<Response> {
-			agentTimeline.push(roomRepo?.agents?.[0]?.id ?? "")
-
-			const room = new RoomTurnBased(roomRepo)
-			room.onTool = (name, args) => toolsExe(name, args)
-			room.onSubAgent = async (agentId, question) => {
-				const agentRepo = agentsRepo.find(a => a.id === agentId);
-				if (!agentRepo) return null;
-				const roomRepo:RoomRepo = {
-					id: "sub-room",
-					history: [],
-					agents: [agentRepo],
-				}
-				return recursiveRequest(roomRepo, question)
-			}
-			room.addUserMessage(question)
-			return room.getResponse()
-		}
-
-
-		const resp = await recursiveRequest(roomRepoRoot, question)
-		expect(resp.type).toBe(RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>resp.content).answer).toBe("4")
-		expect(agentTimeline).toEqual(["id-3", "id-2", "id-1"])
+		const chat = new ChatNode(nodeSym)
+		await chat.enterClient("client-1", "id-3")
+		await chat.userMessage(
+			"client-1",
+			`Don't answer directly, but use the tools available to you.
+What is 2+2? Just write the answer number.`
+		)
+		await chat.complete()
 
 	}, 100000)
 

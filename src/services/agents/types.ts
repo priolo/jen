@@ -44,7 +44,7 @@ export interface ContentAskTo {
 export interface ContentTool {
 	id: string;
 	// il nome del tool
-	name: string;
+	//name: string;
 	// i parametri da passare al tool
 	args: any;
 }
