@@ -10,7 +10,7 @@ import mcpServerSo from "@/stores/stacks/mcpServer/repo"
 export const wsConnection: SocketService = new SocketService({
 	protocol: window.location.protocol == "http:" ? "ws:" : "wss:",
 	host: window.location.hostname,
-	port: 3100, //import.meta.env.VITE_API_WS_PORT ?? window.location.port,
+	port: import.meta.env.VITE_API_WS_PORT ?? 3010,
 	base: "",
 })
 

@@ -61,9 +61,8 @@ describe("Test on CHAT", () => {
 		executeTool: async (toolId, args) => {
 			return toolsExe(toolId, args)
 		},
-		removeChat: (chatId) => { /* remove chat logic */ },
-		sendMessageToClient: (clientAddress, message) => {
-			console.log(`Message to ${clientAddress}: ${message}`)
+		sendMessageToClient: (clientAddress, result) => {
+			console.log(`SEND MESSAGE TO: ${clientAddress}`, result)
 		}
 	}
 

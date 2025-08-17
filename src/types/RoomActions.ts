@@ -1,4 +1,5 @@
-import { CoreMessage } from "ai"
+import { LlmResponse } from "@/services/agents/types.js";
+import { CoreMessage, CoreUserMessage } from "ai"
 
 
 export type ChatMessage = {
@@ -21,10 +22,9 @@ export type BaseC2S = {
 	chatId: string
 }
 
-/** un CLIENT entra nella CHAT */
+/** un CLIENT entra nella CHAT (sempre nella ROOT-ROOM)*/
 export type UserEnterC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.ENTER
-	roomId?: string
 	agentId?: string
 }
 
@@ -50,7 +50,8 @@ export type UserMessageC2S = BaseC2S & {
 export enum CHAT_ACTION_S2C {
 	ENTERED = "entered",
 	LEAVE = "leave",
-	APPEND_MESSAGE = "append-message",
+	AGENT_MESSAGE = "agent-message",
+	USER_MESSAGE = "user-message",
 	NEW_ROOM = "new-room",
 }
 
@@ -71,14 +72,21 @@ export type UserLeaveS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.LEAVE
 }
 
-/** è stato inserito un messaggio in ROOM */
-export type AppendMessageS2C = BaseS2C & {
-	action: CHAT_ACTION_S2C.APPEND_MESSAGE
+/** un AGENT ha risposto */
+export type AgentMessageS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.AGENT_MESSAGE
 	roomId: string
 	/** se il messaggio è stato inserito da un agente, contiene l'id dell'agente */
 	agentId?: string 
-	content: ChatMessage[]
+	content: LlmResponse
 }
+
+/** un USER ha risposto */
+export type UserMessageS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.USER_MESSAGE
+	content: CoreUserMessage
+}
+
 
 /** è stata creara una SUB-ROOM */
 export type NewRoomS2C = BaseS2C & {

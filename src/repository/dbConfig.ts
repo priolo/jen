@@ -13,7 +13,7 @@ const __dirname = dirname(__filename);
 
 
 // in base ai settaggi dell'env imposto la connessione al DB
-export const getDBConnectionConfig = () => {
+export const getDBConnectionConfig = (noLog:boolean = false) => {
 
 	// se c'e' una path allora stiamo parlando di SQLITE
 	if (process.env.DB_DIR != null) {
@@ -39,7 +39,7 @@ export const getDBConnectionConfig = () => {
 			type: "sqlite",
 			database: dbPath,
 			synchronize: true,
-			logging: true,
+			logging: !noLog,
 		}
 	}
 	

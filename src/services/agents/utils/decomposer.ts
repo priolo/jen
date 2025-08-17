@@ -9,7 +9,7 @@ import fromHTMLToText from '../textualize/html.js';
 import fromPDFToText from '../textualize/pdf.js';
 import { DOC_TYPE, NodeDoc } from "../types.js";
 import { vectorDBCreateAndStore } from "../db/manage.js";
-import { uuidv4 } from "../../types/utils.js";
+import { uuidv4 } from "../../types/env.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

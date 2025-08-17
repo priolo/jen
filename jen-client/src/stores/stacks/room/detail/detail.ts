@@ -1,13 +1,12 @@
 import { wsConnection } from "@/plugins/session"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { Room } from "@/types/Room"
-import { AppendMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S } from "@/types/RoomActions"
+import { AgentMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S, UserMessageS2C } from "@/types/commons/RoomActions"
+import { VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../../editorBase"
-import { ROOM_STATE } from "../types"
 import { buildRoomDetail } from "../factory"
-import { VIEW_SIZE } from "@priolo/jack"
-import mockHistory1 from "./mockHistory1"
+import { ROOM_STATE } from "../types"
 
 
 
@@ -19,7 +18,8 @@ const setup = {
 		room: <Partial<Room>>null,
 		chatState: ROOM_STATE.OFFLINE,
 
-		prompt: "5+6?",
+		prompt: `Don't answer directly, but use the tools available to you.
+What is 2+2? Just write the answer number.`,
 
 		/** indica che la dialog ROLE è aperto */
 		roleDialogOpen: false,
@@ -56,8 +56,6 @@ const setup = {
 				action: CHAT_ACTION_C2S.ENTER,
 				// se è nuova sara' null
 				chatId: roomSo.state.chatId,
-				// se è nuova sara' null
-				roomId: roomSo.state.room?.id,
 				// nel caso sia una nuova CHAT devo indicare l'agent
 				agentId: roomSo.state.room?.agentId,
 			}
@@ -78,21 +76,6 @@ const setup = {
 
 		//#endregion
 
-		sendPrompt: async (_: void, store?: RoomDetailStore) => {
-			const prompt = store.state.prompt?.trim()
-			if (!prompt || prompt.length == 0) return
-			const message: UserMessageC2S = {
-				action: CHAT_ACTION_C2S.USER_MESSAGE,
-				chatId: store.state.chatId,
-				text: prompt,
-				complete: true,
-			}
-			// cancella la text
-			store.setPrompt("")
-			// invio il messaggio al server
-			wsConnection.send(JSON.stringify(message))
-		},
-
 		onMessage: (data: any, store?: RoomDetailStore) => {
 			const message: BaseS2C = JSON.parse(data.payload)
 			if (!message 
@@ -107,7 +90,6 @@ const setup = {
 					store.setRoom({
 						...store.state.room,
 						id: msg.roomId,
-						//history: mockHistory1,
 						history: [],
 						//agentId: msg.agentId ?? store.state.room.agentId,
 					})
@@ -121,11 +103,21 @@ const setup = {
 					break
 				}
 
-				case CHAT_ACTION_S2C.APPEND_MESSAGE: {
-					const msg: AppendMessageS2C = message as AppendMessageS2C
+				case CHAT_ACTION_S2C.USER_MESSAGE: {
+					const msg: UserMessageS2C = message as UserMessageS2C
+					// assumo che l'user puo' comunicare solo nella ROOT-ROOM
+					if (!!store.state.room?.parentRoomId) return
+					if (!store.state.room.history) store.state.room.history = []
+					store.state.room.history.push(msg.content)
+					store.setRoom({ ...store.state.room })
+					break
+				}
+
+				case CHAT_ACTION_S2C.AGENT_MESSAGE: {
+					const msg: AgentMessageS2C = message as AgentMessageS2C
 					if (store.state.room?.id != msg.roomId) return
 					if (!store.state.room.history) store.state.room.history = []
-					store.state.room.history.push(...msg.content)
+					store.state.room.history.push(...msg.content.responseRaw)
 					store.setRoom({ ...store.state.room })
 					break
 				}
@@ -147,6 +139,21 @@ const setup = {
 				}
 
 			}
+		},
+		
+		sendPrompt: async (_: void, store?: RoomDetailStore) => {
+			const prompt = store.state.prompt?.trim()
+			if (!prompt || prompt.length == 0) return
+			const message: UserMessageC2S = {
+				action: CHAT_ACTION_C2S.USER_MESSAGE,
+				chatId: store.state.chatId,
+				text: prompt,
+				complete: true,
+			}
+			// cancella la text
+			store.setPrompt("")
+			// invio il messaggio al server
+			wsConnection.send(JSON.stringify(message))
 		},
 
 	},

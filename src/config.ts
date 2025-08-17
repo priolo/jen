@@ -14,13 +14,14 @@ import ToolRoute from "./routers/ToolRoute.js";
 import McpServerRoute from "./routers/McpServerRoute.js";
 import { McpServerRepo } from "./repository/McpServer.js";
 import tools from "./config_tools.js";
+import { TypeLog } from "@priolo/julian/dist/core/types.js";
 
 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export const PORT = process.env.PORT || 3000;
-export const PORT_WS = process.env.PORT_WS || 3010;
+export const WS_PORT = +(process.env.WS_PORT || 3010)
 
 class MyStateClass extends ServiceBase {
 	// definico lo STATE
@@ -45,16 +46,15 @@ class MyStateClass extends ServiceBase {
 
 
 
-function buildNodeConfig(noWs: boolean = false) {
+function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 
 	return [
 
 		<log.conf>{
 			class: "log",
-			onLog: (msg) => {
-				if (msg.type == "error") {
-					console.error(msg)
-				}
+			exclude: [TypeLog.SYSTEM],
+			onParentLog: (log) => {
+				if (!!log?.payload && ['nc:init', 'nc:destroy', "ns:set-state"].includes(log.payload.type)) return false
 			}
 		},
 
@@ -85,27 +85,26 @@ function buildNodeConfig(noWs: boolean = false) {
 					],
 				},
 
-				noWs ? null
-					: <ws.conf>{
-						class: "ws",
-						port: PORT_WS,
-						children: [
-							// { class: "npm:@priolo/julian-ws-reflection" }
-							<WSRoomsConf>{
-								class: WSRoomsService
-							},
-							<WSDocConf>{
-								class: WSDocService
-							}
-						]
-					}
+				noWs ? null : <ws.conf>{
+					class: "ws",
+					port: WS_PORT,
+					children: [
+						// { class: "npm:@priolo/julian-ws-reflection" }
+						<WSRoomsConf>{
+							class: WSRoomsService
+						},
+						<WSDocConf>{
+							class: WSDocService
+						}
+					]
+				}
 			]
 		},
 
 		<typeorm.conf>{
 			class: "typeorm",
 			options: {
-				...getDBConnectionConfig(),
+				...getDBConnectionConfig(noLog),
 				//entities: repositories
 			},
 			children: [

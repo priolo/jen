@@ -1,4 +1,4 @@
-import { ChatMessage } from "@/types/RoomActions"
+import { ChatMessage } from "@/types/commons/RoomActions"
 import { FunctionComponent } from "react"
 import cls from "./MessageCmp.module.css"
 

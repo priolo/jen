@@ -22,7 +22,7 @@ export class ToolRepo {
 	@Column({ type: 'varchar', default: '' })
 	description?: string
 
-	/** Parametri del tool in formato JSON */
+	/** Parametri del tool in formato JSON (sovrascrive quella del MCP) */
 	@Column({ type: 'json', nullable: true })
 	parameters?: any
 

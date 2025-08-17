@@ -1,7 +1,7 @@
 import { RootService } from "@priolo/julian";
 import dotenv from "dotenv";
 import buildNodeConfig from "./config.js";
-import { ENV_TYPE } from "./types/utils.js";
+import { ENV_TYPE } from "./types/env.js";
 import { seeding } from "./seeding.js";
 
 

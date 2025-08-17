@@ -1,10 +1,11 @@
 import { RootService } from "@priolo/julian"
 import axios, { AxiosInstance } from "axios"
 import { WebSocket } from "ws"
-import buildNodeConfig, { PORT, PORT_WS } from "../config.js"
-import { AgentRepo } from "../repository/Agent.js"
-import { seeding } from "../seeding.js"
-import { AppendMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserMessageC2S } from "../types/RoomActions.js"
+import buildNodeConfig, { PORT, WS_PORT } from "../src/config.js"
+import { AgentRepo } from "../src/repository/Agent.js"
+import { seeding } from "../src/seeding.js"
+import { AgentMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserMessageC2S } from "../src/types/RoomActions.js"
+import { LLM_RESPONSE_TYPE, LlmResponse, ContentCompleted } from "../src/services/agents/types.js"
 
 
 describe("Test on WS ROOT", () => {
@@ -17,7 +18,7 @@ describe("Test on WS ROOT", () => {
 			baseURL: `http://localhost:${PORT}`,
 			withCredentials: true
 		})
-		const cnf = buildNodeConfig()
+		const cnf = buildNodeConfig(false, true)
 		root = await RootService.Start(cnf)
 		await seeding(root)
 	}, 100000)
@@ -28,7 +29,7 @@ describe("Test on WS ROOT", () => {
 
 
 
-	test("client connect/send/close", async () => {
+	test("simple question: 2+2", async () => {
 
 		expect(root).toBeDefined()
 		const allAgents = (await axiosIstance.get(`/api/agents`))?.data as AgentRepo[]
@@ -36,9 +37,8 @@ describe("Test on WS ROOT", () => {
 		const agentLeader = allAgents.find(a => a.name == "LEADER")
 		expect(agentLeader).toBeDefined()
 
-		const ws = new WebSocket(`ws://localhost:${PORT_WS}/`)
+		const ws = new WebSocket(`ws://localhost:${WS_PORT}/`)
 		const result = await new Promise<string>((res, rej) => {
-			let result: string = ""
 
 			// Wait for the WebSocket to open
 			ws.on('open', function open() {
@@ -49,13 +49,14 @@ describe("Test on WS ROOT", () => {
 				}))
 			})
 
+			let result: string = ""
 
 			// Listen for messages from the server
 			ws.on('message', (data: ArrayBuffer) => {
 				const msg = JSON.parse(data.toString()) as BaseS2C
 
 				switch (msg.action) {
-					
+
 					// I have entered in a room
 					case CHAT_ACTION_S2C.ENTERED: {
 
@@ -63,7 +64,8 @@ describe("Test on WS ROOT", () => {
 						const toSend: UserMessageC2S = {
 							action: CHAT_ACTION_C2S.USER_MESSAGE,
 							chatId: msg.chatId,
-							text: "What is the result of adding 5 and 10, then multiplying by 2? Reply with the number only.",
+							text: `Don't answer directly, but use the tools available to you.
+What is 2+2? Just write the answer number.`,
 							complete: true,
 						}
 						ws.send(JSON.stringify(toSend))
@@ -71,15 +73,18 @@ describe("Test on WS ROOT", () => {
 					}
 
 					// receive a message from agent
-					case CHAT_ACTION_S2C.APPEND_MESSAGE:
-						const appendMsg = msg as AppendMessageS2C
-						console.log("Append message:", appendMsg.content)
+					case CHAT_ACTION_S2C.AGENT_MESSAGE:
+						const agentMsg = msg as AgentMessageS2C
+						const type = (<LlmResponse>agentMsg.content).type
+						if (type == LLM_RESPONSE_TYPE.COMPLETED && agentMsg.agentId == agentLeader?.id) {
+							result = (<ContentCompleted>(<LlmResponse>agentMsg.content).content).answer
+							ws.close()
+						}
 						break
 
 					// receive a new room created
 					case CHAT_ACTION_S2C.NEW_ROOM:
 						const newRoomMsg = msg as NewRoomS2C
-						console.log("New room created:", newRoomMsg.roomId, "Parent:", newRoomMsg.parentRoomId)
 						break
 
 					default:
@@ -92,7 +97,11 @@ describe("Test on WS ROOT", () => {
 			});
 		})
 
-		//expect(dateNow).toBe(result)
+		console.log(result)
+
+		expect(result).toEqual("4")
 
 	}, 1000000)
 })
+
+

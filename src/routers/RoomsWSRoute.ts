@@ -4,8 +4,13 @@ import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { ToolRepo } from "../repository/Tool.js"
-import { BaseC2S, CHAT_ACTION_C2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/RoomActions.js"
+import { BaseC2S, BaseS2C, CHAT_ACTION_C2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/RoomActions.js"
 import RoomsChats from "./RoomsChats.js"
+import AgentRoute from "./AgentRoute.js"
+import McpServerRoute from "./McpServerRoute.js"
+import { getTools } from "@/services/mcp/utils.js"
+import { McpServerRepo } from "@/repository/McpServer.js"
+import { McpTool } from "@/services/mcp/types.js"
 
 
 
@@ -25,14 +30,21 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 			repository: "/typeorm/rooms",
 			agentRepository: "/typeorm/agents",
 			toolRepository: "/typeorm/tools",
+			mcpRepository: "/typeorm/mcp_servers",
 		}
 	}
 
+
+
+	//#region SocketCommunicator
+
+	/**
+	 * Restituisco solo i client di questa chat
+	 */
 	private getClient(clientId: string): ws.IClient | undefined {
 		const clients = this.getClients()
 		return clients.find(c => c.remoteAddress === clientId)
 	}
-
 
 	async onConnect(client: ws.IClient) {
 		// qua posso mettere tutti i dati utili al client
@@ -55,8 +67,15 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 		super.onDisconnect(client)
 	}
 
+	//#endregion
+
+
+
+	//#region HANDLE CHAT MESSAGES
+
 	/**
 	 * Handle incoming WebSocket messages
+	 * [II] forse bisogna togliere gli await, ma per ora lascio così
 	 */
 	async onMessage(client: ws.IClient, message: string) {
 		if (!client || !message) return
@@ -67,7 +86,7 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 				await this.handleEnter(client, msg as UserEnterC2S)
 				break
 			case CHAT_ACTION_C2S.LEAVE:
-				await this.handleLeave(client, msg as UserLeaveC2S)
+				this.handleLeave(client, msg as UserLeaveC2S)
 				break
 			case CHAT_ACTION_C2S.USER_MESSAGE:
 				await this.handleUserMessage(client, msg as UserMessageC2S)
@@ -86,30 +105,16 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 	private async handleEnter(client: ws.IClient, msg: UserEnterC2S) {
 		const chat = new ChatNode(this)
 		this.chats.push(chat)
-		chat.enterClient(client.remoteAddress, msg.agentId)
-
-
-		// // creo e invio il messaggio di entrata
-		// const message: UserEnteredS2C = {
-		// 	action: CHAT_ACTION_S2C.ENTERED,
-		// 	chatId: chat.id,
-		// 	roomId: chat.getRootRoomId(),
-		// 	//agentId: getRootRoom(chat)?.agentId,
-		// }
-		// this.sendToChat(message)
+		await chat.enterClient(client.remoteAddress, msg.agentId)
 	}
 
-	private async handleLeave(client: ws.IClient, msg: UserLeaveC2S) {
+	private handleLeave(client: ws.IClient, msg: UserLeaveC2S) {
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) return this.log(`Chat not found: ${msg.chatId}`)
 
-		chat.removeClient(client.remoteAddress)
+		const isVoid = chat.removeClient(client.remoteAddress)
+		if (isVoid) this.removeChat(chat.id)
 
-		// const message: BaseS2C = {
-		// 	action: CHAT_ACTION_S2C.LEAVE,
-		// 	chatId: msg.chatId,
-		// }
-		// this.sendToChat(message)
 		this.log(`Client ${client.remoteAddress} left chat ${msg.chatId}`)
 	}
 
@@ -118,13 +123,11 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 		if (!chat) return this.log(`Chat not found: ${msg.chatId}`)
 
 		chat.userMessage(client.remoteAddress, msg.text)
-
 		if (!msg?.complete) return
-		chat.complete()
-		
+		await chat.complete()
 	}
 
-
+	//#endregion 
 
 
 
@@ -143,15 +146,36 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 			id: randomUUID() as string,
 			parentRoomId: parentId,
 			history: [],
-			agents: agents,
+			agents: agents ?? [],
 		}
 	}
 
+	static McpCache: Map<string, McpTool[]> = new Map()
+
 	public async getAgentRepoById(agentId: string): Promise<AgentRepo> {
-		const agent: AgentRepo = await new Bus(this, this.state.agentRepository).dispatch({
-			type: typeorm.RepoRestActions.GET_BY_ID,
-			payload: agentId
-		})
+		const agent: AgentRepo = await AgentRoute.GetById(agentId, this, this.state.agentRepository)
+
+		// [II] bisogna recuperare la "description" e "parameters" del tool dall MCP cosa che ora non faccio!!!!
+		for (const tool of agent.tools ?? []) {
+
+			// se ha la description e i parameters non c'e' biusogno di caricarli
+			if (!!tool.description && !!tool.parameters) continue
+
+			// se non ci sono i tools di questo MCP li carico
+			if (!WSRoomsService.McpCache.has(tool.mcpId)) {
+				const mcpServer = await McpServerRoute.GetById(tool.mcpId, this, this.state.mcpRepository)
+				if (!mcpServer) continue
+				const mcpTools = await getTools(mcpServer.host)
+				WSRoomsService.McpCache.set(mcpServer.id, mcpTools)
+			}
+
+			// prendo i tools dal cache
+			const mcpTools = WSRoomsService.McpCache.get(tool.mcpId)
+			if (!mcpTools) continue
+			const cachedTool = mcpTools.find(t => t.name == tool.name)
+			tool.description = cachedTool.description
+			tool.parameters = cachedTool.inputSchema
+		}
 		return agent
 	}
 
@@ -166,20 +190,7 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 		return "42"
 	}
 
-	/**
-	 * Quando un CLIENT lascia la chat se è vuota la rimuove
-	 */
-	public removeChat(chatId: string): void {
-		const index = this.chats.findIndex(c => c.id === chatId)
-		if (index !== -1) {
-			this.chats.splice(index, 1)
-			this.log(`Chat removed: ${chatId}`)
-		} else {
-			this.log(`Chat not found: ${chatId}`)
-		}
-	}
-
-	public sendMessageToClient(clientAddress: string, message: string) {
+	public sendMessageToClient(clientAddress: string, message: BaseS2C) {
 		const client = this.getClient(clientAddress)
 		if (!client) return
 		this.sendToClient(client, JSON.stringify(message))
@@ -189,166 +200,21 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 
 
 
-
-
-
-
-
-
 	private getChatById(chatId: string): ChatNode | undefined {
 		return this.chats.find(c => c.id === chatId)
 	}
 
-
-
-
-
-
-
-
-
-
-	// private async complete(chat: Chat, prompt: string): Promise<void> {
-	// 	const rootRoom = getRootRoom(chat)
-	// 	const agentId = rootRoom.agentId
-	// 	const resolver: Resolver = {
-	// 		getAgent: async (id: string) => {
-	// 			const agent: AgentRepo = await new Bus(this, "/typeorm/agents").dispatch({
-	// 				type: typeorm.Actions.FIND_ONE,
-	// 				payload: {
-	// 					where: { id },
-	// 					relations: ["tools", "subAgents"],
-	// 					select: {
-	// 						subAgents: { id: true },
-	// 						tools: { id: true }
-	// 					}
-	// 				}
-	// 			})
-	// 			return agent
-	// 		},
-	// 		getTools: async (id: string) => {
-	// 			const tool: ToolRepo = await new Bus(this, "/typeorm/tools").dispatch({
-	// 				type: typeorm.RepoRestActions.GET_BY_ID,
-	// 				payload: id
-	// 			})
-	// 			return tool
-	// 		},
-	// 		onCreateNewRoom: (agentId: string, parentRoomId: string): string => {
-	// 			// creo una nuova room
-	// 			const newRoom = {
-	// 				id: randomUUID() as string,
-	// 				name: "",
-	// 				history: [],
-	// 				agentId,
-	// 				parentRoomId,
-	// 			}
-	// 			chat.rooms.push(newRoom)
-
-	// 			// [II] salvataggio nel DB
-
-	// 			// invia messaggio al CLIENT
-	// 			const msg: NewRoomS2C = {
-	// 				action: CHAT_ACTION_S2C.NEW_ROOM,
-	// 				chatId: chat.id,
-	// 				roomId: newRoom.id,
-	// 				parentRoomId,
-	// 				agentId,
-	// 			}
-	// 			this.sendToChat(msg)
-
-	// 			return newRoom.id
-	// 		},
-	// 		// quando l'agente invia un messaggio	
-	// 		onMessage: (agentId: string, messages?: ChatMessage[], roomId?: string): ChatMessage[] => {
-	// 			const room = getRoomById(chat, roomId)
-	// 			if (!messages || !messages.length) {
-	// 				return room.history
-	// 			}
-	// 			room.history.push(...messages)
-
-	// 			// [TODO] salvataggio nel DB
-
-	// 			// invia messaggio al CLIENT
-	// 			const msg: AppendMessageS2C = {
-	// 				action: CHAT_ACTION_S2C.APPEND_MESSAGE,
-	// 				chatId: chat.id,
-	// 				roomId: room.id,
-	// 				content: messages,
-	// 			}
-	// 			this.sendToChat(msg)
-
-	// 			return room.history
-	// 		},
-	// 	}
-	// 	const agent = new AgentLlm({ id: agentId }, resolver)
-	// 	agent.roomId = rootRoom.id // setto l'id della room nell'agente
-	// 	// creo l'istanza dell'agente
-	// 	const response = await agent.ask(prompt)
-	// }
-
 	/**
-	 * Send a message to all clients in a chat
+	 * Quando un CLIENT lascia la chat se è vuota la rimuove
 	 */
-	// private sendToChat(message: BaseS2C) {
-	// 	if (!message || !message.chatId) return this.log("missing roomId in message")
-	// 	const chat = this.chats.find(c => c.id == message.chatId)
-	// 	if (!chat) return this.log(`CHAT not found: ${message.chatId}`)
+	private removeChat(chatId: string): void {
+		const index = this.chats.findIndex(c => c.id === chatId)
+		if (index !== -1) {
+			this.chats.splice(index, 1)
+			this.log(`Chat removed: ${chatId}`)
+		} else {
+			this.log(`Chat not found: ${chatId}`)
+		}
+	}
 
-	// 	for (const clientAddress of chat.clients) {
-	// 		const client = this.getClient(clientAddress)
-	// 		if (!client) continue
-	// 		this.sendToClient(client, JSON.stringify(message))
-	// 	}
-	// }
 }
-
-// export interface Chat {
-// 	id: string
-// 	rooms: RoomRepo[]
-// 	clients: Set<string>
-// }
-
-
-// async function createNewChat(agentId: string): Promise<Chat> {
-// 	const room: RoomRepo = {
-// 		id: randomUUID() as string,
-// 		history: [],
-// 		agentId,
-// 	}
-// 	const chat: Chat = {
-// 		id: randomUUID(),
-// 		rooms: [room],
-// 		clients: new Set(),
-// 	}
-// 	return chat
-// }
-
-
-// async function recursiveAsk(room: RoomRepo): Promise<Response> {
-
-// 	const room = new RoomTurnBased(room)
-
-
-// 	room.onTurnStarted(async (agent: AgentLlm) => { });
-// 	room.onTurn(async (agent: AgentLlm) => {
-// 		return agent.ask(room.history)
-// 	});
-// 	room.onTurnFinished(async (agent: AgentLlm, response: Response) => { });
-
-// 	room.onAskTo(async (agent: AgentRepo, content: ContentAskTo) => {
-// 		const subRoomRepo = {
-// 			history: [],
-// 			agents: [agent],
-// 		}
-// 		await recursiveAsk(subRoomRepo)
-// 	});
-
-// }
-
-
-// function getRoomById(chat: Chat, roomId?: string): RoomRepo {
-// 	return chat?.rooms?.find(r => r.id == roomId)
-// }
-// function getRootRoom(chat: Chat): RoomRepo {
-// 	return chat?.rooms?.find(r => r.parentRoomId == null)
-// }

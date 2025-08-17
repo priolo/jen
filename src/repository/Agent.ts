@@ -40,7 +40,7 @@ export class AgentRepo {
     @Column({ type: 'boolean', default: true })
     killOnResponse?: boolean;
 
-    @Column({ type: 'enum', enum: AGENT_TYPE, default: AGENT_TYPE.REACT })
+    @Column({ type: 'varchar', default: AGENT_TYPE.REACT })
     type?: AGENT_TYPE;
 
     // RELATIONSHIPS

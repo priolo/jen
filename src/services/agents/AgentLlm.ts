@@ -4,7 +4,8 @@ import { google } from '@ai-sdk/google';
 import { generateText, jsonSchema, tool, ToolResultPart, ToolSet } from "ai";
 import dotenv from 'dotenv';
 import { colorPrint, ColorType } from './utils/index.js';
-import { Response, RESPONSE_TYPE } from './types.js';
+import { LlmResponse, LLM_RESPONSE_TYPE } from './types.js';
+import { mistral } from '@ai-sdk/mistral';
 
 dotenv.config();
 
@@ -23,14 +24,14 @@ class AgentLlm {
 	) {
 	}
 
-	public async ask(history: ChatMessage[]): Promise<Response> {
+	public async ask(history: ChatMessage[]): Promise<LlmResponse> {
 
 		if (!history) return null
 
-		const model = google('gemini-2.0-flash', {})
+		//const model = google('gemini-2.0-flash', {})
 		//this.model = google('gemini-2.5-pro-exp-03-25')
 		//this.model = google('gemini-2.0-flash')
-		//this.model = mistral('mistral-large-latest')
+		const model = mistral('mistral-large-latest')
 		//this.model = cohere('command-r-plus')
 
 		const systemPrompt = this.getReactSystemPrompt()
@@ -62,9 +63,9 @@ class AgentLlm {
 				[this.agent.name, ColorType.Blue], " : unknown : ", 
 				[JSON.stringify(lastMsg.content), ColorType.Magenta]
 			)
-			return <Response>{
-				response: messages,
-				type: RESPONSE_TYPE.UNKNOWN,
+			return <LlmResponse>{
+				responseRaw: messages,
+				type: LLM_RESPONSE_TYPE.UNKNOWN,
 				continue: true,
 			}
 		}
@@ -80,9 +81,9 @@ class AgentLlm {
 				[this.agent.name, ColorType.Blue], " : final answer: ", 
 				[result, ColorType.Green]
 			)
-			return <Response>{
-				response: messages,
-				type: RESPONSE_TYPE.COMPLETED,
+			return <LlmResponse>{
+				responseRaw: messages,
+				type: LLM_RESPONSE_TYPE.COMPLETED,
 				continue: false,
 				content: {
 					answer: result
@@ -96,9 +97,9 @@ class AgentLlm {
 				[this.agent.name, ColorType.Blue], " : ask info: ", 
 				[result, ColorType.Green]
 			)
-			return <Response>{
-				type: RESPONSE_TYPE.ASK_TO,
-				response: messages,
+			return <LlmResponse>{
+				type: LLM_RESPONSE_TYPE.ASK_TO,
+				responseRaw: messages,
 				continue: true,
 				content: {
 					question: result,
@@ -114,9 +115,9 @@ class AgentLlm {
 				[this.agent.name, ColorType.Blue], " : call sub-agent: ", 
 				[agentId, ColorType.Green]
 			)
-			return <Response>{
-				type: RESPONSE_TYPE.ASK_TO,
-				response: messages,
+			return <LlmResponse>{
+				type: LLM_RESPONSE_TYPE.ASK_TO,
+				responseRaw: messages,
 				continue: true,
 				content: {
 					agentId: agentId,
@@ -131,9 +132,9 @@ class AgentLlm {
 				this.agent.name, ColorType.Blue], " : strategy : ", 
 				[JSON.stringify(result), ColorType.Magenta]
 			)
-			return <Response>{
-				type: RESPONSE_TYPE.STRATEGY,
-				response: messages,
+			return <LlmResponse>{
+				type: LLM_RESPONSE_TYPE.STRATEGY,
+				responseRaw: messages,
 				continue: true,
 				content: {
 					strategy: result,
@@ -147,9 +148,9 @@ class AgentLlm {
 				[this.agent.name, ColorType.Blue], " : reasoning : ", 
 				[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
 			)
-			return <Response>{
-				type: RESPONSE_TYPE.REASONING,
-				response: messages,
+			return <LlmResponse>{
+				type: LLM_RESPONSE_TYPE.REASONING,
+				responseRaw: messages,
 				continue: true,
 				content: {
 					thought: result,
@@ -162,12 +163,12 @@ class AgentLlm {
 			[this.agent.name, ColorType.Blue], " : function : ", 
 			[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
 		)
-		return <Response>{
-			type: RESPONSE_TYPE.TOOL,
-			response: messages,
+		return <LlmResponse>{
+			type: LLM_RESPONSE_TYPE.TOOL,
+			responseRaw: messages,
 			continue: true,
 			content: {
-				id: result.id,
+				toolId: result.id,
 				args: result.args,
 			},
 		}

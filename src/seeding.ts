@@ -28,13 +28,15 @@ export async function seeding(root: RootService) {
 
 	const mcpServers = await new Bus(root, "/typeorm/mcp_servers").dispatch<McpServerRepo[]>({
 		type: typeorm.RepoStructActions.SEED,
-		payload: <McpServerRepo[]>[
+		payload: [
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{
+			<McpServerRepo>{
+				id: "id-mcp-1",
 				name: "local",
 				host: "http://localhost:3000/mcp",
 			},
-			{
+			<McpServerRepo>{
+				id: "id-mcp-2",
 				name: "test",
 				host: "https://text-extractor.mcp.inevitable.fyi/mcp",
 			},
@@ -46,11 +48,31 @@ export async function seeding(root: RootService) {
 		payload: <ToolRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
 			{
+				id: "id-tool-1",
 				name: "sum",
+				description: "This tool can sum two numbers",
+				parameters: {
+					type: "object",
+					properties: {
+						a: { type: "number", description: "First number" },
+						b: { type: "number", description: "Second number" }
+					},
+					required: ["a", "b"]
+				},
 				mcp: mcpServers[0],
 			},
 			{
+				id: "id-tool-2",
 				name: "subtract",
+				description: "This tool can subtract two numbers",
+				parameters: {
+					type: "object",
+					properties: {
+						a: { type: "number", description: "First number" },
+						b: { type: "number", description: "Second number" }
+					},
+					required: ["a", "b"]
+				},
 				mcp: mcpServers[0],
 			},
 		]
@@ -61,6 +83,7 @@ export async function seeding(root: RootService) {
 		payload: <AgentRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
 			{
+				id: "id-agent-math",
 				name: "MATH",
 				description: "This agent can add and multiply numbers",
 				systemPrompt: "You are a test agent that can add and multiply numbers.",
@@ -79,6 +102,7 @@ export async function seeding(root: RootService) {
 		type: typeorm.RepoStructActions.SEED,
 		payload: <AgentRepo[]>[
 			{
+				id: "id-agent-leader",
 				name: "LEADER",
 				description: "This agent can resolve all problem",
 				systemPrompt: "",

@@ -1,7 +1,7 @@
 import { IAgentRepo } from "../src/repository/Agent.js";
 import { RoomRepo } from "../src/repository/Room.js";
 import { ToolRepo } from "../src/repository/Tool.js";
-import { ContentCompleted, Response, RESPONSE_TYPE } from '../src/services/agents/types.js';
+import { ContentCompleted, LlmResponse, LLM_RESPONSE_TYPE } from '../src/services/agents/types.js';
 import RoomTurnBased from '../src/services/rooms/RoomTurnBased.js';
 
 
@@ -49,7 +49,7 @@ describe("Test on ROOM", () => {
 		const resp = await room.getResponse()
 
 		expect(resp).toBeDefined()
-		expect(resp.type).toBe(RESPONSE_TYPE.COMPLETED);
+		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED);
 		expect((resp.content as ContentCompleted).answer).toBe("42");
 
 	}, 100000)
@@ -74,7 +74,7 @@ describe("Test on ROOM", () => {
 		const resp = await room.getResponse()
 
 		expect(resp).toBeDefined()
-		expect(resp.type).toBe(RESPONSE_TYPE.COMPLETED);
+		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED);
 		expect((resp.content as ContentCompleted).answer).toBe("4");
 
 	})
@@ -112,7 +112,7 @@ describe("Test on ROOM", () => {
 			})
 			room.addUserMessage(question)
 			const resp = await room.getResponse()
-			if (resp.type == RESPONSE_TYPE.COMPLETED) {
+			if (resp.type == LLM_RESPONSE_TYPE.COMPLETED) {
 				return (<ContentCompleted>resp.content).answer
 			}
 			return null;
@@ -121,7 +121,7 @@ describe("Test on ROOM", () => {
 		room.addUserMessage("How much is 2+2? Just write the result.")
 		const resp = await room.getResponse()
 
-		expect(resp.type).toBe(RESPONSE_TYPE.COMPLETED)
+		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect((<ContentCompleted>resp.content).answer).toBe("4")
 
 	}, 100000)
@@ -159,7 +159,7 @@ describe("Test on ROOM", () => {
 
 		const agentTimeline:string[] = []
 
-		async function recursiveRequest(roomRepo: RoomRepo, question: string): Promise<Response> {
+		async function recursiveRequest(roomRepo: RoomRepo, question: string): Promise<LlmResponse> {
 			agentTimeline.push(roomRepo?.agents?.[0]?.id ?? "")
 
 			const room = new RoomTurnBased(roomRepo)
@@ -180,7 +180,7 @@ describe("Test on ROOM", () => {
 
 
 		const resp = await recursiveRequest(roomRepoRoot, question)
-		expect(resp.type).toBe(RESPONSE_TYPE.COMPLETED)
+		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect((<ContentCompleted>resp.content).answer).toBe("4")
 		expect(agentTimeline).toEqual(["id-3", "id-2", "id-1"])
 

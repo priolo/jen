@@ -1,5 +1,4 @@
-import { ChatMessage } from '@/types/RoomActions.js';
-
+import { ChatMessage } from "./RoomActions";
 
 export enum LLM_RESPONSE_TYPE {
 	/** risposta finale */

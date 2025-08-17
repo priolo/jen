@@ -1,11 +1,25 @@
 import { AgentRepo } from "@/repository/Agent.js";
-import { Bus, httpRouter, typeorm } from "@priolo/julian";
+import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
-import { select } from "slate";
 
 
 
 class AgentRoute extends httpRouter.Service {
+
+	public static async GetById(agentId: string, node: INode, repository: string): Promise<AgentRepo> {
+		const agent: AgentRepo = await new Bus(node, repository).dispatch({
+			type: typeorm.Actions.FIND_ONE,
+			payload: {
+				where: { id: agentId },
+				relations: ["tools", "subAgents"],
+				select: {
+					subAgents: { id: true, name: true, description: true },
+					tools: { id: true, name: true, description: true, parameters: true, mcpId: true }
+				}
+			}
+		})
+		return agent
+	}
 
 	get stateDefault(): httpRouter.conf & any {
 		return {
@@ -38,20 +52,9 @@ class AgentRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const agent: AgentRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.Actions.FIND_ONE,
-			payload: {
-				where: { id },
-				relations: ["tools", "subAgents"],
-				select: {
-					subAgents: { id: true },
-					tools: { id: true }
-				}
-			}
-		})
+		const agent: AgentRepo = await AgentRoute.GetById(id, this, this.state.repository)
 		res.json(agent)
 	}
-
 
 	async create(req: Request, res: Response) {
 		const agent: AgentRepo = req.body

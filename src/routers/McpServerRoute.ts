@@ -1,5 +1,5 @@
 import { executeTool, getTools } from "@/services/mcp/utils.js";
-import { Bus, httpRouter, typeorm } from "@priolo/julian";
+import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { McpServerRepo } from "../repository/McpServer.js";
 
@@ -21,6 +21,14 @@ class McpServerRoute extends httpRouter.Service {
 				{ path: "/:id/:tool/execute", verb: "post", method: "execute2" },
 			]
 		}
+	}
+
+	public static async GetById(mcpId: string, node: INode, repository: string): Promise<McpServerRepo> {
+		const mcpServer = await new Bus(node, repository).dispatch<McpServerRepo>({
+			type: typeorm.RepoRestActions.GET_BY_ID,
+			payload: mcpId
+		})
+		return mcpServer
 	}
 
 	async getAll(req: Request, res: Response) {
@@ -61,10 +69,7 @@ class McpServerRoute extends httpRouter.Service {
 
 	async resources(req: Request, res: Response) {
 		const id = req.params["id"]
-		const mcpServer = await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
-			type: typeorm.RepoRestActions.GET_BY_ID,
-			payload: id
-		})
+		const mcpServer = await McpServerRoute.GetById(id, this, this.state.repository)
 		if (!mcpServer) return
 
 		const resp = await getTools(mcpServer.host)
@@ -75,10 +80,7 @@ class McpServerRoute extends httpRouter.Service {
 	async execute2(req: Request, res: Response) {
 		const id = req.params["id"]
 		const tool = req.params["tool"]
-		const mcpServer = await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
-			type: typeorm.RepoRestActions.GET_BY_ID,
-			payload: id
-		})
+		const mcpServer = await McpServerRoute.GetById(id, this, this.state.repository)
 		if (!mcpServer) return
 
 		const resp = await executeTool(mcpServer.host, tool, req.body)
