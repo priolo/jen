@@ -53,7 +53,7 @@ const setup = {
 			mcpServer.tools = null
 			store._update()
 			const resurces = await mcpServerApi.resources(mcpServer.id)
-			mcpServer.tools = resurces.tools
+			mcpServer.tools = resurces
 			store._update()
 		},
 

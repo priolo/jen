@@ -14,7 +14,8 @@ class AgentRoute extends httpRouter.Service {
 				relations: ["tools", "subAgents"],
 				select: {
 					subAgents: { id: true, name: true, description: true },
-					tools: { id: true, name: true, description: true, parameters: true, mcpId: true }
+					tools: { id: true, name: true, description: true, parameters: true, mcpId: true },
+					llm: { id:true, name: true, key: true }
 				}
 			}
 		})

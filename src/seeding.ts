@@ -4,6 +4,7 @@ import { AgentRepo } from "./repository/Agent.js";
 import { ToolRepo } from "./repository/Tool.js";
 import { McpServerRepo } from "./repository/McpServer.js";
 import { LlmRepo } from "./repository/Llm.js";
+import { LLM_MODELS } from "./types/commons/LlmProviders.js";
 
 
 
@@ -15,13 +16,8 @@ export async function seeding(root: RootService) {
 		type: typeorm.RepoStructActions.SEED,
 		payload: <LlmRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{ name: "gemeni-2.0-flash" },
-			{ name: "gemini-2.0-pro" },
-			{ name: "gpt-4o" },
-			{ name: "gpt-4o-mini" },
-			{ name: "claude-2" },
-			{ name: "claude-3" },
-			{ name: "claude-3-sonnet" }
+			{ name: LLM_MODELS.MISTRAL_LARGE, key: "xMeTHawOQXOnfb5awoAyBx5mXqeIDnQ7" },
+			{ name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: "AIzaSyBGaDP1hcY9uKuuRDGCxV_7OEqnCO8gVwM" },
 		]
 	});
 
@@ -50,29 +46,29 @@ export async function seeding(root: RootService) {
 			{
 				id: "id-tool-1",
 				name: "sum",
-				description: "This tool can sum two numbers",
-				parameters: {
-					type: "object",
-					properties: {
-						a: { type: "number", description: "First number" },
-						b: { type: "number", description: "Second number" }
-					},
-					required: ["a", "b"]
-				},
+				// description: "This tool can sum two numbers",
+				// parameters: {
+				// 	type: "object",
+				// 	properties: {
+				// 		a: { type: "number", description: "First number" },
+				// 		b: { type: "number", description: "Second number" }
+				// 	},
+				// 	required: ["a", "b"]
+				// },
 				mcp: mcpServers[0],
 			},
 			{
 				id: "id-tool-2",
 				name: "subtract",
-				description: "This tool can subtract two numbers",
-				parameters: {
-					type: "object",
-					properties: {
-						a: { type: "number", description: "First number" },
-						b: { type: "number", description: "Second number" }
-					},
-					required: ["a", "b"]
-				},
+				// description: "This tool can subtract two numbers",
+				// parameters: {
+				// 	type: "object",
+				// 	properties: {
+				// 		a: { type: "number", description: "First number" },
+				// 		b: { type: "number", description: "Second number" }
+				// 	},
+				// 	required: ["a", "b"]
+				// },
 				mcp: mcpServers[0],
 			},
 		]

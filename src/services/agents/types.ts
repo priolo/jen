@@ -1,4 +1,4 @@
-import { ChatMessage } from '@/types/RoomActions.js';
+import { ChatMessage } from '@/types/commons/RoomActions.js';
 
 
 export enum LLM_RESPONSE_TYPE {

@@ -4,7 +4,7 @@ import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { ToolRepo } from "../repository/Tool.js"
-import { BaseC2S, BaseS2C, CHAT_ACTION_C2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/RoomActions.js"
+import { BaseC2S, BaseS2C, CHAT_ACTION_C2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
 import RoomsChats from "./RoomsChats.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
@@ -158,7 +158,7 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 		// [II] bisogna recuperare la "description" e "parameters" del tool dall MCP cosa che ora non faccio!!!!
 		for (const tool of agent.tools ?? []) {
 
-			// se ha la description e i parameters non c'e' biusogno di caricarli
+			// se ha la description e i parameters non c'e' bisogno di caricarli
 			if (!!tool.description && !!tool.parameters) continue
 
 			// se non ci sono i tools di questo MCP li carico

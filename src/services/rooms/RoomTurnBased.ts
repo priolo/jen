@@ -1,5 +1,5 @@
 import { RoomRepo } from "@/repository/Room.js";
-import { ChatMessage } from "@/types/RoomActions.js";
+import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
 import AgentLlm from "../agents/AgentLlm.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../agents/types.js';

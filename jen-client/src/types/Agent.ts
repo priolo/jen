@@ -27,6 +27,7 @@ export interface Agent {
 
 	/** LLM che utilizza per le risposte */
 	llm?: Llm
+	llmId?: string
 
 	/** ID dell'agente base da cui è derivato questo agente */
 	baseId?: string

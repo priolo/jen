@@ -14,6 +14,8 @@ import ActionsCmp from "./Actions"
 import LlmDialog from "./LlmDialog"
 import ToolsDialog from "./ToolsDialog"
 import { Llm } from "@/types/Llm"
+import { LLM_MODELS } from "@/types/commons/LlmProviders"
+import llmSo from "@/stores/stacks/llm/repo"
 
 
 
@@ -35,6 +37,7 @@ const AgentView: FunctionComponent<Props> = ({
 		store.setAgent(agent)
 	}, [])
 
+	// [II] magari elimino il concetto di base agent
 	const baseAgents = useMemo(() =>
 		agentSo.getAllBaseAgents(store.state.agent?.id),
 		[agentSo.state.all, store.state.agent]
@@ -71,8 +74,9 @@ const AgentView: FunctionComponent<Props> = ({
 	// RENDER
 	if ( !store.state.agent ) return null
 
-	const llm = ["gemini-2.0-flash"]
-	const llmSelected = store.state.agent.llm
+	const llm = llmSo.state.all ?? []
+	const llmSelectedId = store.state.agent.llmId
+
 	const agents = agentSo.state.all ?? []
 	const agentBaseId = store.state.agent?.baseId
 	const subAgentsSelected = store.state.agent?.subAgents?.map(agent => agent.id) ?? []
@@ -120,11 +124,11 @@ const AgentView: FunctionComponent<Props> = ({
 				<div className="jack-lbl-prop">LLM</div>
 				<ListDialog2
 					store={store}
-					select={llmSelected}
+					select={llmSelectedId}
 					items={llm}
 					readOnly={inRead}
-					// fnGetId={(item: Llm) => item?.id}
-					// fnGetString={(item: Llm) => item?.name}
+					fnGetId={(item: Llm) => item?.id}
+					fnGetString={(item: Llm) => item?.name}
 					onChangeSelect={handleLlmChange}
 				/>
 			</div>

@@ -1,6 +1,6 @@
 import { LlmDetailStore } from "@/stores/stacks/llm/detail"
 import { EDIT_STATE } from "@/types"
-import { PROVIDER } from "@/types/Llm"
+import { LLM_MODELS } from "@/types/commons/LlmProviders"
 import { ListDialog, StringUpRow, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
@@ -32,41 +32,44 @@ const LlmDetailForm: FunctionComponent<Props> = ({
     // RENDER
     const llm = store.state.llm
     if (llm == null) return null
-    const name = llm.name ?? ""
     const inRead = store.state.editState == EDIT_STATE.READ
     const inNew = store.state.editState == EDIT_STATE.NEW
 
+    const models = Object.values(LLM_MODELS)
+    const modelIndex = models.indexOf(llm.name as LLM_MODELS ?? LLM_MODELS.MISTRAL_LARGE)
+
+
     return <div className="jack-lyt-form var-dialog">
 
-        <div className="lyt-v">
+        {/* <div className="lyt-v">
             <div className="jack-lbl-prop">NAME</div>
             <TextInput autoFocus
                 value={name}
                 onChange={name => handlePropChange({ name })}
                 readOnly={inRead}
             />
-        </div>
+        </div> */}
 
-        {/* <div className="lyt-v">
+        <div className="lyt-v">
             <div className="jack-lbl-prop">PROVIDER</div>
             <ListDialog width={80}
                 store={store}
-                select={Object.values(PROVIDER).indexOf(llm.provider ?? PROVIDER.OPENAI)}
-                items={Object.values(PROVIDER)}
+                select={modelIndex}
+                items={models}
                 RenderRow={StringUpRow}
                 readOnly={inRead}
-                onSelect={index => handlePropChange({ provider: Object.values(PROVIDER)[index] })}
+                onSelect={index => handlePropChange({ name: Object.values(LLM_MODELS)[index] })}
             />
         </div>
 
         <div className="lyt-v">
             <div className="jack-lbl-prop">API-KEY</div>
             <TextInput
-                value={key}
+                value={llm.key}
                 onChange={key => handlePropChange({ key })}
                 readOnly={inRead}
             />
-        </div> */}
+        </div>
 
     </div>
 }

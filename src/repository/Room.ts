@@ -1,6 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
 import { AgentRepo } from './Agent.js';
-import { ChatMessage } from '@/types/RoomActions.js';
+import { ChatMessage } from '@/types/commons/RoomActions.js';
 
 
 

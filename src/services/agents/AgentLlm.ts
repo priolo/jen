@@ -1,11 +1,17 @@
 import { AgentRepo } from '@/repository/Agent.js';
-import { ChatMessage } from '@/types/RoomActions.js';
-import { google } from '@ai-sdk/google';
+import { LLM_MODELS } from '@/types/commons/LlmProviders.js';
+import { ChatMessage } from '@/types/commons/RoomActions.js';
+import { cohere, createCohere } from '@ai-sdk/cohere';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createMistral } from '@ai-sdk/mistral';
 import { generateText, jsonSchema, tool, ToolResultPart, ToolSet } from "ai";
 import dotenv from 'dotenv';
+import { LLM_RESPONSE_TYPE, LlmResponse } from './types.js';
 import { colorPrint, ColorType } from './utils/index.js';
-import { LlmResponse, LLM_RESPONSE_TYPE } from './types.js';
-import { mistral } from '@ai-sdk/mistral';
+// Uncomment and add these imports as needed:
+// import { createOpenAI } from '@ai-sdk/openai';
+// import { createAnthropic } from '@ai-sdk/anthropic';
+// import { createCohere } from '@ai-sdk/cohere';
 
 dotenv.config();
 
@@ -28,11 +34,47 @@ class AgentLlm {
 
 		if (!history) return null
 
-		//const model = google('gemini-2.0-flash', {})
-		//this.model = google('gemini-2.5-pro-exp-03-25')
-		//this.model = google('gemini-2.0-flash')
-		const model = mistral('mistral-large-latest')
-		//this.model = cohere('command-r-plus')
+
+		let provider = null
+		switch (this.agent?.llm?.name) {
+			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
+			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH_PRO:
+			case LLM_MODELS.GOOGLE_GEMINI_2_5_PRO_EXP:
+				provider = createGoogleGenerativeAI({
+					apiKey: this.agent.llm.key ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+				});
+				break;
+			case LLM_MODELS.COHERE_COMMAND_R_PLUS:
+				provider = createCohere({
+					apiKey: this.agent.llm.key ?? process.env.COHERE_API_KEY,
+				})
+				break
+			case LLM_MODELS.MISTRAL_LARGE:
+			default:
+				provider = createMistral({
+					apiKey: this.agent.llm.key ?? process.env.MISTRAL_API_KEY,
+				});
+				break;
+		}
+		let model = null
+		switch (this.agent?.llm?.name) {
+			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
+				model = provider('gemini-2.0-flash')
+				break;
+			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH_PRO:
+				model = provider('gemini-2.0-flash-pro')
+				break;
+			case LLM_MODELS.GOOGLE_GEMINI_2_5_PRO_EXP:
+				model = provider('gemini-2.5-pro-exp-03-25')
+				break;
+			case LLM_MODELS.COHERE_COMMAND_R_PLUS:
+				model = provider('command-r-plus')
+				break;
+			case LLM_MODELS.MISTRAL_LARGE:
+			default:
+				model = provider('mistral-large-latest')
+				break
+		}
 
 		const systemPrompt = this.getReactSystemPrompt()
 		const systemTools = this.getSystemTools()
@@ -60,7 +102,7 @@ class AgentLlm {
 		// NON E' UN TOOL situazione imprevista... continua a ragionare 
 		if (lastMsg.role != "tool") {
 			colorPrint(
-				[this.agent.name, ColorType.Blue], " : unknown : ", 
+				[this.agent.name, ColorType.Blue], " : unknown : ",
 				[JSON.stringify(lastMsg.content), ColorType.Magenta]
 			)
 			return <LlmResponse>{
@@ -71,14 +113,14 @@ class AgentLlm {
 		}
 
 		// E' UN TOOL
-		const content:ToolResultPart = lastMsg.content[0]
-		const toolName:string = content.toolName
-		const result:any = content.result
+		const content: ToolResultPart = lastMsg.content[0]
+		const toolName: string = content.toolName
+		const result: any = content.result
 
 		// FINAL RESPONSE
 		if (toolName == "final_answer") {
 			colorPrint(
-				[this.agent.name, ColorType.Blue], " : final answer: ", 
+				[this.agent.name, ColorType.Blue], " : final answer: ",
 				[result, ColorType.Green]
 			)
 			return <LlmResponse>{
@@ -94,7 +136,7 @@ class AgentLlm {
 		// COLLECT INFORMATION
 		if (toolName == "ask_for_information") {
 			colorPrint(
-				[this.agent.name, ColorType.Blue], " : ask info: ", 
+				[this.agent.name, ColorType.Blue], " : ask info: ",
 				[result, ColorType.Green]
 			)
 			return <LlmResponse>{
@@ -112,7 +154,7 @@ class AgentLlm {
 		if (toolName.startsWith("chat_with_")) {
 			const { question, agentId } = result as { question: string, agentId: string }
 			colorPrint(
-				[this.agent.name, ColorType.Blue], " : call sub-agent: ", 
+				[this.agent.name, ColorType.Blue], " : call sub-agent: ",
 				[agentId, ColorType.Green]
 			)
 			return <LlmResponse>{
@@ -129,7 +171,7 @@ class AgentLlm {
 		// UPDATE STRATEGY
 		if (toolName == "update_strategy") {
 			colorPrint([
-				this.agent.name, ColorType.Blue], " : strategy : ", 
+				this.agent.name, ColorType.Blue], " : strategy : ",
 				[JSON.stringify(result), ColorType.Magenta]
 			)
 			return <LlmResponse>{
@@ -145,7 +187,7 @@ class AgentLlm {
 		// REASONING 
 		if (toolName == "get_reasoning") {
 			colorPrint(
-				[this.agent.name, ColorType.Blue], " : reasoning : ", 
+				[this.agent.name, ColorType.Blue], " : reasoning : ",
 				[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
 			)
 			return <LlmResponse>{
@@ -160,7 +202,7 @@ class AgentLlm {
 
 		// E' un TOOL GENERICO
 		colorPrint(
-			[this.agent.name, ColorType.Blue], " : function : ", 
+			[this.agent.name, ColorType.Blue], " : function : ",
 			[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
 		)
 		return <LlmResponse>{
@@ -285,7 +327,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 				description: toolRepo.description,
 				parameters: jsonSchema(toolRepo.parameters),
 				execute: async (args) => {
-					return {id: toolRepo.id, args}
+					return { id: toolRepo.id, args }
 				}
 			})
 		}

@@ -1,7 +1,7 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import RoomsChats from "@/routers/RoomsChats.js";
-import { AgentMessageS2C, BaseS2C, CHAT_ACTION_S2C, NewRoomS2C, UserEnteredS2C, UserMessageS2C } from "@/types/RoomActions.js";
+import { AgentMessageS2C, BaseS2C, CHAT_ACTION_S2C, NewRoomS2C, UserEnteredS2C, UserMessageS2C } from "@/types/commons/RoomActions.js";
 import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../agents/types.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 

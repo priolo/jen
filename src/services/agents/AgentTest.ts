@@ -1,4 +1,4 @@
-import { ChatMessage } from '@/types/RoomActions.js';
+import { ChatMessage } from '@/types/commons/RoomActions.js';
 import { google } from '@ai-sdk/google';
 import { generateText, jsonSchema, tool, ToolSet } from "ai";
 import dotenv from 'dotenv';

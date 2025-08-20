@@ -1,6 +1,6 @@
 import { AgentRepo } from "@/repository/Agent.js"
 import { RoomRepo } from "@/repository/Room.js"
-import { BaseS2C } from "@/types/RoomActions.js"
+import { BaseS2C } from "@/types/commons/RoomActions.js"
 
 
 interface RoomsChats {

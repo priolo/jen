@@ -2,10 +2,9 @@ import ObjectField from "@/components/forms/jsonForm/ObjectField"
 import { McpToolDetailStore } from "@/stores/stacks/mcpTool/detail"
 import { TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { FunctionComponent, useState } from "react"
-import ToolResponseContentCmp from "../ToolResponseContentCmp"
-import { Tool } from "@/types/Tool"
+import { FunctionComponent } from "react"
 import ToolRequestCmp from "../ToolRequestCmp"
+import ToolResponseContentCmp from "../ToolResponseContentCmp"
 
 
 

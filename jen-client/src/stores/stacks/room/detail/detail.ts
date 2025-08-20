@@ -50,7 +50,7 @@ What is 2+2? Just write the answer number.`,
 			const roomSo = store as RoomDetailStore
 			// mi metto in scolto sui messaggi della stanza
 			wsConnection.emitter.on("message", roomSo.onMessage)
-			// se sono nella ROOT invio il messaggio di ENTER
+			// se NON sono nella ROOT NON invio il messaggio di ENTER
 			if ( !!roomSo.state.room?.parentRoomId ) return
 			const message: UserEnterC2S = {
 				action: CHAT_ACTION_C2S.ENTER,
