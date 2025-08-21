@@ -15,7 +15,7 @@ export function buildMcpToolDetail(state: Partial<McpToolDetailState>) {
 
 export function buildToolListResponses(state: Partial<ToolResultListState>) {
 	const store = buildStore({
-		type: DOC_TYPE.MCP_TOOL_MESSAGE_LIST,
+		type: DOC_TYPE.MCP_TOOL_RESULT_LIST,
 		...state,
 	} as ToolResultListState) as ToolResultListStore;
 	return store;

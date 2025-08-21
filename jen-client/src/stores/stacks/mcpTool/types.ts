@@ -1,8 +1,10 @@
 import { McpTool } from "@/types/McpServer"
 
 
-
-export interface ToolMessage {
+/**
+ * Il risultato di un execuzione di TOOL MCP
+ */
+export interface ToolResult {
 	/** server dove è presente il tool */
 	mcpServerId: string | null
 	/** tool utilizzato */

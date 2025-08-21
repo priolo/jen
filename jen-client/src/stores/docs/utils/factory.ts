@@ -58,7 +58,7 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 		[DOC_TYPE.MCP_SERVER_LIST]: mcpServerListSetup,
 		[DOC_TYPE.MCP_SERVER_DETAIL]: mcpServerDetailSetup,
 		[DOC_TYPE.MCP_TOOL_DETAIL]: mcpToolDetailSetup,
-		[DOC_TYPE.MCP_TOOL_MESSAGE_LIST]: toolResultListSetup,
+		[DOC_TYPE.MCP_TOOL_RESULT_LIST]: toolResultListSetup,
 
 		[DOC_TYPE.TOOL_LIST]: toolListSetup,
 		[DOC_TYPE.TOOL_DETAIL]: toolDetailSetup,

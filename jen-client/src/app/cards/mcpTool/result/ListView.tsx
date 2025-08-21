@@ -1,12 +1,12 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import EditorIcon from "@/icons/EditorIcon"
 import { ToolResultListStore } from "@/stores/stacks/mcpTool/resultList"
-import toolMessageSo from "@/stores/stacks/mcpTool/messageRepo"
+import toolResultsSo from "@/stores/stacks/mcpTool/resultsRepo"
 import { AlertDialog } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
 import clsCard from "../../CardCyanDef.module.css"
-import ToolResponseContentCmp from "../ToolResponseContentCmp"
+import ToolResultCmp from "../ToolResultCmp"
 import ToolRequestCmp from "../ToolRequestCmp"
 
 
@@ -15,20 +15,24 @@ interface Props {
 	store?: ToolResultListStore
 }
 
-const ToolMessageListView: FunctionComponent<Props> = ({
+
+/**
+ * CARD che visualizza la lista dei risultati delle esecuzioni di uno specifico TOOL
+ */
+const ToolResultListView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
 	// STORE
 	useStore(store)
-	useStore(toolMessageSo)
+	useStore(toolResultsSo)
 
 	
 	// HOOKs
 	const toolMessages = useMemo(() => {
-		return toolMessageSo.state.all
+		return toolResultsSo.state.all
 			.filter( (message => message.mcpServerId === store?.state.mcpServerId && message.mcpTool.name === store?.state.toolName))
-	}, [toolMessageSo.state.all, store?.state.mcpServerId])
+	}, [toolResultsSo.state.all, store?.state.mcpServerId])
 
 
 	// HANDLER
@@ -54,7 +58,7 @@ const ToolMessageListView: FunctionComponent<Props> = ({
 					/>
 
 					{message.response?.content?.map((content, idx) => (
-						<ToolResponseContentCmp
+						<ToolResultCmp
 							key={idx}
 							content={content}
 						/>
@@ -69,6 +73,6 @@ const ToolMessageListView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default ToolMessageListView
+export default ToolResultListView
 
 

@@ -4,7 +4,7 @@ import { TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
 import ToolRequestCmp from "../ToolRequestCmp"
-import ToolResponseContentCmp from "../ToolResponseContentCmp"
+import ToolResultCmp from "../ToolResultCmp"
 
 
 
@@ -102,7 +102,7 @@ const McpToolDetailForm: FunctionComponent<Props> = ({
 
         <TitleAccordion title="OUTPUT VALUE" open={false}>
             {store.state.response?.content?.map((content, index) => (
-                <ToolResponseContentCmp key={index}
+                <ToolResultCmp key={index}
                     content={content}
                 />
             ))}

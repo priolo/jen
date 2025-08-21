@@ -1,17 +1,20 @@
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { mixStores } from "@priolo/jon"
-import { ToolMessage } from "./types"
+import { ToolResult } from "./types"
 
 
 
 /**
- * Gestisce la lista delle risposte dei tool MCP
+ * Gestisce la lista delle RESULT dei tool MCP
  */
 const setup = {
 
 	state: {
+		/** id del servizio MCP da cui proviene il TOOL */
 		mcpServerId: <string>null,
+		/** nome univoco con scope MCP del TOOL */
 		toolName: <string>null,
+		
 		//#region VIEWBASE
 		width: 200,
 		//#endregion

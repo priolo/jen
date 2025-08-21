@@ -5,7 +5,7 @@ import { McpTool } from "@/types/McpServer"
 import { mixStores } from "@priolo/jon"
 import mcpServerSo from "../mcpServer/repo"
 import { buildToolListResponses } from "./factory"
-import toolMessageSo from "./messageRepo"
+import toolResultsSo from "./resultsRepo"
 import { McpToolResponse } from "./types"
 
 
@@ -53,7 +53,7 @@ const setup = {
 				store.state.request
 			)
 			store.setResponse(resp)
-			toolMessageSo.add({
+			toolResultsSo.add({
 				mcpServerId: store.state.mcpServerId,
 				mcpTool: { ...store.state.mcpTool } as McpTool,
 				request: store.state.request,
@@ -63,7 +63,7 @@ const setup = {
 
 		async openMessages(_: void, store?: McpToolDetailStore) {
 			// Check if the messages view is already opened
-			if (store.state.linked?.state.type === DOC_TYPE.MCP_TOOL_MESSAGE_LIST) {
+			if (store.state.linked?.state.type === DOC_TYPE.MCP_TOOL_RESULT_LIST) {
 				return // Don't open if already opened
 			}
 

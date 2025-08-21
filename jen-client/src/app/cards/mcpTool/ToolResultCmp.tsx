@@ -8,9 +8,9 @@ interface Props {
 }
 
 /**
- * Render dal CONTENT di un respone per un tool
+ * Visualizza un RISULTATO di un TOOL
  */
-const ToolResponseContentCmp: FunctionComponent<Props> = ({
+const ToolResultCmp: FunctionComponent<Props> = ({
     content,
 }) => {
 
@@ -35,7 +35,7 @@ const ToolResponseContentCmp: FunctionComponent<Props> = ({
     )
 }
 
-export default ToolResponseContentCmp
+export default ToolResultCmp
 
 
 
