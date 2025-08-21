@@ -1,6 +1,6 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import EditorIcon from "@/icons/EditorIcon"
-import { ToolMessageListStore } from "@/stores/stacks/mcpTool/messageList"
+import { ToolResultListStore } from "@/stores/stacks/mcpTool/resultList"
 import toolMessageSo from "@/stores/stacks/mcpTool/messageRepo"
 import { AlertDialog } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -12,7 +12,7 @@ import ToolRequestCmp from "../ToolRequestCmp"
 
 
 interface Props {
-	store?: ToolMessageListStore
+	store?: ToolResultListStore
 }
 
 const ToolMessageListView: FunctionComponent<Props> = ({
@@ -27,7 +27,8 @@ const ToolMessageListView: FunctionComponent<Props> = ({
 	// HOOKs
 	const toolMessages = useMemo(() => {
 		return toolMessageSo.state.all
-	}, [toolMessageSo.state.all])
+			.filter( (message => message.mcpServerId === store?.state.mcpServerId && message.mcpTool.name === store?.state.toolName))
+	}, [toolMessageSo.state.all, store?.state.mcpServerId])
 
 
 	// HANDLER

@@ -30,8 +30,9 @@ function remove(id: string, opt?: CallOptions): Promise<void> {
 
 
 /** GET RESOURCES */
-function resources(id: string, opt?: CallOptions): Promise<McpTool[]> {
-	return ajax.get(`mcp_servers/${id}/resources`)
+async function resources(mcpServerId: string, opt?: CallOptions): Promise<McpTool[]> {
+	const tools = await ajax.get(`mcp_servers/${mcpServerId}/resources`)
+	return tools
 }
 
 /** ESEGUE UN TOOL DEL MCP */

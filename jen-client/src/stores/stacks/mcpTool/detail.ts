@@ -1,5 +1,6 @@
 import mcpServerApi from "@/api/mcpServer"
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
+import { DOC_TYPE } from "@/types"
 import { McpTool } from "@/types/McpServer"
 import { mixStores } from "@priolo/jon"
 import mcpServerSo from "../mcpServer/repo"
@@ -61,7 +62,14 @@ const setup = {
 		},
 
 		async openMessages(_: void, store?: McpToolDetailStore) {
+			// Check if the messages view is already opened
+			if (store.state.linked?.state.type === DOC_TYPE.MCP_TOOL_MESSAGE_LIST) {
+				return // Don't open if already opened
+			}
+
 			const view = buildToolListResponses({
+				mcpServerId: store.state.mcpServerId,
+				toolName: store.state.mcpTool?.name ?? "",
 			})
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},

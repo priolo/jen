@@ -16,10 +16,8 @@ const McpToolDetailActions: FunctionComponent<Props> = ({
 	// STORE
 	useStore(store.state.group)
 	const cnnDetailSa = useStore(store)
-
 	
 	// HOOKs
-
 
 	// HANDLER
 	const handleExecuteClick = async () => {
@@ -27,12 +25,10 @@ const McpToolDetailActions: FunctionComponent<Props> = ({
 		store.openMessages()
 	}
 
-
 	// LOADING
 	if (cnnDetailSa.disabled) {
 		return <CircularLoadingCmp style={{ width: 25, height: 25, color: "rgba(0,0,0,.5)" }} />
 	}
-
 
 	// RENDER
 	return <>

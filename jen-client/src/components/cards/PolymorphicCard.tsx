@@ -36,7 +36,7 @@ import { McpServerDetailStore } from "@/stores/stacks/mcpServer/detail"
 import McpToolDetailView from "@/app/cards/mcpTool/detail/View"
 import { McpToolDetailStore } from "@/stores/stacks/mcpTool/detail"
 import ToolMessageListView from "@/app/cards/mcpTool/message/ListView"
-import { ToolMessageListStore } from "@/stores/stacks/mcpTool/messageList"
+import { ToolResultListStore } from "@/stores/stacks/mcpTool/resultList"
 
 
 
@@ -84,7 +84,7 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 			case DOC_TYPE.MCP_TOOL_DETAIL:
 				return <McpToolDetailView store={view as McpToolDetailStore} />
 			case DOC_TYPE.MCP_TOOL_MESSAGE_LIST:
-				return <ToolMessageListView store={view as ToolMessageListStore} />
+				return <ToolMessageListView store={view as ToolResultListStore} />
 
 			case DOC_TYPE.TOOL_LIST:
 				return <ToolListView store={view as ToolListStore} />
