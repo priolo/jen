@@ -6,13 +6,15 @@ import { McpTool } from "@/types/McpServer"
  */
 export interface ToolResult {
 	/** server dove è presente il tool */
-	mcpServerId: string | null
+	mcpServerId?: string
 	/** tool utilizzato */
-	mcpTool: McpTool | null
+	mcpToolName?: string
 	/** i dati inviati */
-	request: any,
+	request?: any,
 	/** i dati ricevuti */
-	response: McpToolResponse
+	response?: McpToolResponse
+	/** quando è arrivata la risposta sul client */
+	timestamp?: number
 }
 
 export interface McpToolResponse {

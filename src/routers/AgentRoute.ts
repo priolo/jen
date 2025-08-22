@@ -58,7 +58,7 @@ class AgentRoute extends httpRouter.Service {
 	}
 
 	async create(req: Request, res: Response) {
-		const agent: AgentRepo = req.body
+		const agent: AgentRepo = req.body?.agent
 		const agentNew: AgentRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: agent

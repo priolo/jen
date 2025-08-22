@@ -4,9 +4,10 @@ import { DOC_TYPE } from "@/types"
 import { McpTool } from "@/types/McpServer"
 import { mixStores } from "@priolo/jon"
 import mcpServerSo from "../mcpServer/repo"
-import { buildToolListResponses } from "./factory"
+import { buildToolListResults } from "./factory"
 import toolResultsSo from "./resultsRepo"
 import { McpToolResponse } from "./types"
+
 
 
 const setup = {
@@ -37,7 +38,6 @@ const setup = {
 		getMcpServer: (_: void, store?: McpToolDetailStore) => {
 			return mcpServerSo.getById(store.state.mcpServerId)
 		},
-
 	},
 
 	actions: {
@@ -55,19 +55,20 @@ const setup = {
 			store.setResponse(resp)
 			toolResultsSo.add({
 				mcpServerId: store.state.mcpServerId,
-				mcpTool: { ...store.state.mcpTool } as McpTool,
+				mcpToolName: store.state.mcpTool.name,
 				request: store.state.request,
 				response: resp,
+				timestamp: Date.now(),
 			})
 		},
 
-		async openMessages(_: void, store?: McpToolDetailStore) {
+		async openResults(_: void, store?: McpToolDetailStore) {
 			// Check if the messages view is already opened
 			if (store.state.linked?.state.type === DOC_TYPE.MCP_TOOL_RESULT_LIST) {
 				return // Don't open if already opened
 			}
 
-			const view = buildToolListResponses({
+			const view = buildToolListResults({
 				mcpServerId: store.state.mcpServerId,
 				toolName: store.state.mcpTool?.name ?? "",
 			})

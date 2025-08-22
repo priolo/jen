@@ -1,3 +1,5 @@
+import { McpTool } from "@/services/mcp/types.js"
+import { getTools } from "@/services/mcp/utils.js"
 import ChatNode from "@/services/rooms/ChatNode.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { randomUUID } from "crypto"
@@ -5,12 +7,9 @@ import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { ToolRepo } from "../repository/Tool.js"
 import { BaseC2S, BaseS2C, CHAT_ACTION_C2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
-import RoomsChats from "./RoomsChats.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
-import { getTools } from "@/services/mcp/utils.js"
-import { McpServerRepo } from "@/repository/McpServer.js"
-import { McpTool } from "@/services/mcp/types.js"
+import RoomsChats from "./RoomsChats.js"
 
 
 
@@ -155,10 +154,11 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 	public async getAgentRepoById(agentId: string): Promise<AgentRepo> {
 		const agent: AgentRepo = await AgentRoute.GetById(agentId, this, this.state.agentRepository)
 
-		// [II] bisogna recuperare la "description" e "parameters" del tool dall MCP cosa che ora non faccio!!!!
+		// [II] --- mettere in una funzione a parte
+		// bisogna recuperare la "description" e "parameters"
 		for (const tool of agent.tools ?? []) {
 
-			// se ha la description e i parameters non c'e' bisogno di caricarli
+			// se il TOOL ha la description e i parameters non c'e' bisogno di caricarli
 			if (!!tool.description && !!tool.parameters) continue
 
 			// se non ci sono i tools di questo MCP li carico
@@ -176,6 +176,9 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 			tool.description = cachedTool.description
 			tool.parameters = cachedTool.inputSchema
 		}
+		// [II] --- ---
+
+
 		return agent
 	}
 
@@ -190,6 +193,9 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 		return "42"
 	}
 
+	/**
+	 * Invia un messaggio ad un client specifico
+	 */
 	public sendMessageToClient(clientAddress: string, message: BaseS2C) {
 		const client = this.getClient(clientAddress)
 		if (!client) return
@@ -199,6 +205,9 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 	//#endregion
 
 
+
+
+	//#region UTILS
 
 	private getChatById(chatId: string): ChatNode | undefined {
 		return this.chats.find(c => c.id === chatId)
@@ -216,5 +225,7 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 			this.log(`Chat not found: ${chatId}`)
 		}
 	}
+
+	//#endregion
 
 }

@@ -13,7 +13,7 @@ export function buildMcpToolDetail(state: Partial<McpToolDetailState>) {
 	return store;
 }
 
-export function buildToolListResponses(state: Partial<ToolResultListState>) {
+export function buildToolListResults(state: Partial<ToolResultListState>) {
 	const store = buildStore({
 		type: DOC_TYPE.MCP_TOOL_RESULT_LIST,
 		...state,

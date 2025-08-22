@@ -8,6 +8,8 @@ import { FunctionComponent, useMemo } from "react"
 import clsCard from "../../CardCyanDef.module.css"
 import ToolResultCmp from "../ToolResultCmp"
 import ToolRequestCmp from "../ToolRequestCmp"
+import { ToolResult } from "@/stores/stacks/mcpTool/types"
+
 
 
 
@@ -27,19 +29,21 @@ const ToolResultListView: FunctionComponent<Props> = ({
 	useStore(store)
 	useStore(toolResultsSo)
 
-	
+
 	// HOOKs
-	const toolMessages = useMemo(() => {
+	const toolResults = useMemo(() => {
 		return toolResultsSo.state.all
-			.filter( (message => message.mcpServerId === store?.state.mcpServerId && message.mcpTool.name === store?.state.toolName))
+			.filter((result => result.mcpServerId == store?.state.mcpServerId && result.mcpToolName == store?.state.toolName))
 	}, [toolResultsSo.state.all, store?.state.mcpServerId])
 
 
 	// HANDLER
+	const handleResultClick = (result: ToolResult) => {
+		store?.onParentSelect(result)
+	}
 
 
 	// RENDER
-
 	return <FrameworkCard
 		className={clsCard.root}
 		icon={<EditorIcon />}
@@ -48,16 +52,18 @@ const ToolResultListView: FunctionComponent<Props> = ({
 		actionsRender={<></>}
 	>
 		<div className={clsCard.content}>
-			{toolMessages?.map((message, index) => {
+			{toolResults?.map((result, index) => {
 				return <div key={index} className={clsCard.item}>
-					
-					<div>{message.mcpTool.name}</div>
-					
+
+					<div
+						onClick={() => handleResultClick(result)}
+					>{result.mcpToolName}</div>
+
 					<ToolRequestCmp
-						request={message.request}
+						request={result.request}
 					/>
 
-					{message.response?.content?.map((content, idx) => (
+					{result.response?.content?.map((content, idx) => (
 						<ToolResultCmp
 							key={idx}
 							content={content}

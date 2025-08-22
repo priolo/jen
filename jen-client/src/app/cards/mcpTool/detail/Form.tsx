@@ -30,64 +30,26 @@ const McpToolDetailForm: FunctionComponent<Props> = ({
     }
 
     // RENDER
-    const mcpTool = store.state.mcpTool
-    if (mcpTool == null) return null
-    const name = mcpTool.name ?? ""
-    const description = mcpTool.description ?? ""
-    const inputSchema = mcpTool.inputSchema
-
-    // const name = "Example Tool"
-    // const description = "This is an example tool for demonstration purposes."
-    // const inputSchema = {
-    //     type: "object",
-    //     properties: {
-    //         // Define your input schema properties here
-    //         "prop1": {
-    //             type: "string",
-    //             title: "Example Property",
-    //             description: "An example property"
-    //         },
-    //         "arrayProp": {
-    //             type: "array",
-    //             items: {
-    //                 type: "object",
-    //                 properties: {
-    //                     id: { type: "number", title: "id" },
-    //                     name: { type: "string", title: "name" }
-    //                 }
-    //             },
-    //             title: "Array Property",
-    //             description: "An example array property"
-    //         },
-    //         "objectProp": {
-    //             type: "object",
-    //             properties: {
-    //                 "nestedProp": { type: "string", title: "Nested Property" }
-    //             },
-    //             title: "Object Property",
-    //             description: "An example object property"
-    //         },
-
-    //     }
-    // }
+    const tool = store.state.mcpTool
+    if (tool == null) return null
 
     return <div className="jack-lyt-form var-dialog">
 
         <TitleAccordion title="INFO" open={false}>
             <div className="lyt-v">
                 <div className="jack-lbl-prop">NAME</div>
-                <div className="jack-lbl-readonly">{name}</div>
+                <div className="jack-lbl-readonly">{tool.name ?? ""}</div>
             </div>
 
             <div className="lyt-v">
                 <div className="jack-lbl-prop">DESCRIPTION</div>
-                <div className="jack-lbl-readonly">{description}</div>
+                <div className="jack-lbl-readonly">{tool.description ?? ""}</div>
             </div>
         </TitleAccordion>
 
         <TitleAccordion title="INPUT SCHEMA">
             <ObjectField isRoot
-                schema={inputSchema}
+                schema={tool.inputSchema}
                 value={store.state.request}
                 onChange={handleSchemaDataChange}
                 readOnly={false}
@@ -100,7 +62,7 @@ const McpToolDetailForm: FunctionComponent<Props> = ({
             />
         </TitleAccordion>
 
-        <TitleAccordion title="OUTPUT VALUE" open={false}>
+        <TitleAccordion title="OUTPUT VALUE" open={true}>
             {store.state.response?.content?.map((content, index) => (
                 <ToolResultCmp key={index}
                     content={content}

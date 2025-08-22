@@ -40,12 +40,14 @@ const setup = {
 		//#region VIEWBASE
 		//#endregion
 
+		/**
+		 * Carica il dettaglio di questo AGENT
+		 */
 		async fetch(_: void, store?: AgentDetailStore) {
 			if (!store.state.agent?.id) return
 			const agent = await agentApi.get(store.state.agent.id, { store, manageAbort: true })
 			store.setAgent(agent)
 		},
-
 		async fetchIfVoid(_: void, store?: AgentDetailStore) {
 			if (!!store.state.agent?.name) return // Assuming name is a required prop
 			await store.fetch()
@@ -67,6 +69,10 @@ const setup = {
 			})
 		},
 
+		/**
+		 * ripristina il valore originale (prima della modifica)
+		 * cioe' quello delle API
+		 */
 		restore: (_: void, store?: AgentDetailStore) => {
 			store.fetch()
 			store.setEditState(EDIT_STATE.READ)

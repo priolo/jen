@@ -39,6 +39,10 @@ class RoomTurnBased {
 		this.room.history.push(msg)
 	}
 
+	/**
+	 * Restituiese un LlmResponse dopo aver processato tutti i turni necessari
+	 * ha degli "eventi" per gestire l'uso di tool o sub-agenti
+	 */
 	public async getResponse(): Promise<LlmResponse> {
 		// [II] per il momento suppongo che ci sia un solo AGENT
 		const agent = new AgentLlm(this.room.agents?.[0])

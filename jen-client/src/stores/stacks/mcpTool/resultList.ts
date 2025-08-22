@@ -1,5 +1,6 @@
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { mixStores } from "@priolo/jon"
+import { McpToolDetailStore } from "./detail"
 import { ToolResult } from "./types"
 
 
@@ -14,7 +15,7 @@ const setup = {
 		mcpServerId: <string>null,
 		/** nome univoco con scope MCP del TOOL */
 		toolName: <string>null,
-		
+
 		//#region VIEWBASE
 		width: 200,
 		//#endregion
@@ -30,6 +31,12 @@ const setup = {
 		// getMcpServer: (_: void, store?: ToolResponseListStore) => {
 		// 	return mcpServerSo.getById(store.state.mcpServerId)
 		// },
+
+		onParentSelect: (result: ToolResult, store?: ToolResultListStore) => {
+			const parent = store?.state.parent as McpToolDetailStore
+			parent.setRequest(result.request || {})
+			parent.setResponse(result.response || null)
+		}
 
 	},
 

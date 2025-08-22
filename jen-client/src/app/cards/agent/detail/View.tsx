@@ -1,9 +1,11 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import agentSo from "@/stores/stacks/agent/repo"
+import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
 import { EDIT_STATE } from "@/types"
 import { Agent } from "@/types/Agent"
+import { Llm } from "@/types/Llm"
 import { Tool } from "@/types/Tool"
 import { IconToggle, ListDialog2, ListMultiDialog, MarkdownEditor, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -11,11 +13,7 @@ import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
-import LlmDialog from "./LlmDialog"
 import ToolsDialog from "./ToolsDialog"
-import { Llm } from "@/types/Llm"
-import { LLM_MODELS } from "@/types/commons/LlmProviders"
-import llmSo from "@/stores/stacks/llm/repo"
 
 
 
@@ -32,7 +30,7 @@ const AgentView: FunctionComponent<Props> = ({
 
 	// HOOKs
 	useEffect(() => {
-		//store.fetchIfVoid()
+		if ( inNew ) return
 		const agent = agentSo.getById(store.state.agent?.id)
 		store.setAgent(agent)
 	}, [])
@@ -49,8 +47,8 @@ const AgentView: FunctionComponent<Props> = ({
 	// 	store.setAgent({ ...store.state.agent, type })
 	// }
 
-	const handleLlmChange = (llm: Llm) => {
-		store.setAgent({ ...store.state.agent, llm })
+	const handleLlmChange = (llmId: string) => {
+		store.setAgent({ ...store.state.agent, llmId })
 	}
 
 	const handleBaseAgentChange = (baseId: string) => {
@@ -160,7 +158,7 @@ const AgentView: FunctionComponent<Props> = ({
 			</div>
 
 			<div className="lyt-v">
-				<div className="jack-lbl-prop">AGENTS</div>
+				<div className="jack-lbl-prop">SUB-AGENTS</div>
 				<ListMultiDialog
 					store={store}
 					items={agents}
@@ -265,7 +263,7 @@ const AgentView: FunctionComponent<Props> = ({
 
 		<ToolsDialog store={store} />
 
-		<LlmDialog store={store} />
+		{/* <LlmDialog store={store} /> */}
 
 	</FrameworkCard>
 }

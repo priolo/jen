@@ -22,7 +22,9 @@ const McpToolDetailActions: FunctionComponent<Props> = ({
 	// HANDLER
 	const handleExecuteClick = async () => {
 		await store.execute()
-		store.openMessages()
+	}
+	const handleOpenResultsClick = () => {
+		store.openResults()
 	}
 
 	// LOADING
@@ -36,6 +38,11 @@ const McpToolDetailActions: FunctionComponent<Props> = ({
 			children="EXECUTE"
 			onClick={handleExecuteClick}
 		/>
+		<Button
+			children="RESULTS"
+			onClick={handleOpenResultsClick}
+		/>
+
 	</>
 }
 
