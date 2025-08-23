@@ -3,8 +3,13 @@ import { RoomRepo } from "@/repository/Room.js"
 import { BaseS2C } from "@/types/commons/RoomActions.js"
 
 
-interface RoomsChats {
+/**
+ * Interfaccia da implementare per comunicare con una CHAT
+ * permette di collegare la CHAT al REPOSITORY
+ */
+interface IRoomsChats {
 
+	/** Crea una nuova ROOM */
 	createRoomRepo(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null>
 
 	/** 
@@ -13,10 +18,12 @@ interface RoomsChats {
 	 */
 	getAgentRepoById(agentId: string): Promise<AgentRepo>
 
+	/** Esegue un tool e restituisce il risultato */
 	executeTool(toolId: string, args: any): Promise<any>
 
+	/** Invia un messaggio ad un client */
 	sendMessageToClient(clientAddress: string, message: BaseS2C): void
 
 }
 
-export default RoomsChats
+export default IRoomsChats

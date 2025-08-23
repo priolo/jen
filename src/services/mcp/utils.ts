@@ -4,7 +4,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 
 
 
-export async function getTools(mcpHost: string): Promise<McpTool[]> {
+export async function getMcpTools(mcpHost: string): Promise<McpTool[]> {
 	let client: Client = new Client({
 		name: 'streamable-http-client',
 		version: '1.0.0'
@@ -18,7 +18,7 @@ export async function getTools(mcpHost: string): Promise<McpTool[]> {
 	return resp.tools
 }
 
-export async function executeTool(mcpHost: string, toolName: string, args: any): Promise<any> {
+export async function executeMcpTool(mcpHost: string, toolName: string, args: any): Promise<any> {
 	let client: Client = new Client({
 		name: 'streamable-http-client',
 		version: '1.0.0'

@@ -7,6 +7,7 @@ import { mixStores } from "@priolo/jon"
 import { EditorState } from "../editorBase"
 import { buildRoomDetailNew } from "../room/factory"
 import { buildEditorFromAgent } from "../agentEditor/factory"
+import agentSo from "./repo"
 
 
 
@@ -53,13 +54,17 @@ const setup = {
 			await store.fetch()
 		},
 
+		/**
+		 * Salva o aggiorna un AGENT
+		 */
 		async save(_: void, store?: AgentDetailStore) {
-			let agentSaved: Agent = null
-			if (store.state.editState == EDIT_STATE.NEW) {
-				agentSaved = await agentApi.create(store.state.agent, { store })
-			} else {
-				agentSaved = await agentApi.update(store.state.agent, { store })
-			}
+			// let agentSaved: Agent = null
+			// if (store.state.editState == EDIT_STATE.NEW) {
+			// 	agentSaved = await agentApi.create(store.state.agent, { store })
+			// } else {
+			// 	agentSaved = await agentApi.update(store.state.agent, { store })
+			// }
+			const agentSaved = await agentSo.save(store.state.agent)
 			store.setAgent(agentSaved)
 			store.setEditState(EDIT_STATE.READ)
 			store.setSnackbar({

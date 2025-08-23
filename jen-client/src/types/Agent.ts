@@ -1,5 +1,4 @@
 import { Uuid } from "./global"
-import { Llm } from "./Llm"
 import { Tool } from "./Tool"
 
 
@@ -26,7 +25,7 @@ export interface Agent {
 	killOnResponse: boolean
 
 	/** LLM che utilizza per le risposte */
-	llm?: Llm
+	//llm?: Llm
 	llmId?: string
 
 	/** ID dell'agente base da cui è derivato questo agente */

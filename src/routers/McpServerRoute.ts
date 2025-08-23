@@ -1,4 +1,4 @@
-import { executeTool, getTools } from "@/services/mcp/utils.js";
+import { executeMcpTool, getMcpTools } from "@/services/mcp/utils.js";
 import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { McpServerRepo } from "../repository/McpServer.js";
@@ -18,7 +18,7 @@ class McpServerRoute extends httpRouter.Service {
 				{ path: "/:id", verb: "delete", method: "delete" },
 				{ path: "/:id", verb: "patch", method: "update" },
 				{ path: "/:id/resources", verb: "get", method: "resources" },
-				{ path: "/:id/:tool/execute", verb: "post", method: "execute2" },
+				{ path: "/:id/:tool/execute", verb: "post", method: "executeTool" },
 			]
 		}
 	}
@@ -72,18 +72,18 @@ class McpServerRoute extends httpRouter.Service {
 		const mcpServer = await McpServerRoute.GetById(id, this, this.state.repository)
 		if (!mcpServer) return
 
-		const resp = await getTools(mcpServer.host)
+		const resp = await getMcpTools(mcpServer.host)
 		this.log("mcp-server:tools", resp)
 		res.json(resp)
 	}
 
-	async execute2(req: Request, res: Response) {
+	async executeTool(req: Request, res: Response) {
 		const id = req.params["id"]
 		const tool = req.params["tool"]
 		const mcpServer = await McpServerRoute.GetById(id, this, this.state.repository)
 		if (!mcpServer) return
 
-		const resp = await executeTool(mcpServer.host, tool, req.body)
+		const resp = await executeMcpTool(mcpServer.host, tool, req.body)
 		res.json(resp)
 	}
 

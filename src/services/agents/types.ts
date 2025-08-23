@@ -28,12 +28,22 @@ export interface LlmResponse {
 	continue?: boolean
 
 	// dipende dal type
-	content?: ContentCompleted | ContentAskTo | ContentTool  | ContentStrategy | ContentReasoning
+	content?: ContentCompleted | ContentAskTo | ContentTool  | ContentStrategy | ContentReasoning | ContentFailure
 }
 
 export interface ContentCompleted {
 	answer: string;
 }
+export interface ContentStrategy {
+	strategy: string;
+}
+export interface ContentReasoning {
+	thought: string;
+}
+export interface ContentFailure {
+	reason: string;
+}
+
 
 export interface ContentAskTo {
 	agentId: string
@@ -54,10 +64,3 @@ export interface ContentTool {
 	result?: any
 }
 
-export interface ContentStrategy {
-	strategy: string;
-}
-
-export interface ContentReasoning {
-	thought: string;
-}

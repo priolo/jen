@@ -1,7 +1,7 @@
 import { RootService, Bus } from "@priolo/julian";
 import { typeorm } from "@priolo/julian";
 import { AgentRepo } from "./repository/Agent.js";
-import { ToolRepo } from "./repository/Tool.js";
+import { TOOL_TYPE, ToolRepo } from "./repository/Tool.js";
 import { McpServerRepo } from "./repository/McpServer.js";
 import { LlmRepo } from "./repository/Llm.js";
 import { LLM_MODELS } from "./types/commons/LlmProviders.js";
@@ -70,6 +70,21 @@ export async function seeding(root: RootService) {
 				// 	required: ["a", "b"]
 				// },
 				mcp: mcpServers[0],
+			},
+			{
+				id: "id-tool-3",
+				name: "multiply",
+				description: "This tool can multiply two numbers",
+				parameters: {
+					type: "object",
+					properties: {
+						a: { type: "number", description: "First number" },
+						b: { type: "number", description: "Second number" }
+					},
+					required: ["a", "b"]
+				},
+				type: TOOL_TYPE.CODE,
+				code: `(args) => args.a * args.b`,
 			},
 		]
 	});

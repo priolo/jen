@@ -1,15 +1,15 @@
 import { McpTool } from "@/services/mcp/types.js"
-import { getTools } from "@/services/mcp/utils.js"
+import { executeMcpTool, getMcpTools } from "@/services/mcp/utils.js"
 import ChatNode from "@/services/rooms/ChatNode.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
-import { ToolRepo } from "../repository/Tool.js"
+import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
 import { BaseC2S, BaseS2C, CHAT_ACTION_C2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
-import RoomsChats from "./RoomsChats.js"
+import IRoomsChats from "./IRoomsChats.js"
 
 
 
@@ -18,7 +18,7 @@ export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
 /**
  * WebSocket service for managing prompt chat rooms
  */
-export class WSRoomsService extends ws.route implements RoomsChats {
+export class WSRoomsService extends ws.route implements IRoomsChats {
 
 	private chats: ChatNode[] = []
 
@@ -161,20 +161,24 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 			// se il TOOL ha la description e i parameters non c'e' bisogno di caricarli
 			if (!!tool.description && !!tool.parameters) continue
 
-			// se non ci sono i tools di questo MCP li carico
-			if (!WSRoomsService.McpCache.has(tool.mcpId)) {
-				const mcpServer = await McpServerRoute.GetById(tool.mcpId, this, this.state.mcpRepository)
-				if (!mcpServer) continue
-				const mcpTools = await getTools(mcpServer.host)
-				WSRoomsService.McpCache.set(mcpServer.id, mcpTools)
-			}
+			// se nono di tipo MCP allora li cerco in CACHE o li carico
+			if ( tool.type == TOOL_TYPE.MCP && !!tool.mcpId) {
 
-			// prendo i tools dal cache
-			const mcpTools = WSRoomsService.McpCache.get(tool.mcpId)
-			if (!mcpTools) continue
-			const cachedTool = mcpTools.find(t => t.name == tool.name)
-			tool.description = cachedTool.description
-			tool.parameters = cachedTool.inputSchema
+				// non sono in CACHE allora li carico e li metto in CACHE
+				if (!WSRoomsService.McpCache.has(tool.mcpId)) {
+					const mcpServer = await McpServerRoute.GetById(tool.mcpId, this, this.state.mcpRepository)
+					if (!mcpServer) continue
+					const mcpTools = await getMcpTools(mcpServer.host)
+					WSRoomsService.McpCache.set(mcpServer.id, mcpTools)
+				}
+
+				// prendo i tools dal CACHE
+				const mcpTools = WSRoomsService.McpCache.get(tool.mcpId)
+				if (!mcpTools) continue
+				const cachedTool = mcpTools.find(t => t.name == tool.name)
+				tool.description = cachedTool.description
+				tool.parameters = cachedTool.inputSchema
+			}
 		}
 		// [II] --- ---
 
@@ -188,9 +192,30 @@ export class WSRoomsService extends ws.route implements RoomsChats {
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: toolId
 		})
+
 		if (!toolRepo) return null;
 
-		return "42"
+		if ( toolRepo.type == TOOL_TYPE.CODE ) {
+			if (!toolRepo.code) return "Tool without code"
+			// eseguo il codice
+			try {
+				const func = new Function('args', `return (${toolRepo.code})(args)`)
+				const result = func(args)
+				// Handle both sync and async functions
+				return await Promise.resolve(result)
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : String(error)
+				return `Tool execution error: ${errorMessage}`
+			}
+		}
+
+		if (toolRepo.type == TOOL_TYPE.MCP) {
+			const mcpServer = await McpServerRoute.GetById(toolRepo.mcpId, this, this.state.mcpRepository)
+			if (!mcpServer) return `MCP Server not found: ${toolRepo.mcpId}`
+			return await executeMcpTool(mcpServer.host, toolRepo.name, args)
+		}
+		
+		return "Tool type not supported"
 	}
 
 	/**

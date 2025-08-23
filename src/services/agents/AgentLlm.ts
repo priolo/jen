@@ -83,17 +83,30 @@ class AgentLlm {
 		const tools = { ...agentTools, ...subagentTools, ...systemTools }
 
 		// eseguo LLM
-		const r = await generateText({
-			model: model,
-			temperature: 0,
-			system: systemPrompt,
-			messages: history,
-			//toolChoice: !this.parent? "auto": "required",
-			//toolChoice: this.history.length > 2 && !!this.parent ? "auto" : "required",
-			toolChoice: "required",
-			tools,
-			maxSteps: 1,
-		})
+		let r: Awaited<ReturnType<typeof generateText>>
+		try {
+			r = await generateText({
+				model: model,
+				temperature: 0,
+				system: systemPrompt,
+				messages: history,
+				//toolChoice: !this.parent? "auto": "required",
+				//toolChoice: this.history.length > 2 && !!this.parent ? "auto" : "required",
+				toolChoice: "required",
+				tools,
+				maxSteps: 1,
+			})
+		} catch (err) {
+			console.error("LLM ERROR:", err)
+			return <LlmResponse>{
+				responseRaw: null,
+				type: LLM_RESPONSE_TYPE.FAILURE,
+				continue: false,
+				content: {
+					reason: "Unprocessable Entity"
+				},
+			}
+		}
 
 		// ricavo il messaggio di risposta
 		const messages = r.response.messages

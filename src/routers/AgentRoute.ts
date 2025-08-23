@@ -11,11 +11,11 @@ class AgentRoute extends httpRouter.Service {
 			type: typeorm.Actions.FIND_ONE,
 			payload: {
 				where: { id: agentId },
-				relations: ["tools", "subAgents"],
+				relations: ["tools", "subAgents", "llm"],
 				select: {
 					subAgents: { id: true, name: true, description: true },
 					tools: { id: true, name: true, description: true, parameters: true, mcpId: true },
-					llm: { id:true, name: true, key: true }
+					llm: { id: true, name: true, key: true }
 				}
 			}
 		})

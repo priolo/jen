@@ -1,21 +1,25 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
-import RoomsChats from "@/routers/RoomsChats.js";
+import IRoomsChats from "@/routers/IRoomsChats.js";
 import { AgentMessageS2C, BaseS2C, CHAT_ACTION_S2C, NewRoomS2C, UserEnteredS2C, UserMessageS2C } from "@/types/commons/RoomActions.js";
 import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../agents/types.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 
 
-
+/**
+ * Implementazione di una CHAT 
+ * permette la conversazione degli AGENT e dello USER
+ * con gestione di più stanze (ROOM) 
+ */
 class ChatNode {
 	constructor(
-		node: RoomsChats,
+		node: IRoomsChats,
 	) {
 		this.node = node;
 	}
 
 	public id: string = crypto.randomUUID();
-	private node: RoomsChats;
+	private node: IRoomsChats;
 	private rooms: RoomTurnBased[] = []
 	private clientsIds: Set<string> = new Set();
 

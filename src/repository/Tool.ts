@@ -2,7 +2,11 @@ import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGe
 import { AgentRepo } from './Agent.js';
 import { McpServerRepo } from './McpServer.js';
 
-
+export enum TOOL_TYPE {
+	MCP = 'MCP',
+	NODE = 'NODE',
+	CODE = 'CODE'
+}
 
 /**
  * Rappresenta un tool utilizzabile dagli agenti
@@ -13,6 +17,10 @@ export class ToolRepo {
 
 	@PrimaryGeneratedColumn("uuid")
 	id: string
+
+	/** The type of the tool */
+	@Column({ type: 'varchar', default: TOOL_TYPE.MCP })
+	type: TOOL_TYPE
 
 	/** Il nome del tool (è univoco nello scope di MCP) */
 	@Column({ type: 'varchar', default: '' })
@@ -26,20 +34,30 @@ export class ToolRepo {
 	@Column({ type: 'json', nullable: true })
 	parameters?: any
 
-    // Il server MCP 
+
+	
+    /** Il server MCP */
     @ManyToOne(() => McpServerRepo, mcp => mcp.id)
 	@JoinColumn({ name: 'mcpId' })
     mcp?: McpServerRepo
 	@Column({ type: 'uuid', nullable: true })
     mcpId?: string
 
+	/** Funzione per eseguire direttamente il codice */
+	@Column({ type: 'varchar', nullable: true })
+	code?: string
+
+	/** Percorso per eseguire il tool in julian */
+	@Column({ type: 'varchar', nullable: true })
+	pathNode?: string
+
+
+
 	// RELATIONSHIPS
 	/** Agenti che utilizzano questo tool */
 	@ManyToMany(() => AgentRepo, agent => agent.tools)
 	agents?: AgentRepo[]
-
-
-	execute?: (args:any) => Promise<any>
+	
 }
 
 export interface IToolRepo extends InstanceType<typeof ToolRepo> {}

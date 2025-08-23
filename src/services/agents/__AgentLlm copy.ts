@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 import { z } from "zod";
 import { colorPrint, ColorType } from './utils/index.js';
 import { last } from 'slate';
-import { executeTool, getTools } from '@/services/mcp/utils.js';
+import { executeMcpTool, getMcpTools } from '@/services/mcp/utils.js';
 
 dotenv.config();
 
@@ -314,7 +314,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 			// recupero dal DB
 			const toolPoco = await this.resolver.getTools(toolPart.id)
 			// recupero il tool dal MCP server
-			const mcpTools = await getTools(toolPart.mcp.host)
+			const mcpTools = await getMcpTools(toolPart.mcp.host)
 			const mcpTool = mcpTools.find(t => t.name == toolPoco.name)
 			const mcpHost = toolPart.mcp.host
 			const toolName = mcpTool.name
@@ -326,7 +326,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 				parameters: jsonSchema(inputSchema),
 				execute: async (args) => {
 					colorPrint([this.agent.name, ColorType.Blue], " : tool : ", [toolName, ColorType.Yellow], " : ", [JSON.stringify(args), ColorType.Green])
-					const resp = await executeTool(mcpHost, toolName, args)
+					const resp = await executeMcpTool(mcpHost, toolName, args)
 					return resp.result
 				}
 			})
