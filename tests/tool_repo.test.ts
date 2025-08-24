@@ -25,7 +25,7 @@ describe("Test on TOOL router", () => {
 		const tool1Payload = {
 			name: "name",
 			description: "description",
-			parameters: JSON.stringify({ param1: "value1" }),
+			inputSchema: JSON.stringify({ param1: "value1" }),
 			code: "console.log('hello');",
 		};
 		const tool1 = await axiosIstance.post(`/api/tools`, { tool: tool1Payload });
@@ -36,7 +36,7 @@ describe("Test on TOOL router", () => {
 		const tool2Payload = {
 			name: "name2",
 			description: "description2",
-			parameters: JSON.stringify({ param2: "value2" }),
+			inputSchema: JSON.stringify({ param2: "value2" }),
 			code: "console.log('world');",
 		};
 		const tool2 = await axiosIstance.post(`/api/tools`, { tool: tool2Payload });

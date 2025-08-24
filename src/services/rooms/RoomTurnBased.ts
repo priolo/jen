@@ -17,7 +17,7 @@ class RoomTurnBased {
 	 * Su utilizzo di un TOOL 
 	 * Restituisce il risultato del tool
 	 * */
-	public onTool: (id:string, args: any) => Promise<any> = null
+	public onTool: (id: string, args: any) => Promise<any> = null
 
 	/**
 	 * Su utilizzo di un sub-agente
@@ -25,16 +25,16 @@ class RoomTurnBased {
 	 */
 	public onSubAgent: (agentId: string, question: string) => Promise<any> = null;
 
-	public onLoop: (roomId:string, agentId: string, llmResponse: LlmResponse) => void = null;
+	public onLoop: (roomId: string, agentId: string, llmResponse: LlmResponse) => void = null;
 
 	public addUserMessage(message: string) {
 		if (!this.room.history) {
 			this.room.history = [];
 		}
-		const msg: ChatMessage = { 
+		const msg: ChatMessage = {
 			id: randomUUID(),
-			role: "user", 
-			content: message, 
+			role: "user",
+			content: message,
 		}
 		this.room.history.push(msg)
 	}
@@ -54,9 +54,17 @@ class RoomTurnBased {
 				const content = <ContentTool>response.content
 				const result = await this.onTool?.(content.toolId, content.args)
 				content.result = result
+
 				// inserisco il risultato nel RAW "tool-result"
-				const toolContent = response.responseRaw.find(r => r.role == "tool")?.content?.find( c => c.type == "tool-result")
+				// [II] fare utils
+				const toolContent = response.responseRaw.find(r => r.role == "tool")?.content?.find(c => c.type == "tool-result")
 				toolContent.result = result;
+				if (toolContent) {
+					toolContent.output = {
+						type: (typeof result) == "object" ? "json" : "text",
+						value: result,
+					}
+				}
 			}
 
 			if (response.type === LLM_RESPONSE_TYPE.ASK_TO) {
@@ -64,11 +72,13 @@ class RoomTurnBased {
 				const result = await this.onSubAgent?.(content.agentId, content.question)
 				content.result = result
 				// inserisco il risultato nel RAW "tool-result"
-				const toolContent = response.responseRaw.find(r => r.role == "tool")?.content?.find( c => c.type == "tool-result")
+				const toolContent = response.responseRaw.find(r => r.role == "tool")?.content?.find(c => c.type == "tool-result")
 				toolContent.result = result;
 			}
 
-			this.room.history.push(...response.responseRaw)
+			//this.room.history.push(...response.responseRaw)
+			// [II] fare utils
+			this.room.history.push({ id: randomUUID(), role: "agent", content: response })
 
 			this.onLoop?.(this.room.id, agent.agent.id, response)
 

@@ -1,9 +1,19 @@
 import { AgentRepo } from '@/repository/Agent.js';
+import { LLM_MODELS } from '@/types/commons/LlmProviders.js';
 import { ChatMessage } from '@/types/commons/RoomActions.js';
-import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet, UserModelMessage } from "ai";
+import { cohere, createCohere } from '@ai-sdk/cohere';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createMistral } from '@ai-sdk/mistral';
+import { generateText, jsonSchema, tool, ToolResultPart, ToolSet } from "ai";
+import dotenv from 'dotenv';
 import { LLM_RESPONSE_TYPE, LlmResponse } from './types.js';
 import { colorPrint, ColorType } from './utils/index.js';
-import { getModel } from './utils/models.js';
+// Uncomment and add these imports as needed:
+// import { createOpenAI } from '@ai-sdk/openai';
+// import { createAnthropic } from '@ai-sdk/anthropic';
+// import { createCohere } from '@ai-sdk/cohere';
+
+dotenv.config();
 
 
 
@@ -24,37 +34,67 @@ class AgentLlm {
 
 		if (!history) return null
 
-		// STARTUP
-		const model = getModel(this.agent.llm)
+
+		let provider = null
+		switch (this.agent?.llm?.name) {
+			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
+			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH_PRO:
+			case LLM_MODELS.GOOGLE_GEMINI_2_5_PRO_EXP:
+				provider = createGoogleGenerativeAI({
+					apiKey: this.agent.llm.key ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+				});
+				break;
+			case LLM_MODELS.COHERE_COMMAND_R_PLUS:
+				provider = createCohere({
+					apiKey: this.agent.llm.key ?? process.env.COHERE_API_KEY,
+				})
+				break
+			case LLM_MODELS.MISTRAL_LARGE:
+			default:
+				provider = createMistral({
+					apiKey: this.agent.llm.key ?? process.env.MISTRAL_API_KEY,
+				});
+				break;
+		}
+		let model = null
+		switch (this.agent?.llm?.name) {
+			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
+				model = provider('gemini-2.0-flash')
+				break;
+			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH_PRO:
+				model = provider('gemini-2.0-flash-pro')
+				break;
+			case LLM_MODELS.GOOGLE_GEMINI_2_5_PRO_EXP:
+				model = provider('gemini-2.5-pro-exp-03-25')
+				break;
+			case LLM_MODELS.COHERE_COMMAND_R_PLUS:
+				model = provider('command-r-plus')
+				break;
+			case LLM_MODELS.MISTRAL_LARGE:
+			default:
+				model = provider('mistral-large-latest')
+				break
+		}
+
 		const systemPrompt = this.getReactSystemPrompt()
 		const systemTools = this.getSystemTools()
 		const subagentTools = this.createSubAgentsTools()
 		const agentTools = this.createTools()
 		const tools = { ...agentTools, ...subagentTools, ...systemTools }
 
-
-		// TRANSFORM TO VERCEL HISTORY
-		const vercelHistory: ModelMessage[] = history.flatMap((message:ChatMessage) => {
-			if ( (typeof message.content) == "string" ) {
-				return { role: message.role, content: message.content } as UserModelMessage
-			}
-			return message.content.responseRaw as ModelMessage[]
-		})
-
-
-		// LLM GENERATE
+		// eseguo LLM
 		let r: Awaited<ReturnType<typeof generateText>>
 		try {
 			r = await generateText({
 				model: model,
 				temperature: 0,
 				system: systemPrompt,
-				messages: vercelHistory,
+				messages: history,
 				//toolChoice: !this.parent? "auto": "required",
 				//toolChoice: this.history.length > 2 && !!this.parent ? "auto" : "required",
 				toolChoice: "required",
 				tools,
-				//stopWhen: ({ steps }) => steps.length >= 1, // Updated from maxSteps: 1
+				// maxSteps replaced - in v5, single step execution is default behavior
 			})
 		} catch (err) {
 			console.error("LLM ERROR:", err)
@@ -68,125 +108,93 @@ class AgentLlm {
 			}
 		}
 
-		// ricavo il messaggio di risposta
-		const messages = r.response.messages
-		const lastMsg: ModelMessage = messages[r.response.messages.length - 1]
+		// ricavo il messaggio di risposta - v5 structure
+		const lastStep = r.steps[r.steps.length - 1]
+		
+		// Check if we have tool calls in the last step
+		if (lastStep.toolCalls && lastStep.toolCalls.length > 0) {
+			const toolCall = lastStep.toolCalls[0]
+			const toolName = toolCall.toolName
+			const toolInput = toolCall.input
+			
+			// Check if we also have tool results
+			if (lastStep.toolResults && lastStep.toolResults.length > 0) {
+				const toolResult = lastStep.toolResults[0]
+				const result = toolResult.output // v5 uses 'output' instead of 'result'
+				
+				// FINAL RESPONSE
+				if (toolName == "final_answer") {
+					colorPrint(
+						[this.agent.name, ColorType.Blue], " : final answer: ",
+						[result, ColorType.Green]
+					)
+					return <LlmResponse>{
+						responseRaw: r.steps,
+						type: LLM_RESPONSE_TYPE.COMPLETED,
+						continue: false,
+						content: {
+							answer: result
+						},
+					}
+				}
 
-		// NON E' UN TOOL situazione imprevista... continua a ragionare 
-		if (lastMsg.role != "tool") {
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : unknown : ",
-				[JSON.stringify(lastMsg.content), ColorType.Magenta]
-			)
-			return <LlmResponse>{
-				responseRaw: messages,
-				type: LLM_RESPONSE_TYPE.UNKNOWN,
-				continue: true,
+				// COLLECT INFORMATION
+				if (toolName == "ask_for_information") {
+					colorPrint(
+						[this.agent.name, ColorType.Blue], " : ask for information: ",
+						[result, ColorType.Yellow]
+					)
+					return <LlmResponse>{
+						responseRaw: r.steps,
+						type: LLM_RESPONSE_TYPE.NEED_MORE_INFO,
+						continue: false,
+						content: result,
+					}
+				}
+
+				// EXECUTING A TOOL
+				colorPrint(
+					[this.agent.name, ColorType.Blue], " : ", [toolName, ColorType.Cyan], " : ",
+					[result, ColorType.Green]
+				)
+				return <LlmResponse>{
+					responseRaw: r.steps,
+					type: LLM_RESPONSE_TYPE.TOOL_CALL,
+					continue: true,
+					content: {
+						toolCall: toolName,
+						args: toolInput,
+						response: result
+					},
+				}
+			} else {
+				// Tool call without result - need to execute tool
+				colorPrint(
+					[this.agent.name, ColorType.Blue], " : tool call: ", [toolName, ColorType.Cyan],
+					" args: ", [toolInput, ColorType.Gray]
+				)
+				return <LlmResponse>{
+					responseRaw: r.steps,
+					type: LLM_RESPONSE_TYPE.TOOL_CALL,
+					continue: true,
+					content: {
+						toolCall: toolName,
+						args: toolInput,
+					},
+				}
 			}
 		}
 
-		// E' UN TOOL
-		const content: ToolResultPart = lastMsg.content[0]
-		const toolName: string = content.toolName
-		// per il momento gestisco solo i text
-		const result: any = content.output.value
-
-		// FINAL RESPONSE
-		if (toolName == "final_answer") {
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : final answer: ",
-				[result, ColorType.Green]
-			)
-			return <LlmResponse>{
-				responseRaw: messages,
-				type: LLM_RESPONSE_TYPE.COMPLETED,
-				continue: false,
-				content: {
-					answer: result
-				},
-			}
-		}
-
-		// COLLECT INFORMATION
-		if (toolName == "ask_for_information") {
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : ask info: ",
-				[result, ColorType.Green]
-			)
-			return <LlmResponse>{
-				type: LLM_RESPONSE_TYPE.ASK_TO,
-				responseRaw: messages,
-				continue: true,
-				content: {
-					question: result,
-					agentId: this.agent.id, // l'agente che ha chiesto l'informazione
-				},
-			}
-		}
-
-		// CALL AGENT
-		if (toolName.startsWith("chat_with_")) {
-			const { question, agentId } = result as { question: string, agentId: string }
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : call sub-agent: ",
-				[agentId, ColorType.Green]
-			)
-			return <LlmResponse>{
-				type: LLM_RESPONSE_TYPE.ASK_TO,
-				responseRaw: messages,
-				continue: true,
-				content: {
-					agentId: agentId,
-					question: question,
-				},
-			}
-		}
-
-		// UPDATE STRATEGY
-		if (toolName == "update_strategy") {
-			colorPrint([
-				this.agent.name, ColorType.Blue], " : strategy : ",
-				[JSON.stringify(result), ColorType.Magenta]
-			)
-			return <LlmResponse>{
-				type: LLM_RESPONSE_TYPE.STRATEGY,
-				responseRaw: messages,
-				continue: true,
-				content: {
-					strategy: result,
-				},
-			}
-		}
-
-		// REASONING 
-		if (toolName == "get_reasoning") {
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : reasoning : ",
-				[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
-			)
-			return <LlmResponse>{
-				type: LLM_RESPONSE_TYPE.REASONING,
-				responseRaw: messages,
-				continue: true,
-				content: {
-					thought: result,
-				},
-			}
-		}
-
-		// E' un TOOL GENERICO
+		// NO TOOL CALL - this is unexpected in required tool mode
+		const textResponse = lastStep.text || ''
 		colorPrint(
-			[this.agent.name, ColorType.Blue], " : function : ",
-			[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
+			[this.agent.name, ColorType.Blue], " : unknown : ",
+			[textResponse, ColorType.Magenta]
 		)
 		return <LlmResponse>{
-			type: LLM_RESPONSE_TYPE.TOOL,
-			responseRaw: messages,
+			responseRaw: r.steps,
+			type: LLM_RESPONSE_TYPE.UNKNOWN,
 			continue: true,
-			content: {
-				toolId: result.id,
-				args: result.args,
-			},
 		}
 
 	}
@@ -196,7 +204,7 @@ class AgentLlm {
 		const tools = {
 			final_answer: tool({
 				description: "Provide the final answer to the problem",
-				inputSchema: jsonSchema({
+				parameters: jsonSchema({
 					type: "object",
 					properties: { answer: { type: "string", description: "The complete, final answer to the problem" } },
 					required: ["answer"]
@@ -211,7 +219,7 @@ class AgentLlm {
 For example: 
 User: "give me the temperature where I am now". You: "where are you now?", User: "I am in Paris"
 `,
-				inputSchema: jsonSchema({
+				parameters: jsonSchema({
 					type: "object",
 					properties: {
 						request: {
@@ -228,7 +236,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 
 			update_strategy: tool({
 				description: "Set up a strategy consisting of a list of steps to follow to solve the main problem.", // and try to minimize the use of tools preferring 'reasoning'. ",
-				inputSchema: jsonSchema({
+				parameters: jsonSchema({
 					type: "object",
 					properties: {
 						strategy: {
@@ -244,8 +252,8 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 			}),
 
 			get_reasoning: tool({
-				description: "Process the available data and generate useful data to answer the main question. For example, you can filter the data, group it, find relationships and generate a new data set",
-				inputSchema: jsonSchema({
+				description: "Process the available data and generate useful data to answer the main question. For example, you can filter the data, group it, find relationships and generate a new data set.",
+				parameters: jsonSchema({
 					type: "object",
 					properties: {
 						thought: {
@@ -273,7 +281,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 		for (const subAgent of this.agent.subAgents) {
 			structs[`chat_with_${subAgent.name}`] = tool({
 				description: `Ask agent ${subAgent.name} for info.\n${subAgent.description ?? ""}`,
-				inputSchema: jsonSchema({
+				parameters: jsonSchema({
 					type: "object",
 					properties: {
 						question: {
@@ -299,7 +307,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 		for (const toolRepo of this.agent.tools) {
 			structs[toolRepo.name] = tool({
 				description: toolRepo.description,
-				inputSchema: jsonSchema(toolRepo.parameters),
+				parameters: jsonSchema(toolRepo.parameters),
 				execute: async (args) => {
 					return { id: toolRepo.id, args }
 				}

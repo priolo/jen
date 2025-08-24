@@ -1,4 +1,3 @@
-import { ChatMessage } from '@/types/commons/RoomActions.js';
 
 
 export enum LLM_RESPONSE_TYPE {
@@ -22,8 +21,8 @@ export enum LLM_RESPONSE_TYPE {
 
 export interface LlmResponse {
 	type: LLM_RESPONSE_TYPE
-	// la risposta di "vercel-ai" da aggiungere alla history
-	responseRaw: ChatMessage[]
+	// la risposta RAW da aggiungere alla history
+	responseRaw: any[]
 	// se non è la risposta finale
 	continue?: boolean
 

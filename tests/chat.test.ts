@@ -1,9 +1,10 @@
 import { randomUUID } from 'crypto';
 import { RoomRepo } from '../src/repository/Room.js';
-import RoomsChats from '../src/routers/RoomsChats.js';
+import IRoomsChats from '../src/routers/IRoomsChats.js';
 import { IAgentRepo } from '../src/repository/Agent.js';
 import { ToolRepo } from '../src/repository/Tool.js';
 import ChatNode from '../src/services/rooms/ChatNode.js';
+import { LLM_MODELS } from '../src/types/commons/LlmProviders.js';
 
 
 
@@ -29,24 +30,27 @@ describe("Test on CHAT", () => {
 	const agentAdderRepo = <IAgentRepo>{
 		id: "id-1",
 		name: "adder",
+		llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 		description: "Agent who can do additions well",
 		tools: [addTool],
 	}
 	const agentMathRepo = <IAgentRepo>{
 		id: "id-2",
 		name: "math",
+		llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 		description: "Agent who deals with mathematics",
 		subAgents: [agentAdderRepo],
 	}
 	const agentLeadRepo = <IAgentRepo>{
 		id: "id-3",
 		name: "lead",
+		llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 		description: "General agent. Never respond directly but use the tools at my disposal to answer questions.",
 		subAgents: [agentMathRepo],
 	}
 	const agentsRepo: IAgentRepo[] = [agentMathRepo, agentAdderRepo, agentLeadRepo]
 
-	const nodeSym = <RoomsChats>{
+	const nodeSym = <IRoomsChats>{
 		createRoomRepo: async (agents, parentId) => {
 			return <RoomRepo>{
 				id: randomUUID(),

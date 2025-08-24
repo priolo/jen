@@ -1,9 +1,10 @@
 import { ToolResultPart } from "ai";
-import { IAgentRepo } from "../src/repository/Agent.js";
-import { ChatMessage } from "../src/types/RoomActions.js";
+import { AgentRepo, IAgentRepo } from "../src/repository/Agent.js";
+import { ChatMessage } from "../src/types/commons/RoomActions.js";
 import { ContentAskTo, ContentCompleted, ContentTool, LlmResponse, LLM_RESPONSE_TYPE } from '../src/services/agents/types.js';
 import AgentLlm from '../src/services/agents/AgentLlm.js';
-
+import { LLM_MODELS } from "../src/types/commons/LlmProviders.js";
+import { randomUUID } from "crypto";
 
 
 describe("Test on AGENT", () => {
@@ -18,9 +19,10 @@ describe("Test on AGENT", () => {
 	test("Test semplice domanda", async () => {
 
 		// creo un agente
-		const agentRepo = {
-			id: "id-1",
+		const agentRepo:AgentRepo = {
+			id: "agent-1",
 			name: "generic",
+			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 		}
 		const agent = new AgentLlm(agentRepo)
 
@@ -38,8 +40,9 @@ describe("Test on AGENT", () => {
 	test("Test con tool", async () => {
 		// creo un agente
 		const agentRepo = <IAgentRepo>{
-			id: "id-1",
-			name: "gneric",
+			id: "agent-1",
+			name: "generic",
+			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 			tools: [
 				{
 					name: "addition",
@@ -60,20 +63,29 @@ describe("Test on AGENT", () => {
 		const history: ChatMessage[] = [
 			{ role: "user", content: "How much is 2+2? Just write the result." },
 		]
-		let resp: LlmResponse;
+		let response: LlmResponse;
 		do {
-			resp = await agent.ask(history)
-			history.push(...resp.responseRaw)
-			if (resp.type === LLM_RESPONSE_TYPE.TOOL) {
-				const args = (<ContentTool>resp.content).args;
-				const toolResult = args.a + args.a
-				const lastMsg = history[history.length - 1];
-				(lastMsg.content[0] as ToolResultPart).result = toolResult.toString();
+			response = await agent.ask(history)
+			if (response.type === LLM_RESPONSE_TYPE.TOOL) {
+				const args = (<ContentTool>response.content).args;
+				const toolResult = (+args.a) + (+args.b);
+				const responseTool = response.responseRaw?.find(r => r.role == "tool")
+				const contentResult:ToolResultPart = responseTool?.content?.find( c => c.type === "tool-result") as ToolResultPart
+				if (contentResult) {
+					contentResult.output =  {
+					type: "text",
+					value: toolResult.toString(),
+				}}
 			}
-		} while (resp.continue)
+			history.push({
+				id: randomUUID(),
+				role: "agent",
+				content: response
+			})
+		} while (response.continue)
 
-		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>resp.content).answer).toBe("4")
+		expect(response.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
+		expect((<ContentCompleted>response.content).answer).toBe("4")
 
 	}, 100000)
 
@@ -82,13 +94,15 @@ describe("Test on AGENT", () => {
 
 		// creo l'agente sub
 		const agentAdder = <IAgentRepo>{
-			id: "id-2",
+			id: "agent-2",
+			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 			name: "adder",
 			description: "I'm an agent who can do additions well",
 		}
 		// creo l'agente leader
 		const agentLead = <IAgentRepo>{
-			id: "id-1",
+			id: "agent-1",
+			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 			name: "lead",
 			subAgents: [agentAdder],
 		}
@@ -98,37 +112,39 @@ describe("Test on AGENT", () => {
 		const history: ChatMessage[] = [
 			{ role: "user", content: "How much is 2+2? Just write the result." },
 		]
-		let resp: LlmResponse
+		let response: LlmResponse
 		// ciclo leader
 		do {
-			resp = await agentLeadExe.ask(history)
-			history.push(...resp.responseRaw)
-			if (resp.type === LLM_RESPONSE_TYPE.ASK_TO) {
+			response = await agentLeadExe.ask(history)
+
+			history.push({ id: randomUUID(), role: "agent", content: response })
+
+			if (response.type === LLM_RESPONSE_TYPE.ASK_TO) {
 
 				// ciclo sub-agente
-				const agentSub = new AgentLlm(agents.find(a => a.id === (<ContentAskTo>resp.content).agentId))
+				const agentSub = new AgentLlm(agents.find(a => a.id === (<ContentAskTo>response.content).agentId))
 				const historySub: ChatMessage[] = [
-					{ role: "user", content: (<ContentAskTo>resp.content).question },
+					{ role: "user", content: (<ContentAskTo>response.content).question },
 				]
 				let respSub:LlmResponse;
 				do {
 					respSub = await agentSub.ask(historySub)
-					historySub.push(...respSub.responseRaw)
+					historySub.push({ id: randomUUID(), role: "agent", content: respSub })
 
 				} while (respSub.continue);
 				// ---
 
 				const lastMsg = history[history.length - 1];
-				(<ToolResultPart>lastMsg.content[0]).result = (<ContentCompleted>respSub.content).answer;
+				//(<ToolResultPart>lastMsg.content[0]).result = (<ContentCompleted>respSub.content).answer;
 
 			}
 
 			//await new Promise(resolve => setTimeout(resolve, 5000)) // wait 1 second
 
-		} while (resp.continue)
+		} while (response.continue)
 
-		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>resp.content).answer).toBe("4")
+		expect(response.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
+		expect((<ContentCompleted>response.content).answer).toBe("4")
 
 	}, 100000)
 })

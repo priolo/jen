@@ -1,11 +1,22 @@
 import { LlmResponse } from "@/services/agents/types.js";
-import { CoreMessage, CoreUserMessage } from "ai"
 
 
+/**
+ * Un messaggio di chat (compone la HISTORY di una ROOM)
+ */
 export type ChatMessage = {
+	/** identificativo del MESSAGE */
 	id?: string;
+	/** indica che questo MESSAGE apre una ROOM */
 	subroomId?: string;
-} & CoreMessage;
+
+	role: "user" | "agent" | "system"
+
+	content: string | LlmResponse
+}
+
+
+
 
 
 //#region CLIENT TO SERVER
@@ -84,7 +95,7 @@ export type AgentMessageS2C = BaseS2C & {
 /** un USER ha risposto */
 export type UserMessageS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.USER_MESSAGE
-	content: CoreUserMessage
+	content: ChatMessage
 }
 
 

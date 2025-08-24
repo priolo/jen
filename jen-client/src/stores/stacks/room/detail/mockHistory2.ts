@@ -1,4 +1,4 @@
-const mockHistory2: CoreMessage[] = [
+const mockHistory2: ModelMessage[] = [
 	{
 		role: "user",
 		content: `

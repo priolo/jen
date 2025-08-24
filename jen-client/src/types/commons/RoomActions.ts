@@ -1,11 +1,11 @@
 import { LlmResponse } from "./AgentLlmResponse";
-import { CoreMessage, CoreUserMessage } from "ai"
+import { ModelMessage, CoreUserMessage } from "ai"
 
 
 export type ChatMessage = {
 	id?: string;
 	subroomId?: string;
-} & CoreMessage;
+} & ModelMessage;
 
 
 //#region CLIENT TO SERVER

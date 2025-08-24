@@ -186,7 +186,9 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 		return agent
 	}
 
-	//[TO DO]
+	/**
+	 * Esegue un TOOL e ne restituisce il risultato
+	 */
 	public async executeTool(toolId: string, args: any): Promise<any> {
 		const toolRepo: ToolRepo = await new Bus(this, this.state.toolRepository).dispatch({
 			type: typeorm.RepoRestActions.GET_BY_ID,
@@ -199,7 +201,8 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 			if (!toolRepo.code) return "Tool without code"
 			// eseguo il codice
 			try {
-				const func = new Function('args', `return (${toolRepo.code})(args)`)
+				//const func = new Function('args', `return (${toolRepo.code})(args)`)
+				const func = new Function(toolRepo.code)
 				const result = func(args)
 				// Handle both sync and async functions
 				return await Promise.resolve(result)

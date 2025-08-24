@@ -1,7 +1,9 @@
 import { ToolSchema } from "@priolo/julian-mcp";
 
 
-
+/**
+ * Definizione dei MCP TOOLS di sistema da inserire nel server allo startup
+ */
 const tools: ToolSchema[] = [
 	{
 		name: "sum",
