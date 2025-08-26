@@ -11,6 +11,9 @@ class RoomTurnBased {
 	constructor(
 		public room: Partial<RoomRepo>,
 	) {
+		if (!this.room.history) {
+			this.room.history = [];
+		}
 	}
 
 	/** 
@@ -28,9 +31,6 @@ class RoomTurnBased {
 	public onLoop: (roomId: string, agentId: string, llmResponse: LlmResponse) => void = null;
 
 	public addUserMessage(message: string) {
-		if (!this.room.history) {
-			this.room.history = [];
-		}
 		const msg: ChatMessage = {
 			id: randomUUID(),
 			role: "user",

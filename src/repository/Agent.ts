@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { RoomRepo } from './Room.js';
-import { IToolRepo, ToolRepo } from './Tool.js';
 import { LlmRepo } from './Llm.js';
+import { RoomRepo } from './Room.js';
+import { ToolRepo } from './Tool.js';
 
 
 
@@ -34,12 +34,15 @@ export class AgentRepo {
     @Column({ type: 'varchar', default: '' })
     contextPrompt?: string;
 
+    /**[II] indica che puo' chiedere info al suo "creatore"*/
     @Column({ type: 'boolean', default: false })
     askInformation?: boolean;
 
+    /**[II] quando la risposta è completa viene distrutto. Altrimenti rimane attivo per approfondimenti con la history integra */
     @Column({ type: 'boolean', default: true })
     killOnResponse?: boolean;
 
+    /**[II] da verificare */
     @Column({ type: 'varchar', default: AGENT_TYPE.REACT })
     type?: AGENT_TYPE;
 
@@ -99,7 +102,7 @@ export class AgentRepo {
             referencedColumnName: "id"
         }
     })
-    tools?: Partial<IToolRepo>[]
+    tools?: Partial<ToolRepo>[]
 
 
 
@@ -108,6 +111,3 @@ export class AgentRepo {
     @ManyToMany(() => RoomRepo, room => room.agents)
     rooms?: RoomRepo[]
 }
-
-export interface IAgentRepo extends InstanceType<typeof AgentRepo> {}
-

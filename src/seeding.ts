@@ -5,9 +5,11 @@ import { TOOL_TYPE, ToolRepo } from "./repository/Tool.js";
 import { McpServerRepo } from "./repository/McpServer.js";
 import { LlmRepo } from "./repository/Llm.js";
 import { LLM_MODELS } from "./types/commons/LlmProviders.js";
+import { envInit } from "./types/env.js";
 
 
 
+envInit();
 
 export async function seeding(root: RootService) {
 

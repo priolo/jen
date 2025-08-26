@@ -1,5 +1,6 @@
 import { LlmRepo } from "@/repository/Llm.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
+import { envInit } from "@/types/env.js";
 import { createCohere } from "@ai-sdk/cohere";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
@@ -7,21 +8,27 @@ import { createOllama } from 'ollama-ai-provider-v2';
 
 
 
-export function getModel(llm: LlmRepo) {
+envInit();
 
+export function getModel(llm?: LlmRepo) {
+
+	const name = llm?.name
+	const key = llm?.key
 	let provider = null
-	switch (llm?.name) {
+	
+	switch (name) {
+		default:
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH_PRO:
 		case LLM_MODELS.GOOGLE_GEMINI_2_5_PRO_EXP:
 		case LLM_MODELS.GOOGLE_GEMMA_3_27B:
 			provider = createGoogleGenerativeAI({
-				apiKey: llm.key ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+				apiKey: key ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY,
 			});
 			break;
 		case LLM_MODELS.COHERE_COMMAND_R_PLUS:
 			provider = createCohere({
-				apiKey: llm.key ?? process.env.COHERE_API_KEY,
+				apiKey: key ?? process.env.COHERE_API_KEY,
 			})
 			break
 		case LLM_MODELS.OLLAMA_LLAMA_3_2_3B:
@@ -31,14 +38,14 @@ export function getModel(llm: LlmRepo) {
 			break;
 		case LLM_MODELS.MISTRAL_LARGE:
 			provider = createMistral({
-				apiKey: llm.key ?? process.env.MISTRAL_API_KEY,
+				apiKey: key ?? process.env.MISTRAL_API_KEY,
 			});
 			break;
 	}
 
-
 	let model = null
-	switch (llm?.name) {
+	switch (name) {
+		default:
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
 			model = provider('gemini-2.0-flash')
 			break;

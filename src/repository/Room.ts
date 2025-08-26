@@ -13,7 +13,7 @@ export class RoomRepo {
 
     /** History of prompt conversation */
     @Column({ type: 'json', default: '[]' })
-    history: ChatMessage[];
+    history?: ChatMessage[] = [];
 
     // RELATIONSHIPS
 

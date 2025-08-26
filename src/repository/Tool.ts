@@ -20,7 +20,7 @@ export class ToolRepo {
 
 	/** The type of the tool */
 	@Column({ type: 'varchar', default: TOOL_TYPE.MCP })
-	type: TOOL_TYPE
+	type?: TOOL_TYPE
 
 	/** Il nome del tool (è univoco nello scope di MCP) */
 	@Column({ type: 'varchar', default: '' })
@@ -59,5 +59,3 @@ export class ToolRepo {
 	agents?: AgentRepo[]
 	
 }
-
-export interface IToolRepo extends InstanceType<typeof ToolRepo> {}

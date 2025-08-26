@@ -15,33 +15,35 @@ import McpServerRoute from "./routers/McpServerRoute.js";
 import { McpServerRepo } from "./repository/McpServer.js";
 import tools from "./config_tools.js";
 import { TypeLog } from "@priolo/julian/dist/core/types.js";
+import { envInit } from "./types/env.js";
 
 
 
+envInit();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export const PORT = process.env.PORT || 3000;
 export const WS_PORT = +(process.env.WS_PORT || 3010)
 
-class MyStateClass extends ServiceBase {
-	// definico lo STATE
-	get stateDefault() {
-		return {
-			...super.stateDefault,
-			text: "",
-		}
-	}
-	// le ACTION di questo NODE
-	get executablesMap() {
-		return {
-			...super.executablesMap,
-			["set-text"]: (payload) => {
-				this.setState({ text: payload })
-				return "ok fatto!"
-			}
-		}
-	}
-}
+// class MyStateClass extends ServiceBase {
+// 	// definico lo STATE
+// 	get stateDefault() {
+// 		return {
+// 			...super.stateDefault,
+// 			text: "",
+// 		}
+// 	}
+// 	// le ACTION di questo NODE
+// 	get executablesMap() {
+// 		return {
+// 			...super.executablesMap,
+// 			["set-text"]: (payload) => {
+// 				this.setState({ text: payload })
+// 				return "ok fatto!"
+// 			}
+// 		}
+// 	}
+// }
 
 
 

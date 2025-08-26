@@ -1,16 +1,15 @@
 import { randomUUID } from 'crypto';
+import { AgentRepo } from '../src/repository/Agent.js';
 import { RoomRepo } from '../src/repository/Room.js';
-import IRoomsChats from '../src/routers/IRoomsChats.js';
-import { IAgentRepo } from '../src/repository/Agent.js';
 import { ToolRepo } from '../src/repository/Tool.js';
+import IRoomsChats from '../src/routers/IRoomsChats.js';
 import ChatNode from '../src/services/rooms/ChatNode.js';
-import { LLM_MODELS } from '../src/types/commons/LlmProviders.js';
 
 
 
 describe("Test on CHAT", () => {
 
-	const addTool = <ToolRepo>{
+	const addTool: ToolRepo = {
 		id: "id-tool-1",
 		name: "addition",
 		description: "A simple tool that adds two numbers",
@@ -23,38 +22,31 @@ describe("Test on CHAT", () => {
 			required: ["a", "b"]
 		}
 	}
-	const toolsExe = (id: string, args: any) => ({
-		"id-tool-1": (args: any) => (args.a + args.b).toString()
-	}[id]?.(args) ?? null)
 
-	const agentAdderRepo = <IAgentRepo>{
+	const agentAdderRepo: AgentRepo = {
 		id: "id-1",
 		name: "adder",
-		llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 		description: "Agent who can do additions well",
 		tools: [addTool],
 	}
-	const agentMathRepo = <IAgentRepo>{
+	const agentMathRepo: AgentRepo = {
 		id: "id-2",
 		name: "math",
-		llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 		description: "Agent who deals with mathematics",
 		subAgents: [agentAdderRepo],
 	}
-	const agentLeadRepo = <IAgentRepo>{
+	const agentLeadRepo: AgentRepo = {
 		id: "id-3",
 		name: "lead",
-		llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 		description: "General agent. Never respond directly but use the tools at my disposal to answer questions.",
 		subAgents: [agentMathRepo],
 	}
-	const agentsRepo: IAgentRepo[] = [agentMathRepo, agentAdderRepo, agentLeadRepo]
+	const agentsRepo: AgentRepo[] = [agentMathRepo, agentAdderRepo, agentLeadRepo]
 
-	const nodeSym = <IRoomsChats>{
+	const nodeSym: IRoomsChats = {
 		createRoomRepo: async (agents, parentId) => {
 			return <RoomRepo>{
 				id: randomUUID(),
-				history: [],
 				parentId: parentId,
 				agents: agents || [],
 			}
@@ -63,7 +55,9 @@ describe("Test on CHAT", () => {
 			return agentsRepo.find(agent => agent.id === agentId) || null
 		},
 		executeTool: async (toolId, args) => {
-			return toolsExe(toolId, args)
+			return {
+				"id-tool-1": (args: any) => (args.a + args.b).toString()
+			}[toolId]?.(args) ?? null
 		},
 		sendMessageToClient: (clientAddress, result) => {
 			console.log(`SEND MESSAGE TO: ${clientAddress}`, result)

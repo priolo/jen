@@ -1,5 +1,5 @@
 import { ToolResultPart } from "ai";
-import { AgentRepo, IAgentRepo } from "../src/repository/Agent.js";
+import { AgentRepo } from "../src/repository/Agent.js";
 import { ChatMessage } from "../src/types/commons/RoomActions.js";
 import { ContentAskTo, ContentCompleted, ContentTool, LlmResponse, LLM_RESPONSE_TYPE } from '../src/services/agents/types.js';
 import AgentLlm from '../src/services/agents/AgentLlm.js';
@@ -7,8 +7,8 @@ import { LLM_MODELS } from "../src/types/commons/LlmProviders.js";
 import { randomUUID } from "crypto";
 
 
-describe("Test on AGENT", () => {
 
+describe("Test on AGENT", () => {
 
 	beforeAll(async () => {
 	})
@@ -16,13 +16,15 @@ describe("Test on AGENT", () => {
 	afterAll(async () => {
 	})
 
+
+
 	test("Test semplice domanda", async () => {
 
 		// creo un agente
 		const agentRepo:AgentRepo = {
 			id: "agent-1",
 			name: "generic",
-			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
+			llm: { id: "llm-1", name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
 		}
 		const agent = new AgentLlm(agentRepo)
 
@@ -39,7 +41,7 @@ describe("Test on AGENT", () => {
 
 	test("Test con tool", async () => {
 		// creo un agente
-		const agentRepo = <IAgentRepo>{
+		const agentRepo:AgentRepo = {
 			id: "agent-1",
 			name: "generic",
 			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
@@ -89,24 +91,23 @@ describe("Test on AGENT", () => {
 
 	}, 100000)
 
-
 	test("call subagent", async () => {
 
 		// creo l'agente sub
-		const agentAdder = <IAgentRepo>{
+		const agentAdder:AgentRepo = {
 			id: "agent-2",
-			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
+			llm: { id: "llm-1", name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
 			name: "adder",
 			description: "I'm an agent who can do additions well",
 		}
 		// creo l'agente leader
-		const agentLead = <IAgentRepo>{
+		const agentLead:AgentRepo = {
 			id: "agent-1",
 			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 			name: "lead",
 			subAgents: [agentAdder],
 		}
-		const agents: IAgentRepo[] = [agentAdder, agentLead]
+		const agents: AgentRepo[] = [agentAdder, agentLead]
 
 		const agentLeadExe = new AgentLlm(agentLead)
 		const history: ChatMessage[] = [
