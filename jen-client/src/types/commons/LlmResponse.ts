@@ -1,4 +1,4 @@
-import { ChatMessage } from "./RoomActions";
+
 
 export enum LLM_RESPONSE_TYPE {
 	/** risposta finale */
@@ -21,18 +21,28 @@ export enum LLM_RESPONSE_TYPE {
 
 export interface LlmResponse {
 	type: LLM_RESPONSE_TYPE
-	// la risposta di "vercel-ai" da aggiungere alla history
-	responseRaw: ChatMessage[]
+	// la risposta RAW da aggiungere alla history
+	responseRaw: any[]
 	// se non è la risposta finale
 	continue?: boolean
 
 	// dipende dal type
-	content?: ContentCompleted | ContentAskTo | ContentTool  | ContentStrategy | ContentReasoning
+	content?: ContentCompleted | ContentAskTo | ContentTool  | ContentStrategy | ContentReasoning | ContentFailure
 }
 
 export interface ContentCompleted {
 	answer: string;
 }
+export interface ContentStrategy {
+	strategy: string;
+}
+export interface ContentReasoning {
+	thought: string;
+}
+export interface ContentFailure {
+	reason: string;
+}
+
 
 export interface ContentAskTo {
 	agentId: string
@@ -53,10 +63,3 @@ export interface ContentTool {
 	result?: any
 }
 
-export interface ContentStrategy {
-	strategy: string;
-}
-
-export interface ContentReasoning {
-	thought: string;
-}

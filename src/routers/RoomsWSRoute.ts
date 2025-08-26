@@ -161,8 +161,8 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 			// se il TOOL ha la description e i parameters non c'e' bisogno di caricarli
 			if (!!tool.description && !!tool.parameters) continue
 
-			// se nono di tipo MCP allora li cerco in CACHE o li carico
-			if ( tool.type == TOOL_TYPE.MCP && !!tool.mcpId) {
+			// se è di tipo MCP allora li cerco in CACHE o li carico
+			if ( !!tool.mcpId) {
 
 				// non sono in CACHE allora li carico e li metto in CACHE
 				if (!WSRoomsService.McpCache.has(tool.mcpId)) {

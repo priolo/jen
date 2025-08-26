@@ -2,7 +2,7 @@ import { RoomRepo } from "@/repository/Room.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
 import AgentLlm from "../agents/AgentLlm.js";
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../agents/types.js';
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 
 
 
@@ -28,7 +28,7 @@ class RoomTurnBased {
 	 */
 	public onSubAgent: (agentId: string, question: string) => Promise<any> = null;
 
-	public onLoop: (roomId: string, agentId: string, llmResponse: LlmResponse) => void = null;
+	public onLoop: (roomId: string, agentId: string, chatMessage: ChatMessage) => void = null;
 
 	public addUserMessage(message: string) {
 		const msg: ChatMessage = {
@@ -78,9 +78,10 @@ class RoomTurnBased {
 
 			//this.room.history.push(...response.responseRaw)
 			// [II] fare utils
-			this.room.history.push({ id: randomUUID(), role: "agent", content: response })
+			const chatMessage:ChatMessage = { id: randomUUID(), role: "agent", content: response }
+			this.room.history.push(chatMessage)
 
-			this.onLoop?.(this.room.id, agent.agent.id, response)
+			this.onLoop?.(this.room.id, agent.agent.id, chatMessage)
 
 		} while (response.continue)
 

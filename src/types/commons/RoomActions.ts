@@ -1,4 +1,4 @@
-import { LlmResponse } from "@/services/agents/types.js";
+import { LlmResponse } from "./LlmResponse.js";
 
 
 /**
@@ -89,7 +89,7 @@ export type AgentMessageS2C = BaseS2C & {
 	roomId: string
 	/** se il messaggio è stato inserito da un agente, contiene l'id dell'agente */
 	agentId?: string 
-	content: LlmResponse
+	content: ChatMessage
 }
 
 /** un USER ha risposto */

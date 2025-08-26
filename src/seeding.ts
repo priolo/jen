@@ -103,7 +103,7 @@ export async function seeding(root: RootService) {
 				contextPrompt: "",
 				askInformation: true,
 				killOnResponse: true,
-				llmId: llms[0].id,
+				//llmId: llms[0].id,
 				tools: [
 					{ id: tools[0].id }, { id: tools[1].id },
 				],
@@ -122,7 +122,7 @@ export async function seeding(root: RootService) {
 				contextPrompt: "",
 				askInformation: true,
 				killOnResponse: false,
-				llm: llms[0],
+				//llm: llms[0],
 				subAgents: [
 					{ id: agentMath.id },
 				]

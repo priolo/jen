@@ -1,8 +1,8 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import IRoomsChats from "@/routers/IRoomsChats.js";
-import { AgentMessageS2C, BaseS2C, CHAT_ACTION_S2C, NewRoomS2C, UserEnteredS2C, UserMessageS2C } from "@/types/commons/RoomActions.js";
-import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../agents/types.js';
+import { AgentMessageS2C, BaseS2C, CHAT_ACTION_S2C, ChatMessage, NewRoomS2C, UserEnteredS2C, UserMessageS2C } from "@/types/commons/RoomActions.js";
+import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 
 
@@ -132,14 +132,14 @@ class ChatNode {
 			if (llmResponse.type != LLM_RESPONSE_TYPE.COMPLETED) return null
 			return (<ContentCompleted>llmResponse.content).answer
 		}
-		room.onLoop = (roomId: string, agentId: string, response: LlmResponse) => {
+		room.onLoop = (roomId: string, agentId: string, chatMessage: ChatMessage) => {
 			// INVIO
 			const msgToClient: AgentMessageS2C = {
 				action: CHAT_ACTION_S2C.AGENT_MESSAGE,
 				chatId: this.id,
 				agentId: agentId,
 				roomId: roomId,
-				content: response,
+				content: chatMessage,
 			}
 			this.sendMessageToClients(msgToClient)
 			// ---

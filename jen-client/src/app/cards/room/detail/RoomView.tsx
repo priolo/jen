@@ -65,10 +65,10 @@ const RoomView: FunctionComponent<Props> = ({
 
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
-			{history.map((msg) => (
+			{history.map((chatMessage) => (
 				<MessageCmp
-					key={msg.id}
-					message={msg}
+					key={chatMessage.id}
+					message={chatMessage}
 				/>
 			))}
 		</div>

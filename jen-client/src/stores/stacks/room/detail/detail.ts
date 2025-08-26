@@ -1,7 +1,7 @@
 import { wsConnection } from "@/plugins/session"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { Room } from "@/types/Room"
-import { AgentMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S, UserMessageS2C } from "@/types/commons/RoomActions"
+import { AgentMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S, UserMessageS2C } from "@/types/commons/RoomActions.js"
 import { VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../../editorBase"
@@ -105,6 +105,7 @@ What is 2+2? Just write the answer number.`,
 
 				case CHAT_ACTION_S2C.USER_MESSAGE: {
 					const msg: UserMessageS2C = message as UserMessageS2C
+					console.log("USER_MESSAGE", msg)
 					// assumo che l'user puo' comunicare solo nella ROOT-ROOM
 					if (!!store.state.room?.parentRoomId) return
 					if (!store.state.room.history) store.state.room.history = []
@@ -117,7 +118,7 @@ What is 2+2? Just write the answer number.`,
 					const msg: AgentMessageS2C = message as AgentMessageS2C
 					if (store.state.room?.id != msg.roomId) return
 					if (!store.state.room.history) store.state.room.history = []
-					store.state.room.history.push(...msg.content.responseRaw)
+					store.state.room.history.push(msg.content)
 					store.setRoom({ ...store.state.room })
 					break
 				}

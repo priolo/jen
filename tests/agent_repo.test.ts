@@ -17,7 +17,7 @@ describe("Test on AGENT router", () => {
 			withCredentials: true
 		})
 
-		const cnf = buildNodeConfig(true)
+		const cnf = buildNodeConfig(true, true)
 		root = await RootService.Start(cnf)
 		const http = root.nodeByPath("/http") as http.Service
 		const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes

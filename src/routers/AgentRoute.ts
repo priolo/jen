@@ -1,6 +1,7 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
+import path from "path";
 
 
 
@@ -14,7 +15,10 @@ class AgentRoute extends httpRouter.Service {
 				relations: ["tools", "subAgents", "llm"],
 				select: {
 					subAgents: { id: true, name: true, description: true },
-					tools: { id: true, name: true, description: true, parameters: true, mcpId: true },
+					tools: { 
+						id: true, type: true, name: true, description: true, 
+						parameters: true, mcpId: true, code: true, pathNode: true 
+					},
 					llm: { id: true, name: true, key: true }
 				}
 			}

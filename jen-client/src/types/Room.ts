@@ -1,6 +1,6 @@
 import { Agent } from "./Agent";
 import { Uuid } from "./global";
-import { ChatMessage } from "./commons/RoomActions";
+import { ChatMessage } from "./commons/RoomActions.js";
 
 
 

@@ -1,6 +1,7 @@
-import { ChatMessage } from "@/types/commons/RoomActions"
+import { ChatMessage } from "@/types/commons/RoomActions.js"
 import { FunctionComponent } from "react"
 import cls from "./MessageCmp.module.css"
+import { ContentAskTo, ContentCompleted, ContentReasoning, ContentStrategy, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse"
 
 interface MessageProps {
 	message: ChatMessage
@@ -10,36 +11,23 @@ const MessageCmp: FunctionComponent<MessageProps> = ({
 	message,
 }) => {
 
-	const content = !!message
-		? (Array.isArray(message?.content) ? message.content : [message.content])
-		: []
+	const response = (message.content as LlmResponse)
+	if (!(response?.content)) return null
 
 	return (
 		<div className={cls.historyItem}>
 			<div className={cls.historyRole}>{message.role}</div>
 			<div style={{ display: "flex", flexDirection: "column" }}>
-				{content.map((item, index) => {
-
-					const type = typeof item == "string" ? "string" : item.type
-
-					return {
-						"string": <div key={index} className={cls.historyText}>{item}</div>,
-						"tool-call": (
-							<div key={index} style={{ display: "flex", flexDirection: "column" }}>
-								{message.subroomId && (
-									<div className={cls.historyText}>Subroom: {message.subroomId}</div>
-								)}
-								<div key={item.toolCallId} className={cls.historyText}>Tool Call: {item.toolName}</div>
-								{Object.entries(item?.args ?? {}).map(([key, value]: [string, string]) => (
-									<div key={key} className={cls.historyText}>{key}: {value}</div>
-								))}
-							</div>
-						),
-						"tool-result": <div key={index} style={{ display: "flex", flexDirection: "column" }}>
-							<div key={item.toolCallId} className={cls.historyText}>Tool Result: {item.result}</div>,
-						</div>,
-					}[type]
-				})}
+				<div>{response.type}</div>
+				{{
+					[LLM_RESPONSE_TYPE.ASK_TO]: <div className={cls.historyText}>{(response.content as ContentAskTo)?.question}</div>,
+					[LLM_RESPONSE_TYPE.TOOL]: <div className={cls.historyText}>
+						{JSON.stringify((response.content as ContentTool)?.result)}
+					</div>,
+					[LLM_RESPONSE_TYPE.COMPLETED]: <div className={cls.historyText}>{(response.content as ContentCompleted)?.answer}</div>,
+					[LLM_RESPONSE_TYPE.STRATEGY]: <div className={cls.historyText}>{(response.content as ContentStrategy)?.strategy}</div>,
+					[LLM_RESPONSE_TYPE.REASONING]: <div className={cls.historyText}>{(response.content as ContentReasoning)?.thought}</div>,
+				}[response.type] ?? null}
 			</div>
 		</div>
 	)

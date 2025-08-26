@@ -1,7 +1,7 @@
 import { AgentRepo } from '@/repository/Agent.js';
 import { ChatMessage } from '@/types/commons/RoomActions.js';
 import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet, UserModelMessage } from "ai";
-import { LLM_RESPONSE_TYPE, LlmResponse } from './types.js';
+import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import { colorPrint, ColorType } from './utils/index.js';
 import { getModel } from './utils/models.js';
 import { time } from '@priolo/jon-utils';

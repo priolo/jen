@@ -3,6 +3,12 @@ import { Tool } from "./Tool"
 
 
 
+export enum AGENT_TYPE {
+    REACT = 'react',
+    HUMAN = 'human',
+    FINDER = 'finder'
+}
+
 export interface Agent {
 	id: Uuid
 	name: string
@@ -23,6 +29,8 @@ export interface Agent {
 	 * La history è preservata anche per le successive domande
 	*/
 	killOnResponse: boolean
+
+	type?: AGENT_TYPE
 
 	/** LLM che utilizza per le risposte */
 	//llm?: Llm
