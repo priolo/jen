@@ -1,9 +1,8 @@
 import { google } from '@ai-sdk/google';
-import dotenv from 'dotenv';
-import { ChapterStruct } from "./types.js";
-import { generateObject, generateText } from 'ai';
+import { generateObject } from 'ai';
 import { z } from 'zod'; // Added Zod import
-dotenv.config();
+import { ChapterStruct } from "./types.js";
+
 
 const blockDef = "block of text"
 const blockDef2 = "blocks of text"

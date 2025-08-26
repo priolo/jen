@@ -7,3 +7,6 @@ src/examples/
 db/
 
 .env
+.env.test
+.env.production
+.env.development

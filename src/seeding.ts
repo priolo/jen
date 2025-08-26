@@ -16,8 +16,8 @@ export async function seeding(root: RootService) {
 		type: typeorm.RepoStructActions.SEED,
 		payload: <LlmRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{ name: LLM_MODELS.MISTRAL_LARGE, key: "xMeTHawOQXOnfb5awoAyBx5mXqeIDnQ7" },
-			{ name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: "AIzaSyBGaDP1hcY9uKuuRDGCxV_7OEqnCO8gVwM" },
+			{ name: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY },
+			{ name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY },
 		]
 	});
 

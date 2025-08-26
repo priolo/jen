@@ -4,6 +4,7 @@ import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet, 
 import { LLM_RESPONSE_TYPE, LlmResponse } from './types.js';
 import { colorPrint, ColorType } from './utils/index.js';
 import { getModel } from './utils/models.js';
+import { time } from '@priolo/jon-utils';
 
 
 
@@ -67,6 +68,8 @@ class AgentLlm {
 				},
 			}
 		}
+
+		await time.delay(500) // per evitare problemi di rate limit
 
 		// ricavo il messaggio di risposta
 		const messages = r.response.messages

@@ -1,13 +1,11 @@
 import { RootService } from "@priolo/julian";
-import dotenv from "dotenv";
 import buildNodeConfig from "./config.js";
-import { ENV_TYPE } from "./types/env.js";
+import { ENV_TYPE, envInit } from "./types/env.js";
 import { seeding } from "./seeding.js";
 
 
 
-const envFile = `.env.${process.env.NODE_ENV}`;
-dotenv.config({ path: envFile });
+envInit();
 
 (async () => {
 

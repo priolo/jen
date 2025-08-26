@@ -5,10 +5,6 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
 import { createOllama } from 'ollama-ai-provider-v2';
 
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 
 
 export function getModel(llm: LlmRepo) {

@@ -5,15 +5,12 @@ import { cohere, createCohere } from '@ai-sdk/cohere';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createMistral } from '@ai-sdk/mistral';
 import { generateText, jsonSchema, tool, ToolResultPart, ToolSet } from "ai";
-import dotenv from 'dotenv';
 import { LLM_RESPONSE_TYPE, LlmResponse } from './types.js';
 import { colorPrint, ColorType } from './utils/index.js';
 // Uncomment and add these imports as needed:
 // import { createOpenAI } from '@ai-sdk/openai';
 // import { createAnthropic } from '@ai-sdk/anthropic';
 // import { createCohere } from '@ai-sdk/cohere';
-
-dotenv.config();
 
 
 

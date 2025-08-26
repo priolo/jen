@@ -1,6 +1,6 @@
 {
   "name": "jen",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Agents Framework",
   "private": true,
   "author": "Iorio Ivano <iorioivano@gmail.com>",
@@ -9,7 +9,6 @@
   "main": "dist/start.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production tsx src/start.ts",
-    "start2": "tsx src/start2.ts",
     "start:dev": "cross-env NODE_ENV=development tsx src/start.ts",
     "test": "node --experimental-vm-modules --inspect-brk ./node_modules/jest/bin/jest.js"
   },
