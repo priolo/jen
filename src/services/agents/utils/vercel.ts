@@ -1,21 +1,26 @@
 import { LlmRepo } from "@/repository/Llm.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
+import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { envInit } from "@/types/env.js";
 import { createCohere } from "@ai-sdk/cohere";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
+import { ModelMessage, UserModelMessage } from "ai";
 import { createOllama } from 'ollama-ai-provider-v2';
 
 
 
 envInit();
 
+/**
+ * Istanzio un MODELLO LLM in base alla configurazione
+ */
 export function getModel(llm?: LlmRepo) {
 
 	const name = llm?.name
 	const key = llm?.key
 	let provider = null
-	
+
 	switch (name) {
 		default:
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
@@ -69,4 +74,17 @@ export function getModel(llm?: LlmRepo) {
 			break
 	}
 	return model
+}
+
+/**
+ * Trasformo una HISTORY di tipo ChatMessage in una per VERCEL/AI
+ */
+export function getHistory(history: ChatMessage[]): ModelMessage[] {
+	const vercelHistory: ModelMessage[] = history.flatMap((message: ChatMessage) => {
+		if ((typeof message.content) == "string") {
+			return { role: message.role, content: message.content } as UserModelMessage
+		}
+		return message.content.responseRaw as ModelMessage[]
+	})
+	return vercelHistory
 }

@@ -1,7 +1,7 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import IRoomsChats from "@/routers/IRoomsChats.js";
-import { AgentMessageS2C, BaseS2C, CHAT_ACTION_S2C, ChatMessage, NewRoomS2C, UserEnteredS2C, UserMessageS2C } from "@/types/commons/RoomActions.js";
+import { AgentMessageS2C, BaseS2C, CHAT_ACTION_S2C, ChatMessage, NewRoomS2C, UserEnteredS2C } from "@/types/commons/RoomActions.js";
 import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 
@@ -80,9 +80,11 @@ class ChatNode {
 		room.addUserMessage(question)
 
 		// INVIO
-		const msgToClient: UserMessageS2C = {
-			action: CHAT_ACTION_S2C.USER_MESSAGE,
+		const msgToClient: AgentMessageS2C = {
+			action: CHAT_ACTION_S2C.AGENT_MESSAGE,
 			chatId: this.id,
+			roomId: room.room.id,
+			agentId: clientId,
 			content: { role: "user", content: question },
 		}
 		this.sendMessageToClients(msgToClient)
@@ -144,7 +146,11 @@ class ChatNode {
 			this.sendMessageToClients(msgToClient)
 			// ---
 		}
-		if (!!question) room.addUserMessage(question)
+		if (!!question) {
+			// [II] bisogna inviare anche il messaggio al client
+			// ma al momento il messaggio USER è inviato solo alla ROOT-ROOM
+			room.addUserMessage(question)
+		}
 
 		return await room.getResponse()
 	}

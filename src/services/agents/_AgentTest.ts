@@ -2,7 +2,7 @@ import { ChatMessage } from '@/types/commons/RoomActions.js';
 import { google } from '@ai-sdk/google';
 import { generateText, jsonSchema, tool, ToolSet } from "ai";
 import { z } from "zod";
-import { colorPrint, ColorType } from './utils/index.js';
+import { colorPrint, ColorType } from '../../utils/index.js';
 
 
 export enum RESPONSE_TYPE {

@@ -3,6 +3,9 @@ import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
 import AgentLlm from "../agents/AgentLlm.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
+import { printLlmResponse } from "../agents/utils/print.js";
+import { AGENT_TYPE } from "@/repository/Agent.js";
+import AgentMock from "../agents/AgentMock.js";
 
 
 
@@ -45,10 +48,12 @@ class RoomTurnBased {
 	 */
 	public async getResponse(): Promise<LlmResponse> {
 		// [II] per il momento suppongo che ci sia un solo AGENT
-		const agent = new AgentLlm(this.room.agents?.[0])
+		const agentRepo = this.room.agents?.[0]
+		const agent = agentRepo.type == AGENT_TYPE.MOCK ? new AgentMock(agentRepo) : new AgentLlm(agentRepo)
 		let response: LlmResponse;
 		do {
 			response = await agent.ask(this.room.history)
+			printLlmResponse(agent.agent.name, response)
 
 			if (response.type === LLM_RESPONSE_TYPE.TOOL) {
 				const content = <ContentTool>response.content

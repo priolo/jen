@@ -7,6 +7,7 @@ import { ToolRepo } from './Tool.js';
 
 export enum AGENT_TYPE {
     REACT = 'react',
+    MOCK = 'mock',
     HUMAN = 'human',
     FINDER = 'finder'
 }

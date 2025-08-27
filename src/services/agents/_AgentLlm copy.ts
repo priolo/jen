@@ -6,7 +6,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createMistral } from '@ai-sdk/mistral';
 import { generateText, jsonSchema, tool, ToolResultPart, ToolSet } from "ai";
 import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
-import { colorPrint, ColorType } from './utils/index.js';
+import { colorPrint, ColorType } from '../../utils/index.js';
 // Uncomment and add these imports as needed:
 // import { createOpenAI } from '@ai-sdk/openai';
 // import { createAnthropic } from '@ai-sdk/anthropic';

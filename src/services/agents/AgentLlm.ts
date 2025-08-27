@@ -1,10 +1,9 @@
 import { AgentRepo } from '@/repository/Agent.js';
 import { ChatMessage } from '@/types/commons/RoomActions.js';
-import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet, UserModelMessage } from "ai";
-import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
-import { colorPrint, ColorType } from './utils/index.js';
-import { getModel } from './utils/models.js';
 import { time } from '@priolo/jon-utils';
+import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet } from "ai";
+import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
+import { getHistory, getModel } from './utils/vercel.js';
 
 
 
@@ -35,13 +34,7 @@ class AgentLlm {
 
 
 		// TRANSFORM TO VERCEL HISTORY
-		const vercelHistory: ModelMessage[] = history.flatMap((message:ChatMessage) => {
-			if ( (typeof message.content) == "string" ) {
-				return { role: message.role, content: message.content } as UserModelMessage
-			}
-			return message.content.responseRaw as ModelMessage[]
-		})
-
+		const vercelHistory: ModelMessage[] = getHistory(history)
 
 		// LLM GENERATE
 		let r: Awaited<ReturnType<typeof generateText>>
@@ -58,7 +51,6 @@ class AgentLlm {
 				//stopWhen: ({ steps }) => steps.length >= 1, // Updated from maxSteps: 1
 			})
 		} catch (err) {
-			console.error("LLM ERROR:", err)
 			return <LlmResponse>{
 				responseRaw: null,
 				type: LLM_RESPONSE_TYPE.FAILURE,
@@ -77,10 +69,6 @@ class AgentLlm {
 
 		// NON E' UN TOOL situazione imprevista... continua a ragionare 
 		if (lastMsg.role != "tool") {
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : unknown : ",
-				[JSON.stringify(lastMsg.content), ColorType.Magenta]
-			)
 			return <LlmResponse>{
 				responseRaw: messages,
 				type: LLM_RESPONSE_TYPE.UNKNOWN,
@@ -96,10 +84,6 @@ class AgentLlm {
 
 		// FINAL RESPONSE
 		if (toolName == "final_answer") {
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : final answer: ",
-				[result, ColorType.Green]
-			)
 			return <LlmResponse>{
 				responseRaw: messages,
 				type: LLM_RESPONSE_TYPE.COMPLETED,
@@ -112,17 +96,13 @@ class AgentLlm {
 
 		// COLLECT INFORMATION
 		if (toolName == "ask_for_information") {
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : ask info: ",
-				[result, ColorType.Green]
-			)
 			return <LlmResponse>{
 				type: LLM_RESPONSE_TYPE.ASK_TO,
 				responseRaw: messages,
 				continue: true,
 				content: {
-					question: result,
 					agentId: this.agent.id, // l'agente che ha chiesto l'informazione
+					question: result,
 				},
 			}
 		}
@@ -130,10 +110,6 @@ class AgentLlm {
 		// CALL AGENT
 		if (toolName.startsWith("chat_with_")) {
 			const { question, agentId } = result as { question: string, agentId: string }
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : call sub-agent: ",
-				[agentId, ColorType.Green]
-			)
 			return <LlmResponse>{
 				type: LLM_RESPONSE_TYPE.ASK_TO,
 				responseRaw: messages,
@@ -147,10 +123,6 @@ class AgentLlm {
 
 		// UPDATE STRATEGY
 		if (toolName == "update_strategy") {
-			colorPrint([
-				this.agent.name, ColorType.Blue], " : strategy : ",
-				[JSON.stringify(result), ColorType.Magenta]
-			)
 			return <LlmResponse>{
 				type: LLM_RESPONSE_TYPE.STRATEGY,
 				responseRaw: messages,
@@ -163,10 +135,6 @@ class AgentLlm {
 
 		// REASONING 
 		if (toolName == "get_reasoning") {
-			colorPrint(
-				[this.agent.name, ColorType.Blue], " : reasoning : ",
-				[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
-			)
 			return <LlmResponse>{
 				type: LLM_RESPONSE_TYPE.REASONING,
 				responseRaw: messages,
@@ -178,20 +146,16 @@ class AgentLlm {
 		}
 
 		// E' un TOOL GENERICO
-		colorPrint(
-			[this.agent.name, ColorType.Blue], " : function : ",
-			[toolName, ColorType.Yellow], " : ", [JSON.stringify(result), ColorType.Green]
-		)
 		return <LlmResponse>{
 			type: LLM_RESPONSE_TYPE.TOOL,
 			responseRaw: messages,
 			continue: true,
 			content: {
+				toolName: toolName,
 				toolId: result.id,
 				args: result.args,
 			},
 		}
-
 	}
 
 

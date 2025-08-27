@@ -2,6 +2,7 @@ import { ChatMessage } from "@/types/commons/RoomActions.js"
 import { FunctionComponent } from "react"
 import cls from "./MessageCmp.module.css"
 import { ContentAskTo, ContentCompleted, ContentReasoning, ContentStrategy, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse"
+import { Button } from "@priolo/jack"
 
 interface MessageProps {
 	message: ChatMessage
@@ -20,7 +21,11 @@ const MessageCmp: FunctionComponent<MessageProps> = ({
 			<div style={{ display: "flex", flexDirection: "column" }}>
 				<div>{response.type}</div>
 				{{
-					[LLM_RESPONSE_TYPE.ASK_TO]: <div className={cls.historyText}>{(response.content as ContentAskTo)?.question}</div>,
+					[LLM_RESPONSE_TYPE.ASK_TO]: 
+						<div style={{ display: "flex", flexDirection: "column"}}>
+							<Button>open</Button> 
+							<div>{(response.content as ContentAskTo)?.question}</div>
+						</div>,
 					[LLM_RESPONSE_TYPE.TOOL]: <div className={cls.historyText}>
 						{JSON.stringify((response.content as ContentTool)?.result)}
 					</div>,

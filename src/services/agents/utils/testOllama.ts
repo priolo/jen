@@ -1,6 +1,6 @@
 import { LlmRepo } from "@/repository/Llm.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
-import { getModel } from "@/services/agents/utils/models.js";
+import { getModel } from "@/services/agents/utils/vercel.js";
 import { generateText } from "ai";
 
 /**
