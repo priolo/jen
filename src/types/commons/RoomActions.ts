@@ -7,6 +7,8 @@ import { LlmResponse } from "./LlmResponse.js";
 export type ChatMessage = {
 	/** identificativo del MESSAGE */
 	id?: string;
+	/** identifica di chi è il messaggio. Se null è l'utente principale */
+	authorId?: string
 	/** indica che questo MESSAGE apre una ROOM */
 	subroomId?: string;
 
@@ -47,8 +49,8 @@ export type UserLeaveC2S = BaseC2S & {
 /** un CLIENT inserisce un messaggio */
 export type UserMessageC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.USER_MESSAGE
+	roomId: string
 	text: string
-	complete?: boolean
 }
 
 //#endregion
@@ -61,8 +63,7 @@ export type UserMessageC2S = BaseC2S & {
 export enum CHAT_ACTION_S2C {
 	ENTERED = "entered",
 	LEAVE = "leave",
-	AGENT_MESSAGE = "agent-message",
-	USER_MESSAGE = "user-message",
+	MESSAGE = "message",
 	NEW_ROOM = "new-room",
 }
 
@@ -83,25 +84,18 @@ export type UserLeaveS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.LEAVE
 }
 
-/** un AGENT ha risposto */
-export type AgentMessageS2C = BaseS2C & {
-	action: CHAT_ACTION_S2C.AGENT_MESSAGE
+/** è stato inserito un MESSAGE in ROOM  */
+export type MessageS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.MESSAGE
 	/** la stanza in cui è stato inserito */
 	roomId: string
-	/** se il messaggio è stato inserito da un agente, contiene l'id dell'agente */
-	agentId?: string 
 	/** il conenuto del messaggio */
 	content: ChatMessage
 }
 
-/** un USER ha risposto */
-export type UserMessageS2C = BaseS2C & {
-	action: CHAT_ACTION_S2C.USER_MESSAGE
-	content: ChatMessage
-}
 
 
-/** è stata creara una SUB-ROOM */
+/** è stata creata una SUB-ROOM */
 export type NewRoomS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.NEW_ROOM
 

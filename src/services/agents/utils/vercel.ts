@@ -88,3 +88,19 @@ export function getHistory(history: ChatMessage[]): ModelMessage[] {
 	})
 	return vercelHistory
 }
+
+
+/**
+ * Inserisce un risultato dentro il tool-result di VERCEL/AI 
+ * usato per i TOOL e per gli ASK_TO
+ */
+export function updateVercelToolResponse(responseRaw: any, result: any) {
+	const toolContent = responseRaw
+		.find(r => r.role == "tool")
+		?.content?.find(c => c.type == "tool-result");
+	if (!toolContent) return
+	toolContent.output = {
+		type: (typeof result) == "object" ? "json" : "text",
+		value: result,
+	};
+}

@@ -121,9 +121,8 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) return this.log(`Chat not found: ${msg.chatId}`)
 
-		chat.userMessage(client.remoteAddress, msg.text)
-		if (!msg?.complete) return
-		await chat.complete()
+		chat.addUserMessage(msg.text, client.remoteAddress, msg.roomId)
+		await chat.complete(client.remoteAddress)
 	}
 
 	//#endregion 

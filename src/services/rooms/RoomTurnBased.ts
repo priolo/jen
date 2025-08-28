@@ -6,6 +6,7 @@ import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../..
 import { printLlmResponse } from "../agents/utils/print.js";
 import { AGENT_TYPE } from "@/repository/Agent.js";
 import AgentMock from "../agents/AgentMock.js";
+import { updateVercelToolResponse } from "../agents/utils/vercel.js";
 
 
 
@@ -33,14 +34,28 @@ class RoomTurnBased {
 
 	public onLoop: (roomId: string, agentId: string, chatMessage: ChatMessage) => void = null;
 
-	public addUserMessage(message: string) {
+	public addUserMessage(message: string, authorId?: string): ChatMessage {
 		const msg: ChatMessage = {
 			id: randomUUID(),
+			authorId: authorId,
 			role: "user",
 			content: message,
 		}
 		this.room.history.push(msg)
+		return msg;
 	}
+
+	private addAgentMessage(llmResponse: LlmResponse, authorId: string): ChatMessage {
+		const msg: ChatMessage = {
+			id: randomUUID(),
+			authorId: authorId,
+			role: "agent",
+			content: llmResponse,
+		}
+		this.room.history.push(msg)
+		return msg;
+	}
+
 
 	/**
 	 * Restituiese un LlmResponse dopo aver processato tutti i turni necessari
@@ -59,33 +74,17 @@ class RoomTurnBased {
 				const content = <ContentTool>response.content
 				const result = await this.onTool?.(content.toolId, content.args)
 				content.result = result
-
-				// inserisco il risultato nel RAW "tool-result"
-				// [II] fare utils
-				const toolContent = response.responseRaw.find(r => r.role == "tool")?.content?.find(c => c.type == "tool-result")
-				toolContent.result = result;
-				if (toolContent) {
-					toolContent.output = {
-						type: (typeof result) == "object" ? "json" : "text",
-						value: result,
-					}
-				}
+				updateVercelToolResponse(response.responseRaw, result)
 			}
 
 			if (response.type === LLM_RESPONSE_TYPE.ASK_TO) {
 				const content = <ContentAskTo>response.content
 				const result = await this.onSubAgent?.(content.agentId, content.question)
 				content.result = result
-				// inserisco il risultato nel RAW "tool-result"
-				const toolContent = response.responseRaw.find(r => r.role == "tool")?.content?.find(c => c.type == "tool-result")
-				toolContent.result = result;
+				updateVercelToolResponse(response.responseRaw, result)
 			}
 
-			//this.room.history.push(...response.responseRaw)
-			// [II] fare utils
-			const chatMessage:ChatMessage = { id: randomUUID(), role: "agent", content: response }
-			this.room.history.push(chatMessage)
-
+			const chatMessage = this.addAgentMessage(response, agent.agent.id)
 			this.onLoop?.(this.room.id, agent.agent.id, chatMessage)
 
 		} while (response.continue)
@@ -96,3 +95,4 @@ class RoomTurnBased {
 }
 
 export default RoomTurnBased
+

@@ -25,6 +25,7 @@ export enum CHAT_ACTION_C2S {
 	ENTER = "enter",
 	LEAVE = "leave",
 	USER_MESSAGE = "user-message",
+	LOOK_ROOM = "look-room",
 }
 
 export type BaseC2S = {
@@ -86,9 +87,11 @@ export type UserLeaveS2C = BaseS2C & {
 /** un AGENT ha risposto */
 export type AgentMessageS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.AGENT_MESSAGE
+	/** la stanza in cui è stato inserito */
 	roomId: string
 	/** se il messaggio è stato inserito da un agente, contiene l'id dell'agente */
 	agentId?: string 
+	/** il conenuto del messaggio */
 	content: ChatMessage
 }
 

@@ -45,7 +45,7 @@ describe("Test on AGENT router", () => {
 			subAgents: [],
 			tools: []
 		}
-		const res1 = await axiosIstance.post(`/api/agents`, agentData)
+		const res1 = await axiosIstance.post(`/api/agents`, { agent: agentData })
 		expect(res1.status).toBe(200)
 		const agent1 = res1.data
 		expect(agent1).toHaveProperty("id")
@@ -61,7 +61,7 @@ describe("Test on AGENT router", () => {
 			subAgents: [{ id: agent1.id }],
 			tools: []
 		}
-		const res2 = await axiosIstance.post(`/api/agents`, agentData)
+		const res2 = await axiosIstance.post(`/api/agents`, { agent: agentData })
 		expect(res2.status).toBe(200)
 		const agent2 = res2.data
 		expect(agent2).toHaveProperty("id")
@@ -99,7 +99,7 @@ describe("Test on AGENT router", () => {
 
 	}, 100000)
 
-	
+
 
 	// test("Creo un mcp con un tool lo assegno ad un agente e mando un prompt", async () => {
 
@@ -142,7 +142,7 @@ describe("Test on AGENT router", () => {
 
 
 	// 	// 4. Create a room
-		
+
 
 
 	// 	// 4. Call a prompt

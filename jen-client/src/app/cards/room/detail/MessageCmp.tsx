@@ -12,6 +12,15 @@ const MessageCmp: FunctionComponent<MessageProps> = ({
 	message,
 }) => {
 
+
+	// HANDLER
+	const handleOpenSubroom = () => {
+		if (message.subroomId) {
+			window.open(`/room/${message.subroomId}`, "_blank")
+		}
+	}
+
+	// RENDER
 	const response = (message.content as LlmResponse)
 	if (!(response?.content)) return null
 
@@ -23,7 +32,7 @@ const MessageCmp: FunctionComponent<MessageProps> = ({
 				{{
 					[LLM_RESPONSE_TYPE.ASK_TO]: 
 						<div style={{ display: "flex", flexDirection: "column"}}>
-							<Button>open</Button> 
+							<Button onClick={handleOpenSubroom}>open</Button> 
 							<div>{(response.content as ContentAskTo)?.question}</div>
 						</div>,
 					[LLM_RESPONSE_TYPE.TOOL]: <div className={cls.historyText}>

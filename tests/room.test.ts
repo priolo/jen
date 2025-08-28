@@ -1,7 +1,7 @@
 import { AgentRepo } from "../src/repository/Agent.js";
 import { RoomRepo } from "../src/repository/Room.js";
 import { TOOL_TYPE, ToolRepo } from "../src/repository/Tool.js";
-import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../src/services/agents/types.js';
+import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../src/types/commons/LlmResponse.js';
 import RoomTurnBased from '../src/services/rooms/RoomTurnBased.js';
 
 

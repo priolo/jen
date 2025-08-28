@@ -1,10 +1,11 @@
 import { ToolResultPart } from "ai";
 import { AgentRepo } from "../src/repository/Agent.js";
 import { ChatMessage } from "../src/types/commons/RoomActions.js";
-import { ContentAskTo, ContentCompleted, ContentTool, LlmResponse, LLM_RESPONSE_TYPE } from '../src/services/agents/types.js';
 import AgentLlm from '../src/services/agents/AgentLlm.js';
-import { LLM_MODELS } from "../src/types/commons/LlmProviders.js";
 import { randomUUID } from "crypto";
+import { ContentAskTo, ContentCompleted, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../src/types/commons/LlmResponse.js";
+import { LLM_MODELS } from "../src/types/commons/LlmProviders.js";
+import { updateVercelToolResponse } from "../src/services/rooms/RoomTurnBased.js";
 
 
 
@@ -114,6 +115,7 @@ describe("Test on AGENT", () => {
 			{ role: "user", content: "How much is 2+2? Just write the result." },
 		]
 		let response: LlmResponse
+
 		// ciclo leader
 		do {
 			response = await agentLeadExe.ask(history)
@@ -134,15 +136,12 @@ describe("Test on AGENT", () => {
 
 				} while (respSub.continue);
 				// ---
-
-				const lastMsg = history[history.length - 1];
-				//(<ToolResultPart>lastMsg.content[0]).result = (<ContentCompleted>respSub.content).answer;
-
+				
+				updateVercelToolResponse(response.responseRaw, (<ContentCompleted>respSub.content).answer)
 			}
 
-			//await new Promise(resolve => setTimeout(resolve, 5000)) // wait 1 second
-
 		} while (response.continue)
+		// ---
 
 		expect(response.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect((<ContentCompleted>response.content).answer).toBe("4")

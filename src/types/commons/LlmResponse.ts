@@ -1,21 +1,21 @@
 
 
 export enum LLM_RESPONSE_TYPE {
-	/** risposta finale */
+	/** 0 risposta finale */
 	COMPLETED,
-	/** continua a ragionare */
+	/** 1 continua a ragionare */
 	UNKNOWN,
-	/** non sa rispondere */
+	/** 2 non sa rispondere */
 	FAILURE,
 
-	/** chiamata ad un tool */
+	/** 3 chiamata ad un tool */
 	TOOL,
-	/** richiesta di nuove informazioni ad un agente*/
+	/** 4 richiesta di nuove informazioni ad un agente*/
 	ASK_TO,
 
-	/** aggiorna la strategia da seguire */
+	/** 5 aggiorna la strategia da seguire */
 	STRATEGY,
-	/** continua a ragionare (loop) */
+	/** 6 continua a ragionare (loop) */
 	REASONING
 }
 
