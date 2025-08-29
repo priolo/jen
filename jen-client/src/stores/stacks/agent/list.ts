@@ -4,7 +4,7 @@ import { mixStores } from "@priolo/jon"
 import { AgentDetailStore } from "./detail.js"
 import { buildAgentDetail, buildAgentDetailNew } from "./factory.js"
 import agentSo from "./repo.js"
-import { Agent } from "@/types/Agent"
+import { AgentLlm } from "@/types/Agent"
 
 
 
@@ -78,7 +78,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Agent[]) => ({ all }),
+		setAll: (all: AgentLlm[]) => ({ all }),
 	},
 }
 

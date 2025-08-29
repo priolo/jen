@@ -1,7 +1,7 @@
 import agentApi from "@/api/agent"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { EDIT_STATE } from "@/types"
-import { Agent } from "@/types/Agent"
+import { AgentLlm } from "@/types/Agent"
 import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../editorBase"
@@ -15,7 +15,7 @@ const setup = {
 
 	state: {
 
-		agent: <Partial<Agent>>null,
+		agent: <Partial<AgentLlm>>null,
 		editState: EDIT_STATE.READ,
 
 		/** indica che la dialog TOOLS è aperto */
@@ -99,7 +99,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAgent: (agent: Partial<Agent>) => ({ agent }),
+		setAgent: (agent: Partial<AgentLlm>) => ({ agent }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),
 		setLlmDialogOpen: (llmDialogOpen: boolean) => ({ llmDialogOpen }),

@@ -2,7 +2,7 @@ import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
 import agentSo from "@/stores/stacks/agent/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
-import { Agent } from "@/types/Agent"
+import { AgentLlm } from "@/types/Agent"
 import { FloatButton, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
@@ -42,7 +42,7 @@ const RoomView: FunctionComponent<Props> = ({
 	// RENDER
 	const history = store.state.room?.history ?? []
 	const agents = agentSo.state.all ?? []
-	const agentSelected = agentSo.state.all.find((a: Agent) => a.id === store.state.room?.agentId)
+	const agentSelected = agentSo.state.all.find((a: AgentLlm) => a.id === store.state.room?.agentId)
 	const selectedAgentId = store.state.room?.agentId
 
 	return <FrameworkCard

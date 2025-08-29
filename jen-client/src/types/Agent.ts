@@ -9,12 +9,24 @@ export enum AGENT_TYPE {
     FINDER = 'finder'
 }
 
-export interface Agent {
+export interface AgentBase {
+	/** identificativo */
 	id: Uuid
+	/** nome non univoco */
 	name: string
-
 	/** utilizzato per la descrizione all'interno dei TOOL */
 	description: string
+	/** tipo di AGENT */
+	type?: AGENT_TYPE
+}
+
+export interface AgentHuman extends AgentBase {
+	type: AGENT_TYPE.HUMAN
+}
+
+
+export interface AgentLlm extends AgentBase {
+	
 	/** prompt di system */
 	systemPrompt: string
 	/** prompt user di descrizione del contesto */
@@ -30,8 +42,6 @@ export interface Agent {
 	*/
 	killOnResponse: boolean
 
-	type?: AGENT_TYPE
-
 	/** LLM che utilizza per le risposte */
 	//llm?: Llm
 	llmId?: string
@@ -40,7 +50,7 @@ export interface Agent {
 	baseId?: string
 
 	/** i SUB-AGENTI che questo AGENT puo' chiamare come tools*/
-	subAgents?: Partial<Agent>[]
+	subAgents?: Partial<AgentLlm>[]
 
 	/** gli strumenti che questo AGENT puo' chiamare come tools */
 	tools: Partial<Tool>[]

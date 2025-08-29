@@ -6,7 +6,7 @@ import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
 import { AgentListStore } from "@/stores/stacks/agent/list"
 import agentSo from "@/stores/stacks/agent/repo"
-import { Agent } from "@/types/Agent"
+import { AgentLlm } from "@/types/Agent"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 
 
@@ -32,14 +32,14 @@ const AgentListView: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleSelect = (agent: Agent) => store.select(agent.id)
+	const handleSelect = (agent: AgentLlm) => store.select(agent.id)
 	const handleNew = () => store.create()
 	const handleDelete = () => store.delete(selectId)
 
 
 	// RENDER
 	const selectId = (store.state.linked as AgentDetailStore)?.state?.agent?.id
-	const isSelected = (agent: Agent) => agent.id == selectId
+	const isSelected = (agent: AgentLlm) => agent.id == selectId
 
 	return <FrameworkCard
 		className={clsCard.root}

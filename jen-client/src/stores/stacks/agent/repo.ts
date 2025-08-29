@@ -1,5 +1,5 @@
 import agentApi from "@/api/agent"
-import { Agent } from "@/types/Agent"
+import { AgentLlm } from "@/types/Agent"
 import { createStore, StoreCore } from "@priolo/jon"
 
 
@@ -7,7 +7,7 @@ import { createStore, StoreCore } from "@priolo/jon"
 const setup = {
 
 	state: {
-		all: <Agent[]>null,
+		all: <AgentLlm[]>null,
 	},
 
 	getters: {
@@ -15,16 +15,16 @@ const setup = {
 			if (!id) return -1
 			return store.state.all?.findIndex(llm => llm.id == id)
 		},
-		getById(id: string, store?: AgentStore): Agent {
+		getById(id: string, store?: AgentStore): AgentLlm {
 			if (!id) return null
 			return store.state.all?.find(llm => llm.id == id) ?? null
 		},
 		/**
 		 * Restituisce tutti i parent di "agentId" fino al primo agente base.
 		 */
-		getAllBaseAgents(agentId: string, store?: AgentStore): Agent[] {
+		getAllBaseAgents(agentId: string, store?: AgentStore): AgentLlm[] {
 			let nextAgent = store.getById(agentId)
-			const agents:Agent[] = []
+			const agents:AgentLlm[] = []
 			do {
 				nextAgent = store.getById(nextAgent?.baseId)
 				if (!nextAgent) break
@@ -54,12 +54,12 @@ const setup = {
 		},
 
 
-		async save(agent: Partial<Agent>, store?: AgentStore): Promise<Agent> {
-			let agentSaved: Agent = null
+		async save(agent: Partial<AgentLlm>, store?: AgentStore): Promise<AgentLlm> {
+			let agentSaved: AgentLlm = null
 			if (!agent.id) {
 				agentSaved = await agentApi.create(agent, { store })
 			} else {
-				agentSaved = await agentApi.update(agent as Agent, { store })
+				agentSaved = await agentApi.update(agent as AgentLlm, { store })
 			}
 
 			const all = [...store.state.all]
@@ -78,7 +78,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Agent[]) => ({ all }),
+		setAll: (all: AgentLlm[]) => ({ all }),
 	},
 }
 

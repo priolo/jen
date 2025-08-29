@@ -4,7 +4,7 @@ import agentSo from "@/stores/stacks/agent/repo"
 import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
 import { EDIT_STATE } from "@/types"
-import { Agent } from "@/types/Agent"
+import { AgentLlm } from "@/types/Agent"
 import { Llm } from "@/types/Llm"
 import { Tool } from "@/types/Tool"
 import { IconToggle, ListDialog2, ListMultiDialog, MarkdownEditor, TextInput, TitleAccordion } from "@priolo/jack"
@@ -60,7 +60,7 @@ const AgentView: FunctionComponent<Props> = ({
 	}
 
 	const handleAgentsSelectChange = (ids: string[]) => {
-		const subAgents: Partial<Agent>[] = ids.map(id => ({ id }))
+		const subAgents: Partial<AgentLlm>[] = ids.map(id => ({ id }))
 		store.setAgent({ ...store.state.agent, subAgents })
 	}
 
@@ -138,8 +138,8 @@ const AgentView: FunctionComponent<Props> = ({
 					select={agentBaseId}
 					items={agents}
 					readOnly={inRead}
-					fnGetId={(item: Agent) => item?.id}
-					fnGetString={(item: Agent) => item?.name}
+					fnGetId={(item: AgentLlm) => item?.id}
+					fnGetString={(item: AgentLlm) => item?.name}
 					onChangeSelect={handleBaseAgentChange}
 				/>
 			</div>
@@ -165,8 +165,8 @@ const AgentView: FunctionComponent<Props> = ({
 					selects={subAgentsSelected}
 					readOnly={inRead}
 					onChangeSelect={handleAgentsSelectChange}
-					fnGetId={(item: Agent) => item.id}
-					fnGetString={(item: Agent) => item.name}
+					fnGetId={(item: AgentLlm) => item.id}
+					fnGetString={(item: AgentLlm) => item.name}
 				/>
 			</div>
 
@@ -201,7 +201,7 @@ const AgentView: FunctionComponent<Props> = ({
 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">DESCRIPTION</div>
-				{baseAgents.map((baseAgent: Agent) => (
+				{baseAgents.map((baseAgent: AgentLlm) => (
 					<div key={baseAgent.id} className="jack-lbl-prop">
 						{baseAgent.name}
 						<MarkdownEditor

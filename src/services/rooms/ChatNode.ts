@@ -18,9 +18,13 @@ class ChatNode {
 		this.node = node;
 	}
 
+	/** identificativo della CHAT */
 	public id: string = crypto.randomUUID();
+	/** il NODE del contesto */
 	private node: IRoomsChats;
+	/** le ROOM aperte in questa CHAT */
 	private rooms: RoomTurnBased[] = []
+	/** tutti i client WS */
 	private clientsIds: Set<string> = new Set();
 
 
@@ -33,7 +37,7 @@ class ChatNode {
 		// inserisco il client
 		this.clientsIds.add(clientId);
 		// creo una nuova room se non esiste
-		let room: RoomTurnBased = this.getRoomById()
+		let room: RoomTurnBased = this.getMainRoom()
 		if (!room) {
 			const roomRepo = await this.node.createRoomRepo()
 			room = new RoomTurnBased(roomRepo)
@@ -72,7 +76,7 @@ class ChatNode {
 	}
 
 	/**
-	 * comunico alla chat che un messaggio di tipo USER è stato inserito in una ROOM
+	 * comunico alla CHAT che un MESSAGE di tipo USER è stato inserito in una ROOM
 	 */
 	addUserMessage(text: string, authorId: string, roomId: string): void {
 		// inserisco il messaggio nella history
@@ -89,9 +93,9 @@ class ChatNode {
 		this.sendMessageToClients(msgToClient)
 	}
 
-	async complete(authorId:string): Promise<LlmResponse> {
-		// assumo che da completare sia sempre la root room
-		let room: RoomTurnBased = this.getRoomById()
+	async complete(authorId: string): Promise<LlmResponse> {
+		// assumo che da completare sia sempre la MAIN-ROOM
+		let room: RoomTurnBased = this.getMainRoom()
 		return await this.recursiveRequest(room, authorId)
 	}
 
@@ -101,7 +105,7 @@ class ChatNode {
 
 
 
-	private async recursiveRequest(room: RoomTurnBased, authorId?:string): Promise<LlmResponse> {
+	private async recursiveRequest(room: RoomTurnBased, authorId?: string): Promise<LlmResponse> {
 
 		room.onTool = async (toolId: string, args: any) => {
 			return this.node.executeTool(toolId, args)
@@ -150,8 +154,11 @@ class ChatNode {
 		return await room.getResponse()
 	}
 
+	private getMainRoom(): RoomTurnBased {
+		return this.rooms.find(room => room.room.parentRoomId == null)
+	}
 	private getRoomById(id?: string): RoomTurnBased {
-		return this.rooms.find(room => room.room.parentRoomId == id)
+		return this.rooms.find(room => room.room.id == id)
 	}
 
 	private sendMessageToClients(message: BaseS2C): void {
