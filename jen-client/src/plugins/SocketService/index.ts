@@ -31,7 +31,7 @@ export class SocketService {
 		this.reconnect.enabled = true
 		try {
 			let url = `${protocol}//${host}:${port}/`
-			if (base) url = `${url}/${base}`
+			if (base) url = `${url}/${base}${this.options.userId ? `?id=${this.options.userId}` : ""}`
 			this.websocket = new WebSocket(url);
 		} catch (error) {
 			this.reconnect.start()

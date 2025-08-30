@@ -30,14 +30,18 @@ class RoomTurnBased {
 	 * Su utilizzo di un sub-agente
 	 * Restituisce il risultato della domanda al sub-agente
 	 */
-	public onSubAgent: (agentId: string, question: string) => Promise<any> = null;
+	public onSubAgent: (requestAgentId:string, responseAgentId: string, question: string) => Promise<any> = null;
 
-	public onLoop: (roomId: string, agentId: string, chatMessage: ChatMessage) => void = null;
+	/**
+	 * Chiamato quando l'AGENT risponde e quindi si completa un ciclo del LOOP di risposte
+	 */
+	public onMessage: ( chatMessage: ChatMessage, roomId: string) => void = null;
 
-	public addUserMessage(message: string, authorId?: string): ChatMessage {
+	
+	public addUserMessage(message: string, clientId?: string): ChatMessage {
 		const msg: ChatMessage = {
 			id: randomUUID(),
-			authorId: authorId,
+			clientId: clientId,
 			role: "user",
 			content: message,
 		}
@@ -45,10 +49,10 @@ class RoomTurnBased {
 		return msg;
 	}
 
-	private addAgentMessage(llmResponse: LlmResponse, authorId: string): ChatMessage {
+	private addAgentMessage(llmResponse: LlmResponse, clientId: string): ChatMessage {
 		const msg: ChatMessage = {
 			id: randomUUID(),
-			authorId: authorId,
+			clientId: clientId,
 			role: "agent",
 			content: llmResponse,
 		}
@@ -63,8 +67,10 @@ class RoomTurnBased {
 	 */
 	public async getResponse(): Promise<LlmResponse> {
 		// [II] per il momento suppongo che ci sia un solo AGENT
+		// ricavo l'AGENT che deve rispondere
 		const agentRepo = this.room.agents?.[0]
 		const agent = agentRepo.type == AGENT_TYPE.MOCK ? new AgentMock(agentRepo) : new AgentLlm(agentRepo)
+
 		let response: LlmResponse;
 		do {
 			response = await agent.ask(this.room.history)
@@ -79,13 +85,13 @@ class RoomTurnBased {
 
 			if (response.type === LLM_RESPONSE_TYPE.ASK_TO) {
 				const content = <ContentAskTo>response.content
-				const result = await this.onSubAgent?.(content.agentId, content.question)
+				const result = await this.onSubAgent?.(agent.agent.id, content.agentId, content.question)
 				content.result = result
 				updateVercelToolResponse(response.responseRaw, result)
 			}
 
 			const chatMessage = this.addAgentMessage(response, agent.agent.id)
-			this.onLoop?.(this.room.id, agent.agent.id, chatMessage)
+			this.onMessage?.(chatMessage, this.room.id )
 
 		} while (response.continue)
 

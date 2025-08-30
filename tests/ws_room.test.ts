@@ -4,8 +4,9 @@ import { WebSocket } from "ws"
 import buildNodeConfig, { PORT, WS_PORT } from "../src/config.js"
 import { AgentRepo } from "../src/repository/Agent.js"
 import { seeding } from "../src/seeding.js"
-import { AgentMessageS2C, BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, NewRoomS2C, UserEnterC2S, UserMessageC2S } from "../src/types/RoomActions.js"
-import { LLM_RESPONSE_TYPE, LlmResponse, ContentCompleted } from "../src/services/agents/types.js"
+import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from "../src/types/commons/LlmResponse.js"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatMessage, MessageS2C, RoomNewS2C, UserCreateEnterC2S, UserEnteredS2C, UserMessageC2S } from "../src/types/commons/RoomActions.js"
+
 
 
 describe("Test on WS ROOT", () => {
@@ -37,14 +38,18 @@ describe("Test on WS ROOT", () => {
 		const agentLeader = allAgents.find(a => a.name == "LEADER")
 		expect(agentLeader).toBeDefined()
 
-		const ws = new WebSocket(`ws://localhost:${WS_PORT}/`)
+		let mainRoomId: string
+		let chatId: string
+
+		const userId = `id-user`
+		const ws = new WebSocket(`ws://localhost:${WS_PORT}?id=${userId}`)
 		const result = await new Promise<string>((res, rej) => {
 
 			// Wait for the WebSocket to open
 			ws.on('open', function open() {
-				// Enter in room
-				ws.send(JSON.stringify(<UserEnterC2S>{
-					action: CHAT_ACTION_C2S.ENTER,
+				// creo e entro nella CHAT (nella MAIN-ROOM)
+				ws.send(JSON.stringify(<UserCreateEnterC2S>{
+					action: CHAT_ACTION_C2S.CREATE_ENTER,
 					agentId: agentLeader?.id
 				}))
 			})
@@ -60,31 +65,37 @@ describe("Test on WS ROOT", () => {
 					// I have entered in a room
 					case CHAT_ACTION_S2C.ENTERED: {
 
+						mainRoomId = (msg as UserEnteredS2C).rooms[0].id
+						chatId = msg.chatId
+
 						// send a prompt to agent
 						const toSend: UserMessageC2S = {
 							action: CHAT_ACTION_C2S.USER_MESSAGE,
-							chatId: msg.chatId,
+							chatId: chatId,
+							// oppure null per indicare la MAIN-ROOM
+							roomId: mainRoomId,
 							text: `Don't answer directly, but use the tools available to you.
 What is 2+2? Just write the answer number.`,
-							complete: true,
 						}
 						ws.send(JSON.stringify(toSend))
 						break
 					}
 
 					// receive a message from agent
-					case CHAT_ACTION_S2C.AGENT_MESSAGE:
-						const agentMsg = msg as AgentMessageS2C
-						const type = (<LlmResponse>agentMsg.content).type
-						if (type == LLM_RESPONSE_TYPE.COMPLETED && agentMsg.agentId == agentLeader?.id) {
-							result = (<ContentCompleted>(<LlmResponse>agentMsg.content).content).answer
+					case CHAT_ACTION_S2C.MESSAGE:
+						const agentWsMsg = msg as MessageS2C
+						const chatMessage: ChatMessage = agentWsMsg.content
+						if (chatMessage.role == "user") break;
+						const llmResponse = <LlmResponse>chatMessage.content
+						if (llmResponse.type == LLM_RESPONSE_TYPE.COMPLETED && chatMessage.clientId == agentLeader?.id) {
+							result = (<ContentCompleted>llmResponse.content).answer
 							ws.close()
 						}
 						break
 
 					// receive a new room created
-					case CHAT_ACTION_S2C.NEW_ROOM:
-						const newRoomMsg = msg as NewRoomS2C
+					case CHAT_ACTION_S2C.ROOM_NEW:
+						const newRoomMsg = msg as RoomNewS2C
 						break
 
 					default:

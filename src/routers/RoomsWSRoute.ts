@@ -2,14 +2,15 @@ import { McpTool } from "@/services/mcp/types.js"
 import { executeMcpTool, getMcpTools } from "@/services/mcp/utils.js"
 import ChatNode from "@/services/rooms/ChatNode.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
+import { TypeLog } from "@priolo/julian/dist/core/types.js"
 import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
-import { BaseC2S, BaseS2C, CHAT_ACTION_C2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
+import { BaseC2S, BaseS2C, CHAT_ACTION_C2S, UserCreateEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
-import McpServerRoute from "./McpServerRoute.js"
 import IRoomsChats from "./IRoomsChats.js"
+import McpServerRoute from "./McpServerRoute.js"
 
 
 
@@ -37,17 +38,9 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 
 	//#region SocketCommunicator
 
-	/**
-	 * Restituisco solo i client di questa chat
-	 */
-	private getClient(clientId: string): ws.IClient | undefined {
-		const clients = this.getClients()
-		return clients.find(c => c.remoteAddress === clientId)
-	}
-
 	async onConnect(client: ws.IClient) {
 		// qua posso mettere tutti i dati utili al client
-		console.log(`Client connected: ${client.remoteAddress}`)
+		console.log(`Client connected:`, client.params.id)
 		super.onConnect(client)
 	}
 
@@ -81,8 +74,8 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 		const msg = JSON.parse(message) as BaseC2S
 
 		switch (msg.action) {
-			case CHAT_ACTION_C2S.ENTER:
-				await this.handleEnter(client, msg as UserEnterC2S)
+			case CHAT_ACTION_C2S.CREATE_ENTER:
+				await this.handleEnter(client, msg as UserCreateEnterC2S)
 				break
 			case CHAT_ACTION_C2S.LEAVE:
 				this.handleLeave(client, msg as UserLeaveC2S)
@@ -101,28 +94,29 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 	/**
 	 * Handle client entering in a chat
 	 */
-	private async handleEnter(client: ws.IClient, msg: UserEnterC2S) {
+	private async handleEnter(client: ws.IClient, msg: UserCreateEnterC2S) {
 		const chat = new ChatNode(this)
+		await chat.init(msg.agentId)
 		this.chats.push(chat)
-		await chat.enterClient(client.remoteAddress, msg.agentId)
+		await chat.enterClient(client.params.id)
 	}
 
 	private handleLeave(client: ws.IClient, msg: UserLeaveC2S) {
 		const chat = this.getChatById(msg.chatId)
-		if (!chat) return this.log(`Chat not found: ${msg.chatId}`)
+		if (!chat) return this.log("CHAT", `not found: ${msg.chatId}`, TypeLog.ERROR)
 
-		const isVoid = chat.removeClient(client.remoteAddress)
+		const isVoid = chat.removeClient(client.params.id)
 		if (isVoid) this.removeChat(chat.id)
 
-		this.log(`Client ${client.remoteAddress} left chat ${msg.chatId}`)
+		this.log(`Client ${client.params.id} left chat ${msg.chatId}`)
 	}
 
 	private async handleUserMessage(client: ws.IClient, msg: UserMessageC2S) {
 		const chat = this.getChatById(msg.chatId)
-		if (!chat) return this.log(`Chat not found: ${msg.chatId}`)
+		if (!chat) return this.log("CHAT", `Chat not found: ${msg.chatId}`, TypeLog.ERROR)
 
-		chat.addUserMessage(msg.text, client.remoteAddress, msg.roomId)
-		await chat.complete(client.remoteAddress)
+		chat.addUserMessage(msg.text, client.params.id, msg.roomId)
+		await chat.complete()
 	}
 
 	//#endregion 
@@ -223,8 +217,8 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 	/**
 	 * Invia un messaggio ad un client specifico
 	 */
-	public sendMessageToClient(clientAddress: string, message: BaseS2C) {
-		const client = this.getClient(clientAddress)
+	public sendMessageToClient(clientId: string, message: BaseS2C) {
+		const client = this.getClients()?.find(c => c.params.id == clientId)
 		if (!client) return
 		this.sendToClient(client, JSON.stringify(message))
 	}

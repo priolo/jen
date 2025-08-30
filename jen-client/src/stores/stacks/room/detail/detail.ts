@@ -1,12 +1,11 @@
 import { wsConnection } from "@/plugins/session"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { Room } from "@/types/Room"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, MessageS2C, NewRoomS2C, UserEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S } from "@/types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, MessageS2C, RoomNewS2C, UserCreateEnterC2S, UserEnteredS2C, UserLeaveC2S, UserLeaveS2C, UserMessageC2S } from "@/types/commons/RoomActions.js"
 import { VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { EditorState } from "../../editorBase"
 import { buildRoomDetail } from "../factory"
-import { ROOM_STATE } from "../types"
+import { ChatRoom } from "@/types/commons/RoomActions"
 
 
 
@@ -15,8 +14,7 @@ const setup = {
 	state: {
 
 		chatId: <string>null,
-		room: <Partial<Room>>null,
-		chatState: ROOM_STATE.OFFLINE,
+		room: <Partial<ChatRoom>>null,
 
 		prompt: `Don't answer directly, but use the tools available to you.
 What is 2+2? Just write the answer number.`,
@@ -52,8 +50,8 @@ What is 2+2? Just write the answer number.`,
 			wsConnection.emitter.on("message", roomSo.onMessage)
 			// se NON sono nella ROOT NON invio il messaggio di ENTER
 			if ( !!roomSo.state.room?.parentRoomId ) return
-			const message: UserEnterC2S = {
-				action: CHAT_ACTION_C2S.ENTER,
+			const message: UserCreateEnterC2S = {
+				action: CHAT_ACTION_C2S.CREATE_ENTER,
 				// se è nuova sara' null
 				chatId: roomSo.state.chatId,
 				// nel caso sia una nuova CHAT devo indicare l'agent
@@ -94,7 +92,6 @@ What is 2+2? Just write the answer number.`,
 						history: [],
 						//agentId: msg.agentId ?? store.state.room.agentId,
 					})
-					store.setChatState(ROOM_STATE.ONLINE)
 					break
 				}
 
@@ -113,8 +110,8 @@ What is 2+2? Just write the answer number.`,
 					break
 				}
 
-				case CHAT_ACTION_S2C.NEW_ROOM: {
-					const msg = message as NewRoomS2C
+				case CHAT_ACTION_S2C.ROOM_NEW: {
+					const msg = message as RoomNewS2C
 					const view = buildRoomDetail({
 						chatId: msg.chatId,
 						room: {
@@ -152,8 +149,7 @@ What is 2+2? Just write the answer number.`,
 
 	mutators: {
 		setChatId: (chatId: string) => ({ chatId }),
-		setChatState: (chatState: ROOM_STATE) => ({ chatState }),
-		setRoom: (room: Partial<Room>) => ({ room }),
+		setRoom: (room: Partial<ChatRoom>) => ({ room }),
 		setPrompt: (prompt: string) => ({ prompt }),
 
 		setRoleDialogOpen: (roleDialogOpen: boolean) => ({ roleDialogOpen }),

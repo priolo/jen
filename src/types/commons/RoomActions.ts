@@ -6,17 +6,26 @@ import { LlmResponse } from "./LlmResponse.js";
  */
 export type ChatMessage = {
 	/** identificativo del MESSAGE */
-	id?: string;
+	id: string;
 	/** identifica di chi è il messaggio. Se null è l'utente principale */
-	authorId?: string
-	/** indica che questo MESSAGE apre una ROOM */
-	subroomId?: string;
-
+	clientId?: string
+	/** se valorizzato il MESSAGE è collegato ad una ROOM */
+	subRoomId?: string;
+	/** il ruolo di chi ha scritto il messaggio */
 	role: "user" | "agent" | "system"
-
+	/** il testo del messaggio (oppure la risposta LLM) */
 	content: string | LlmResponse
 }
 
+/**
+ * E' uno spazio dotato di HISTORY dove i CLIENT possono comunicare
+ */
+export type ChatRoom = {
+	id: string
+	parentRoomId?: string
+	history: ChatMessage[]
+	agentsIds: string[]
+}
 
 
 
@@ -24,32 +33,43 @@ export type ChatMessage = {
 //#region CLIENT TO SERVER
 
 export enum CHAT_ACTION_C2S {
-	ENTER = "enter",
+	/* un CLIENT crea e entra in una CHAT */
+	CREATE_ENTER = "create-enter",
+	/* un CLIENT lascia la CHAT */
 	LEAVE = "leave",
+	/* un CLIENT invia un messaggio */
 	USER_MESSAGE = "user-message",
 }
 
 export type BaseC2S = {
+	/** tipo di action */
 	action: CHAT_ACTION_C2S
 	/** Rifrimento alla CHAT */
 	chatId: string
 }
 
-/** un CLIENT entra nella CHAT (sempre nella ROOT-ROOM)*/
-export type UserEnterC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.ENTER
-	agentId?: string
+/** CLIENT crea e entra in una nuova CHAT */
+export type UserCreateEnterC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.CREATE_ENTER
+	// in futuro si potranno creare diversi tipi di CHAT
+	// type: "single-agent" | "free" | "agile" | "document" 
+	/** LLM-AGENT di riferimento */
+	agentId: string
 }
 
-/** un CLIENT lascia la CHAT */
+/** CLIENT lascia la CHAT */
 export type UserLeaveC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.LEAVE
+	/** il client che fa l'azione */
+	clientId: string
 }
 
 /** un CLIENT inserisce un messaggio */
 export type UserMessageC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.USER_MESSAGE
-	roomId: string
+	/** id della ROOM, se null è la MAIN-ROOM */
+	roomId?: string
+	/** il testo del messaggio */
 	text: string
 }
 
@@ -64,7 +84,7 @@ export enum CHAT_ACTION_S2C {
 	ENTERED = "entered",
 	LEAVE = "leave",
 	MESSAGE = "message",
-	NEW_ROOM = "new-room",
+	ROOM_NEW = "room-new",
 }
 
 export type BaseS2C = {
@@ -72,11 +92,10 @@ export type BaseS2C = {
 	chatId: string
 }
 
-/** un CLIENT è entrato nella CHAT */
+/** un CLIENT è entrato in una CHAT */
 export type UserEnteredS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ENTERED
-	roomId: string
-	//agentId: string
+	rooms: ChatRoom[]
 }
 
 /** un CLIENT è uscito dalla CHAT */
@@ -95,13 +114,15 @@ export type MessageS2C = BaseS2C & {
 
 
 
-/** è stata creata una SUB-ROOM */
-export type NewRoomS2C = BaseS2C & {
-	action: CHAT_ACTION_S2C.NEW_ROOM
-
+/** creata una nuova SUB-ROOM */
+export type RoomNewS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.ROOM_NEW
+	/** id nella nuova ROOM */
 	roomId: string
-	parentRoomId?: string
-	agentId?: string
+	/** id della PARENT-ROOM  */
+	parentRoomId: string
+	/** LLM-AGENT di riferimento */
+	agentId: string
 }
 
 //#endregion

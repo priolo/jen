@@ -4,6 +4,7 @@ export interface SocketOptions {
     host?: string
     port?: number
     base?: string
+    userId?: string
 }
 
 export enum SS_EVENT {

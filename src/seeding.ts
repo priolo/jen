@@ -98,8 +98,8 @@ export async function seeding(root: RootService) {
 			{
 				id: "id-agent-math",
 				name: "MATH",
-				description: "This agent can add and multiply numbers",
-				systemPrompt: "You are a test agent that can add and multiply numbers.",
+				description: "Math agent who can add and multiply numbers",
+				systemPrompt: "You are a math agent that can add and multiply numbers.",
 				contextPrompt: "",
 				askInformation: true,
 				killOnResponse: true,
@@ -117,7 +117,7 @@ export async function seeding(root: RootService) {
 			{
 				id: "id-agent-leader",
 				name: "LEADER",
-				description: "This agent can resolve all problem",
+				description: "General agent who can lead and use subagents",
 				systemPrompt: "",
 				contextPrompt: "",
 				askInformation: true,

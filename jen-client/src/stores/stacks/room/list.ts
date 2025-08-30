@@ -1,6 +1,6 @@
 import roomApi from "@/api/room"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { Room } from "@/types/Room.js"
+import { ChatRoom } from "@/types/commons/RoomActions.js"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { RoomDetailStore } from "./detail/detail.js"
@@ -12,7 +12,7 @@ const setup = {
 
 	state: {
 
-		all: <Room[]>null,
+		all: <ChatRoom[]>null,
 
 		//#region VIEWBASE
 		width: 370,
@@ -84,7 +84,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Room[]) => ({ all }),
+		setAll: (all: ChatRoom[]) => ({ all }),
 	},
 }
 

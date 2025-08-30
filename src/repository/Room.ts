@@ -4,6 +4,9 @@ import { ChatMessage } from '@/types/commons/RoomActions.js';
 
 
 
+/**
+ * E' uno spazio dotato di HISTORY dove i CLIENT possono comunicare
+ */
 @Entity('rooms')
 export class RoomRepo {
 

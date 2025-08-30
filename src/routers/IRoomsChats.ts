@@ -22,7 +22,7 @@ interface IRoomsChats {
 	executeTool(toolId: string, args: any): Promise<any>
 
 	/** Invia un messaggio ad un client */
-	sendMessageToClient(clientAddress: string, message: BaseS2C): void
+	sendMessageToClient(clientId: string, message: BaseS2C): void
 
 }
 

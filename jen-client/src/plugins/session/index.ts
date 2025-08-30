@@ -4,6 +4,7 @@ import toolSo from "@/stores/stacks/tool/repo"
 import { delay } from "../../utils/time"
 import { SocketService } from "../SocketService"
 import mcpServerSo from "@/stores/stacks/mcpServer/repo"
+import userSo from "@/stores/stacks/account/repo"
 
 
 
@@ -12,6 +13,7 @@ export const wsConnection: SocketService = new SocketService({
 	host: window.location.hostname,
 	port: import.meta.env.VITE_API_WS_PORT ?? 3010,
 	base: "",
+	userId: userSo.state.current?.id
 })
 
 

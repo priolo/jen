@@ -1,4 +1,6 @@
+import { Uuid } from "../global.js";
 import { LlmResponse } from "./LlmResponse.js";
+
 
 
 /**
@@ -8,15 +10,24 @@ export type ChatMessage = {
 	/** identificativo del MESSAGE */
 	id?: string;
 	/** identifica di chi è il messaggio. Se null è l'utente principale */
-	authorId?: string
-	/** indica che questo MESSAGE apre una ROOM */
-	subroomId?: string;
-
+	clientId?: string
+	/** questo MESSAGE è collegato ad un altra ROOM */
+	subRoomId?: string;
+	/** il ruolo di chi ha scritto il messaggio */
 	role: "user" | "agent" | "system"
-
+	/** il testo del messaggio (oppure la risposta di un LLM) */
 	content: string | LlmResponse
 }
 
+/**
+ * E' uno spazio dotato di HISTORY dove i CLIENT possono comunicare
+ */
+export interface ChatRoom {
+	id: Uuid;
+	parentRoomId?: string;
+	history: ChatMessage[];
+	agentId?: Uuid;
+}
 
 
 
@@ -24,26 +35,37 @@ export type ChatMessage = {
 //#region CLIENT TO SERVER
 
 export enum CHAT_ACTION_C2S {
-	ENTER = "enter",
+	/* un CLIENT entra nella CHAT */
+	CREATE_ENTER = "create-enter",
+	/* un CLIENT lascia la CHAT */
 	LEAVE = "leave",
+	/* un CLIENT invia un messaggio */
 	USER_MESSAGE = "user-message",
 }
 
 export type BaseC2S = {
+	/** tipo di action */
 	action: CHAT_ACTION_C2S
 	/** Rifrimento alla CHAT */
 	chatId: string
 }
 
-/** un CLIENT entra nella CHAT (sempre nella ROOT-ROOM)*/
-export type UserEnterC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.ENTER
+/** CLIENT crea e entra in una nuova CHAT */
+export type UserCreateEnterC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.CREATE_ENTER
+	/** il client che fa l'azione */
+	clientId: string
+	// in futuro si potranno creare diversi tipi di CHAT
+	// type: "single-agent" | "free" | "agile" | "document" 
+	/** agente LLM di riferimento */
 	agentId?: string
 }
 
 /** un CLIENT lascia la CHAT */
 export type UserLeaveC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.LEAVE
+	/** il client che fa l'azione */
+	clientId?: string
 }
 
 /** un CLIENT inserisce un messaggio */
@@ -64,7 +86,7 @@ export enum CHAT_ACTION_S2C {
 	ENTERED = "entered",
 	LEAVE = "leave",
 	MESSAGE = "message",
-	NEW_ROOM = "new-room",
+	ROOM_NEW = "room-new",
 }
 
 export type BaseS2C = {
@@ -96,8 +118,8 @@ export type MessageS2C = BaseS2C & {
 
 
 /** è stata creata una SUB-ROOM */
-export type NewRoomS2C = BaseS2C & {
-	action: CHAT_ACTION_S2C.NEW_ROOM
+export type RoomNewS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.ROOM_NEW
 
 	roomId: string
 	parentRoomId?: string

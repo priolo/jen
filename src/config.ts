@@ -48,7 +48,7 @@ export const WS_PORT = +(process.env.WS_PORT || 3010)
 
 
 
-function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
+function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: boolean = false, noDb: boolean = false) {
 
 	return [
 
@@ -70,7 +70,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 					tools: tools,
 				},
 
-				<httpRouter.conf>{
+				noRepo ? null : <httpRouter.conf>{
 					class: "http-router",
 					path: "/api",
 					cors: {
@@ -95,15 +95,15 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 						<WSRoomsConf>{
 							class: WSRoomsService
 						},
-						<WSDocConf>{
-							class: WSDocService
-						}
+						// <WSDocConf>{
+						// 	class: WSDocService
+						// }
 					]
 				}
 			]
 		},
 
-		<typeorm.conf>{
+		noDb ? null : <typeorm.conf>{
 			class: "typeorm",
 			options: {
 				...getDBConnectionConfig(noLog),

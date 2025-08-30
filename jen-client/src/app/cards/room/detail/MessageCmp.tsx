@@ -15,8 +15,8 @@ const MessageCmp: FunctionComponent<MessageProps> = ({
 
 	// HANDLER
 	const handleOpenSubroom = () => {
-		if (message.subroomId) {
-			window.open(`/room/${message.subroomId}`, "_blank")
+		if (message.subRoomId) {
+			window.open(`/room/${message.subRoomId}`, "_blank")
 		}
 	}
 

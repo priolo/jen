@@ -1,25 +1,25 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
-import { Room } from "@/types/Room"
+import { ChatRoom } from "@/types/commons/RoomActions"
 
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<Room[]> {
+function index(opt?: CallOptions): Promise<ChatRoom[]> {
 	return ajax.get(`rooms`, opt)
 }
 
 /** GET */
-function get(id: string, opt?: CallOptions): Promise<Room> {
+function get(id: string, opt?: CallOptions): Promise<ChatRoom> {
 	return ajax.get(`rooms/${id}`, opt)
 }
 
 /** CREATE NEW */
-function create(prompt: Partial<Room>, opt?: CallOptions): Promise<Room> {
+function create(prompt: Partial<ChatRoom>, opt?: CallOptions): Promise<ChatRoom> {
 	return ajax.post(`rooms`, { prompt }, opt)
 }
 
 /** UPDATE */
-function update(prompt: Partial<Room>, opt?: CallOptions): Promise<Room> {
+function update(prompt: Partial<ChatRoom>, opt?: CallOptions): Promise<ChatRoom> {
 	return ajax.patch(`rooms/${prompt.id}`, { prompt }, opt)
 }
 
@@ -29,7 +29,7 @@ function remove(promptId: string, opt?: CallOptions): Promise<void> {
 }
 
 /** EXECUTE */
-function execute(prompt: Partial<Room>, opt?: CallOptions): Promise<Partial<Room>> {
+function execute(prompt: Partial<ChatRoom>, opt?: CallOptions): Promise<Partial<ChatRoom>> {
 	return ajax.post(`rooms/execute`, { prompt }, opt)
 }
 
