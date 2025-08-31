@@ -4,9 +4,9 @@ import { EDIT_STATE } from "@/types"
 import { AgentLlm } from "@/types/Agent"
 import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { EditorState } from "../editorBase"
-import { buildRoomDetailNew } from "../room/factory"
 import { buildEditorFromAgent } from "../agentEditor/factory"
+import chatSo from "../chat/repo"
+import { EditorState } from "../editorBase"
 import agentSo from "./repo"
 
 
@@ -86,8 +86,9 @@ const setup = {
 
 		/** apertura della CARD ROOM */
 		openChatRoom(_: void, store?: AgentDetailStore) {
-			const view = buildRoomDetailNew(store.state.agent?.id)
-			store.state.group.addLink({ view, parent: store, anim: true })
+			chatSo.createChat(store.state.agent?.id)
+			// const view = buildRoomDetailNew(store.state.agent?.id)
+			// store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
 		/** apertura della CARD EDITOR */

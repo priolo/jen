@@ -5,16 +5,16 @@ import { deckCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
 import { buildUserCard } from "@/stores/stacks/account/utils/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
+import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
-import { buildRoomDetailNew, buildRoomList } from "@/stores/stacks/room/factory"
+import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
+import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
 import { buildToolList } from "@/stores/stacks/tool/factory"
 import { Button } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import React, { FunctionComponent } from "react"
 import { buildStore } from "../../stores/docs/utils/factory"
 import { AccountState, AccountStore } from "../../stores/stacks/account"
-import { AgentEditorState, AgentEditorStore } from "../../stores/stacks/agentEditor"
-import { NODE_TYPES } from "../../components/slate/elements/doc/types"
 import { buildCodeEditor } from "../../stores/stacks/editorCode/factory"
 import { ReflectionState, ReflectionStore } from "../../stores/stacks/reflection"
 import { buildUsers } from "../../stores/stacks/streams/utils/factory"
@@ -23,9 +23,6 @@ import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
-import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
-import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
-import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
 
 
 
@@ -61,10 +58,7 @@ const MainMenu: FunctionComponent<Props> = ({
 		const view = buildAgentList()
 		deckCardsSo.add({ view, anim: true })
 	}
-	const handleRoom = () => {
-		const view = buildRoomDetailNew()
-		deckCardsSo.add({ view, anim: true })
-	}
+
 
 
 

@@ -4,7 +4,7 @@ import { ChatRoom } from "@/types/commons/RoomActions.js"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { RoomDetailStore } from "./detail/detail.js"
-import { buildRoomDetail, buildRoomDetailNew } from "./factory.js"
+import { buildRoomDetail } from "./factory.js"
 
 
 
@@ -63,8 +63,8 @@ const setup = {
 		},
 
 		create(_: void, store?: PromptListStore) {
-			const view = buildRoomDetailNew()
-			store.state.group.addLink({ view, parent: store, anim: true })
+			// const view = buildRoomDetailNew()
+			// store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
 		async delete(promptId: string, store?: PromptListStore) {

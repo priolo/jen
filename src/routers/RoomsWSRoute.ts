@@ -7,9 +7,9 @@ import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
-import { BaseC2S, BaseS2C, CHAT_ACTION_C2S, UserCreateEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, UserCreateEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
-import IRoomsChats from "./IRoomsChats.js"
+import IRoomsChats from "../services/rooms/IRoomsChats.js"
 import McpServerRoute from "./McpServerRoute.js"
 
 
@@ -40,7 +40,6 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 
 	async onConnect(client: ws.IClient) {
 		// qua posso mettere tutti i dati utili al client
-		console.log(`Client connected:`, client.params.id)
 		super.onConnect(client)
 	}
 
@@ -71,7 +70,7 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 	 */
 	async onMessage(client: ws.IClient, message: string) {
 		if (!client || !message) return
-		const msg = JSON.parse(message) as BaseC2S
+		const msg = JSON.parse(message)
 
 		switch (msg.action) {
 			case CHAT_ACTION_C2S.CREATE_ENTER:
@@ -95,10 +94,12 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 	 * Handle client entering in a chat
 	 */
 	private async handleEnter(client: ws.IClient, msg: UserCreateEnterC2S) {
+		if ( !client?.params.id || !msg?.agentId ) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
+			
 		const chat = new ChatNode(this)
 		await chat.init(msg.agentId)
-		this.chats.push(chat)
 		await chat.enterClient(client.params.id)
+		this.chats.push(chat)
 	}
 
 	private handleLeave(client: ws.IClient, msg: UserLeaveC2S) {

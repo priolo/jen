@@ -9,8 +9,11 @@ import { FunctionComponent } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
-import MessageCmp from "./MessageCmp"
+import MessageCmp from "./history/MessageCmp"
 import RoleDialog from "./RoleDialog"
+import chatSo from "@/stores/stacks/chat/repo"
+import { ChatMessage } from "@/types/commons/RoomActions"
+import { buildRoomDetail } from "@/stores/stacks/room/factory"
 
 
 
@@ -24,26 +27,31 @@ const RoomView: FunctionComponent<Props> = ({
 
 	// STORE
 	useStore(store)
+	useStore(chatSo)
 
 
 	// HOOKs
 
 
 	// HANDLER
-	const handleAgentChange = (agentId: string) => {
-		store.setRoom({ ...store.state.room, agentId })
-	}
-
 	const handleSendClick = () => {
 		store.sendPrompt()
+	}
+	const handleOpenSubroom = (chatMessage: ChatMessage) => {
+		if (!chatMessage.roomRefId) return
+
+		const view = buildRoomDetail({
+			chatId: store.state.chatId,
+			roomId: chatMessage.roomRefId,
+		})
+		store.state.group.addLink({ view, parent: store, anim: true })
 	}
 
 
 	// RENDER
-	const history = store.state.room?.history ?? []
-	const agents = agentSo.state.all ?? []
-	const agentSelected = agentSo.state.all.find((a: AgentLlm) => a.id === store.state.room?.agentId)
-	const selectedAgentId = store.state.room?.agentId
+	const room = chatSo.getRoomById(store.state.roomId)
+	const history = room?.history ?? []
+	const agentRef = agentSo.state.all.find((a: AgentLlm) => a.id === room?.agentsIds[0])
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -55,25 +63,22 @@ const RoomView: FunctionComponent<Props> = ({
 
 		<div className="lyt-v">
 			<div className="jack-lbl-prop">AGENT</div>
-			<div className="jack-lbl-readonly">{agentSelected?.name ?? "--"}</div>
+			<div className="jack-lbl-readonly">{agentRef?.name ?? "--"}</div>
 			<div className="jack-lbl-prop">ROOM ID</div>
-			<div className="jack-lbl-readonly">{store.state.room?.id ?? "--"}</div>
+			<div className="jack-lbl-readonly">{room?.id ?? "--"}</div>
 			<div className="jack-lbl-prop">ROOM PARENT ID</div>
-			<div className="jack-lbl-readonly">{store.state.room?.parentRoomId ?? "--"}</div>
+			<div className="jack-lbl-readonly">{room?.parentRoomId ?? "--"}</div>
 		</div>
-
-
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
 			{history.map((chatMessage) => (
 				<MessageCmp
 					key={chatMessage.id}
 					message={chatMessage}
+					onAskToClick={() => handleOpenSubroom(chatMessage)}
 				/>
 			))}
 		</div>
-
-
 
 		<TextInput
 			value={store.state.prompt}

@@ -5,7 +5,7 @@ import buildNodeConfig, { PORT, WS_PORT } from "../src/config.js"
 import { AgentRepo } from "../src/repository/Agent.js"
 import { seeding } from "../src/seeding.js"
 import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from "../src/types/commons/LlmResponse.js"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatMessage, MessageS2C, RoomNewS2C, UserCreateEnterC2S, UserEnteredS2C, UserMessageC2S } from "../src/types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatMessage, RoomMessageS2C, RoomNewS2C, UserCreateEnterC2S, UserEnteredS2C, UserMessageC2S } from "../src/types/commons/RoomActions.js"
 
 
 
@@ -63,9 +63,9 @@ describe("Test on WS ROOT", () => {
 				switch (msg.action) {
 
 					// I have entered in a room
-					case CHAT_ACTION_S2C.ENTERED: {
+					case CHAT_ACTION_S2C.USER_ENTERED: {
 
-						mainRoomId = (msg as UserEnteredS2C).rooms[0].id
+						mainRoomId = (msg as UserEnteredS2C).rooms![0].id
 						chatId = msg.chatId
 
 						// send a prompt to agent
@@ -82,8 +82,8 @@ What is 2+2? Just write the answer number.`,
 					}
 
 					// receive a message from agent
-					case CHAT_ACTION_S2C.MESSAGE:
-						const agentWsMsg = msg as MessageS2C
+					case CHAT_ACTION_S2C.ROOM_MESSAGE:
+						const agentWsMsg = msg as RoomMessageS2C
 						const chatMessage: ChatMessage = agentWsMsg.content
 						if (chatMessage.role == "user") break;
 						const llmResponse = <LlmResponse>chatMessage.content

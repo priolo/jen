@@ -111,7 +111,7 @@ class AgentLlm {
 			if ( !!this.lastSubagentCall ) {
 				//const callSubagentMsg:ChatMessage = r.response.messages.find ( msg => msg.role=="assistant" && msg.content[0]?.toolName?.startsWith("chat_with_"))
 				const callSubagentMsg:ChatMessage = r.response.messages[0]
-				callSubagentMsg.subRoomId = this.lastSubagentCall.roomId
+				callSubagentMsg.roomRefId = this.lastSubagentCall.roomId
 			}
 			this.lastSubagentCall = null
 			

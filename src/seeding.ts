@@ -1,6 +1,6 @@
 import { RootService, Bus } from "@priolo/julian";
 import { typeorm } from "@priolo/julian";
-import { AgentRepo } from "./repository/Agent.js";
+import { AGENT_TYPE, AgentRepo } from "./repository/Agent.js";
 import { TOOL_TYPE, ToolRepo } from "./repository/Tool.js";
 import { McpServerRepo } from "./repository/McpServer.js";
 import { LlmRepo } from "./repository/Llm.js";
@@ -98,6 +98,7 @@ export async function seeding(root: RootService) {
 			{
 				id: "id-agent-math",
 				name: "MATH",
+				type: AGENT_TYPE.MOCK,
 				description: "Math agent who can add and multiply numbers",
 				systemPrompt: "You are a math agent that can add and multiply numbers.",
 				contextPrompt: "",
@@ -117,6 +118,7 @@ export async function seeding(root: RootService) {
 			{
 				id: "id-agent-leader",
 				name: "LEADER",
+				type: AGENT_TYPE.MOCK,
 				description: "General agent who can lead and use subagents",
 				systemPrompt: "",
 				contextPrompt: "",

@@ -1,7 +1,7 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
-import IRoomsChats from "@/routers/IRoomsChats.js";
-import { MessageS2C, BaseS2C, CHAT_ACTION_S2C, ChatMessage, RoomNewS2C, UserEnteredS2C } from "@/types/commons/RoomActions.js";
+import IRoomsChats from "@/services/rooms/IRoomsChats.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, UserEnteredS2C } from "@/types/commons/RoomActions.js";
 import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 
@@ -42,18 +42,25 @@ class ChatNode {
 	}
 
 	/**
-	 * comunico alla chat che un client è entrato nella chat
+	 * comunico alla CHAT che un CLIENT è entrato nella chat
+	 * e lo aggiungo in CHAT
 	 */
 	async enterClient(clientId: string) {
 		if (!clientId || this.clientsIds.has(clientId)) return;
-
-		// inserisco il client nella CHAT
-		this.clientsIds.add(clientId);
-
-		// INVIO: messaggio di entrata
-		const message: UserEnteredS2C = {
-			action: CHAT_ACTION_S2C.ENTERED,
+		
+		// invio a tutti gli altri CLIENT
+		const message: ClientEnteredS2C = {
+			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
 			chatId: this.id,
+			clientId: clientId,
+		}
+		this.sendMessage(message)
+
+		// invio al CLIENT che entra la lista delle ROOM
+		const msg: UserEnteredS2C = {
+			action: CHAT_ACTION_S2C.USER_ENTERED,
+			chatId: this.id,
+			clientsIds: [...this.clientsIds],
 			rooms: this.rooms.map(r => ({
 				id: r.room.id,
 				parentRoomId: r.room.parentRoomId,
@@ -61,18 +68,21 @@ class ChatNode {
 				agentsIds: r.room.agents?.map(a => a.id),
 			})),
 		}
-		this.sendMessage(message)
-		// ---
+		this.node.sendMessageToClient(clientId, msg)
+		
+		// inserisco il CLIENT nella CHAT
+		this.clientsIds.add(clientId);
 	}
 
 	/**
 	 * comunico alla chat che un client ha lasciato la chat
+	 * e lo elimino dalla CHAT
 	 * @return true se la chat è vuota e può essere rimossa
 	 */
 	removeClient(clientId: string): boolean {
 		// INVIO
 		const message: BaseS2C = {
-			action: CHAT_ACTION_S2C.LEAVE,
+			action: CHAT_ACTION_S2C.CLIENT_LEAVE,
 			chatId: this.id,
 		}
 		this.sendMessage(message)
@@ -141,6 +151,7 @@ class ChatNode {
 
 			// effettuo la ricorsione su questa nuova ROOM-AGENT
 			const llmResponse = await this.recursiveRequest(subRoom)
+			
 			if (llmResponse.type != LLM_RESPONSE_TYPE.COMPLETED) return null
 			return (<ContentCompleted>llmResponse.content).answer
 		}
@@ -161,8 +172,8 @@ class ChatNode {
 	 * invia alla CHAT un CHAT-MESSAGE
 	 */
 	private sendChatMessage(chatMessage: ChatMessage, roomId: string) {
-		const msgToClient: MessageS2C = {
-			action: CHAT_ACTION_S2C.MESSAGE,
+		const msgToClient: RoomMessageS2C = {
+			action: CHAT_ACTION_S2C.ROOM_MESSAGE,
 			chatId: this.id,
 			roomId: roomId,
 			content: chatMessage,

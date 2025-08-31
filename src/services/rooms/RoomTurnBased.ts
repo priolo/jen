@@ -74,6 +74,7 @@ class RoomTurnBased {
 		let response: LlmResponse;
 		do {
 			response = await agent.ask(this.room.history)
+			
 			printLlmResponse(agent.agent.name, response)
 
 			if (response.type === LLM_RESPONSE_TYPE.TOOL) {
@@ -86,6 +87,7 @@ class RoomTurnBased {
 			if (response.type === LLM_RESPONSE_TYPE.ASK_TO) {
 				const content = <ContentAskTo>response.content
 				const result = await this.onSubAgent?.(agent.agent.id, content.agentId, content.question)
+				
 				content.result = result
 				updateVercelToolResponse(response.responseRaw, result)
 			}

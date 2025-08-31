@@ -102,7 +102,7 @@ class AgentTest {
 		// Check for subagent call
 		if (!!this.lastSubagentCall) {
 			const callSubagentMsg: ChatMessage = r.response.messages[0]
-			callSubagentMsg.subRoomId = this.lastSubagentCall.roomId
+			callSubagentMsg.roomRefId = this.lastSubagentCall.roomId
 		}
 		this.lastSubagentCall = null
 

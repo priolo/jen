@@ -1,7 +1,7 @@
 import { AgentLlm } from "@/types/Agent"
 import { createStore, StoreCore } from "@priolo/jon"
-import { randomUUID } from "crypto"
 import { User } from "./types"
+import { generateUUID } from "@/utils/object"
 
 
 
@@ -9,7 +9,7 @@ const setup = {
 
 	state: {
 		current: <User>{
-			id: randomUUID(),
+			id: generateUUID(),
 			name: "Ivano Iorio",
 		},
 	},

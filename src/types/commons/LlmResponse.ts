@@ -45,6 +45,9 @@ export interface ContentFailure {
 
 
 export interface ContentAskTo {
+	// la sub-room in cui fare la domanda
+	roomId: string;
+	// id dell'agent a cui fare la domanda
 	agentId: string
 	// la domanda porre all'agent
 	question: string
