@@ -10,7 +10,7 @@ import { updateVercelToolResponse } from "../agents/utils/vercel.js";
 
 
 
-class RoomTurnBased {
+class RoomViewpoint {
 
 	constructor(
 		public room: Partial<RoomRepo>,
@@ -63,8 +63,8 @@ class RoomTurnBased {
 
 
 	/**
-	 * Restituiese un LlmResponse dopo aver processato tutti i turni necessari
-	 * ha degli "eventi" per gestire l'uso di tool o sub-agenti
+	 * [II] deo prendere gli AGENTS e trasformare la HISTORY inbase al turno del corrente AGENT
+	 * In maniera che possano essere usati piu' AGENT in una ROOM
 	 */
 	public async getResponse(): Promise<LlmResponse> {
 		// [II] per il momento suppongo che ci sia un solo AGENT
@@ -103,5 +103,5 @@ class RoomTurnBased {
 
 }
 
-export default RoomTurnBased
+export default RoomViewpoint
 

@@ -2,7 +2,7 @@ import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import IRoomsChats from "@/services/rooms/IRoomsChats.js";
 import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, UserEnteredS2C } from "@/types/commons/RoomActions.js";
-import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
+import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 
 
@@ -23,13 +23,14 @@ class ChatNode {
 	/** il NODE del contesto */
 	private node: IRoomsChats;
 	/** le ROOM aperte in questa CHAT */
-	private rooms: RoomTurnBased[] = []
+	private rooms: RoomTurnBased[]
 	/** tutti i client WS */
 	private clientsIds: Set<string> = new Set();
 
 
 	//#region HANDLE CHAT OPERATIONS
 
+	/** inizializza la CHAT con un AGENT di riferimento */
 	async init(agentId: string) {
 		// carico l'agente e lo inserisco nella MAIN-ROOM
 		const agentRepo = await this.node.getAgentRepoById(agentId)
@@ -93,9 +94,10 @@ class ChatNode {
 	}
 
 	/**
-	 * invia alla CHAT che un MESSAGE di tipo USER è stato inserito in una ROOM
+	 * un MESSAGE di tipo USER è stato inserito in una ROOM della CHAT
+	 * se non si specifica la ROOM allora è la MAIN-ROOM
 	 */
-	addUserMessage(text: string, clientId: string, roomId: string): void {
+	addUserMessage(text: string, clientId: string, roomId?: string): void {
 		// inserisco il messaggio nella history
 		const room: RoomTurnBased = this.getRoomById(roomId) ?? this.getMainRoom()
 		const chatMessage = room.addUserMessage(text, clientId)
@@ -150,10 +152,11 @@ class ChatNode {
 			this.addUserMessage(question, requestAgentId, subRoom.room.id)
 
 			// effettuo la ricorsione su questa nuova ROOM-AGENT
-			const llmResponse = await this.recursiveRequest(subRoom)
-			
-			if (llmResponse.type != LLM_RESPONSE_TYPE.COMPLETED) return null
-			return (<ContentCompleted>llmResponse.content).answer
+			const response = await this.recursiveRequest(subRoom)
+			return { 
+				response, 
+				roomId: subRoom.room.id
+			}
 		}
 		room.onMessage = (chatMessage: ChatMessage, roomId: string) => 
 			this.sendChatMessage(chatMessage, roomId)

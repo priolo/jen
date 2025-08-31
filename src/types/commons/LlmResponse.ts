@@ -45,13 +45,13 @@ export interface ContentFailure {
 
 
 export interface ContentAskTo {
-	// la sub-room in cui fare la domanda
-	roomId: string;
-	// id dell'agent a cui fare la domanda
+	/**  la SUB-ROOM usata */
+	roomId?: string;
+	/** id dell'AGENT a cui è stata fatta la domanda */
 	agentId: string
-	// la domanda porre all'agent
+	/** la domanda posta all'AGENT */
 	question: string
-	// risposta dell'agent
+	/** risposta dell'AGENT */
 	result?: any
 }
 

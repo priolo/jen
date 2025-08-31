@@ -14,6 +14,7 @@ import RoleDialog from "./RoleDialog"
 import chatSo from "@/stores/stacks/chat/repo"
 import { ChatMessage } from "@/types/commons/RoomActions"
 import { buildRoomDetail } from "@/stores/stacks/room/factory"
+import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
 
 
 
@@ -38,11 +39,12 @@ const RoomView: FunctionComponent<Props> = ({
 		store.sendPrompt()
 	}
 	const handleOpenSubroom = (chatMessage: ChatMessage) => {
-		if (!chatMessage.roomRefId) return
+		const content:ContentAskTo = (chatMessage?.content as LlmResponse)?.content as ContentAskTo
+		if (!content) return
 
 		const view = buildRoomDetail({
 			chatId: store.state.chatId,
-			roomId: chatMessage.roomRefId,
+			roomId: content.roomId,
 		})
 		store.state.group.addLink({ view, parent: store, anim: true })
 	}

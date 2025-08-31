@@ -9,8 +9,6 @@ export type ChatMessage = {
 	id: string;
 	/** identifica di chi è il messaggio. Se null è l'utente principale */
 	clientId?: string
-	/** se valorizzato il MESSAGE è collegato ad una ROOM */
-	roomRefId?: string;
 	/** il ruolo di chi ha scritto il messaggio */
 	role: "user" | "agent" | "system"
 	/** il testo del messaggio (oppure la risposta LLM) */
