@@ -8,7 +8,7 @@ import cls from "./MessageCmp.module.css"
 
 interface Props {
 	message: ChatMessage
-	onAskToClick?: ()=>void
+	onAskToClick?: () => void
 
 }
 
@@ -19,7 +19,7 @@ const MessageCmp: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	
+
 
 	// RENDER
 	const role = message.role
@@ -28,12 +28,12 @@ const MessageCmp: FunctionComponent<Props> = ({
 	return (
 		<div className={cls.historyItem}>
 			<div className={cls.historyRole}>{role}</div>
-			{ role=="user" ? (
+			{role == "user" ? (
 				<div className={cls.historyText}>{message.content as string}</div>
 			) : (
-				<ContentCmp response={response} onAskToClick={onAskToClick}/>
+				<ContentCmp response={response} onAskToClick={onAskToClick} />
 			)}
-			
+
 		</div>
 	)
 }
