@@ -7,6 +7,7 @@ import { printLlmResponse } from "../agents/utils/print.js";
 import { AGENT_TYPE } from "@/repository/Agent.js";
 import AgentMock from "../agents/AgentMock.js";
 import { updateVercelToolResponse } from "../agents/utils/vercel.js";
+import IRoomsChats from "./IRoomsChats.js";
 
 
 
@@ -19,6 +20,18 @@ class RoomViewpoint {
 			this.room.history = [];
 		}
 	}
+
+	static async Build(node: IRoomsChats, agentsIds: string[]): Promise<RoomViewpoint> {
+		// carico l'agente e lo inserisco nella MAIN-ROOM
+		const agentRepo = await node.getAgentRepoById(agentId)
+		if (!agentRepo) throw new Error(`Agent with id ${agentId} not found`);
+
+		// creo una nuova MAIN-ROOM
+		const roomRepo = await node.createRoomRepo([agentRepo], null)
+		const room = new RoomViewpoint(roomRepo)
+		return room
+	}
+
 
 	/** 
 	 * Su utilizzo di un TOOL 

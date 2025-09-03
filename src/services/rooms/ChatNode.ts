@@ -30,16 +30,10 @@ class ChatNode {
 
 	//#region HANDLE CHAT OPERATIONS
 
-	/** inizializza la CHAT con un AGENT di riferimento */
-	async init(agentId: string) {
-		// carico l'agente e lo inserisco nella MAIN-ROOM
-		const agentRepo = await this.node.getAgentRepoById(agentId)
-		if (!agentRepo) throw new Error(`Agent with id ${agentId} not found`);
-
-		// creo una nuova MAIN-ROOM
-		const roomRepo = await this.node.createRoomRepo([agentRepo], null)
-		const room = new RoomTurnBased(roomRepo)
-		this.rooms = [room]
+	static async Build(node: IRoomsChats, room: RoomTurnBased): Promise<ChatNode> {
+		const chat = new ChatNode(node)
+		chat.rooms = [room]
+		return chat
 	}
 
 	/**

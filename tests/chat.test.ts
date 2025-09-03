@@ -4,6 +4,7 @@ import { RoomRepo } from '../src/repository/Room.js';
 import { ToolRepo } from '../src/repository/Tool.js';
 import ChatNode from '../src/services/rooms/ChatNode.js';
 import IRoomsChats from '../src/services/rooms/IRoomsChats.js';
+import RoomTurnBased from '../src/services/rooms/RoomTurnBased.js';
 import { ContentCompleted, LLM_RESPONSE_TYPE } from '../src/types/commons/LlmResponse.js';
 
 
@@ -71,13 +72,30 @@ describe("Test on CHAT", () => {
 	afterAll(async () => {
 	})
 
-	test("semplice domanda in MAIN-ROOM", async () => {
-		const chat = new ChatNode(nodeSym)
-		await chat.init(agentLeadRepo.id)
+	test("domanda in MAIN-ROOM con TOOL", async () => {
+		const room = await RoomTurnBased.Build(nodeSym, agentAdderRepo.id)
+		const chat = await ChatNode.Build(nodeSym, room)
+		await chat.enterClient("id-user")
+		chat.addUserMessage(
+			`What is 2+2? Just write the answer number.`,
+			"id-user",
+		)
+		const response = await chat.complete()
+
+		console.log("Response:", response)
+		expect(response).not.toBeNull()
+		expect(response?.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
+		expect((<ContentCompleted>response?.content).answer).toBe("4")
+
+	}, 100000)
+
+	test("domanda in MAIN-ROOM con SUB-AGENTS", async () => {
+		const room = await RoomTurnBased.Build(nodeSym, agentLeadRepo.id)
+		const chat = await ChatNode.Build(nodeSym, room)
 		await chat.enterClient("id-user")
 		chat.addUserMessage(
 			`Don't answer directly, but use the tools available to you. What is 2+2? Just write the answer number.`,
-			"id-user", 
+			"id-user",
 		)
 		const response = await chat.complete()
 
@@ -89,12 +107,12 @@ describe("Test on CHAT", () => {
 	}, 100000)
 
 	test("due LLM parlano tra di loro", async () => {
-		const chat = new ChatNode(nodeSym)
-		await chat.init(agentLeadRepo.id)
+		const room = RoomViewpoint.Build(nodeSym, [agentLeadRepo.id, xxxx])
+		const chat = ChatNode.Build(nodeSym, room)
 		await chat.enterClient("id-user")
 		chat.addUserMessage(
 			`Don't answer directly, but use the tools available to you. What is 2+2? Just write the answer number.`,
-			"id-user", 
+			"id-user",
 		)
 		const response = await chat.complete()
 

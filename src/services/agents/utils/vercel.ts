@@ -1,5 +1,6 @@
 import { LlmRepo } from "@/repository/Llm.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
+import { ContentTool, LLM_RESPONSE_TYPE } from "@/types/commons/LlmResponse.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { envInit } from "@/types/env.js";
 import { createCohere } from "@ai-sdk/cohere";
@@ -81,9 +82,17 @@ export function getModel(llm?: LlmRepo) {
  */
 export function getHistory(history: ChatMessage[]): ModelMessage[] {
 	const vercelHistory: ModelMessage[] = history.flatMap((message: ChatMessage) => {
+		
 		if ((typeof message.content) == "string") {
 			return { role: message.role, content: message.content } as UserModelMessage
 		}
+
+		if ( message.content.type == LLM_RESPONSE_TYPE.TOOL || message.content.type == LLM_RESPONSE_TYPE.ASK_TO ){
+			const modelMsgs = message.content.responseRaw as ModelMessage[]
+			const result = (<ContentTool>message.content.content).result
+			updateVercelToolResponse(modelMsgs, result)
+		}
+
 		return message.content.responseRaw as ModelMessage[]
 	})
 	return vercelHistory
@@ -94,7 +103,7 @@ export function getHistory(history: ChatMessage[]): ModelMessage[] {
  * Inserisce un risultato dentro il tool-result di VERCEL/AI 
  * usato per i TOOL e per gli ASK_TO
  */
-export function updateVercelToolResponse(responseRaw: any, result: any) {
+function updateVercelToolResponse(responseRaw: ModelMessage[], result: any) {
 	const toolContent = responseRaw
 		.find(r => r.role == "tool")
 		?.content?.find(c => c.type == "tool-result");

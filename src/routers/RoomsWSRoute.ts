@@ -11,6 +11,7 @@ import { BaseS2C, CHAT_ACTION_C2S, UserCreateEnterC2S, UserLeaveC2S, UserMessage
 import AgentRoute from "./AgentRoute.js"
 import IRoomsChats from "../services/rooms/IRoomsChats.js"
 import McpServerRoute from "./McpServerRoute.js"
+import RoomTurnBased from "@/services/rooms/RoomTurnBased.js"
 
 
 
@@ -94,10 +95,10 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 	 * Handle client entering in a chat
 	 */
 	private async handleEnter(client: ws.IClient, msg: UserCreateEnterC2S) {
-		if ( !client?.params.id || !msg?.agentId ) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
-			
-		const chat = new ChatNode(this)
-		await chat.init(msg.agentId)
+		if (!client?.params.id || !msg?.agentId) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
+
+		const room = await RoomTurnBased.Build(this, msg.agentId)
+		const chat = await ChatNode.Build(this, room)
 		await chat.enterClient(client.params.id)
 		this.chats.push(chat)
 	}
@@ -156,7 +157,7 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 			if (!!tool.description && !!tool.parameters) continue
 
 			// se è di tipo MCP allora li cerco in CACHE o li carico
-			if ( !!tool.mcpId) {
+			if (!!tool.mcpId) {
 
 				// non sono in CACHE allora li carico e li metto in CACHE
 				if (!WSRoomsService.McpCache.has(tool.mcpId)) {
@@ -191,7 +192,7 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 
 		if (!toolRepo) return null;
 
-		if ( toolRepo.type == TOOL_TYPE.CODE ) {
+		if (toolRepo.type == TOOL_TYPE.CODE) {
 			if (!toolRepo.code) return "Tool without code"
 			// eseguo il codice
 			try {
@@ -211,7 +212,7 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 			if (!mcpServer) return `MCP Server not found: ${toolRepo.mcpId}`
 			return await executeMcpTool(mcpServer.host, toolRepo.name, args)
 		}
-		
+
 		return "Tool type not supported"
 	}
 
@@ -251,3 +252,4 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 	//#endregion
 
 }
+

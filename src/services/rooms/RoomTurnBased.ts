@@ -1,12 +1,12 @@
+import { AGENT_TYPE } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
-import AgentLlm from "../agents/AgentLlm.js";
 import { ContentAskTo, ContentCompleted, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
-import { printLlmResponse } from "../agents/utils/print.js";
-import { AGENT_TYPE } from "@/repository/Agent.js";
+import AgentLlm from "../agents/AgentLlm.js";
 import AgentMock from "../agents/AgentMock.js";
-import { updateVercelToolResponse } from "../agents/utils/vercel.js";
+import { printLlmResponse } from "../agents/utils/print.js";
+import IRoomsChats from "./IRoomsChats.js";
 
 
 
@@ -18,6 +18,17 @@ class RoomTurnBased {
 		if (!this.room.history) {
 			this.room.history = [];
 		}
+	}
+
+	static async Build(node: IRoomsChats, agentId: string): Promise<RoomTurnBased> {
+		// carico l'agente e lo inserisco nella MAIN-ROOM
+		const agentRepo = await node.getAgentRepoById(agentId)
+		if (!agentRepo) throw new Error(`Agent with id ${agentId} not found`);
+
+		// creo una nuova MAIN-ROOM
+		const roomRepo = await node.createRoomRepo([agentRepo], null)
+		const room = new RoomTurnBased(roomRepo)
+		return room
 	}
 
 	/** 
@@ -82,7 +93,6 @@ class RoomTurnBased {
 				const content = <ContentTool>response.content
 				const result = await this.onTool?.(content.toolId, content.args)
 				content.result = result
-				updateVercelToolResponse(response.responseRaw, result)
 			}
 
 			if (response.type === LLM_RESPONSE_TYPE.ASK_TO) {
@@ -90,7 +100,6 @@ class RoomTurnBased {
 				const subResponse = await this.onSubAgent?.(agent.agent.id, content.agentId, content.question)
 				content.roomId = subResponse?.roomId
 				content.result = (<ContentCompleted>subResponse?.response?.content)?.answer
-				updateVercelToolResponse(response.responseRaw, content.result)
 			}
 
 			const chatMessage = this.addAgentMessage(response, agent.agent.id)
