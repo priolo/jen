@@ -11,7 +11,7 @@ export function printLlmResponse(name: string, response: LlmResponse): void {
 			const content = response.content as ContentFailure
 			colorPrint(
 				[name, ColorType.Blue], " : failure : ",
-				[content.reason, ColorType.Red]
+				[content.result, ColorType.Red]
 			)
 		} break
 
@@ -27,7 +27,7 @@ export function printLlmResponse(name: string, response: LlmResponse): void {
 			const content = response.content as ContentCompleted
 			colorPrint(
 				[name, ColorType.Blue], " : final answer: ",
-				[content.answer, ColorType.Green]
+				[content.result, ColorType.Green]
 			)
 		} break
 
@@ -44,7 +44,7 @@ export function printLlmResponse(name: string, response: LlmResponse): void {
 			const content = response.content as ContentStrategy
 			colorPrint([
 				name, ColorType.Blue], " : strategy : ",
-				[content.strategy, ColorType.Magenta]
+				[content.result, ColorType.Magenta]
 			)
 		} break
 
@@ -52,7 +52,7 @@ export function printLlmResponse(name: string, response: LlmResponse): void {
 			const content = response.content as ContentReasoning
 			colorPrint(
 				[name, ColorType.Blue], " : reasoning : ",
-				[content.thought, ColorType.Magenta]
+				[content.result, ColorType.Magenta]
 			)
 		} break
 

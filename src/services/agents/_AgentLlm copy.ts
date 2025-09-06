@@ -100,7 +100,7 @@ class AgentLlm {
 				type: LLM_RESPONSE_TYPE.FAILURE,
 				continue: false,
 				content: {
-					reason: "Unprocessable Entity"
+					result: "Unprocessable Entity"
 				},
 			}
 		}
@@ -130,7 +130,7 @@ class AgentLlm {
 						type: LLM_RESPONSE_TYPE.COMPLETED,
 						continue: false,
 						content: {
-							answer: result
+							result: result
 						},
 					}
 				}

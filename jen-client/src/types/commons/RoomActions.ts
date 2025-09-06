@@ -50,6 +50,7 @@ export type BaseC2S = {
 export type UserCreateEnterC2S = Omit<BaseC2S, "chatId"> & {
 	action: CHAT_ACTION_C2S.CREATE_ENTER
 	// in futuro si potranno creare diversi tipi di CHAT
+	// ogni tipo di chat ha un suo parametro di configurazione
 	// type: "single-agent" | "free" | "agile" | "document" 
 	/** LLM-AGENT di riferimento */
 	agentId: string
@@ -62,7 +63,7 @@ export type UserLeaveC2S = BaseC2S & {
 	clientId: string
 }
 
-/** un CLIENT inserisce un messaggio */
+/** inserisce un messaggio USER e chiede il COMPLETE */
 export type UserMessageC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.USER_MESSAGE
 	/** id della ROOM, se null è la MAIN-ROOM */

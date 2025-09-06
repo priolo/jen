@@ -34,9 +34,9 @@ const ContentCmp: FunctionComponent<Props> = ({
 				[LLM_RESPONSE_TYPE.TOOL]: <div className={cls.historyText}>
 					{JSON.stringify((response.content as ContentTool)?.result)}
 				</div>,
-				[LLM_RESPONSE_TYPE.COMPLETED]: <div className={cls.historyText}>{(response.content as ContentCompleted)?.answer}</div>,
-				[LLM_RESPONSE_TYPE.STRATEGY]: <div className={cls.historyText}>{(response.content as ContentStrategy)?.strategy}</div>,
-				[LLM_RESPONSE_TYPE.REASONING]: <div className={cls.historyText}>{(response.content as ContentReasoning)?.thought}</div>,
+				[LLM_RESPONSE_TYPE.COMPLETED]: <div className={cls.historyText}>{(response.content as ContentCompleted)?.result}</div>,
+				[LLM_RESPONSE_TYPE.STRATEGY]: <div className={cls.historyText}>{(response.content as ContentStrategy)?.result}</div>,
+				[LLM_RESPONSE_TYPE.REASONING]: <div className={cls.historyText}>{(response.content as ContentReasoning)?.result}</div>,
 			}[response.type] ?? null}
 		</div>
 	)

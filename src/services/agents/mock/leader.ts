@@ -36,7 +36,7 @@ const leaderResponses: LlmResponse[] = [
 		],
 		continue: true,
 		content: {
-			thought: "I need to calculate the sum of 2 and 2.",
+			result: "I need to calculate the sum of 2 and 2.",
 		},
 	},
 
@@ -116,7 +116,7 @@ const leaderResponses: LlmResponse[] = [
 		],
 		continue: true,
 		content: {
-			thought: "The MATH agent should respond with the answer to 2+2.",
+			result: "The MATH agent should respond with the answer to 2+2.",
 		},
 	},
 
@@ -153,7 +153,7 @@ const leaderResponses: LlmResponse[] = [
 		type: LLM_RESPONSE_TYPE.COMPLETED,
 		continue: false,
 		content: {
-			answer: "4",
+			result: "4",
 		},
 	},
 ]

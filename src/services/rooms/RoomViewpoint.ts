@@ -102,7 +102,7 @@ class RoomViewpoint {
 				const content = <ContentAskTo>response.content
 				const subResponse = await this.onSubAgent?.(agent.agent.id, content.agentId, content.question)
 				content.roomId = subResponse?.roomId
-				content.result = (<ContentCompleted>subResponse?.response?.content)?.answer
+				content.result = (<ContentCompleted>subResponse?.response?.content)?.result
 				updateVercelToolResponse(response.responseRaw, content.result)
 			}
 

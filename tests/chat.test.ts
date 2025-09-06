@@ -125,7 +125,7 @@ describe("Test on CHAT", () => {
 		console.log("Response:", response)
 		expect(response).not.toBeNull()
 		expect(response?.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>response?.content).answer).toBe("4")
+		expect((<ContentCompleted>response?.content).result).toBe("4")
 
 	}, 100000)
 
@@ -142,7 +142,7 @@ describe("Test on CHAT", () => {
 		console.log("Response:", response)
 		expect(response).not.toBeNull()
 		expect(response?.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>response?.content).answer).toBe("4")
+		expect((<ContentCompleted>response?.content).result).toBe("4")
 
 	}, 100000)
 

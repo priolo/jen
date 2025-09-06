@@ -209,7 +209,7 @@ const history: ChatMessage[] = [
 			],
 			continue: true,
 			content: {
-				strategy: "I need to add 2 and 2 and then provide the final answer.",
+				result: "I need to add 2 and 2 and then provide the final answer.",
 			},
 		},
 	},
@@ -252,7 +252,7 @@ const history: ChatMessage[] = [
 			],
 			continue: true,
 			content: {
-				thought: "I need to use the addition tool to add 2 and 2.",
+				result: "I need to use the addition tool to add 2 and 2.",
 			},
 		},
 	},
@@ -351,7 +351,7 @@ const history: ChatMessage[] = [
 			],
 			continue: true,
 			content: {
-				thought: "The result of 2 + 2 is 4.",
+				result: "The result of 2 + 2 is 4.",
 			},
 		},
 	},
@@ -394,7 +394,7 @@ const history: ChatMessage[] = [
 			type: LLM_RESPONSE_TYPE.COMPLETED,
 			continue: false,
 			content: {
-				answer: "4",
+				result: "4",
 			},
 		},
 	},

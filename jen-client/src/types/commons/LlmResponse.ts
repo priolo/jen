@@ -31,27 +31,29 @@ export interface LlmResponse {
 }
 
 export interface ContentCompleted {
-	answer: string;
+	result: string;
 }
 export interface ContentStrategy {
-	strategy: string;
+	result: string;
 }
 export interface ContentReasoning {
-	thought: string;
+	result: string;
 }
 export interface ContentFailure {
-	reason: string;
+	result: string;
 }
 
 
 export interface ContentAskTo {
-	/**  la sub-room in cui fare la domanda */
+	/**  la SUB-ROOM usata */
 	roomId?: string;
-	/** id dell'agent a cui fare la domanda */
+	/** id dell'AGENT a cui è stata fatta la domanda */
 	agentId: string
-	/** la domanda porre all'agent */
+	/** mi serve per comodità */
+	agentName?: string
+	/** la domanda posta all'AGENT */
 	question: string
-	/** risposta dell'agent */
+	/** risposta dell'AGENT */
 	result?: any
 }
 

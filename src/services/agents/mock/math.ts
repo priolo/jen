@@ -36,7 +36,7 @@ const mathResponses: LlmResponse[] = [
 		],
 		continue: true,
 		content: {
-			thought: "The user is asking a simple addition question.",
+			result: "The user is asking a simple addition question.",
 		},
 	},
 	{
@@ -137,7 +137,7 @@ const mathResponses: LlmResponse[] = [
 		],
 		continue: false,
 		content: {
-			answer: "2 + 2 = 4",
+			result: "2 + 2 = 4",
 		},
 	}
 ]

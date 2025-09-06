@@ -31,16 +31,16 @@ export interface LlmResponse {
 }
 
 export interface ContentCompleted {
-	answer: string;
+	result: string;
 }
 export interface ContentStrategy {
-	strategy: string;
+	result: string;
 }
 export interface ContentReasoning {
-	thought: string;
+	result: string;
 }
 export interface ContentFailure {
-	reason: string;
+	result: string;
 }
 
 

@@ -155,7 +155,7 @@ When it's your turn, provide your response based on the conversation history.
 				const content = <ContentAskTo>response.content
 				const subResponse = await this.onSubAgent?.(agent.agent.id, content.agentId, content.question)
 				content.roomId = subResponse?.roomId
-				content.result = (<ContentCompleted>subResponse?.response?.content)?.answer
+				content.result = (<ContentCompleted>subResponse?.response?.content)?.result
 			}
 
 			const chatMessage = this.addAgentMessage(response, agent.agent.id)
