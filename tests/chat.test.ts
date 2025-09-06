@@ -3,7 +3,7 @@ import { AgentRepo } from '../src/repository/Agent.js';
 import { RoomRepo } from '../src/repository/Room.js';
 import { ToolRepo } from '../src/repository/Tool.js';
 import ChatNode from '../src/services/rooms/ChatNode.js';
-import IRoomsChats from '../src/services/rooms/IRoomsChats.js';
+import ChatContext from '../src/services/rooms/ChatContext.js';
 import RoomTurnBased from '../src/services/rooms/RoomTurnBased.js';
 import { ContentCompleted, LLM_RESPONSE_TYPE } from '../src/types/commons/LlmResponse.js';
 
@@ -43,9 +43,49 @@ describe("Test on CHAT", () => {
 		description: "General agent. Never respond directly but use the tools at my disposal to answer questions.",
 		subAgents: [agentMathRepo],
 	}
-	const agentsRepo: AgentRepo[] = [agentMathRepo, agentAdderRepo, agentLeadRepo]
 
-	const nodeSym: IRoomsChats = {
+	const philosopherRepo: AgentRepo = {
+		id: "id-agent-4",
+		name: "philosopher",
+		description: "You're a philosopher. You know the history of philosophy and its exponents.",
+		subAgents: [agentMathRepo],
+	}
+	const physicistRepo: AgentRepo = {
+		id: "id-agent-5",
+		name: "physicist",
+		description: "You're a physicist. You know the history of physic and its exponents.",
+		subAgents: [agentMathRepo],
+	}
+
+	const agentsRepo: AgentRepo[] = [agentMathRepo, agentAdderRepo, agentLeadRepo, philosopherRepo, physicistRepo]
+
+	class Recorder {
+		constructor() { }
+		messages: { clientId: string, msg: any }[] = []
+		context: ChatContext = {
+			createRoomRepo: async (agents, parentId) => {
+				return <RoomRepo>{
+					id: randomUUID(),
+					parentId: parentId,
+					agents: agents || [],
+				}
+			},
+			getAgentRepoById: async (agentId) => {
+				return agentsRepo.find(agent => agent.id === agentId) || null
+			},
+			executeTool: async (toolId, args) => {
+				return {
+					"id-tool-1": (args: any) => (args.a + args.b).toString()
+				}[toolId]?.(args) ?? null
+			},
+			sendMessageToClient: (clientId, msg) => {
+				console.log(`SEND: ${clientId}`, msg)
+				this.messages.push({ clientId, msg })
+			}
+		}
+	}
+
+	const nodeSym: ChatContext = {
 		createRoomRepo: async (agents, parentId) => {
 			return <RoomRepo>{
 				id: randomUUID(),
@@ -73,7 +113,7 @@ describe("Test on CHAT", () => {
 	})
 
 	test("domanda in MAIN-ROOM con TOOL", async () => {
-		const room = await RoomTurnBased.Build(nodeSym, agentAdderRepo.id)
+		const room = await RoomTurnBased.Build(nodeSym, [agentAdderRepo.id])
 		const chat = await ChatNode.Build(nodeSym, room)
 		await chat.enterClient("id-user")
 		chat.addUserMessage(
@@ -90,7 +130,7 @@ describe("Test on CHAT", () => {
 	}, 100000)
 
 	test("domanda in MAIN-ROOM con SUB-AGENTS", async () => {
-		const room = await RoomTurnBased.Build(nodeSym, agentLeadRepo.id)
+		const room = await RoomTurnBased.Build(nodeSym, [agentLeadRepo.id])
 		const chat = await ChatNode.Build(nodeSym, room)
 		await chat.enterClient("id-user")
 		chat.addUserMessage(
@@ -106,22 +146,38 @@ describe("Test on CHAT", () => {
 
 	}, 100000)
 
-	test("due LLM parlano tra di loro", async () => {
-		const room = RoomViewpoint.Build(nodeSym, [agentLeadRepo.id, xxxx])
-		const chat = ChatNode.Build(nodeSym, room)
-		await chat.enterClient("id-user")
-		chat.addUserMessage(
-			`Don't answer directly, but use the tools available to you. What is 2+2? Just write the answer number.`,
-			"id-user",
-		)
-		const response = await chat.complete()
+	test("due USER parlano tra di loro", async () => {
 
-		console.log("Response:", response)
-		expect(response).not.toBeNull()
-		expect(response?.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>response?.content).answer).toBe("4")
+		const recorder = new Recorder()
+
+		const room = await RoomTurnBased.Build(recorder.context)
+		const chat = await ChatNode.Build(recorder.context, room)
+
+		const user1 = "user-1"
+		const user2 = "user-2"
+
+		chat.enterClient(user1)
+		chat.addUserMessage(`first message from user 1`, user1)
+		chat.enterClient(user2)
+		chat.addUserMessage(`first message from user 2`, user2)
+		chat.addUserMessage(`second message from user 1`, user1)
+
+		debugger
 
 	}, 100000)
 
+	test("due AGENTs", async () => {
+
+		const recorder = new Recorder()
+
+		const room = await RoomTurnBased.Build(recorder.context, [philosopherRepo.id, physicistRepo.id])
+		const chat = await ChatNode.Build(recorder.context, room)
+
+		chat.addUserMessage(`do you like philosophy or physics more?`)
+		const response = await chat.complete()
+
+		debugger
+
+	}, 100000)
 
 })

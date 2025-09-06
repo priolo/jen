@@ -7,7 +7,7 @@ import { BaseS2C } from "@/types/commons/RoomActions.js"
  * Interfaccia da implementare per comunicare con una CHAT
  * permette di collegare la CHAT al REPOSITORY
  */
-interface IRoomsChats {
+interface ChatContext {
 
 	/** Crea una nuova ROOM */
 	createRoomRepo(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null>
@@ -26,4 +26,4 @@ interface IRoomsChats {
 
 }
 
-export default IRoomsChats
+export default ChatContext

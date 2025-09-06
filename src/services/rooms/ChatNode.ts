@@ -1,19 +1,19 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
-import IRoomsChats from "@/services/rooms/IRoomsChats.js";
+import ChatContext from "@/services/rooms/ChatContext.js";
 import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, UserEnteredS2C } from "@/types/commons/RoomActions.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 
 
 /**
- * Implementazione di una CHAT 
- * permette la conversazione degli AGENT e dello USER
- * con gestione di più stanze (ROOM) 
+ * contiente i CLIENTs che vengono aggiornati
+ * contiene le ROOMs dove avvengono le elaborazioni con gli AGENTs
+ * ha node che è il CONTEXT che gli fornisce i REPOSITORY
  */
 class ChatNode {
 	constructor(
-		node: IRoomsChats,
+		node: ChatContext,
 	) {
 		this.node = node;
 	}
@@ -21,7 +21,7 @@ class ChatNode {
 	/** identificativo della CHAT */
 	public id: string = crypto.randomUUID();
 	/** il NODE del contesto */
-	private node: IRoomsChats;
+	private node: ChatContext;
 	/** le ROOM aperte in questa CHAT */
 	private rooms: RoomTurnBased[]
 	/** tutti i client WS */
@@ -30,20 +30,20 @@ class ChatNode {
 
 	//#region HANDLE CHAT OPERATIONS
 
-	static async Build(node: IRoomsChats, room: RoomTurnBased): Promise<ChatNode> {
+	static async Build(node: ChatContext, room: RoomTurnBased): Promise<ChatNode> {
 		const chat = new ChatNode(node)
 		chat.rooms = [room]
 		return chat
 	}
 
 	/**
-	 * comunico alla CHAT che un CLIENT è entrato nella chat
-	 * e lo aggiungo in CHAT
+	 * comunico alla CHAT che il CLIENT è entrato
+	 * aggiungo il CLIENT per aggiornarlo
 	 */
-	async enterClient(clientId: string) {
+	enterClient(clientId: string) {
 		if (!clientId || this.clientsIds.has(clientId)) return;
 		
-		// invio a tutti gli altri CLIENT
+		// avverto gli altri CLIENT
 		const message: ClientEnteredS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
 			chatId: this.id,
@@ -51,7 +51,7 @@ class ChatNode {
 		}
 		this.sendMessage(message)
 
-		// invio al CLIENT che entra la lista delle ROOM
+		// invio al nuovo CLIENT i dati della CHAT
 		const msg: UserEnteredS2C = {
 			action: CHAT_ACTION_S2C.USER_ENTERED,
 			chatId: this.id,
@@ -75,23 +75,23 @@ class ChatNode {
 	 * @return true se la chat è vuota e può essere rimossa
 	 */
 	removeClient(clientId: string): boolean {
-		// INVIO
+		// avverto tutti i CLIENTs
 		const message: BaseS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_LEAVE,
 			chatId: this.id,
 		}
 		this.sendMessage(message)
-		// ---
 
 		this.clientsIds.delete(clientId);
 		return this.clientsIds.size == 0
 	}
 
 	/**
-	 * un MESSAGE di tipo USER è stato inserito in una ROOM della CHAT
-	 * se non si specifica la ROOM allora è la MAIN-ROOM
+	 * MESSAGE di tipo USER è stato inserito in una ROOM della CHAT
+	 * con clientId=null è GENERIC-USER
+	 * con roomId=null  è la MAIN-ROOM
 	 */
-	addUserMessage(text: string, clientId: string, roomId?: string): void {
+	addUserMessage(text: string, clientId?: string, roomId?: string): void {
 		// inserisco il messaggio nella history
 		const room: RoomTurnBased = this.getRoomById(roomId) ?? this.getMainRoom()
 		const chatMessage = room.addUserMessage(text, clientId)

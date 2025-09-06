@@ -1,6 +1,6 @@
 import { LlmRepo } from "@/repository/Llm.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
-import { ContentTool, LLM_RESPONSE_TYPE } from "@/types/commons/LlmResponse.js";
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { envInit } from "@/types/env.js";
 import { createCohere } from "@ai-sdk/cohere";
@@ -82,20 +82,87 @@ export function getModel(llm?: LlmRepo) {
  */
 export function getHistory(history: ChatMessage[]): ModelMessage[] {
 	const vercelHistory: ModelMessage[] = history.flatMap((message: ChatMessage) => {
-		
+
 		if ((typeof message.content) == "string") {
 			return { role: message.role, content: message.content } as UserModelMessage
 		}
 
-		if ( message.content.type == LLM_RESPONSE_TYPE.TOOL || message.content.type == LLM_RESPONSE_TYPE.ASK_TO ){
+		if (message.content.type == LLM_RESPONSE_TYPE.TOOL || message.content.type == LLM_RESPONSE_TYPE.ASK_TO) {
 			const modelMsgs = message.content.responseRaw as ModelMessage[]
 			const result = (<ContentTool>message.content.content).result
 			updateVercelToolResponse(modelMsgs, result)
+		} else {
+
 		}
 
 		return message.content.responseRaw as ModelMessage[]
 	})
 	return vercelHistory
+}
+
+
+/**
+ * Trasformo una HISTORY di tipo ChatMessage in una per VERCEL/AI
+ */
+export function getHistory2(history: ChatMessage[]): ModelMessage[] {
+	const vercelHistory: ModelMessage[] = history.reduce<ModelMessage[]>((acc, message) => {
+
+		if ((typeof message.content) == "string") {
+			return [
+				...acc,
+				{ role: message.role, content: message.content } as UserModelMessage
+			]
+		}
+
+		const toolName = getToolNameByResponse(message.content)
+
+		return [
+			...acc,
+			{
+				role: "assistant",
+				content: [{
+					type: "tool-call",
+					toolName: toolName,
+					input: (message.content as any).content
+				}]
+			} as ModelMessage,
+			{
+				role: "tool",
+				content: [{
+					type: "tool-result",
+					toolName: toolName,
+					output: {
+						type: "text",
+						value: "..."
+					}
+				}]
+			} as ModelMessage,
+		]
+
+	}, [])
+	return vercelHistory
+}
+
+
+function getToolNameByResponse(response: LlmResponse): string {
+
+	switch (response.type) {
+		case LLM_RESPONSE_TYPE.COMPLETED:
+			return "final_answer"
+		case LLM_RESPONSE_TYPE.FAILURE:
+			return "tool"
+		case LLM_RESPONSE_TYPE.STRATEGY:
+			return "update_strategy"
+		case LLM_RESPONSE_TYPE.REASONING:
+			return "get_reasoning"
+		case LLM_RESPONSE_TYPE.ASK_TO:
+			const askToResponse = response.content as ContentAskTo
+			return `chat_with_${askToResponse.agentName ?? askToResponse.agentId}`
+		default:
+			const toolResponse = response.content as ContentTool
+			return toolResponse.toolName
+	}
+
 }
 
 

@@ -9,7 +9,7 @@ import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
 import { BaseS2C, CHAT_ACTION_C2S, UserCreateEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
-import IRoomsChats from "../services/rooms/IRoomsChats.js"
+import ChatContext from "../services/rooms/ChatContext.js"
 import McpServerRoute from "./McpServerRoute.js"
 import RoomTurnBased from "@/services/rooms/RoomTurnBased.js"
 
@@ -20,7 +20,7 @@ export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
 /**
  * WebSocket service for managing prompt chat rooms
  */
-export class WSRoomsService extends ws.route implements IRoomsChats {
+export class WSRoomsService extends ws.route implements ChatContext {
 
 	private chats: ChatNode[] = []
 
@@ -97,7 +97,7 @@ export class WSRoomsService extends ws.route implements IRoomsChats {
 	private async handleEnter(client: ws.IClient, msg: UserCreateEnterC2S) {
 		if (!client?.params.id || !msg?.agentId) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
 
-		const room = await RoomTurnBased.Build(this, msg.agentId)
+		const room = await RoomTurnBased.Build(this, [msg.agentId])
 		const chat = await ChatNode.Build(this, room)
 		await chat.enterClient(client.params.id)
 		this.chats.push(chat)

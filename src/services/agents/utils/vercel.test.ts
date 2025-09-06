@@ -1,6 +1,6 @@
-import { getHistory } from "../src/services/agents/utils/vercel.js";
-import { LLM_RESPONSE_TYPE } from "../src/types/commons/LlmResponse.js";
-import { ChatMessage } from "../src/types/commons/RoomActions.js";
+import { getHistory } from "./vercel.js";
+import { LLM_RESPONSE_TYPE } from "../../../types/commons/LlmResponse.js";
+import { ChatMessage } from "../../../types/commons/RoomActions.js";
 
 describe("Test getHistory function", () => {
 

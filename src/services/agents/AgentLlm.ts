@@ -26,7 +26,7 @@ class AgentLlm {
 
 		// STARTUP
 		const model = getModel(this.agent.llm)
-		const systemPrompt = this.getReactSystemPrompt()
+		const systemPrompt = this.getSystemPrompt()
 		const systemTools = this.getSystemTools()
 		const subagentTools = this.createSubAgentsTools()
 		const agentTools = this.createTools()
@@ -116,6 +116,7 @@ class AgentLlm {
 				continue: true,
 				content: {
 					agentId: agentId,
+					agentName: toolName.replace("chat_with_", ""),
 					question: question,
 				},
 			}
@@ -169,7 +170,7 @@ class AgentLlm {
 					required: ["answer"]
 				}),
 				execute: async (args: any) => {
-					return args.answer
+					return `[${this.agent.name} agent say]:` + args.answer
 				}
 			}),
 
@@ -233,7 +234,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 		return tools
 	}
 
-	createSubAgentsTools() {
+	createSubAgentsTools(): ToolSet {
 		if (!(this.agent?.subAgents?.length > 0)) return {}
 
 		const structs: ToolSet = {}
@@ -281,8 +282,10 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 
 	//#region SYSTEM PROMPT
 
+	public overrideSystemPrompt: (systemPrompt:string) => string = null
+
 	/** System instructions for ReAct agent  */
-	protected getReactSystemPrompt(): string {
+	protected getSystemPrompt(): string {
 		const prompt = `# YOU ARE: ${this.agent.name}.
 ${this.agent.description ?? ""}		
 You are a ReAct agent that solves problems by thinking step by step with reasoning.
@@ -293,6 +296,8 @@ ${this.agent.systemPrompt ?? ""}
 
 Always be explicit in your reasoning. Break down complex problems into steps.
 `;
+
+		if (this.overrideSystemPrompt) return this.overrideSystemPrompt(prompt)
 		return prompt
 	}
 	// ## YOUR MAIN PROCESS:

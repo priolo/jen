@@ -49,6 +49,8 @@ export interface ContentAskTo {
 	roomId?: string;
 	/** id dell'AGENT a cui è stata fatta la domanda */
 	agentId: string
+	/** mi serve per comodità */
+	agentName?: string
 	/** la domanda posta all'AGENT */
 	question: string
 	/** risposta dell'AGENT */

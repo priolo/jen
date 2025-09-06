@@ -1,1 +1,0 @@
-// trasforma un history in una corretta per VERCEL/AI

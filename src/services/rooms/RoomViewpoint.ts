@@ -7,7 +7,7 @@ import { printLlmResponse } from "../agents/utils/print.js";
 import { AGENT_TYPE } from "@/repository/Agent.js";
 import AgentMock from "../agents/AgentMock.js";
 import { updateVercelToolResponse } from "../agents/utils/vercel.js";
-import IRoomsChats from "./IRoomsChats.js";
+import ChatContext from "./ChatContext.js";
 
 
 
@@ -21,7 +21,7 @@ class RoomViewpoint {
 		}
 	}
 
-	static async Build(node: IRoomsChats, agentsIds: string[]): Promise<RoomViewpoint> {
+	static async Build(node: ChatContext, agentsIds: string[]): Promise<RoomViewpoint> {
 		// carico l'agente e lo inserisco nella MAIN-ROOM
 		const agentRepo = await node.getAgentRepoById(agentId)
 		if (!agentRepo) throw new Error(`Agent with id ${agentId} not found`);

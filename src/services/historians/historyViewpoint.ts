@@ -1,1 +1,0 @@
-// trasforma una HISTORY modificando i role per focalizzare la risposta su uno specifico AGENT

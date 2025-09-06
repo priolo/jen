@@ -1,4 +1,4 @@
-import { http, httpRouter, log, ServiceBase, typeorm, ws } from "@priolo/julian";
+import { http, httpRouter, jwt, log, ServiceBase, typeorm, ws } from "@priolo/julian";
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { AgentRepo } from './repository/Agent.js';
@@ -16,6 +16,8 @@ import { McpServerRepo } from "./repository/McpServer.js";
 import tools from "./config_tools.js";
 import { TypeLog } from "@priolo/julian/dist/core/types.js";
 import { envInit } from "./types/env.js";
+import AuthRoute from "./routers/AuthRoute.js";
+import { User } from "./repository/User.js";
 
 
 
@@ -83,6 +85,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 						{ class: LlmRoute },
 						{ class: ToolRoute },
 						{ class: AgentRoute },
+						//{ class: AuthRoute },
 						//{ class: RoomRoute },
 					],
 				},
@@ -135,9 +138,19 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 					class: "typeorm/repo",
 					model: RoomRepo,
 				},
+				{
+					name: "users",
+					class: "typeorm/repo",
+					model: User,
+				},
 			],
 		},
 
+		<jwt.conf> {
+			class: "jwt",
+			secret: "secret_word!!!"
+		},
+		
 		// {
 		// 	class: myState,
 		// 	name: "node.1"

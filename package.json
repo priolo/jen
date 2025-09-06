@@ -35,7 +35,7 @@
     "apache-arrow": "^18.1.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
-    "google-auth-library": "^9.10.0",
+    "google-auth-library": "^10.3.0",
     "langchain": "^0.3.31",
     "mysql2": "^3.9.7",
     "ollama-ai-provider-v2": "^1.1.2",
