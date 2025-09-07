@@ -1,6 +1,6 @@
 import { http, RootService } from "@priolo/julian";
-import buildNodeConfig, { PORT } from "../src/config";
-import { getMcpTools } from "../src/services/mcp/utils.js";
+import buildNodeConfig, { PORT } from "../../config.js";
+import { getMcpTools } from "../mcp/utils.js";
 
 
 

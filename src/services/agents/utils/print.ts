@@ -19,7 +19,7 @@ export function printLlmResponse(name: string, response: LlmResponse): void {
 		case LLM_RESPONSE_TYPE.UNKNOWN: {
 			colorPrint(
 				[name, ColorType.Blue], " : unknown : ",
-				[JSON.stringify(response.responseRaw), ColorType.Magenta]
+				[JSON.stringify(response.content), ColorType.Magenta]
 			)
 		} break
 

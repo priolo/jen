@@ -52,7 +52,7 @@ class AgentLlm {
 			})
 		} catch (err) {
 			return <LlmResponse>{
-				responseRaw: null,
+				//responseRaw: null,
 				type: LLM_RESPONSE_TYPE.FAILURE,
 				continue: false,
 				content: {
@@ -70,22 +70,24 @@ class AgentLlm {
 		// NON E' UN TOOL situazione imprevista... continua a ragionare 
 		if (lastMsg.role != "tool") {
 			return <LlmResponse>{
-				responseRaw: messages,
+				//responseRaw: messages,
 				type: LLM_RESPONSE_TYPE.UNKNOWN,
 				continue: true,
 			}
 		}
 
-		// E' UN TOOL
+
+		// DALLA RISPOSTA RECUPERO I DATI UTILI
 		const content: ToolResultPart = lastMsg.content[0]
 		const toolName: string = content.toolName
 		// per il momento gestisco solo i text
 		const result: any = content.output.value
 
+
 		// FINAL RESPONSE
 		if (toolName == "final_answer") {
 			return <LlmResponse>{
-				responseRaw: messages,
+				//responseRaw: messages,
 				type: LLM_RESPONSE_TYPE.COMPLETED,
 				continue: false,
 				content: {
@@ -98,7 +100,7 @@ class AgentLlm {
 		if (toolName == "ask_for_information") {
 			return <LlmResponse>{
 				type: LLM_RESPONSE_TYPE.ASK_TO,
-				responseRaw: messages,
+				//responseRaw: messages,
 				continue: true,
 				content: {
 					agentId: this.agent.id, // l'agente che ha chiesto l'informazione
@@ -112,7 +114,7 @@ class AgentLlm {
 			const { question, agentId } = result as { question: string, agentId: string }
 			return <LlmResponse>{
 				type: LLM_RESPONSE_TYPE.ASK_TO,
-				responseRaw: messages,
+				//responseRaw: messages,
 				continue: true,
 				content: {
 					agentId: agentId,
@@ -126,7 +128,7 @@ class AgentLlm {
 		if (toolName == "update_strategy") {
 			return <LlmResponse>{
 				type: LLM_RESPONSE_TYPE.STRATEGY,
-				responseRaw: messages,
+				//responseRaw: messages,
 				continue: true,
 				content: {
 					result: result,
@@ -138,7 +140,7 @@ class AgentLlm {
 		if (toolName == "get_reasoning") {
 			return <LlmResponse>{
 				type: LLM_RESPONSE_TYPE.REASONING,
-				responseRaw: messages,
+				//responseRaw: messages,
 				continue: true,
 				content: {
 					result: result,
@@ -149,7 +151,7 @@ class AgentLlm {
 		// E' un TOOL GENERICO
 		return <LlmResponse>{
 			type: LLM_RESPONSE_TYPE.TOOL,
-			responseRaw: messages,
+			//responseRaw: messages,
 			continue: true,
 			content: {
 				toolName: toolName,
@@ -170,29 +172,29 @@ class AgentLlm {
 					required: ["answer"]
 				}),
 				execute: async (args: any) => {
-					return `[${this.agent.name} agent say]:` + args.answer
+					return args.answer
 				}
 			}),
 
-			ask_for_information: tool({
-				description: `You can use this procedure if you don't have enough information from the user.
-For example: 
-User: "give me the temperature where I am now". You: "where are you now?", User: "I am in Paris"
-`,
-				inputSchema: jsonSchema({
-					type: "object",
-					properties: {
-						request: {
-							type: "string",
-							description: "The question to ask to get useful information."
-						}
-					},
-					required: ["request"]
-				}),
-				execute: async (args: any) => {
-					return args.request
-				}
-			}),
+// 			ask_for_information: tool({
+// 				description: `You can use this procedure if you don't have enough information from the user.
+// For example: 
+// User: "give me the temperature where I am now". You: "where are you now?", User: "I am in Paris"
+// `,
+// 				inputSchema: jsonSchema({
+// 					type: "object",
+// 					properties: {
+// 						request: {
+// 							type: "string",
+// 							description: "The question to ask to get useful information."
+// 						}
+// 					},
+// 					required: ["request"]
+// 				}),
+// 				execute: async (args: any) => {
+// 					return args.request
+// 				}
+// 			}),
 
 			update_strategy: tool({
 				description: "Set up a strategy consisting of a list of steps to follow to solve the main problem.", // and try to minimize the use of tools preferring 'reasoning'. ",
@@ -229,7 +231,7 @@ User: "give me the temperature where I am now". You: "where are you now?", User:
 			}),
 		}
 
-		if (!this.agent.askInformation) delete tools.ask_for_information
+		//if (!this.agent.askInformation) delete tools.ask_for_information
 
 		return tools
 	}
@@ -364,3 +366,4 @@ Always be explicit in your reasoning. Break down complex problems into steps.
 }
 
 export default AgentLlm
+

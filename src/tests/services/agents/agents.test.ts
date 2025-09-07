@@ -1,11 +1,8 @@
-import { ToolResultPart } from "ai";
-import { AgentRepo } from "../src/repository/Agent.js";
-import { ChatMessage } from "../src/types/commons/RoomActions.js";
-import AgentLlm from '../src/services/agents/AgentLlm.js';
-import { randomUUID } from "crypto";
-import { ContentAskTo, ContentCompleted, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../src/types/commons/LlmResponse.js";
-import { LLM_MODELS } from "../src/types/commons/LlmProviders.js";
-import { updateVercelToolResponse } from "../src/services/rooms/RoomTurnBased.js";
+import { AgentRepo } from "../../repository/Agent.js";
+import { LLM_MODELS } from "../../types/commons/LlmProviders.js";
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../types/commons/LlmResponse.js";
+import { ChatMessage } from "../../types/commons/RoomActions.js";
+import AgentLlm from '../agents/AgentLlm.js';
 
 
 
@@ -22,7 +19,7 @@ describe("Test on AGENT", () => {
 	test("Test semplice domanda", async () => {
 
 		// creo un agente
-		const agentRepo:AgentRepo = {
+		const agentRepo: AgentRepo = {
 			id: "agent-1",
 			name: "generic",
 			llm: { id: "llm-1", name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
@@ -36,13 +33,13 @@ describe("Test on AGENT", () => {
 		const resp = await agent.ask(history)
 
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>resp.content).answer).toBe("42")
+		expect(resp.content!.result).toBe("42")
 
 	}, 100000)
 
 	test("Test con tool", async () => {
 		// creo un agente
-		const agentRepo:AgentRepo = {
+		const agentRepo: AgentRepo = {
 			id: "agent-1",
 			name: "generic",
 			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
@@ -70,39 +67,31 @@ describe("Test on AGENT", () => {
 		do {
 			response = await agent.ask(history)
 			if (response.type === LLM_RESPONSE_TYPE.TOOL) {
-				const args = (<ContentTool>response.content).args;
-				const toolResult = (+args.a) + (+args.b);
-				const responseTool = response.responseRaw?.find(r => r.role == "tool")
-				const contentResult:ToolResultPart = responseTool?.content?.find( c => c.type === "tool-result") as ToolResultPart
-				if (contentResult) {
-					contentResult.output =  {
-					type: "text",
-					value: toolResult.toString(),
-				}}
+				const content = response.content as ContentTool
+				content.result = (+content.args.a) + (+content.args.b);
 			}
 			history.push({
-				id: randomUUID(),
 				role: "agent",
 				content: response
 			})
 		} while (response.continue)
 
 		expect(response.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>response.content).answer).toBe("4")
+		expect(response.content!.result).toBe("4")
 
 	}, 100000)
 
 	test("call subagent", async () => {
 
 		// creo l'agente sub
-		const agentAdder:AgentRepo = {
+		const agentAdder: AgentRepo = {
 			id: "agent-2",
 			llm: { id: "llm-1", name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
 			name: "adder",
 			description: "I'm an agent who can do additions well",
 		}
 		// creo l'agente leader
-		const agentLead:AgentRepo = {
+		const agentLead: AgentRepo = {
 			id: "agent-1",
 			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
 			name: "lead",
@@ -116,35 +105,39 @@ describe("Test on AGENT", () => {
 		]
 		let response: LlmResponse
 
-		// ciclo leader
+		// ### CICLO LEADER
 		do {
 			response = await agentLeadExe.ask(history)
 
-			history.push({ id: randomUUID(), role: "agent", content: response })
+			history.push({ role: "agent", content: response })
 
 			if (response.type === LLM_RESPONSE_TYPE.ASK_TO) {
 
-				// ciclo sub-agente
-				const agentSub = new AgentLlm(agents.find(a => a.id === (<ContentAskTo>response.content).agentId))
+				// ### CICLO SUB-AGENT
+				const content = response.content as ContentAskTo
+				const agentSub = new AgentLlm(agents.find(a => a.id === content.agentId))
 				const historySub: ChatMessage[] = [
-					{ role: "user", content: (<ContentAskTo>response.content).question },
+					{ role: "user", content: content.question },
 				]
-				let respSub:LlmResponse;
+				let respSub: LlmResponse;
 				do {
 					respSub = await agentSub.ask(historySub)
-					historySub.push({ id: randomUUID(), role: "agent", content: respSub })
+					historySub.push({ role: "agent", content: respSub })
 
 				} while (respSub.continue);
 				// ---
-				
-				updateVercelToolResponse(response.responseRaw, (<ContentCompleted>respSub.content).answer)
+
+				// inserisco la risposta:
+				response.content.result = respSub.content.result
+
 			}
 
 		} while (response.continue)
 		// ---
 
 		expect(response.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>response.content).answer).toBe("4")
+		expect(response.content?.result).toBe("4")
 
 	}, 100000)
+
 })

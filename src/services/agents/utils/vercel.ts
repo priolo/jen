@@ -77,35 +77,15 @@ export function getModel(llm?: LlmRepo) {
 	return model
 }
 
+
 /**
  * Trasformo una HISTORY di tipo ChatMessage in una per VERCEL/AI
  */
 export function getHistory(history: ChatMessage[]): ModelMessage[] {
-	const vercelHistory: ModelMessage[] = history.flatMap((message: ChatMessage) => {
-
-		if ((typeof message.content) == "string") {
-			return { role: message.role, content: message.content } as UserModelMessage
-		}
-
-		if (message.content.type == LLM_RESPONSE_TYPE.TOOL || message.content.type == LLM_RESPONSE_TYPE.ASK_TO) {
-			const modelMsgs = message.content.responseRaw as ModelMessage[]
-			const result = (<ContentTool>message.content.content).result
-			updateVercelToolResponse(modelMsgs, result)
-		} else {
-
-		}
-
-		return message.content.responseRaw as ModelMessage[]
-	})
-	return vercelHistory
-}
-
-
-/**
- * Trasformo una HISTORY di tipo ChatMessage in una per VERCEL/AI
- */
-export function getHistory2(history: ChatMessage[]): ModelMessage[] {
 	const vercelHistory: ModelMessage[] = history.reduce<ModelMessage[]>((acc, message) => {
+
+		if (!message || !message.content)
+			throw new Error("Message or message content is null or undefined")
 
 		if ((typeof message.content) == "string") {
 			return [
@@ -115,6 +95,30 @@ export function getHistory2(history: ChatMessage[]): ModelMessage[] {
 		}
 
 		const toolName = getToolNameByResponse(message.content)
+		const result = (message.content as LlmResponse).content?.result
+		if (!result) throw new Error("Result is null or undefined")
+		const toolCallId = Math.random().toString(36).substring(2, 11)
+
+		let input: any
+		switch (message.content.type) {
+			case LLM_RESPONSE_TYPE.TOOL:
+				input = (message.content.content as ContentTool).args
+				break
+			case LLM_RESPONSE_TYPE.ASK_TO:
+				input = { question: (message.content.content as ContentAskTo).question }
+				break
+			case LLM_RESPONSE_TYPE.COMPLETED:
+				input = { answer: message.content.content.result }
+				break
+			case LLM_RESPONSE_TYPE.STRATEGY:
+				input = { strategy: message.content.content.result }
+				break
+			case LLM_RESPONSE_TYPE.REASONING:
+				input = { thought: message.content.content.result }
+				break
+			default:
+				throw new Error("Unsupported response type for tool call")
+		}
 
 		return [
 			...acc,
@@ -122,18 +126,20 @@ export function getHistory2(history: ChatMessage[]): ModelMessage[] {
 				role: "assistant",
 				content: [{
 					type: "tool-call",
+					toolCallId: toolCallId,
 					toolName: toolName,
-					input: (message.content as any).content
+					input: input,
 				}]
 			} as ModelMessage,
 			{
 				role: "tool",
 				content: [{
 					type: "tool-result",
+					toolCallId: toolCallId,
 					toolName: toolName,
 					output: {
 						type: "text",
-						value: "..."
+						value: result.toString(),
 					}
 				}]
 			} as ModelMessage,
@@ -143,9 +149,7 @@ export function getHistory2(history: ChatMessage[]): ModelMessage[] {
 	return vercelHistory
 }
 
-
 function getToolNameByResponse(response: LlmResponse): string {
-
 	switch (response.type) {
 		case LLM_RESPONSE_TYPE.COMPLETED:
 			return "final_answer"
@@ -162,21 +166,49 @@ function getToolNameByResponse(response: LlmResponse): string {
 			const toolResponse = response.content as ContentTool
 			return toolResponse.toolName
 	}
-
 }
+
+
+
+
+
 
 
 /**
- * Inserisce un risultato dentro il tool-result di VERCEL/AI 
+ * Trasformo una HISTORY di tipo ChatMessage in una per VERCEL/AI
+ */
+// export function getHistory(history: ChatMessage[]): ModelMessage[] {
+// 	const vercelHistory: ModelMessage[] = history.flatMap((message: ChatMessage) => {
+
+// 		if ((typeof message.content) == "string") {
+// 			return { role: message.role, content: message.content } as UserModelMessage
+// 		}
+
+// 		if (message.content.type == LLM_RESPONSE_TYPE.TOOL || message.content.type == LLM_RESPONSE_TYPE.ASK_TO) {
+// 			const modelMsgs = message.content.responseRaw as ModelMessage[]
+// 			const result = (<ContentTool>message.content.content).result
+// 			updateVercelToolResponse(modelMsgs, result)
+// 		} else {
+
+// 		}
+
+// 		return message.content.responseRaw as ModelMessage[]
+// 	})
+// 	return vercelHistory
+// }
+
+
+/**
+ * Inserisce un risultato dentro il tool-result di VERCEL/AI
  * usato per i TOOL e per gli ASK_TO
  */
-function updateVercelToolResponse(responseRaw: ModelMessage[], result: any) {
-	const toolContent = responseRaw
-		.find(r => r.role == "tool")
-		?.content?.find(c => c.type == "tool-result");
-	if (!toolContent) return
-	toolContent.output = {
-		type: (typeof result) == "object" ? "json" : "text",
-		value: result,
-	};
-}
+// function updateVercelToolResponse(responseRaw: ModelMessage[], result: any) {
+// 	const toolContent = responseRaw
+// 		.find(r => r.role == "tool")
+// 		?.content?.find(c => c.type == "tool-result");
+// 	if (!toolContent) return
+// 	toolContent.output = {
+// 		type: (typeof result) == "object" ? "json" : "text",
+// 		value: result,
+// 	};
+// }

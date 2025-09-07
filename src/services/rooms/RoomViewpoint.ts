@@ -95,7 +95,7 @@ class RoomViewpoint {
 				const content = <ContentTool>response.content
 				const result = await this.onTool?.(content.toolId, content.args)
 				content.result = result
-				updateVercelToolResponse(response.responseRaw, result)
+				//updateVercelToolResponse(response.responseRaw, result)
 			}
 
 			if (response.type === LLM_RESPONSE_TYPE.ASK_TO) {
@@ -103,7 +103,7 @@ class RoomViewpoint {
 				const subResponse = await this.onSubAgent?.(agent.agent.id, content.agentId, content.question)
 				content.roomId = subResponse?.roomId
 				content.result = (<ContentCompleted>subResponse?.response?.content)?.result
-				updateVercelToolResponse(response.responseRaw, content.result)
+				//updateVercelToolResponse(response.responseRaw, content.result)
 			}
 
 			const chatMessage = this.addAgentMessage(response, agent.agent.id)
