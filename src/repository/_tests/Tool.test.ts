@@ -1,5 +1,5 @@
 import { RootService } from "@priolo/julian";
-import buildNodeConfig, { PORT } from "../config";
+import buildNodeConfig, { PORT } from "../../config";
 import axios, { AxiosInstance } from "axios";
 
 describe("Test on TOOL router", () => {

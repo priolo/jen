@@ -1,11 +1,11 @@
 import { randomUUID } from 'crypto';
-import { AgentRepo } from '../../repository/Agent.js';
-import { RoomRepo } from '../../repository/Room.js';
-import { ToolRepo } from '../../repository/Tool.js';
-import ChatNode from './ChatNode.js';
-import ChatContext from './ChatContext.js';
-import RoomTurnBased from './RoomTurnBased.js';
-import { LLM_RESPONSE_TYPE } from '../../types/commons/LlmResponse.js';
+import { AgentRepo } from '../../../repository/Agent.js';
+import { RoomRepo } from '../../../repository/Room.js';
+import { ToolRepo } from '../../../repository/Tool.js';
+import ChatNode from '../../rooms/ChatNode.js';
+import ChatContext from '../../rooms/ChatContext.js';
+import RoomTurnBased from '../../rooms/RoomTurnBased.js';
+import { LLM_RESPONSE_TYPE } from '../../../types/commons/LlmResponse.js';
 
 
 

@@ -22,30 +22,20 @@ export enum LLM_RESPONSE_TYPE {
 export interface LlmResponse {
 	type: LLM_RESPONSE_TYPE
 	// la risposta RAW da aggiungere alla history
-	responseRaw: any[]
+	//responseRaw: any[]
 	// se non è la risposta finale
 	continue?: boolean
 
 	// dipende dal type
-	content?: ContentCompleted | ContentAskTo | ContentTool  | ContentStrategy | ContentReasoning | ContentFailure
+	content: ContentBase | ContentAskTo | ContentTool
 }
 
-export interface ContentCompleted {
-	result: string;
-}
-export interface ContentStrategy {
-	result: string;
-}
-export interface ContentReasoning {
-	result: string;
-}
-export interface ContentFailure {
+export interface ContentBase {
 	result: string;
 }
 
-
-export interface ContentAskTo {
-	/**  la SUB-ROOM usata */
+export interface ContentAskTo extends ContentBase {
+	/**  la SUB-ROOM usata, se null è la MAIN-ROOM */
 	roomId?: string;
 	/** id dell'AGENT a cui è stata fatta la domanda */
 	agentId: string
@@ -54,11 +44,10 @@ export interface ContentAskTo {
 	/** la domanda posta all'AGENT */
 	question: string
 	/** risposta dell'AGENT */
-	result?: any
+	result: any
 }
 
-
-export interface ContentTool {
+export interface ContentTool extends ContentBase {
 	/** id del tool */
 	toolId: string;
 	/** se disponibile metto anche il nome */
@@ -66,6 +55,6 @@ export interface ContentTool {
 	// i parametri da passare al tool
 	args: any
 	// risposta del tool
-	result?: any
+	result: any
 }
 

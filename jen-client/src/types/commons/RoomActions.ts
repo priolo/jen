@@ -6,7 +6,7 @@ import { LlmResponse } from "./LlmResponse.js";
  */
 export type ChatMessage = {
 	/** identificativo del MESSAGE */
-	id: string;
+	id?: string;
 	/** identifica di chi è il messaggio. Se null è l'utente principale */
 	clientId?: string
 	/** il ruolo di chi ha scritto il messaggio */
