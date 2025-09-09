@@ -2,7 +2,7 @@ import { AGENT_TYPE, AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
-import { ContentAskTo, ContentCompleted, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import AgentLlm from "../agents/AgentLlm.js";
 import AgentMock from "../agents/AgentMock.js";
 import { printLlmResponse } from "../agents/utils/print.js";
@@ -35,6 +35,18 @@ class RoomTurnBased {
 		const roomRepo = await node.createRoomRepo(agentsRepo, null)
 		const room = new RoomTurnBased(roomRepo)
 		return room
+	}
+	/**
+	 * Costruisce un messaggio di tipo AGENT
+	 */
+	private static BuildAgentMessage(llmResponse: LlmResponse, clientId: string): ChatMessage {
+		const msg: ChatMessage = {
+			id: randomUUID(),
+			clientId: clientId,
+			role: "agent",
+			content: llmResponse,
+		}
+		return msg;
 	}
 
 	/** 
@@ -71,29 +83,13 @@ class RoomTurnBased {
 		return msg;
 	}
 
-	private addAgentMessage(llmResponse: LlmResponse, clientId: string): ChatMessage {
-		const msg: ChatMessage = {
-			id: randomUUID(),
-			clientId: clientId,
-			role: "agent",
-			content: llmResponse,
-		}
-		this.room.history.push(msg)
-		return msg;
-	}
+	
 
-	/**
-	 * restituisco l'AGENT che deve rispondere al prossimo turno
-	 */
-	private getNextTurn(): number {
-		const history = this.room.history?.filter(m => m.role != "user")
-		const lastMessage = history?.[history.length - 1]
-		if (!lastMessage) return 0
 
-		const lastIndex = this.room.agents.findIndex(a => a.id == lastMessage.clientId)
-		const nextIndex = (lastIndex + 1) % this.room.agents.length
 
-		return nextIndex
+	public async getResponse(): Promise<LlmResponse> {
+		//return this.getResponseSerial()
+		return this.getResponseParallel()
 	}
 
 
@@ -101,28 +97,67 @@ class RoomTurnBased {
 	 * Restituiese un LlmResponse dopo aver processato tutti i turni necessari
 	 * ha degli "eventi" per gestire l'uso di tool o sub-agenti
 	 */
-	public async getResponse(): Promise<LlmResponse> {
+	private async getResponseSerial(): Promise<LlmResponse> {
 		if (this.room.agents.length == 0) return null
 
-		let nextIndex: number
-		do {
-			nextIndex = this.getNextTurn()
-			const agentRepo = this.room.agents[nextIndex]
-			const response = await this.getAgentResponse(agentRepo)
-			console.log(`[RoomTurnBased] Agent ${agentRepo.name} has responded`)
-		} while (nextIndex < this.room.agents.length - 1)
+		const responses: LlmResponse[] = []
+		let index = this.getStartIndex()
 
-		return null
+		for (let i = 0; i < this.room.agents.length; i++) {
+			index = (index + 1) % this.room.agents.length
+			const agentRepo = this.room.agents[index]
+			const history = await this.getAgentResponse(agentRepo, this.room.history)
+			responses.push(history[history.length - 1].content as LlmResponse)
+		}
 
+		return responses[responses.length - 1]
+	}
+	/**
+	 * restituisco l'AGENT che deve rispondere al prossimo turno
+	 */
+	private getStartIndex(): number {
+		const history = this.room.history?.filter(m => m.role != "user")
+		const lastMessage = history?.[history.length - 1]
+		if (!lastMessage) return -1
+
+		const lastIndex = this.room.agents.findIndex(a => a.id == lastMessage.clientId)
+		const nextIndex = (lastIndex + 1) % this.room.agents.length
+
+		return nextIndex
 	}
 
-	private async getAgentResponse(agentRepo: AgentRepo): Promise<LlmResponse> {
+	private async getResponseParallel(): Promise<LlmResponse> {
+		if (this.room.agents.length == 0) return null
+
+		const startIndex = this.room.history.length 
+
+		const promises = this.room.agents.map(agentRepo => this.getAgentResponse(agentRepo, [...this.room.history]))
+		const histories = await Promise.all(promises)
+
+		for ( const h of histories) {
+			this.room.history.push(...h.slice(startIndex))
+		}
+
+		return this.room.history[this.room.history.length - 1].content as LlmResponse
+	}
+
+
+
+
+
+
+
+
+
+
+	private async getAgentResponse(agentRepo: AgentRepo, history: ChatMessage[]): Promise<ChatMessage[]> {
 		if (!agentRepo) return null;
 
+		// creo l'AGENT
 		//const agent = agentRepo.type == AGENT_TYPE.MOCK ? new AgentMock(agentRepo) : new AgentLlm(agentRepo)
 		const agent = new AgentLlm(agentRepo)
 
-		// se ci sono piu' agenti...
+		// SYSTEM: se ci sono piu' agenti...
 		if (this.room.agents.length > 1) {
 			const agentsList = this.room.agents
 				.filter(a => a.id != agent.agent.id)
@@ -138,10 +173,10 @@ When it's your turn, provide your response based on the conversation history.
 		}
 
 
+		// LOOP
 		let response: LlmResponse;
-
 		do {
-			response = await agent.ask(this.room.history)
+			response = await agent.ask(history)
 
 			printLlmResponse(agent.agent.name, response)
 
@@ -155,15 +190,16 @@ When it's your turn, provide your response based on the conversation history.
 				const content = <ContentAskTo>response.content
 				const subResponse = await this.onSubAgent?.(agent.agent.id, content.agentId, content.question)
 				content.roomId = subResponse?.roomId
-				content.result = (<ContentCompleted>subResponse?.response?.content)?.result
+				content.result = subResponse?.response?.content?.result
 			}
 
-			const chatMessage = this.addAgentMessage(response, agent.agent.id)
+			const chatMessage = RoomTurnBased.BuildAgentMessage(response, agent.agent.id)
+			history.push(chatMessage)
 			this.onMessage?.(chatMessage, this.room.id)
 
 		} while (response.continue)
 
-		return response
+		return history
 	}
 
 

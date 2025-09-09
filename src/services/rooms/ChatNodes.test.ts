@@ -2,10 +2,10 @@ import { randomUUID } from 'crypto';
 import { AgentRepo } from '../../repository/Agent.js';
 import { RoomRepo } from '../../repository/Room.js';
 import { ToolRepo } from '../../repository/Tool.js';
-import ChatNode from '../rooms/ChatNode.js';
-import ChatContext from '../rooms/ChatContext.js';
-import RoomTurnBased from '../rooms/RoomTurnBased.js';
-import { ContentCompleted, LLM_RESPONSE_TYPE } from '../../types/commons/LlmResponse.js';
+import ChatNode from './ChatNode.js';
+import ChatContext from './ChatContext.js';
+import RoomTurnBased from './RoomTurnBased.js';
+import { LLM_RESPONSE_TYPE } from '../../types/commons/LlmResponse.js';
 
 
 
@@ -45,13 +45,13 @@ describe("Test on CHAT", () => {
 	}
 
 	const philosopherRepo: AgentRepo = {
-		id: "id-agent-4",
+		id: "id-agent-philosopher",
 		name: "philosopher",
 		description: "You're a philosopher. You know the history of philosophy and its exponents.",
 		subAgents: [agentMathRepo],
 	}
 	const physicistRepo: AgentRepo = {
-		id: "id-agent-5",
+		id: "id-agent-physicist",
 		name: "physicist",
 		description: "You're a physicist. You know the history of physic and its exponents.",
 		subAgents: [agentMathRepo],
@@ -125,7 +125,7 @@ describe("Test on CHAT", () => {
 		console.log("Response:", response)
 		expect(response).not.toBeNull()
 		expect(response?.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>response?.content).result).toBe("4")
+		expect(response?.content.result).toBe("4")
 
 	}, 100000)
 
@@ -142,7 +142,7 @@ describe("Test on CHAT", () => {
 		console.log("Response:", response)
 		expect(response).not.toBeNull()
 		expect(response?.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>response?.content).result).toBe("4")
+		expect(response?.content.result).toBe("4")
 
 	}, 100000)
 

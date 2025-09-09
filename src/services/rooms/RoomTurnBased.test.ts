@@ -1,13 +1,16 @@
 import { AgentRepo } from "../../repository/Agent.js";
 import { RoomRepo } from "../../repository/Room.js";
 import { TOOL_TYPE, ToolRepo } from "../../repository/Tool.js";
-import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
-import RoomTurnBased from '../rooms/RoomTurnBased.js';
+import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
+import RoomTurnBased from './RoomTurnBased.js';
 
 
 
 describe("Test on ROOM", () => {
 
+	/**
+	 * tool di ADDITION
+	 */
 	const addTool: ToolRepo = {
 		id: "id-tool-1",
 		type: TOOL_TYPE.CODE,
@@ -22,9 +25,16 @@ describe("Test on ROOM", () => {
 			required: ["a", "b"]
 		}
 	}
+
+	/**
+	 * Simulo l'esecuzione di un TOOL
+	 */
 	const toolsExe = (id: string, args: any) => ({
 		"id-tool-1": (args: any) => (args.a + args.b).toString()
 	}[id]?.(args) ?? null)
+
+
+
 
 	beforeAll(async () => {
 	})
@@ -50,7 +60,7 @@ describe("Test on ROOM", () => {
 
 		expect(resp).toBeDefined()
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED);
-		expect((resp.content as ContentCompleted).answer).toBe("42");
+		expect(resp.content.result).toBe("42");
 
 	}, 100000)
 
@@ -75,7 +85,7 @@ describe("Test on ROOM", () => {
 
 		expect(resp).toBeDefined()
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED);
-		expect((resp.content as ContentCompleted).answer).toBe("4");
+		expect(resp.content.result).toBe("4");
 
 	}, 100000)
 
@@ -83,75 +93,74 @@ describe("Test on ROOM", () => {
 
 		// creo l'agente sub
 		const agentAdderRepo: AgentRepo = {
-			id: "id-2",
+			id: "id-agent-adder",
 			name: "adder",
 			description: "I'm an agent who can do additions well",
 		}
 		// creo l'agente leader
 		const agentLeadRepo: AgentRepo = {
-			id: "id-1",
+			id: "id-agent-lead",
 			name: "lead",
+			//description: "",
 			subAgents: [agentAdderRepo],
 		}
 		const agentsRepo: AgentRepo[] = [agentAdderRepo, agentLeadRepo]
 
-
+		// creo la ROOM-MAIN
 		const roomRepo: RoomRepo = {
-			id: "id-room-1",
+			id: "id-room-main",
 			history: [],
 			agents: [agentLeadRepo],
 		}
 		const room = new RoomTurnBased(roomRepo)
-		room.onSubAgent = async (agentId, question) => {
-			const agentRepo = agentsRepo.find(a => a.id === agentId);
-			if (!agentRepo) return null;
+
+
+
+		room.onSubAgent = async (requestAgentId, agentId, question) => {
+			const agentRepo = agentsRepo.find(a => a.id === agentId)!
 			const room = new RoomTurnBased({
 				id: "sub-room",
 				history: [],
 				agents: [agentRepo],
 			})
-			room.addUserMessage(question)
-			const resp = await room.getResponse()
-			if (resp.type == LLM_RESPONSE_TYPE.COMPLETED) {
-				return (<ContentCompleted>resp.content).answer
-			}
-			return null;
+			room.addUserMessage(question, requestAgentId)
+			const response = await room.getResponse()
+			return { response, roomId: room.room.id }
 		}
 
 		room.addUserMessage("How much is 2+2? Just write the result.")
 		const resp = await room.getResponse()
 
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>resp.content).answer).toBe("4")
+		expect(resp.content.result).toBe("4")
 
 	}, 100000)
-
 
 	test("chiamata ricorsiva ", async () => {
 
 		const agentAdderRepo: AgentRepo = {
-			id: "id-1",
+			id: "id-agent-adder",
 			name: "adder",
 			description: "Agent who can do additions well",
 			tools: [addTool],
 		}
 		const agentMathRepo: AgentRepo = {
-			id: "id-2",
+			id: "id-agent-math",
 			name: "math",
 			description: "Agent who deals with mathematics",
 			subAgents: [agentAdderRepo],
 		}
 		const agentLeadRepo: AgentRepo = {
-			id: "id-3",
+			id: "id-agent-lead",
 			name: "lead",
-			description: "General agent. Never respond directly but use the tools at my disposal to answer questions.",
+			description: "Never respond directly but use the tools at my disposal to answer questions.",
 			subAgents: [agentMathRepo],
 		}
 		const agentsRepo: AgentRepo[] = [agentMathRepo, agentAdderRepo, agentLeadRepo]
 
 
 		const roomRepoRoot: RoomRepo = {
-			id: "id-room-1",
+			id: "id-room-main",
 			history: [],
 			agents: [agentLeadRepo],
 		}
@@ -160,29 +169,43 @@ describe("Test on ROOM", () => {
 		const agentTimeline: string[] = []
 
 		async function recursiveRequest(roomRepo: RoomRepo, question: string): Promise<LlmResponse> {
-			agentTimeline.push(roomRepo?.agents?.[0]?.id ?? "")
 
+			// recupero l'agente principale della room
+			const roomAgent = roomRepo.agents?.[0]!
+			agentTimeline.push(roomAgent?.id ?? "")
+
+			// istanzio la ROOM-REPO
 			const room = new RoomTurnBased(roomRepo)
 			room.onTool = (toolId, args) => toolsExe(toolId, args)
-			room.onSubAgent = async (agentId, question) => {
-				const agentRepo = agentsRepo.find(a => a.id === agentId);
-				if (!agentRepo) return null;
+			room.onSubAgent = async (requestAgentId, agentId, question) => {
+
+				// recupero l'agente che risponde
+				const agentRepo = agentsRepo.find(a => a.id === agentId)!
+
+				// creo una ROOM al volo
 				const roomRepo: RoomRepo = {
 					id: "sub-room",
 					history: [],
 					agents: [agentRepo],
 				}
-				return recursiveRequest(roomRepo, question)
+
+				// chiamo ricorsivamente la funzione
+				return {
+					response: await recursiveRequest(roomRepo, question),
+					roomId: roomRepo.id
+				}
 			}
-			room.addUserMessage(question)
-			return room.getResponse()
+
+			// inserisco la domanda e chiedo la risposta
+			room.addUserMessage(question, roomAgent.id)
+			return await room.getResponse()
 		}
 
 
 		const resp = await recursiveRequest(roomRepoRoot, question)
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
-		expect((<ContentCompleted>resp.content).answer).toBe("4")
-		expect(agentTimeline).toEqual(["id-3", "id-2", "id-1"])
+		expect(resp.content.result).toBe("4")
+		expect(agentTimeline).toEqual(["id-agent-lead", "id-agent-math", "id-agent-adder"])
 
 	}, 100000)
 

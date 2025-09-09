@@ -2,11 +2,10 @@ import { RoomRepo } from "@/repository/Room.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
 import AgentLlm from "../agents/AgentLlm.js";
-import { ContentAskTo, ContentCompleted, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import { printLlmResponse } from "../agents/utils/print.js";
 import { AGENT_TYPE } from "@/repository/Agent.js";
 import AgentMock from "../agents/AgentMock.js";
-import { updateVercelToolResponse } from "../agents/utils/vercel.js";
 import ChatContext from "./ChatContext.js";
 
 
@@ -102,7 +101,7 @@ class RoomViewpoint {
 				const content = <ContentAskTo>response.content
 				const subResponse = await this.onSubAgent?.(agent.agent.id, content.agentId, content.question)
 				content.roomId = subResponse?.roomId
-				content.result = (<ContentCompleted>subResponse?.response?.content)?.result
+				content.result = subResponse?.response?.content?.result
 				//updateVercelToolResponse(response.responseRaw, content.result)
 			}
 

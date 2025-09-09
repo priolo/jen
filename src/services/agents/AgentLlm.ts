@@ -56,7 +56,7 @@ class AgentLlm {
 				type: LLM_RESPONSE_TYPE.FAILURE,
 				continue: false,
 				content: {
-					result: "Unprocessable Entity"
+					result: err
 				},
 			}
 		}

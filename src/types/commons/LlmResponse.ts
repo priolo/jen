@@ -27,24 +27,14 @@ export interface LlmResponse {
 	continue?: boolean
 
 	// dipende dal type
-	content: ContentCompleted | ContentAskTo | ContentTool  | ContentStrategy | ContentReasoning | ContentFailure
+	content: ContentBase | ContentAskTo | ContentTool
 }
 
-export interface ContentCompleted {
-	result: string;
-}
-export interface ContentStrategy {
-	result: string;
-}
-export interface ContentReasoning {
-	result: string;
-}
-export interface ContentFailure {
+export interface ContentBase {
 	result: string;
 }
 
-
-export interface ContentAskTo {
+export interface ContentAskTo extends ContentBase {
 	/**  la SUB-ROOM usata, se null è la MAIN-ROOM */
 	roomId?: string;
 	/** id dell'AGENT a cui è stata fatta la domanda */
@@ -54,11 +44,10 @@ export interface ContentAskTo {
 	/** la domanda posta all'AGENT */
 	question: string
 	/** risposta dell'AGENT */
-	result?: any
+	result: any
 }
 
-
-export interface ContentTool {
+export interface ContentTool extends ContentBase {
 	/** id del tool */
 	toolId: string;
 	/** se disponibile metto anche il nome */

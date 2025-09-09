@@ -1,7 +1,7 @@
 import { http, RootService } from "@priolo/julian";
 import axios, { AxiosInstance } from "axios";
-import buildNodeConfig, { PORT } from "../../config";
-import { AgentRepo } from "../../repository/Agent";
+import buildNodeConfig, { PORT } from "../config";
+import { AgentRepo } from "./Agent";
 
 
 

@@ -1,4 +1,4 @@
-import { ContentAskTo, ContentCompleted, ContentFailure, ContentReasoning, ContentStrategy, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse.js"
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse.js"
 import { colorPrint, ColorType } from "@/utils/index.js"
 
 
@@ -8,10 +8,9 @@ export function printLlmResponse(name: string, response: LlmResponse): void {
 	switch (response.type) {
 
 		case LLM_RESPONSE_TYPE.FAILURE: {
-			const content = response.content as ContentFailure
 			colorPrint(
 				[name, ColorType.Blue], " : failure : ",
-				[content.result, ColorType.Red]
+				[response.content.result, ColorType.Red]
 			)
 		} break
 
@@ -24,10 +23,9 @@ export function printLlmResponse(name: string, response: LlmResponse): void {
 		} break
 
 		case LLM_RESPONSE_TYPE.COMPLETED: {
-			const content = response.content as ContentCompleted
 			colorPrint(
 				[name, ColorType.Blue], " : final answer: ",
-				[content.result, ColorType.Green]
+				[response.content.result, ColorType.Green]
 			)
 		} break
 
@@ -41,18 +39,16 @@ export function printLlmResponse(name: string, response: LlmResponse): void {
 		} break
 
 		case LLM_RESPONSE_TYPE.STRATEGY: {
-			const content = response.content as ContentStrategy
 			colorPrint([
 				name, ColorType.Blue], " : strategy : ",
-				[content.result, ColorType.Magenta]
+				[response.content.result, ColorType.Magenta]
 			)
 		} break
 
 		case LLM_RESPONSE_TYPE.REASONING: {
-			const content = response.content as ContentReasoning
 			colorPrint(
 				[name, ColorType.Blue], " : reasoning : ",
-				[content.result, ColorType.Magenta]
+				[response.content.result, ColorType.Magenta]
 			)
 		} break
 

@@ -2,7 +2,7 @@ import { AgentRepo } from "../../repository/Agent.js";
 import { LLM_MODELS } from "../../types/commons/LlmProviders.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../types/commons/LlmResponse.js";
 import { ChatMessage } from "../../types/commons/RoomActions.js";
-import AgentLlm from '../agents/AgentLlm.js';
+import AgentLlm from './AgentLlm.js';
 
 
 
