@@ -1,7 +1,8 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { LlmRepo } from './Llm.js';
+import { LlmRepo } from './Provider.js';
 import { RoomRepo } from './Room.js';
 import { ToolRepo } from './Tool.js';
+import { LLM_MODELS } from '@/types/commons/LlmProviders.js';
 
 
 
@@ -22,6 +23,10 @@ export class AgentRepo {
     /** nome dell'agente */
     @Column({ type: 'varchar', default: '' })
     name: string;
+
+    /** codice del PROVIDER dell'LLM */
+    @Column({ type: 'varchar', nullable: true })
+    llmCode?: LLM_MODELS | null
 
     /** Descrive l'agent nel tool */
     @Column({ type: 'varchar', default: '' })
@@ -49,13 +54,17 @@ export class AgentRepo {
 
     // RELATIONSHIPS
 
-    // LLM
-    /** il nome dell'LLM utilizzato di default */
-    @ManyToOne(() => LlmRepo, llm => llm.agents, { nullable: true })
-    @JoinColumn({ name: 'llmId' })
-    llm?: LlmRepo | null
-    @Column({ type: 'uuid', nullable: true })
-    llmId?: string | null
+
+
+    // // LLM
+    // /** il nome dell'LLM utilizzato di default */
+    // @ManyToOne(() => LlmRepo, llm => llm.agents, { nullable: true })
+    // @JoinColumn({ name: 'llmId' })
+    // llm?: LlmRepo | null
+    // @Column({ type: 'uuid', nullable: true })
+    // llmId?: string | null
+    // LLM CODE
+    
 
 
     // AGENT BASE (inheritance relationship)

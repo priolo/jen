@@ -33,7 +33,7 @@ class AgentLlm {
 
 
 		let provider = null
-		switch (this.agent?.llm?.name) {
+		switch (this.agent?.llm?.code) {
 			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
 			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH_PRO:
 			case LLM_MODELS.GOOGLE_GEMINI_2_5_PRO_EXP:
@@ -54,7 +54,7 @@ class AgentLlm {
 				break;
 		}
 		let model = null
-		switch (this.agent?.llm?.name) {
+		switch (this.agent?.llm?.code) {
 			case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
 				model = provider('gemini-2.0-flash')
 				break;

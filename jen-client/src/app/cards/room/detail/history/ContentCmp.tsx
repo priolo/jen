@@ -1,4 +1,4 @@
-import { ContentAskTo, ContentCompleted, ContentReasoning, ContentStrategy, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse"
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse"
 import { FunctionComponent } from "react"
 import cls from "./MessageCmp.module.css"
 import { Button } from "@priolo/jack"
@@ -34,9 +34,9 @@ const ContentCmp: FunctionComponent<Props> = ({
 				[LLM_RESPONSE_TYPE.TOOL]: <div className={cls.historyText}>
 					{JSON.stringify((response.content as ContentTool)?.result)}
 				</div>,
-				[LLM_RESPONSE_TYPE.COMPLETED]: <div className={cls.historyText}>{(response.content as ContentCompleted)?.result}</div>,
-				[LLM_RESPONSE_TYPE.STRATEGY]: <div className={cls.historyText}>{(response.content as ContentStrategy)?.result}</div>,
-				[LLM_RESPONSE_TYPE.REASONING]: <div className={cls.historyText}>{(response.content as ContentReasoning)?.result}</div>,
+				[LLM_RESPONSE_TYPE.COMPLETED]: <div className={cls.historyText}>{response.content?.result}</div>,
+				[LLM_RESPONSE_TYPE.STRATEGY]: <div className={cls.historyText}>{response.content?.result}</div>,
+				[LLM_RESPONSE_TYPE.REASONING]: <div className={cls.historyText}>{response.content?.result}</div>,
 			}[response.type] ?? null}
 		</div>
 	)

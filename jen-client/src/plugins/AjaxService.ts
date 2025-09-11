@@ -15,6 +15,7 @@ enum METHOD {
 
 const optionsDefault = {
 	baseUrl: import.meta.env.VITE_API_URL ?? "/api/",
+	/** si tratta di una richiesta di login */
 	isLogin: false,
 	loading: true,
 	noError: false,
@@ -67,7 +68,7 @@ export class AjaxService {
 			const loadStore = <LoadBaseStore>options.store
 			if (options.loading) loadStore?.setLoadingState?.(LOAD_STATE.LOADING)
 			if (options.manageAbort && !!loadStore && !options.signal) {
-				if ( !!loadStore.state.fetchAbort ) loadStore.fetchAbort?.()
+				if (!!loadStore.state.fetchAbort) loadStore.fetchAbort?.()
 				loadStore.state.fetchAbort = new AbortController()
 				options.signal = loadStore.state.fetchAbort.signal
 			}
@@ -78,6 +79,7 @@ export class AjaxService {
 					headers,
 					body: data ? JSON.stringify(data) : undefined,
 					signal: options.signal,
+					...(options.isLogin ? { credentials: 'include' } : {})
 				}
 			)
 		} catch (e) {
@@ -118,6 +120,7 @@ export class AjaxService {
 			if (options.loading) (<LoadBaseStore>options.store)?.setLoadingState?.(LOAD_STATE.ERROR)
 			throw error
 		}
+		
 		return ret
 	}
 }

@@ -3,7 +3,7 @@ import { typeorm } from "@priolo/julian";
 import { AGENT_TYPE, AgentRepo } from "./repository/Agent.js";
 import { TOOL_TYPE, ToolRepo } from "./repository/Tool.js";
 import { McpServerRepo } from "./repository/McpServer.js";
-import { LlmRepo } from "./repository/Llm.js";
+import { LlmRepo } from "./repository/Provider.js";
 import { LLM_MODELS } from "./types/commons/LlmProviders.js";
 import { envInit } from "./types/env.js";
 
@@ -18,8 +18,8 @@ export async function seeding(root: RootService) {
 		type: typeorm.RepoStructActions.SEED,
 		payload: <LlmRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{ name: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY },
-			{ name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY },
+			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY },
+			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY },
 		]
 	});
 

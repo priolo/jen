@@ -1,4 +1,4 @@
-import { LlmRepo } from "@/repository/Llm.js";
+import { LlmRepo } from "@/repository/Provider.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 

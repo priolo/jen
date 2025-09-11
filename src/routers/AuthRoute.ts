@@ -1,7 +1,8 @@
 import crypto from "crypto"
 import { Request, Response } from "express"
 import { OAuth2Client } from 'google-auth-library'
-import { Bus, RepoRestActions, email as emailNs, httpRouter, jwt, typeorm } from "@priolo/julian"
+import { Bus, httpRouter, jwt, typeorm } from "@priolo/julian"
+
 
 
 
@@ -23,8 +24,8 @@ class AuthRoute extends httpRouter.Service {
 				{ path: "/current", verb: "get", method: "current" },
 				{ path: "/logout", verb: "post", method: "logout" },
 
-				{ path: "/register", verb: "post", method: "registerUser" },
-				{ path: "/activate", verb: "post", method: "activate" },
+				//{ path: "/register", verb: "post", method: "registerUser" },
+				//{ path: "/activate", verb: "post", method: "activate" },
 				{ path: "/login", verb: "post", method: "login" },
 			]
 		}
@@ -40,13 +41,22 @@ class AuthRoute extends httpRouter.Service {
 		}
 
 		try {
-			// Verifica il token (puoi usare una libreria come jsonwebtoken per verificarlo)
-			const ticket = await client.verifyIdToken({
-				idToken: token,
-				audience: '106027300810-0udm0cjghhjr87626qrvcoug5ahgq1bh.apps.googleusercontent.com',
+			const data = await new Bus(this, "/jwt").dispatch({
+				type: jwt.Actions.DECODE,
+				payload:  token,
 			})
+			console.log( data )
+
+			//#region GOOGLE
+			// Verifica il token (puoi usare una libreria come jsonwebtoken per verificarlo)
+			// const ticket = await client.verifyIdToken({
+			// 	idToken: token,
+			// 	audience: '106027300810-0udm0cjghhjr87626qrvcoug5ahgq1bh.apps.googleusercontent.com',
+			// })
 			// verificato. mando il payload di JWT
-			const payload = ticket.getPayload();
+			//const payload = ticket.getPayload();
+			//#endregion
+
 			res.status(200).json({ user: payload });
 		} catch (error) {
 			// NON verificato
@@ -70,16 +80,6 @@ class AuthRoute extends httpRouter.Service {
 			});
 			const payload = ticket.getPayload();
 
-			// Genera il token JWT con l'email nel payload
-			const jwtToken = await new Bus(this, "/jwt").dispatch({
-				type: jwt.Actions.ENCODE,
-				payload: {
-					payload: {
-						email: payload.email,
-					}
-				},
-			})
-
 			// cerco lo USER tramite email
 			const users: any[] = await new Bus(this, "/typeorm/users").dispatch({
 				type: typeorm.Actions.FIND,
@@ -93,7 +93,7 @@ class AuthRoute extends httpRouter.Service {
 			// se non c'e' allora creo un nuovo USER
 			if (!user) {
 				user = await new Bus(this, "/typeorm/users").dispatch({
-					type: RepoRestActions.SAVE,
+					type: typeorm.RepoRestActions.SAVE,
 					payload: {
 						email: payload.email,
 						name: payload.name,
@@ -103,6 +103,20 @@ class AuthRoute extends httpRouter.Service {
 					}
 				})
 			}
+
+			// Genera il token JWT con l'email nel payload
+			const jwtToken = await new Bus(this, "/jwt").dispatch({
+				type: jwt.Actions.ENCODE,
+				payload: {
+					payload: {
+						email: payload.email,
+						avatar: "",
+
+					}
+				},
+			})
+
+
 
 			// salvo JWT nel PROVIDER dello USER
 			// [II] capire se è necessario
@@ -119,7 +133,8 @@ class AuthRoute extends httpRouter.Service {
 			// }
 
 			// memorizzo JWT nei cookies. Imposta il cookie HTTP-only
-			res.cookie('jwt', jwtToken, {
+			//res.cookie('jwt', jwtToken, {
+			res.cookie('jwt', token, {
 				httpOnly: true,
 				secure: process.env.NODE_ENV === 'production', // Assicurati di usare secure solo in produzione
 				maxAge: 24 * 60 * 60 * 1000, // 1 giorno
@@ -138,52 +153,50 @@ class AuthRoute extends httpRouter.Service {
 	/**
 	 * Grazie all'"email" registra un nuovo utente
 	 */
-	async registerUser(req: Request, res: Response) {
-		const { email: emailPath, repository } = this.state
-		const { email } = req.body
-		const emailService = new PathFinder(this).getNode<emailNs.Service>(emailPath)
-		const userService = new PathFinder(this).getNode<typeorm.repo>(repository)
+	// async registerUser(req: Request, res: Response) {
+	// 	const { email: emailPath, repository } = this.state
+	// 	const { email } = req.body
+	// 	const emailService = new PathFinder(this).getNode<emailNs.Service>(emailPath)
+	// 	const userService = new PathFinder(this).getNode<typeorm.repo>(repository)
 
-		// creo il codice segreto da inviare per email
-		const code = process.env.NODE_ENV == ENV_TYPE.TEST ? "AAA" : crypto.randomBytes(8).toString('hex')
+	// 	// creo il codice segreto da inviare per email
+	// 	const code = process.env.NODE_ENV == ENV_TYPE.TEST ? "AAA" : crypto.randomBytes(8).toString('hex')
 
-		// creo un utente temporaneo con il codice da attivare
-		await userService.dispatch({
-			type: RepoRestActions.SAVE,
-			payload: {
-				email,
-				salt: code,
-			}
-		})
+	// 	// creo un utente temporaneo con il codice da attivare
+	// 	await userService.dispatch({
+	// 		type: RepoRestActions.SAVE,
+	// 		payload: {
+	// 			email,
+	// 			salt: code,
+	// 		}
+	// 	})
 
-		// invio l'email per l'attivazione del codice
-		await emailService.dispatch({
-			type: emailNs.Actions.SEND,
-			payload: {
-				from: "from@test.com",
-				to: "to@test.com",
-				subject: "Richiesta registraziuone",
-				html: `
-					<div>ue ueue ti vuoi reggggistrare! he?</div> 
-					<div>questo è il codice</div> 
-					<div>${code}</div> 
-					<a href="http://localhost:8080/api/activate?code=${code}">registrami ti prego!</a>
-				`,
-			}
-		})
+	// 	// invio l'email per l'attivazione del codice
+	// 	await emailService.dispatch({
+	// 		type: emailNs.Actions.SEND,
+	// 		payload: {
+	// 			from: "from@test.com",
+	// 			to: "to@test.com",
+	// 			subject: "Richiesta registraziuone",
+	// 			html: `
+	// 				<div>ue ueue ti vuoi reggggistrare! he?</div> 
+	// 				<div>questo è il codice</div> 
+	// 				<div>${code}</div> 
+	// 				<a href="http://localhost:8080/api/activate?code=${code}">registrami ti prego!</a>
+	// 			`,
+	// 		}
+	// 	})
 
-		res.status(200).json({ data: "activate:ok" })
-	}
+	// 	res.status(200).json({ data: "activate:ok" })
+	// }
 
 	/**
 	 * Permette di attivare un utente confermado con il "code" e la "password"
 	 */
 	async activate(req: Request, res: Response) {
-		const { repository } = this.state
 		var { code, password } = req.body
-		const userService = new PathFinder(this).getNode<typeorm.repo>(repository)
 
-		const users = await userService.dispatch({
+		const users = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: { where: { salt: code } }
 		})
@@ -196,8 +209,8 @@ class AuthRoute extends httpRouter.Service {
 		// Hashing user's salt and password with 1000 iterations, 
 		user.password = crypto.pbkdf2Sync(password, user.salt, 1000, 64, `sha512`).toString(`hex`);
 
-		await userService.dispatch({
-			type: RepoRestActions.SAVE,
+		await new Bus(this, this.state.repository).dispatch({
+			type: typeorm.RepoRestActions.SAVE,
 			payload: user,
 		})
 
@@ -210,10 +223,9 @@ class AuthRoute extends httpRouter.Service {
 	async login(req: Request, res: Response) {
 		const { repository } = this.state
 		var { email, password } = req.body
-		const userService = new PathFinder(this).getNode<typeorm.repo>(repository)
 
 		// get user
-		const users = await userService.dispatch({
+		const users = await new Bus(this, repository).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: { where: { email } }
 		})
@@ -226,7 +238,7 @@ class AuthRoute extends httpRouter.Service {
 		if (!correct) return res.status(404).json({ error: "login:account:not_found" })
 
 		// inserisco user nel payload jwt
-		const jwtService = new PathFinder(this).getNode<httpRouter.jwt.Service>("/http/route/route-jwt")
+		const jwtService = this.nodeByPath<httpRouter.jwt.Service>("/http/route/route-jwt")
 		const token = await jwtService.putPayload(user, res)
 		res.json({ token })
 	}

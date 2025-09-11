@@ -138,7 +138,7 @@ class ChatNode {
 				chatId: this.id,
 				roomId: subRoom.room.id,
 				parentRoomId: room.room.id,
-				agentId: agentRepo.id,
+				agentsIds: [agentRepo.id],
 			}
 			this.sendMessage(newRoomMsg)
 

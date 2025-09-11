@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { LlmRepo } from './Provider.js';
 
 
 
@@ -18,4 +19,9 @@ export class User {
 
 	@Column({ type: 'varchar', default: '' })
 	salt: string;
+
+	/** I providers associati a questo user */
+	@OneToMany(() => LlmRepo, provider => provider.user)
+	providers?: LlmRepo[];
+
 }

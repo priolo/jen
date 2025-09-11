@@ -3,7 +3,7 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { AgentRepo } from './repository/Agent.js';
 import { getDBConnectionConfig } from './repository/dbConfig.js';
-import { LlmRepo } from "./repository/Llm.js";
+import { LlmRepo } from "./repository/Provider.js";
 import { RoomRepo } from "./repository/Room.js";
 import { ToolRepo } from "./repository/Tool.js";
 import AgentRoute from './routers/AgentRoute.js';
@@ -85,7 +85,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 						{ class: LlmRoute },
 						{ class: ToolRoute },
 						{ class: AgentRoute },
-						//{ class: AuthRoute },
+						{ class: AuthRoute },
 						//{ class: RoomRoute },
 					],
 				},

@@ -1,26 +1,45 @@
-import { StoreCore, createStore } from "@priolo/jon"
+import authApi from "@/api/auth";
+import { User } from "@/types/User";
+import { StoreCore, createStore } from "@priolo/jon";
+import { buildLoginCard } from "../stacks/account/factory";
+import { deckCardsSo } from "../docs/cards";
+
 
 
 const setup = {
 
 	state: {
 		token: <string>null,
-		user: null,
+		user: <User>null,
 	},
 
 	getters: {
 	},
 
 	actions: {
-		current: (_: void, store?: AuthStore) => {
+		current: async (_: void, store?: AuthStore) => {
 
-			fetch('/api/auth/current', {
-				method: 'GET',
-				credentials: 'include', // Includi i cookie nella richiesta
-			})
-				.then(response => response.json())
-				.then(data => store.setUser(data?.user))
-				.catch(error => console.error('Error:', error));
+			let user: User = null
+			try {
+				user = await authApi.current()
+			} catch (error) {
+				console.error('Error fetching current user:', error);
+			}
+			store.setUser(user)
+			if (!!user) return
+
+			// se non c'e' USER apro la LOGIN CARD
+			const view = buildLoginCard()
+			deckCardsSo.add({ view, anim: true })
+
+
+			// fetch('/api/auth/current', {
+			// 	method: 'GET',
+			// 	credentials: 'include', // Includi i cookie nella richiesta
+			// })
+			// 	.then(response => response.json())
+			// 	.then(data => store.setUser(data?.user))
+			// 	.catch(error => console.error('Error:', error));
 		},
 		createSession: (token: string, store?: AuthStore) => {
 			// Invia il token al tuo server per la verifica e creazione della sessione

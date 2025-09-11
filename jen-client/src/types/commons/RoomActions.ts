@@ -32,9 +32,9 @@ export type ChatRoom = {
 
 export enum CHAT_ACTION_C2S {
 	/* un CLIENT crea e entra in una CHAT */
-	CREATE_ENTER = "create-enter",
+	CHAT_CREATE_ENTER = "chat-create-enter",
 	/* un CLIENT lascia la CHAT */
-	LEAVE = "leave",
+	USER_LEAVE = "user-leave",
 	/* un CLIENT invia un messaggio */
 	USER_MESSAGE = "user-message",
 }
@@ -48,7 +48,7 @@ export type BaseC2S = {
 
 /** CLIENT crea e entra in una nuova CHAT */
 export type UserCreateEnterC2S = Omit<BaseC2S, "chatId"> & {
-	action: CHAT_ACTION_C2S.CREATE_ENTER
+	action: CHAT_ACTION_C2S.CHAT_CREATE_ENTER
 	// in futuro si potranno creare diversi tipi di CHAT
 	// ogni tipo di chat ha un suo parametro di configurazione
 	// type: "single-agent" | "free" | "agile" | "document" 
@@ -58,7 +58,7 @@ export type UserCreateEnterC2S = Omit<BaseC2S, "chatId"> & {
 
 /** CLIENT lascia la CHAT */
 export type UserLeaveC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.LEAVE
+	action: CHAT_ACTION_C2S.USER_LEAVE
 	/** il client che fa l'azione */
 	clientId: string
 }
@@ -143,7 +143,7 @@ export type RoomNewS2C = BaseS2C & {
 	/** id della PARENT-ROOM  */
 	parentRoomId: string
 	/** LLM-AGENT di riferimento */
-	agentId: string
+	agentsIds: string[]
 }
 
 //#endregion

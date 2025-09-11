@@ -50,7 +50,7 @@ const UserView: FunctionComponent<Props> = ({
 			<GoogleOAuthProvider clientId="106027300810-0udm0cjghhjr87626qrvcoug5ahgq1bh.apps.googleusercontent.com">
 				<div>
 					<h2>Login with Google</h2>
-					<GoogleLogin
+					<GoogleLogin 
 						onSuccess={handleLoginSuccess}
 						onError={handleLoginFailure}
 					/>

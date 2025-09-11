@@ -34,7 +34,7 @@ const setup = {
 
 		createChat: async (agentId: string, store?: ChatStore) => {
 			const msgSend: UserCreateEnterC2S = {
-				action: CHAT_ACTION_C2S.CREATE_ENTER,
+				action: CHAT_ACTION_C2S.CHAT_CREATE_ENTER,
 				agentId: agentId,
 			}
 			wsConnection.send(JSON.stringify(msgSend))
@@ -42,7 +42,7 @@ const setup = {
 
 		removeChat: async (chatId: string, store?: ChatStore) => {
 			const message: UserLeaveC2S = {
-				action: CHAT_ACTION_C2S.LEAVE,
+				action: CHAT_ACTION_C2S.USER_LEAVE,
 				chatId: chatId,
 				clientId: userSo.state.current?.id
 			}
@@ -113,7 +113,7 @@ const setup = {
 					chat.rooms.push({
 						id: msg.roomId,
 						parentRoomId: msg.parentRoomId,
-						agentsIds: [msg.agentId],
+						agentsIds: msg.agentsIds,
 						history: [],
 					})
 					store._update()
@@ -150,6 +150,10 @@ export interface ChatStore extends StoreCore<ChatState>, ChatGetters, ChatAction
 }
 
 const chatSo = createStore<ChatState>(setup) as ChatStore
-export default chatSo
+export default chatSo;
 
-wsConnection.emitter.on("message", chatSo.onMessage)
+
+setTimeout(
+	()=> wsConnection.emitter.on("message", chatSo.onMessage)
+, 200
+)

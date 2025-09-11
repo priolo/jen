@@ -53,7 +53,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		for (const chat of chats) {
 			this.handleLeave(
 				client,
-				{ action: CHAT_ACTION_C2S.LEAVE, chatId: chat.id } as UserLeaveC2S
+				{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
 			)
 		}
 		super.onDisconnect(client)
@@ -74,10 +74,10 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		const msg = JSON.parse(message)
 
 		switch (msg.action) {
-			case CHAT_ACTION_C2S.CREATE_ENTER:
+			case CHAT_ACTION_C2S.CHAT_CREATE_ENTER:
 				await this.handleEnter(client, msg as UserCreateEnterC2S)
 				break
-			case CHAT_ACTION_C2S.LEAVE:
+			case CHAT_ACTION_C2S.USER_LEAVE:
 				this.handleLeave(client, msg as UserLeaveC2S)
 				break
 			case CHAT_ACTION_C2S.USER_MESSAGE:

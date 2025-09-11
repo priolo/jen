@@ -87,8 +87,6 @@ const setup = {
 		/** apertura della CARD ROOM */
 		openChatRoom(_: void, store?: AgentDetailStore) {
 			chatSo.createChat(store.state.agent?.id)
-			// const view = buildRoomDetailNew(store.state.agent?.id)
-			// store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
 		/** apertura della CARD EDITOR */

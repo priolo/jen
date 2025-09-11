@@ -5,6 +5,7 @@ import { delay } from "../../utils/time"
 import { SocketService } from "../SocketService"
 import mcpServerSo from "@/stores/stacks/mcpServer/repo"
 import userSo from "@/stores/stacks/account/repo"
+import authSo from "@/stores/auth"
 
 
 
@@ -37,6 +38,9 @@ export async function StartSession() {
 
 	// altrimenti MSW non funziona
 	if (import.meta.env.DEV) await delay(1000)
+
+	// FETCH CURRENT USER
+	await authSo.current()
 
 	// LOAD SINGLETONE STORES
 	await mcpServerSo.fetch()

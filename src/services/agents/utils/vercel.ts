@@ -1,4 +1,4 @@
-import { LlmRepo } from "@/repository/Llm.js";
+import { LlmRepo } from "@/repository/Provider.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
@@ -18,7 +18,7 @@ envInit();
  */
 export function getModel(llm?: LlmRepo) {
 
-	const name = llm?.name
+	const name = llm?.code
 	const key = llm?.key
 	let provider = null
 

@@ -1,4 +1,4 @@
-import { LlmRepo } from "@/repository/Llm.js";
+import { LlmRepo } from "@/repository/Provider.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
 import { getModel } from "@/services/agents/utils/vercel.js";
 import { generateText } from "ai";
@@ -12,7 +12,7 @@ async function testOllamaIntegration() {
     // Create a mock LlmRepo for Ollama
     const mockLlmRepo: LlmRepo = {
         id: "test-ollama",
-        name: LLM_MODELS.OLLAMA_LLAMA_3_2_3B,
+        code: LLM_MODELS.OLLAMA_LLAMA_3_2_3B,
         key: null, // Ollama doesn't need an API key
     } as LlmRepo;
 

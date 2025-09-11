@@ -32,11 +32,15 @@ export type ChatRoom = {
 
 export enum CHAT_ACTION_C2S {
 	/* un CLIENT crea e entra in una CHAT */
-	CREATE_ENTER = "create-enter",
-	/* un CLIENT lascia la CHAT */
-	LEAVE = "leave",
-	/* un CLIENT invia un messaggio */
+	CHAT_CREATE_ENTER = "chat-create-enter",
+
+	/* l'USER lascia la CHAT */
+	USER_LEAVE = "user-leave",
+	/* l'USER invia un messaggio in una ROOM */
 	USER_MESSAGE = "user-message",
+
+	/** richiesta di avviare il completamento in una ROOM */
+	ROOM_COMPLETE = "room-complete",
 }
 
 export type BaseC2S = {
@@ -48,7 +52,7 @@ export type BaseC2S = {
 
 /** CLIENT crea e entra in una nuova CHAT */
 export type UserCreateEnterC2S = Omit<BaseC2S, "chatId"> & {
-	action: CHAT_ACTION_C2S.CREATE_ENTER
+	action: CHAT_ACTION_C2S.CHAT_CREATE_ENTER
 	// in futuro si potranno creare diversi tipi di CHAT
 	// ogni tipo di chat ha un suo parametro di configurazione
 	// type: "single-agent" | "free" | "agile" | "document" 
@@ -58,7 +62,7 @@ export type UserCreateEnterC2S = Omit<BaseC2S, "chatId"> & {
 
 /** CLIENT lascia la CHAT */
 export type UserLeaveC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.LEAVE
+	action: CHAT_ACTION_C2S.USER_LEAVE
 	/** il client che fa l'azione */
 	clientId: string
 }
@@ -72,6 +76,13 @@ export type UserMessageC2S = BaseC2S & {
 	text: string
 }
 
+/** richiesta di completamento di una ROOM */
+export type RoomCompleteC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.ROOM_COMPLETE
+	/** id della ROOM, se null è la MAIN-ROOM */
+	roomId?: string
+}
+
 //#endregion
 
 
@@ -80,7 +91,10 @@ export type UserMessageC2S = BaseC2S & {
 //#region SERVER TO CLIENT
 
 export enum CHAT_ACTION_S2C {
-	/** l'USER è entrato in una CHAT */
+	/** 
+	 * l'USER è entrato in una CHAT
+	 * e riceve i dati iniziali della CHAT
+	 * */
 	USER_ENTERED = "user-entered",
 	/** un CLIENT è entrato in CHAT */
 	CLIENT_ENTERED = "entered",
@@ -100,6 +114,8 @@ export type BaseS2C = {
 	chatId: string
 }
 
+
+//#region CLIENT
 
 /** L'USER è entrato in CHAT */
 export type UserEnteredS2C = BaseS2C & {
@@ -124,6 +140,12 @@ export type ClientLeaveS2C = BaseS2C & {
 	clientId?: string
 }
 
+//#endregion
+
+
+
+//#region  MESSAGE
+
 /** è stato inserito un MESSAGE in ROOM  */
 export type RoomMessageS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ROOM_MESSAGE
@@ -133,9 +155,13 @@ export type RoomMessageS2C = BaseS2C & {
 	content: ChatMessage
 }
 
+//#endregion
 
 
-/** creata una nuova SUB-ROOM */
+
+//#region ROOM
+
+/** creata una nuova ROOM */
 export type RoomNewS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ROOM_NEW
 	/** id nella nuova ROOM */
@@ -143,7 +169,9 @@ export type RoomNewS2C = BaseS2C & {
 	/** id della PARENT-ROOM  */
 	parentRoomId: string
 	/** LLM-AGENT di riferimento */
-	agentId: string
+	agentsIds: string[]
 }
+
+//#endregion
 
 //#endregion
