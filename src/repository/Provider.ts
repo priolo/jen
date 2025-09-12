@@ -1,47 +1,54 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from './User.js';
+import { UserRepo } from './User.js';
 
 
 
 /**
- * Tipo di provider
+ * Tipi di PROVIDERs
  */
 export enum PROVIDER_TYPE {
 	/** è un accesso ad un LLM */
-    LLM = 1,
+	LLM = 1,
 	/** Serve ad accedere ad un account */
-    ACCOUNT = 2,
+	ACCOUNT = 2,
+}
+/**
+ * Nomi di PROVIDERs
+ */
+export enum PROVIDER_NAME {
+	GOOGLE = "google",
+	OPENAI = "openai",
+	FACEBOOK = "facebook",
+	AZURE = "azure",
+	ANTHROPIC = "anthropic",
+	COHERE = "cohere",
 }
 
 
 
 @Entity('providers')
-export class LlmRepo {
-	
+export class ProviderRepo {
+
 	@PrimaryGeneratedColumn("uuid")
-	id: string;
+	id?: string;
 
 	/**
 	 * Nome del PROVIDER (GOOGLE, OPENAI, AZURE, ...)
 	 */
 	@Column({ type: 'varchar' })
-	name: string;
+	name: PROVIDER_NAME;
 
 	/**
-	 * Codice ... per gli LLM Nome del modello (es: gpt-3.5-turbo, gpt-4, ...)
-	 * Uses LlmProviderType enum values (1=OPENAI, 2=GOOGLE, 3=MISTRAL, etc.)
+	 * Indica se è una KEY per un LLM o un ACCOUNT
 	 */
-	@Column({ 
-		type: 'integer',
-		default: PROVIDER_TYPE.ACCOUNT 
-	})
+	@Column({ type: 'integer', default: PROVIDER_TYPE.ACCOUNT })
 	type: PROVIDER_TYPE;
 
 	/**
 	 * Codice ... per gli LLM Nome del modello (es: gpt-3.5-turbo, gpt-4, ...)
 	 */
-	@Column({ type: 'varchar' })
-	code: string;
+	@Column({ type: 'varchar', nullable: true })
+	code?: string;
 
 	/**
 	 * l'API KEY
@@ -58,9 +65,9 @@ export class LlmRepo {
 	/** 
 	 * l'USER a cui appartiene la KEY 
 	 * */
-	@OneToOne(() => User, { nullable: true })
+	@OneToOne(() => UserRepo)
 	@JoinColumn({ name: 'userId' })
-    user?: User;
+	user: UserRepo;
 }
 
 

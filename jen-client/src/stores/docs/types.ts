@@ -24,6 +24,7 @@ export enum DOC_TYPE {
 	CODE_EDITOR = "code_editor",
 
 	REFLECTION = "reflection",
+	/** serve ad effettuare il login o la registrazione */
 	ACCOUNT = "account",
 	USERS = "users",
 	USER = "user",

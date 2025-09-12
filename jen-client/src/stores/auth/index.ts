@@ -21,7 +21,7 @@ const setup = {
 
 			let user: User = null
 			try {
-				user = await authApi.current()
+				user = (await authApi.current())?.user
 			} catch (error) {
 				console.error('Error fetching current user:', error);
 			}
@@ -31,41 +31,21 @@ const setup = {
 			// se non c'e' USER apro la LOGIN CARD
 			const view = buildLoginCard()
 			deckCardsSo.add({ view, anim: true })
-
-
-			// fetch('/api/auth/current', {
-			// 	method: 'GET',
-			// 	credentials: 'include', // Includi i cookie nella richiesta
-			// })
-			// 	.then(response => response.json())
-			// 	.then(data => store.setUser(data?.user))
-			// 	.catch(error => console.error('Error:', error));
 		},
-		createSession: (token: string, store?: AuthStore) => {
-			// Invia il token al tuo server per la verifica e creazione della sessione
-			fetch('/api/auth/google', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ token }),
-			})
-				.then(res => res.json())
-				.then(data => {
-					// Gestisci i dati dell'utente nel client
-					console.log('User data:', data);
-					authSo.setUser(data)
-				})
-				.catch(error => console.error('Error:', error));
-
+		createSession: async (token: string, store?: AuthStore) => {
+			let user: User = null
+			try {
+				user = (await authApi.loginGoogle(token))?.user
+			} catch (error) {
+				console.error('Error fetching current user:', error);
+				return
+			}
+			console.log('User data:', user);
+			authSo.setUser(user)
 		},
-		logout: (_: void, store?: AuthStore) => {
-			fetch('/auth/logout', {
-				method: 'POST',
-				credentials: 'include',
-			})
-				.then(() => store.setUser(null))
-				.catch(error => console.error('Error:', error));
+		logout: async (_: void, store?: AuthStore) => {
+			store.setUser(null)
+			await authApi.logout()
 		},
 	},
 

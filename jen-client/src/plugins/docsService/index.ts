@@ -1,6 +1,6 @@
 import { ClientMessage, ClientMessageType, ClientObjects, ClientUpdateMessage, SlateApplicator } from "@priolo/jess"
 import { Operation } from "slate"
-import { wsConnection } from "../session"
+import { wsConnection } from "../session/wsConnection"
 import { SS_EVENT } from "../SocketService/types"
 
 

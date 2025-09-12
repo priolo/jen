@@ -1,12 +1,12 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { LlmRepo } from './Provider.js';
+import { ProviderRepo } from './Provider.js';
 
 
 
 @Entity('users')
-export class User {
+export class UserRepo {
 	@PrimaryGeneratedColumn("uuid")
-	id: string;
+	id?: string;
 
 	@Column({ type: 'varchar', default: '' })
 	email: string;
@@ -15,13 +15,22 @@ export class User {
 	name: string;
 
 	@Column({ type: 'varchar', default: '' })
-	password: string;
+	avatarUrl: string;
+
+	/**
+	 * visibile agli LLMs
+	 */
+	@Column({ type: 'varchar', default: '' })
+	description?: string;
 
 	@Column({ type: 'varchar', default: '' })
-	salt: string;
+	password?: string;
+
+	@Column({ type: 'varchar', default: '' })
+	salt?: string;
 
 	/** I providers associati a questo user */
-	@OneToMany(() => LlmRepo, provider => provider.user)
-	providers?: LlmRepo[];
+	@OneToMany(() => ProviderRepo, provider => provider.user)
+	providers?: ProviderRepo[];
 
 }

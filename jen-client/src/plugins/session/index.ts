@@ -2,21 +2,9 @@ import agentSo from "@/stores/stacks/agent/repo"
 import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
 import { delay } from "../../utils/time"
-import { SocketService } from "../SocketService"
 import mcpServerSo from "@/stores/stacks/mcpServer/repo"
-import userSo from "@/stores/stacks/account/repo"
 import authSo from "@/stores/auth"
-
-
-
-export const wsConnection: SocketService = new SocketService({
-	protocol: window.location.protocol == "http:" ? "ws:" : "wss:",
-	host: window.location.hostname,
-	port: import.meta.env.VITE_API_WS_PORT ?? 3010,
-	base: "",
-	userId: userSo.state.current?.id
-})
-
+import { wsConnection } from "./wsConnection"
 
 
 

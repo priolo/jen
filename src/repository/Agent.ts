@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { LlmRepo } from './Provider.js';
+import { ProviderRepo } from './Provider.js';
 import { RoomRepo } from './Room.js';
 import { ToolRepo } from './Tool.js';
 import { LLM_MODELS } from '@/types/commons/LlmProviders.js';

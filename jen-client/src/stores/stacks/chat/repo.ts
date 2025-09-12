@@ -1,4 +1,4 @@
-import { wsConnection } from "@/plugins/session"
+import { wsConnection } from "@/plugins/session/wsConnection"
 import { deckCardsSo, GetAllCards } from "@/stores/docs/cards"
 import { DOC_TYPE } from "@/types"
 import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, UserCreateEnterC2S, UserEnteredS2C, UserLeaveC2S, UserMessageC2S } from "@/types/commons/RoomActions"
@@ -153,7 +153,5 @@ const chatSo = createStore<ChatState>(setup) as ChatStore
 export default chatSo;
 
 
-setTimeout(
-	()=> wsConnection.emitter.on("message", chatSo.onMessage)
-, 200
-)
+
+wsConnection.emitter.on("message", chatSo.onMessage)

@@ -3,12 +3,12 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { AgentRepo } from './repository/Agent.js';
 import { getDBConnectionConfig } from './repository/dbConfig.js';
-import { LlmRepo } from "./repository/Provider.js";
+import { ProviderRepo } from "./repository/Provider.js";
 import { RoomRepo } from "./repository/Room.js";
 import { ToolRepo } from "./repository/Tool.js";
 import AgentRoute from './routers/AgentRoute.js';
 import { WSDocConf, WSDocService } from "./routers/DocsWSRoute.js";
-import LlmRoute from "./routers/LlmRoute.js";
+import ProviderRoute from "./routers/ProviderRoute.js";
 import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
 import McpServerRoute from "./routers/McpServerRoute.js";
@@ -17,7 +17,8 @@ import tools from "./config_tools.js";
 import { TypeLog } from "@priolo/julian/dist/core/types.js";
 import { envInit } from "./types/env.js";
 import AuthRoute from "./routers/AuthRoute.js";
-import { User } from "./repository/User.js";
+import { UserRepo } from "./repository/User.js";
+import UserRoute from "./routers/UserRoute.js";
 
 
 
@@ -82,10 +83,11 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 					},
 					children: [
 						{ class: McpServerRoute },
-						{ class: LlmRoute },
+						{ class: ProviderRoute },
 						{ class: ToolRoute },
 						{ class: AgentRoute },
 						{ class: AuthRoute },
+						{ class: UserRoute },
 						//{ class: RoomRoute },
 					],
 				},
@@ -119,9 +121,9 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 					model: McpServerRepo,
 				},
 				{
-					name: "llm",
+					name: "providers",
 					class: "typeorm/repo",
-					model: LlmRepo,
+					model: ProviderRepo,
 				},
 				{
 					name: "agents",
@@ -141,7 +143,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 				{
 					name: "users",
 					class: "typeorm/repo",
-					model: User,
+					model: UserRepo,
 				},
 			],
 		},

@@ -7,6 +7,7 @@ import { FunctionComponent, useEffect } from "react"
 import clsCard from "../CardWhiteDef.module.css"
 import CardIcon from "../../../components/cards/CardIcon"
 import { DOC_TYPE } from "../../../types"
+import { Button } from "@priolo/jack"
 
 
 
@@ -18,26 +19,32 @@ const UserView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
+
 	// STORE
-	const state = useStore(store)
+	useStore(store)
 	const authSa = useStore(authSo)
+
 
 	// HOOKs
 	useEffect(() => {
 	}, [])
 
-	// HANDLER
 
+	// HANDLER
 	const handleLoginSuccess = (response: CredentialResponse) => {
 		console.log('Login Success:', response);
 		authSo.createSession(response.credential)
 	}
-
 	const handleLoginFailure = () => {
 		console.log('Login Failure:');
 	}
+	const handleLogout = () => {
+		authSo.logout()
+	}
 
 	// RENDER
+	const user = authSo.state.user
+
 	return <FrameworkCard
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT} />}
 		className={clsCard.root}
@@ -45,17 +52,29 @@ const UserView: FunctionComponent<Props> = ({
 	>
 		<div className="lyt-form">
 
-			{authSa.user != null ? <div>SUCCESS</div> : <div>LOGIN!!!</div>}
-
-			<GoogleOAuthProvider clientId="106027300810-0udm0cjghhjr87626qrvcoug5ahgq1bh.apps.googleusercontent.com">
-				<div>
-					<h2>Login with Google</h2>
-					<GoogleLogin 
-						onSuccess={handleLoginSuccess}
-						onError={handleLoginFailure}
-					/>
+			{user != null ? (
+				<div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+					<div>{user.email} LOGGED</div>
+					<Button
+						onClick={handleLogout}
+					>LOGOUT</Button>
 				</div>
-			</GoogleOAuthProvider>
+			) : (
+				<div style={{ display: 'flex', flexDirection: "column", gap: 10, alignItems: 'center' }}>
+					<div>ANONYMOUS</div>
+					<GoogleOAuthProvider clientId="106027300810-0udm0cjghhjr87626qrvcoug5ahgq1bh.apps.googleusercontent.com">
+						<div>
+							<h2>Login with Google</h2>
+							<GoogleLogin
+								onSuccess={handleLoginSuccess}
+								onError={handleLoginFailure}
+							/>
+						</div>
+					</GoogleOAuthProvider>
+				</div>
+			)}
+
+
 
 		</div>
 

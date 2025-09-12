@@ -1,4 +1,4 @@
-import { LlmRepo } from "@/repository/Provider.js";
+import { ProviderRepo } from "@/repository/Provider.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
@@ -16,7 +16,7 @@ envInit();
 /**
  * Istanzio un MODELLO LLM in base alla configurazione
  */
-export function getModel(llm?: LlmRepo) {
+export function getModel(llm?: ProviderRepo) {
 
 	const name = llm?.code
 	const key = llm?.key

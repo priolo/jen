@@ -51,6 +51,8 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 	const content = useMemo(() => {
 		switch (view.state.type) {
 
+			case DOC_TYPE.ACCOUNT:
+				return <UserView store={view as AccountStore} />
 			case DOC_TYPE.USERS:
 				return <StreamsListView store={view as UsersStore} />
 			case DOC_TYPE.USER:
@@ -94,8 +96,6 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 			case DOC_TYPE.CODE_EDITOR:
 				return <EditorCodeView store={view as EditorCodeStore} />
 
-			case DOC_TYPE.ACCOUNT:
-				return <UserView store={view as AccountStore} />
 
 			default:
 				return null
