@@ -1,4 +1,4 @@
-import accountSetup from "@/stores/stacks/account";
+import accountListSetup from "@/stores/stacks/account/list";
 import agentDetailSetup from "@/stores/stacks/agent/detail";
 import agentListSetup from "@/stores/stacks/agent/list";
 import agentEditorSetup from "@/stores/stacks/agentEditor";
@@ -66,7 +66,7 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 		[DOC_TYPE.CODE_EDITOR]: editCodeSetup,
 		[DOC_TYPE.REFLECTION]: reflectionSetup,
 
-		[DOC_TYPE.ACCOUNT]: accountSetup,
+		[DOC_TYPE.ACCOUNT_LIST]: accountListSetup,
 		
 	}[state?.type]
 	if (!setup) return

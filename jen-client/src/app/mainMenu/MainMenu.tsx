@@ -5,6 +5,7 @@ import { deckCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
+import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
 import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
 import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
@@ -13,7 +14,6 @@ import { Button } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import React, { FunctionComponent } from "react"
 import { buildStore } from "../../stores/docs/utils/factory"
-import { AccountState, AccountStore } from "../../stores/stacks/account"
 import { buildCodeEditor } from "../../stores/stacks/editorCode/factory"
 import { ReflectionState, ReflectionStore } from "../../stores/stacks/reflection"
 import { buildUsers } from "../../stores/stacks/streams/utils/factory"
@@ -22,7 +22,6 @@ import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
-import { buildLoginCard } from "@/stores/stacks/account/factory"
 
 
 
@@ -71,8 +70,8 @@ const MainMenu: FunctionComponent<Props> = ({
 		const view = buildUsers()
 		deckCardsSo.add({ view, anim: true })
 	}
-	const handleAccount = () => {
-		const view = buildLoginCard()
+	const handleAuth = () => {
+		const view = buildAuthDetailCard()
 		deckCardsSo.add({ view, anim: true })
 	}
 
@@ -119,7 +118,7 @@ const MainMenu: FunctionComponent<Props> = ({
 		{/* <Button children="EDIT" onClick={handleEdit} /> */}
 		{/* <Button children="REF" onClick={handleReflection} /> */}
 		{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
-		<Button children="ACCOUNT" onClick={handleAccount} /> 
+		<Button children="AUTH" onClick={handleAuth} /> 
 		<Button children="MCP" onClick={handleMcpServerList} />
 		<Button children="LLM" onClick={handleLlmList} />
 		<Button children="TOOLS" onClick={handleToolList} />

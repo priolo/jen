@@ -40,7 +40,7 @@ function _error(connectionId: string, opt?: CallOptions): Promise<User[]> {
 }
 
 
-const userApi = {
+const accountApi = {
 	_error,
 	index,
 	get,
@@ -48,4 +48,4 @@ const userApi = {
 	create,
 	update,
 }
-export default userApi
+export default accountApi

@@ -63,13 +63,17 @@ const CardIcon: FunctionComponent<Props> = ({
 			return null
 
 
-
-
 		case DOC_TYPE.CODE_EDITOR:
 			return null//<EditorIcon className={className} style={style} />
 
-		case DOC_TYPE.ACCOUNT:
-			return <SyncIcon className={className} style={style} />
+
+		case DOC_TYPE.AUTH_DETAIL:
+			return null
+		case DOC_TYPE.ACCOUNT_DETAIL:
+			return null
+		case DOC_TYPE.ACCOUNT_LIST:
+			return null
+
 
 		default:
 			return null

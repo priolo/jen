@@ -1,4 +1,4 @@
-import { AGENT_TYPE, AgentRepo } from "@/repository/Agent.js";
+import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
@@ -88,8 +88,8 @@ class RoomTurnBased {
 
 
 	public async getResponse(): Promise<LlmResponse> {
-		//return this.getResponseSerial()
-		return this.getResponseParallel()
+		return this.getResponseSerial()
+		//return this.getResponseParallel()
 	}
 
 
@@ -126,6 +126,10 @@ class RoomTurnBased {
 		return nextIndex
 	}
 
+	/**
+	 * metopdo alternativo cioe' la risposta è elaborata parallelamente da tutti gli AGENTS presenti in ROOM 
+	 * e quindi le risposte vengono composte nella HISTORY
+	 */
 	private async getResponseParallel(): Promise<LlmResponse> {
 		if (this.room.agents.length == 0) return null
 
@@ -140,8 +144,6 @@ class RoomTurnBased {
 
 		return this.room.history[this.room.history.length - 1].content as LlmResponse
 	}
-
-
 
 
 

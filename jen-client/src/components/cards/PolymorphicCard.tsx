@@ -21,13 +21,13 @@ import { ToolListStore } from "@/stores/stacks/tool/list"
 import { ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE } from "@/types"
 import { FunctionComponent, useMemo } from "react"
-import UserView from "../../app/cards/account/View"
+import UserView from "../../app/cards/auth/View"
 import EditorCodeView from "../../app/cards/editorCode/View"
 import TextEditorView from "../../app/cards/agentEditor/View"
 import ReflectionView from "../../app/cards/reflection/node/View"
 import UserDetailView from "../../app/cards/user/detail/View"
 import StreamsListView from "../../app/cards/user/list/ListView"
-import { AccountStore } from "../../stores/stacks/account"
+import { AccountListStore } from "../../stores/stacks/account/list"
 import { ReflectionStore } from "../../stores/stacks/reflection"
 import McpServerListView from "@/app/cards/mcpServer/ListView"
 import McpServerDetailView from "@/app/cards/mcpServer/detail/View"
@@ -51,8 +51,8 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 	const content = useMemo(() => {
 		switch (view.state.type) {
 
-			case DOC_TYPE.ACCOUNT:
-				return <UserView store={view as AccountStore} />
+			case DOC_TYPE.ACCOUNT_LIST:
+				return <UserView store={view as AccountListStore} />
 			case DOC_TYPE.USERS:
 				return <StreamsListView store={view as UsersStore} />
 			case DOC_TYPE.USER:

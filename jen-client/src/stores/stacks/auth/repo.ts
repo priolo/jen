@@ -1,11 +1,14 @@
 import authApi from "@/api/auth";
 import { User } from "@/types/User";
 import { StoreCore, createStore } from "@priolo/jon";
-import { buildLoginCard } from "../stacks/account/factory";
-import { deckCardsSo } from "../docs/cards";
+import { buildLoginCard } from "../account/factory";
+import { deckCardsSo } from "../../docs/cards";
 
 
-
+/**
+ * Contiene le info dell'utente loggato
+ * e gestisce il login/logout
+ */
 const setup = {
 
 	state: {

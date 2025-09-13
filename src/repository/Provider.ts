@@ -1,27 +1,16 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserRepo } from './User.js';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { AccountRepo } from './Account.js';
 
 
 
-/**
- * Tipi di PROVIDERs
- */
-export enum PROVIDER_TYPE {
-	/** è un accesso ad un LLM */
-	LLM = 1,
-	/** Serve ad accedere ad un account */
-	ACCOUNT = 2,
-}
 /**
  * Nomi di PROVIDERs
  */
 export enum PROVIDER_NAME {
 	GOOGLE = "google",
-	OPENAI = "openai",
 	FACEBOOK = "facebook",
 	AZURE = "azure",
-	ANTHROPIC = "anthropic",
-	COHERE = "cohere",
+	APPLE = "apple",
 }
 
 
@@ -39,18 +28,6 @@ export class ProviderRepo {
 	name: PROVIDER_NAME;
 
 	/**
-	 * Indica se è una KEY per un LLM o un ACCOUNT
-	 */
-	@Column({ type: 'integer', default: PROVIDER_TYPE.ACCOUNT })
-	type: PROVIDER_TYPE;
-
-	/**
-	 * Codice ... per gli LLM Nome del modello (es: gpt-3.5-turbo, gpt-4, ...)
-	 */
-	@Column({ type: 'varchar', nullable: true })
-	code?: string;
-
-	/**
 	 * l'API KEY
 	 */
 	@Column({ type: 'text', nullable: true })
@@ -65,9 +42,9 @@ export class ProviderRepo {
 	/** 
 	 * l'USER a cui appartiene la KEY 
 	 * */
-	@OneToOne(() => UserRepo)
+	@OneToOne(() => AccountRepo)
 	@JoinColumn({ name: 'userId' })
-	user: UserRepo;
+	user: Relation<AccountRepo>;
 }
 
 

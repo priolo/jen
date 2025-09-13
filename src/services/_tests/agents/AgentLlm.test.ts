@@ -1,8 +1,8 @@
-import { AgentRepo } from "../../repository/Agent.js";
-import { LLM_MODELS } from "../../types/commons/LlmProviders.js";
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../types/commons/LlmResponse.js";
-import { ChatMessage } from "../../types/commons/RoomActions.js";
-import AgentLlm from './AgentLlm.js';
+import { AgentRepo } from "../../../repository/Agent.js";
+import { LLM_MODELS } from "../../../types/commons/LlmProviders.js";
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../../types/commons/LlmResponse.js";
+import { ChatMessage } from "../../../types/commons/RoomActions.js";
+import AgentLlm from "../../agents/AgentLlm.js";
 
 
 
@@ -22,7 +22,7 @@ describe("Test on AGENT", () => {
 		const agentRepo: AgentRepo = {
 			id: "agent-1",
 			name: "generic",
-			llm: { id: "llm-1", name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
+			llm: { id: "llm-1", code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
 		}
 		const agent = new AgentLlm(agentRepo)
 
@@ -42,7 +42,7 @@ describe("Test on AGENT", () => {
 		const agentRepo: AgentRepo = {
 			id: "agent-1",
 			name: "generic",
-			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
+			llm: { id: "llm-1", code: LLM_MODELS.MISTRAL_LARGE },
 			tools: [
 				{
 					name: "addition",
@@ -86,14 +86,14 @@ describe("Test on AGENT", () => {
 		// creo l'agente sub
 		const agentAdder: AgentRepo = {
 			id: "agent-2",
-			llm: { id: "llm-1", name: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
+			llm: { id: "llm-1", code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
 			name: "adder",
 			description: "I'm an agent who can do additions well",
 		}
 		// creo l'agente leader
 		const agentLead: AgentRepo = {
 			id: "agent-1",
-			llm: { id: "llm-1", name: LLM_MODELS.MISTRAL_LARGE },
+			llm: { id: "llm-1", code: LLM_MODELS.MISTRAL_LARGE },
 			name: "lead",
 			subAgents: [agentAdder],
 		}

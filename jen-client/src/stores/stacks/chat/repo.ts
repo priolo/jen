@@ -4,7 +4,7 @@ import { DOC_TYPE } from "@/types"
 import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, UserCreateEnterC2S, UserEnteredS2C, UserLeaveC2S, UserMessageC2S } from "@/types/commons/RoomActions"
 import { utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
-import userSo from "../account/repo"
+import accountSo from "../account/repo"
 import { buildRoomDetail } from "../room/factory"
 import { Chat, getRoomById } from "./types"
 
@@ -44,7 +44,7 @@ const setup = {
 			const message: UserLeaveC2S = {
 				action: CHAT_ACTION_C2S.USER_LEAVE,
 				chatId: chatId,
-				clientId: userSo.state.current?.id
+				clientId: accountSo.state.current?.id
 			}
 			wsConnection.send(JSON.stringify(message))
 		},

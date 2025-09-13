@@ -1,10 +1,12 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
 import { ProviderRepo } from './Provider.js';
+import { LlmRepo } from './Llm.js';
 
 
 
-@Entity('users')
-export class UserRepo {
+@Entity('accounts')
+export class AccountRepo {
+
 	@PrimaryGeneratedColumn("uuid")
 	id?: string;
 
@@ -29,8 +31,14 @@ export class UserRepo {
 	@Column({ type: 'varchar', default: '' })
 	salt?: string;
 
+
+
 	/** I providers associati a questo user */
 	@OneToMany(() => ProviderRepo, provider => provider.user)
-	providers?: ProviderRepo[];
+	providers?: Relation<ProviderRepo[]>
+
+	/** Le KEY degli LLM associati a questo user */
+	@OneToMany(() => LlmRepo, (llm) => llm.user)
+	llms?: Relation<LlmRepo[]>;
 
 }

@@ -73,10 +73,11 @@ describe("Test on CHAT", () => {
 			getAgentRepoById: async (agentId) => {
 				return agentsRepo.find(agent => agent.id === agentId) || null
 			},
-			executeTool: async (toolId, args) => {
-				return {
+			executeTool: async (id: string, args: any) => {
+				const tools: { [key: string]: any } = {
 					"id-tool-1": (args: any) => (args.a + args.b).toString()
-				}[toolId]?.(args) ?? null
+				}
+				return tools[id]?.(args) ?? null;
 			},
 			sendMessageToClient: (clientId, msg) => {
 				console.log(`SEND: ${clientId}`, msg)
@@ -96,10 +97,11 @@ describe("Test on CHAT", () => {
 		getAgentRepoById: async (agentId) => {
 			return agentsRepo.find(agent => agent.id === agentId) || null
 		},
-		executeTool: async (toolId, args) => {
-			return {
+		executeTool: async (id: string, args: any) => {
+			const tools: { [key: string]: any } = {
 				"id-tool-1": (args: any) => (args.a + args.b).toString()
-			}[toolId]?.(args) ?? null
+			}
+			return tools[id]?.(args) ?? null;
 		},
 		sendMessageToClient: (clientId, msg) => {
 			console.log(`SEND: ${clientId}`, msg)
@@ -130,8 +132,10 @@ describe("Test on CHAT", () => {
 	}, 100000)
 
 	test("domanda in MAIN-ROOM con SUB-AGENTS", async () => {
-		const room = await RoomTurnBased.Build(nodeSym, [agentLeadRepo.id])
-		const chat = await ChatNode.Build(nodeSym, room)
+		const recorder = new Recorder()
+
+		const room = await RoomTurnBased.Build(recorder.context, [agentLeadRepo.id])
+		const chat = await ChatNode.Build(recorder.context, room)
 		await chat.enterClient("id-user")
 		chat.addUserMessage(
 			`Don't answer directly, but use the tools available to you. What is 2+2? Just write the answer number.`,
@@ -147,7 +151,6 @@ describe("Test on CHAT", () => {
 	}, 100000)
 
 	test("due USER parlano tra di loro", async () => {
-
 		const recorder = new Recorder()
 
 		const room = await RoomTurnBased.Build(recorder.context)

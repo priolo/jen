@@ -1,4 +1,4 @@
-import userApi from "@/api/user"
+import accountApi from "@/api/account"
 import { findInRoot } from "@/stores/docs/utils/manage"
 import { MESSAGE_TYPE } from "@/stores/log/utils"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
@@ -96,9 +96,9 @@ const setup = {
 		async save(_: void, store?: UserStore) {
 			let userSaved: User = null
 			if (store.state.editState == EDIT_STATE.NEW) {
-				userSaved = await userApi.create(store.state.user, { store })
+				userSaved = await accountApi.create(store.state.user, { store })
 			} else {
-				userSaved = await userApi.update(store.state.user, { store })
+				userSaved = await accountApi.update(store.state.user, { store })
 			}
 			store.setUser(userSaved)
 			// store.getParentList()?.update(userSaved)

@@ -1,18 +1,18 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import authSo from "@/stores/auth"
-import { AccountStore } from "@/stores/stacks/account"
+import { AuthDetailStore } from "@/stores/stacks/auth/detail"
+import authSo from "@/stores/stacks/auth/repo"
+import { Button } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { CredentialResponse, GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google"
 import { FunctionComponent, useEffect } from "react"
-import clsCard from "../CardWhiteDef.module.css"
 import CardIcon from "../../../components/cards/CardIcon"
 import { DOC_TYPE } from "../../../types"
-import { Button } from "@priolo/jack"
+import clsCard from "../CardWhiteDef.module.css"
 
 
 
 interface Props {
-	store?: AccountStore
+	store?: AuthDetailStore
 }
 
 const UserView: FunctionComponent<Props> = ({
@@ -46,7 +46,7 @@ const UserView: FunctionComponent<Props> = ({
 	const user = authSo.state.user
 
 	return <FrameworkCard
-		icon={<CardIcon type={DOC_TYPE.ACCOUNT} />}
+		icon={<CardIcon type={DOC_TYPE.AUTH_DETAIL} />}
 		className={clsCard.root}
 		store={store}
 	>

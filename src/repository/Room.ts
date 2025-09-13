@@ -33,7 +33,7 @@ export class RoomRepo {
             referencedColumnName: "id"
         }
     })
-    agents?: Relation<AgentRepo>[];
+    agents?: Relation<AgentRepo[]>;
 
     /** ID of the parent room, if this room is a sub-room */
     parentRoomId?: string | null;

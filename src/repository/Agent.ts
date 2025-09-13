@@ -1,8 +1,7 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ProviderRepo } from './Provider.js';
+import { LlmRepo } from './Llm.js';
 import { RoomRepo } from './Room.js';
 import { ToolRepo } from './Tool.js';
-import { LLM_MODELS } from '@/types/commons/LlmProviders.js';
 
 
 
@@ -23,10 +22,6 @@ export class AgentRepo {
     /** nome dell'agente */
     @Column({ type: 'varchar', default: '' })
     name: string;
-
-    /** codice del PROVIDER dell'LLM */
-    @Column({ type: 'varchar', nullable: true })
-    llmCode?: LLM_MODELS | null
 
     /** Descrive l'agent nel tool */
     @Column({ type: 'varchar', default: '' })
@@ -52,54 +47,19 @@ export class AgentRepo {
     @Column({ type: 'varchar', default: AGENT_TYPE.REACT })
     type?: AGENT_TYPE;
 
+
+
+
     // RELATIONSHIPS
 
+    /** l'LLM utilizzato per il complete */
+    @ManyToOne(() => LlmRepo, llm => llm.agents, { nullable: true })
+    @JoinColumn({ name: 'llmId' })
+    llm?: LlmRepo
+    llmId?: string
 
 
-    // // LLM
-    // /** il nome dell'LLM utilizzato di default */
-    // @ManyToOne(() => LlmRepo, llm => llm.agents, { nullable: true })
-    // @JoinColumn({ name: 'llmId' })
-    // llm?: LlmRepo | null
-    // @Column({ type: 'uuid', nullable: true })
-    // llmId?: string | null
-    // LLM CODE
-    
-
-
-    // AGENT BASE (inheritance relationship)
-    // Agente base da cui è derivato questo agente
-    @ManyToOne(() => AgentRepo, agent => agent.derivedAgents, { nullable: true })
-    @JoinColumn({ name: 'baseId' })
-    base?: AgentRepo | null;
-    @Column({ type: 'uuid', nullable: true })
-    baseId?: string | null;
-
-    // * Agenti derivati da questo agente
-    @OneToMany(() => AgentRepo, (agent) => agent.base, { cascade: ['remove'] })
-    derivedAgents?: AgentRepo[] | null
-
-
-    // SUB AGENTS (composition relationship)
-    @ManyToMany(() => AgentRepo, (agent) => agent.parentAgents)
-    @JoinTable({
-        name: "agent_relations",
-        joinColumn: {
-            name: "parentAgentId",
-            referencedColumnName: "id"
-        },
-        inverseJoinColumn: {
-            name: "subAgentId",
-            referencedColumnName: "id"
-        }
-    })
-    subAgents?: Partial<AgentRepo>[] 
-    // Parent agents (inverse side of subAgents)
-    @ManyToMany(() => AgentRepo, (agent) => agent.subAgents)
-    parentAgents?: AgentRepo[]
-
-
-    // TOOLS
+    /** i TOOLS a disposizione */
     @ManyToMany(() => ToolRepo, tool => tool.agents, { cascade: true })
     @JoinTable({
         name: "agent_tools",
@@ -114,10 +74,42 @@ export class AgentRepo {
     })
     tools?: Partial<ToolRepo>[]
 
-
-
-    // ROOMS 
-    /** rooms where this agent is used */
+    
+    /** ROOMS where this agent is used */
     @ManyToMany(() => RoomRepo, room => room.agents)
     rooms?: RoomRepo[]
+
+
+    // AGENT BASE (inheritance relationship)
+    /** Agente base da cui è derivato questo agente */
+    @ManyToOne(() => AgentRepo, agent => agent.derivedAgents, { nullable: true })
+    @JoinColumn({ name: 'baseId' })
+    base?: AgentRepo
+    @Column({ type: 'uuid', nullable: true })
+    baseId?: string
+
+    /** Agenti derivati da questo agente */
+    @OneToMany(() => AgentRepo, (agent) => agent.base, { cascade: ['remove'] })
+    derivedAgents?: AgentRepo[] | null
+
+
+    /** SUB AGENTS (composition relationship) */
+    @ManyToMany(() => AgentRepo, (agent) => agent.parentAgents)
+    @JoinTable({
+        name: "agent_relations",
+        joinColumn: {
+            name: "parentAgentId",
+            referencedColumnName: "id"
+        },
+        inverseJoinColumn: {
+            name: "subAgentId",
+            referencedColumnName: "id"
+        }
+    })
+    subAgents?: Partial<AgentRepo>[] 
+
+    /** Parent agents (inverse side of subAgents) */
+    @ManyToMany(() => AgentRepo, (agent) => agent.subAgents)
+    parentAgents?: AgentRepo[]
+
 }

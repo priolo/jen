@@ -1,4 +1,4 @@
-import { ProviderRepo } from "@/repository/Provider.js";
+import { LlmRepo } from "@/repository/Llm.js";
 import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
@@ -16,13 +16,13 @@ envInit();
 /**
  * Istanzio un MODELLO LLM in base alla configurazione
  */
-export function getModel(llm?: ProviderRepo) {
+export function getModel(llm?: LlmRepo) {
 
-	const name = llm?.code
+	const code = llm?.code
 	const key = llm?.key
 	let provider = null
 
-	switch (name) {
+	switch (code) {
 		default:
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH_PRO:
@@ -50,7 +50,7 @@ export function getModel(llm?: ProviderRepo) {
 	}
 
 	let model = null
-	switch (name) {
+	switch (code) {
 		default:
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
 			model = provider('gemini-2.0-flash')

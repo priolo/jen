@@ -1,17 +1,14 @@
-import { AgentLlm } from "@/types/Agent"
 import { createStore, StoreCore } from "@priolo/jon"
-import { User } from "./types"
-import { generateUUID } from "@/utils/object"
+import { Account } from "./types"
 
 
-
+/**
+ * Gestisce gli ACCOUNT registrati nel sistema 
+ */
 const setup = {
 
 	state: {
-		current: <User>{
-			id: generateUUID(),
-			name: "Ivano Iorio",
-		},
+		all: <Account[]>[],
 	},
 
 	getters: {
@@ -22,17 +19,17 @@ const setup = {
 	},
 
 	mutators: {
-		setCurrent: (current: AgentLlm[]) => ({ current }),
+		setAll: (all: Account[]) => ({ all }),
 	},
 }
 
-export type UserState = typeof setup.state
-export type UserGetters = typeof setup.getters
-export type UserActions = typeof setup.actions
-export type UserMutators = typeof setup.mutators
-export interface UserStore extends StoreCore<UserState>, UserGetters, UserActions, UserMutators {
-	state: UserState
+export type AccountState = typeof setup.state
+export type AccountGetters = typeof setup.getters
+export type AccountActions = typeof setup.actions
+export type AccountMutators = typeof setup.mutators
+export interface AccountStore extends StoreCore<AccountState>, AccountGetters, AccountActions, AccountMutators {
+	state: AccountState
 }
 
-const userSo = createStore<UserState>(setup)
-export default userSo as UserStore
+const accountSo = createStore<AccountState>(setup)
+export default accountSo as AccountStore

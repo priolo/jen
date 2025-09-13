@@ -1,16 +1,16 @@
-import { UserRepo } from "@/repository/User.js";
+import { AccountRepo } from "@/repository/Account.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 
 
 
-class UserRoute extends httpRouter.Service {
+class AccountRoute extends httpRouter.Service {
 
 	get stateDefault(): httpRouter.conf & any {
 		return {
 			...super.stateDefault,
-			path: "/users",
-			repository: "/typeorm/users",
+			path: "/accounts",
+			repository: "/typeorm/accounts",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
@@ -30,7 +30,7 @@ class UserRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const tool: UserRepo = await new Bus(this, this.state.repository).dispatch({
+		const tool: AccountRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
@@ -39,8 +39,8 @@ class UserRoute extends httpRouter.Service {
 
 
 	async create(req: Request, res: Response) {
-		const { user }: { user: UserRepo } = req.body
-		const userNew: UserRepo = await new Bus(this, this.state.repository).dispatch({
+		const { user }: { user: AccountRepo } = req.body
+		const userNew: AccountRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
 			payload: user
 		})
@@ -58,7 +58,7 @@ class UserRoute extends httpRouter.Service {
 
 	async update(req: Request, res: Response) {
 		const id = req.params["id"]
-		const { user }: { user: UserRepo } = req.body
+		const { user }: { user: AccountRepo } = req.body
 		if (!id || !user) return
 		const userUp = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.SAVE,
@@ -68,6 +68,6 @@ class UserRoute extends httpRouter.Service {
 	}
 }
 
-export default UserRoute
+export default AccountRoute
 
 

@@ -1,10 +1,10 @@
-import { PROVIDER_NAME, PROVIDER_TYPE, ProviderRepo } from "@/repository/Provider.js";
-import { UserRepo } from "@/repository/User.js";
+import { PROVIDER_NAME, ProviderRepo } from "@/repository/Provider.js";
+import { AccountRepo } from "@/repository/Account.js";
 import { Bus, httpRouter, jwt, typeorm } from "@priolo/julian";
 import crypto from "crypto";
 import { Request, Response } from "express";
 import { OAuth2Client } from 'google-auth-library';
-import { FindManyOptions, SaveOptions } from "typeorm";
+import { FindManyOptions } from "typeorm";
 
 
 
@@ -20,7 +20,7 @@ class AuthRoute extends httpRouter.Service {
 			...super.stateDefault,
 			path: "/auth",
 			email: "/email",
-			repository: "/typeorm/users",
+			repository: "/typeorm/accounts",
 			jwt: "/jwt",
 			routers: [
 				{ path: "/google", verb: "post", method: "googleLogin" },
@@ -52,9 +52,9 @@ class AuthRoute extends httpRouter.Service {
 			})
 
 			// cerco lo USER tramite email
-			const users: UserRepo[] = await new Bus(this, "/typeorm/users").dispatch({
+			const users: AccountRepo[] = await new Bus(this, this.state.repository).dispatch({
 				type: typeorm.Actions.FIND,
-				payload: <FindManyOptions<UserRepo>>{
+				payload: <FindManyOptions<AccountRepo>>{
 					//select: ["id", "email", "name", "avatar"],
 					where: { email: data.email },
 				}
@@ -106,19 +106,19 @@ class AuthRoute extends httpRouter.Service {
 			const payload = ticket.getPayload();
 
 			// cerco lo USER tramite email
-			const users: any[] = await new Bus(this, "/typeorm/users").dispatch({
+			const users: any[] = await new Bus(this, this.state.repository).dispatch({
 				type: typeorm.Actions.FIND,
-				payload: <FindManyOptions<UserRepo>>{
+				payload: <FindManyOptions<AccountRepo>>{
 					where: { email: payload.email },
 				}
 			})
-			let user: UserRepo = users?.[0]
+			let user: AccountRepo = users?.[0]
 
 			// se non c'e' allora creo un nuovo USER
 			if (!user) {
-				user = await new Bus(this, "/typeorm/users").dispatch({
+				user = await new Bus(this, this.state.repository).dispatch({
 					type: typeorm.RepoRestActions.SAVE,
-					payload: <UserRepo>{
+					payload: <AccountRepo>{
 						email: payload.email,
 						name: payload.name,
 						avatarUrl: payload.picture,
@@ -129,7 +129,6 @@ class AuthRoute extends httpRouter.Service {
 			await new Bus(this, "/typeorm/providers").dispatch({
 				type: typeorm.RepoRestActions.DELETE,
 				payload: <ProviderRepo>{
-					type: PROVIDER_TYPE.ACCOUNT,
 					name: PROVIDER_NAME.GOOGLE,
 					userId: user.id,
 				}
@@ -139,7 +138,6 @@ class AuthRoute extends httpRouter.Service {
 				type: typeorm.RepoRestActions.SAVE,
 				payload: <ProviderRepo>{
 					name: PROVIDER_NAME.GOOGLE,
-					type: PROVIDER_TYPE.ACCOUNT,
 					key: token,
 					userId: user.id,
 				}

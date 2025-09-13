@@ -29,9 +29,12 @@ describe("Test on ROOM", () => {
 	/**
 	 * Simulo l'esecuzione di un TOOL
 	 */
-	const toolsExe = (id: string, args: any) => ({
-		"id-tool-1": (args: any) => (args.a + args.b).toString()
-	}[id]?.(args) ?? null)
+	const toolsExe = (id: string, args: any) => {
+		const tools: { [key: string]: any } = {
+			"id-tool-1": (args: any) => (args.a + args.b).toString()
+		}
+		return tools[id]?.(args) ?? null;
+	}
 
 
 

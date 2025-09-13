@@ -1,7 +1,7 @@
 import { ViewState, ViewStore, default as docSetup, default as viewSetup } from "@/stores/stacks/viewBase"
 import { User } from "@/types/User"
 import { mixStores, StoreCore } from "@priolo/jon"
-import userApi from "../../../api/user"
+import accountApi from "../../../api/account"
 import { buildUser } from "./utils/factory"
 import { loadBaseSetup, LoadBaseState, LoadBaseStore } from "@priolo/jack"
 
@@ -60,7 +60,7 @@ const setup = {
 		},
 		async fetch(_: void, store?: LoadBaseStore) {
 			const s = <UsersStore>store
-			const users = await userApi.index({ store, manageAbort: true })
+			const users = await accountApi.index({ store, manageAbort: true })
 			s.setAll(users)
 			await loadBaseSetup.actions.fetch(_, store)
 		},

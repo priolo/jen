@@ -3,7 +3,7 @@ import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
 import { delay } from "../../utils/time"
 import mcpServerSo from "@/stores/stacks/mcpServer/repo"
-import authSo from "@/stores/auth"
+import authSo from "@/stores/stacks/auth/repo"
 import { wsConnection } from "./wsConnection"
 
 

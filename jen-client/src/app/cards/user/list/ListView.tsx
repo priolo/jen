@@ -1,5 +1,5 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
-import { UsersStore } from "@/stores/stacks/streams"
+import { AccountListStore } from "@/stores/stacks/account/list"
 import { User } from "@/types/User"
 import { AlertDialog, FindInputHeader, OptionsCmp, Table } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -8,9 +8,12 @@ import { FunctionComponent, useEffect } from "react"
 
 
 interface Props {
-	store?: UsersStore
+	store?: AccountListStore
 }
 
+/**
+ * Lista di ACCOUNT registrati nel sistema
+ */
 const StreamsListView: FunctionComponent<Props> = ({
 	store: store,
 }) => {

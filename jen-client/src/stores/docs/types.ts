@@ -2,6 +2,12 @@
 export enum DOC_TYPE {
 	EMPTY = "empty",
 
+	AUTH_DETAIL = "auth_detail",
+
+	ACCOUNT_DETAIL = "account_detail",
+	/** lista degli ACCOUNTs */
+	ACCOUNT_LIST = "account_list",
+	
 	ROOM_DETAIL = "room",
 	ROOM_LIST = "room_list",
 
@@ -16,7 +22,6 @@ export enum DOC_TYPE {
 	MCP_TOOL_DETAIL = "mcp_tool_detail",
 	MCP_TOOL_RESULT_LIST = "mcp_tool_result_list",
 
-
 	TOOL_LIST = "tool_list",
 	TOOL_DETAIL = "tool_detail",
 
@@ -24,8 +29,6 @@ export enum DOC_TYPE {
 	CODE_EDITOR = "code_editor",
 
 	REFLECTION = "reflection",
-	/** serve ad effettuare il login o la registrazione */
-	ACCOUNT = "account",
 	USERS = "users",
 	USER = "user",
 }

@@ -3,6 +3,7 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { AgentRepo } from './repository/Agent.js';
 import { getDBConnectionConfig } from './repository/dbConfig.js';
+import { LlmRepo } from './repository/Llm.js';
 import { ProviderRepo } from "./repository/Provider.js";
 import { RoomRepo } from "./repository/Room.js";
 import { ToolRepo } from "./repository/Tool.js";
@@ -17,8 +18,8 @@ import tools from "./config_tools.js";
 import { TypeLog } from "@priolo/julian/dist/core/types.js";
 import { envInit } from "./types/env.js";
 import AuthRoute from "./routers/AuthRoute.js";
-import { UserRepo } from "./repository/User.js";
-import UserRoute from "./routers/UserRoute.js";
+import { AccountRepo } from "./repository/Account.js";
+import AccountRoute from "./routers/AccountRoute.js";
 
 
 
@@ -87,7 +88,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 						{ class: ToolRoute },
 						{ class: AgentRoute },
 						{ class: AuthRoute },
-						{ class: UserRoute },
+						{ class: AccountRoute },
 						//{ class: RoomRoute },
 					],
 				},
@@ -141,9 +142,14 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 					model: RoomRepo,
 				},
 				{
-					name: "users",
+					name: "accounts",
 					class: "typeorm/repo",
-					model: UserRepo,
+					model: AccountRepo,
+				},
+				{
+					name: "llms",
+					class: "typeorm/repo",
+					model: LlmRepo,
 				},
 			],
 		},
