@@ -1,6 +1,6 @@
 import { BaseOperation } from "slate"
 import { NodeType } from "../components/slate/elements/doc/types"
-import { User } from "./User"
+import { Account } from "./User"
 
 
 
@@ -23,7 +23,7 @@ export interface RemoteDoc {
 
 /** filtro richiesto per una lista di docs */
 export interface FilterDoc {
-	author: User,
+	author: Account,
 }
 
 export enum DOC_STATUS {

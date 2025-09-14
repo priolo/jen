@@ -1,8 +1,8 @@
-import HelpIcon from "@/icons/HelpIcon"
 import { ClearSession, EndSession, StartSession } from "@/plugins/session"
 import docsSo, { FIXED_CARD } from "@/stores/docs"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
+import { buildAccountListCard } from "@/stores/stacks/account/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
 import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
@@ -16,11 +16,9 @@ import React, { FunctionComponent } from "react"
 import { buildStore } from "../../stores/docs/utils/factory"
 import { buildCodeEditor } from "../../stores/stacks/editorCode/factory"
 import { ReflectionState, ReflectionStore } from "../../stores/stacks/reflection"
-import { buildUsers } from "../../stores/stacks/streams/utils/factory"
 import { DOC_TYPE } from "../../types"
 import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
-import MenuButton from "./MenuButton"
 import StoreButton from "./StoreButton"
 
 
@@ -62,12 +60,8 @@ const MainMenu: FunctionComponent<Props> = ({
 
 
 
-	const handleUser = () => {
-		//const view = buildUserCard()
-		//deckCardsSo.add({ view, anim: true })
-	}
-	const handleUsers = () => {
-		const view = buildUsers()
+	const handleAccountList = () => {
+		const view = buildAccountListCard()
 		deckCardsSo.add({ view, anim: true })
 	}
 	const handleAuth = () => {
@@ -75,17 +69,18 @@ const MainMenu: FunctionComponent<Props> = ({
 		deckCardsSo.add({ view, anim: true })
 	}
 
+
+
+
+
 	const handleEdit = () => {
 		const view = buildCodeEditor("pippo")
 		deckCardsSo.add({ view, anim: true })
 	}
-
-
 	const handleDoc = () => {
 		const view = buildEditorNew()
 		deckCardsSo.add({ view, anim: true })
 	}
-
 	const handleReflection = () => {
 		const view = buildStore({
 			type: DOC_TYPE.REFLECTION,
@@ -119,10 +114,13 @@ const MainMenu: FunctionComponent<Props> = ({
 		{/* <Button children="REF" onClick={handleReflection} /> */}
 		{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
 		<Button children="AUTH" onClick={handleAuth} /> 
-		<Button children="MCP" onClick={handleMcpServerList} />
-		<Button children="LLM" onClick={handleLlmList} />
-		<Button children="TOOLS" onClick={handleToolList} />
+		<Button children="ACCOUNTS" onClick={handleAccountList} /> 
+
 		<Button children="AGENTS" onClick={handleAgentList} />
+		<Button children="LLM" onClick={handleLlmList} />
+		<Button children="MCP" onClick={handleMcpServerList} />
+		<Button children="TOOLS" onClick={handleToolList} />
+		
 		{/* <Button children="ROOM" onClick={handleRoom} /> */}
 
 
@@ -134,22 +132,6 @@ const MainMenu: FunctionComponent<Props> = ({
 			<Button children="RESET" onClick={() => ClearSession()} />
 		</>}
 		{/* *** DEBUG *** */}
-
-		<MenuButton
-			title={"USER"}
-			subtitle={"SEI TU!"}
-			onClick={handleUser}
-		>
-			<HelpIcon style={{ width: 20 }} />
-		</MenuButton>
-
-		<MenuButton
-			title={"USERS"}
-			subtitle={"TUTTI GLI ALTRI"}
-			onClick={handleUsers}
-		>
-			<HelpIcon style={{ width: 20 }} />
-		</MenuButton>
 
 		<StoreButton
 			label="LOG"

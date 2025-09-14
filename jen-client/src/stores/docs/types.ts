@@ -3,7 +3,6 @@ export enum DOC_TYPE {
 	EMPTY = "empty",
 
 	AUTH_DETAIL = "auth_detail",
-
 	ACCOUNT_DETAIL = "account_detail",
 	/** lista degli ACCOUNTs */
 	ACCOUNT_LIST = "account_list",
@@ -29,8 +28,6 @@ export enum DOC_TYPE {
 	CODE_EDITOR = "code_editor",
 
 	REFLECTION = "reflection",
-	USERS = "users",
-	USER = "user",
 }
 
 export enum EDIT_STATE {

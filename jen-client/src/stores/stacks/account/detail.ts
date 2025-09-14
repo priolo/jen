@@ -1,6 +1,9 @@
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
+import { Account } from "./types"
+import { EDIT_STATE } from "@/types"
+import accountApi from "@/api/account"
 
 
 /**
@@ -11,6 +14,9 @@ const setup = {
 	state: {
 		//#region VIEWBASE
 		//#endregion
+
+		account: <Partial<Account>>null,
+		editState: EDIT_STATE.READ,
 	},
 
 	getters: {
@@ -33,10 +39,20 @@ const setup = {
 		},
 		//#endregion
 
-		
+		async fetch(_: void, store?: AccountDetailStore) {
+			if (!store.state.account?.id) return
+			const account = await accountApi.get(store.state.account.id, { store, manageAbort: true })
+			store.setAccount(account)
+		},
+		async fetchIfVoid(_: void, store?: AccountDetailStore) {
+			if (!!store.state.account?.email) return 
+			await store.fetch()
+		},
 	},
 
 	mutators: {
+		setAccount: (account: Partial<Account>) => ({ account }),
+		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }
 

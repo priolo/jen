@@ -1,5 +1,5 @@
 import { ViewState, ViewStore, default as docSetup, default as viewSetup } from "@/stores/stacks/viewBase"
-import { User } from "@/types/User"
+import { Account } from "@/types/User"
 import { mixStores, StoreCore } from "@priolo/jon"
 import accountApi from "../../../api/account"
 import { buildUser } from "./utils/factory"
@@ -13,7 +13,7 @@ const setup = {
 	state: {
 		/** id selected user */
 		select: <string>null,
-		all: <User[]>null,
+		all: <Account[]>null,
 		textSearch: <string>null,
 
 		//#region VIEWBASE
@@ -84,7 +84,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: User[]) => ({ all }),
+		setAll: (all: Account[]) => ({ all }),
 		setSelect: (select: string) => ({ select }),
 		setTextSearch: (textSearch: string) => ({ textSearch }),
 	},

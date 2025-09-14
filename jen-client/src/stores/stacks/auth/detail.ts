@@ -15,8 +15,8 @@ const setup = {
 
 	getters: {
 		//#region VIEWBASE
-		getTitle: (_: void, store?: ViewStore) => "ACCOUNTS",
-		getSubTitle: (_: void, store?: ViewStore) => "List of accounts",
+		getTitle: (_: void, store?: ViewStore) => "AUTH",
+		getSubTitle: (_: void, store?: ViewStore) => "connetti al sistema",
 		getSerialization: (_: void, store?: ViewStore) => {
 			const state = store.state as AuthDetailState
 			return {

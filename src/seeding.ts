@@ -6,6 +6,8 @@ import { McpServerRepo } from "./repository/McpServer.js";
 import { ProviderRepo } from "./repository/Provider.js";
 import { LLM_MODELS } from "./types/commons/LlmProviders.js";
 import { envInit } from "./types/env.js";
+import { LlmRepo } from "./repository/Llm.js";
+import { AccountRepo } from "./repository/Account.js";
 
 
 
@@ -13,16 +15,27 @@ envInit();
 
 export async function seeding(root: RootService) {
 
-
-	const llms = await new Bus(root, "/typeorm/llm").dispatch<ProviderRepo[]>({
+	const accounts = await new Bus(root, "/typeorm/accounts").dispatch<AccountRepo[]>({
 		type: typeorm.RepoStructActions.SEED,
-		payload: <ProviderRepo[]>[
+		payload: <AccountRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY },
-			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY },
+			{ id: "id-user-1", name: "Giuseppe Verdi", email: "giuseppe.verdi@gmail.com", password: "test" },
+			{ id: "id-user-2", name: "Mario Rossi", email: "mario.rossi@gmail.com", password: "test" },
+			{ id: "id-user-3", name: "Luigi Bianchi", email: "luigi.bianchi@gmail.com", password: "test" },
 		]
 	});
 
+	const llms = await new Bus(root, "/typeorm/llms").dispatch<ProviderRepo[]>({
+		type: typeorm.RepoStructActions.SEED,
+		payload: <LlmRepo[]>[
+			{ type: typeorm.RepoStructActions.TRUNCATE },
+			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, userId: accounts[0].id },
+			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY, userId: accounts[0].id },
+			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, userId: accounts[1].id },
+			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY, userId: accounts[1].id },
+
+		]
+	});
 
 	const mcpServers = await new Bus(root, "/typeorm/mcp_servers").dispatch<McpServerRepo[]>({
 		type: typeorm.RepoStructActions.SEED,

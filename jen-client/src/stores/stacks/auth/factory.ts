@@ -3,7 +3,9 @@ import { DOC_TYPE } from "@/types";
 import { AuthDetailState, AuthDetailStore } from "./detail";
 
 
-
+/**
+ * Costruisce la CARD riguardo l'accesso al sistema (LOOGIN/REGISTER/LOGOUT)
+ */
 export function buildAuthDetailCard() {
 	const store = buildStore({
 		type: DOC_TYPE.AUTH_DETAIL,

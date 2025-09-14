@@ -2,7 +2,7 @@ import { Uuid } from "./global"
 
 
 
-export interface User {
+export interface Account {
 	id: Uuid
 	name: string
 	email: string

@@ -1,5 +1,6 @@
 import { createStore, StoreCore } from "@priolo/jon"
 import { Account } from "./types"
+import accountApi from "@/api/account"
 
 
 /**
@@ -8,7 +9,7 @@ import { Account } from "./types"
 const setup = {
 
 	state: {
-		all: <Account[]>[],
+		all: <Account[]>null,
 	},
 
 	getters: {
@@ -16,6 +17,19 @@ const setup = {
 	},
 
 	actions: {
+		//#region OVERWRITE
+		async fetch(_: void, store?: AccountStore) {
+			const accounts = await accountApi.index({ store })
+			store.setAll(accounts)
+			//await loadBaseSetup.actions.fetch(_, store)
+		},
+		//#endregion
+
+		async fetchIfVoid(_: void, store?: AccountStore) {
+			if (!!store.state.all) return
+			await store.fetch()
+		},
+
 	},
 
 	mutators: {

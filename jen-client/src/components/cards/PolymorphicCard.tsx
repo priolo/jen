@@ -2,41 +2,41 @@ import AgentListView from "@/app/cards/agent/ListView"
 import AgentView from "@/app/cards/agent/detail/View"
 import LlmListView from "@/app/cards/llm/ListView"
 import LlmDetailView from "@/app/cards/llm/detail/View"
+import McpServerListView from "@/app/cards/mcpServer/ListView"
+import McpServerDetailView from "@/app/cards/mcpServer/detail/View"
+import McpToolDetailView from "@/app/cards/mcpTool/detail/View"
+import ToolResultListView from "@/app/cards/mcpTool/result/ListView"
 import RootListView from "@/app/cards/room/ListView"
 import RoomView from "@/app/cards/room/detail/RoomView"
 import ToolListView from "@/app/cards/tool/ListView"
 import ToolDetailView from "@/app/cards/tool/detail/View"
+import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import { AgentListStore } from "@/stores/stacks/agent/list"
 import { AgentEditorStore } from "@/stores/stacks/agentEditor"
+import { AuthDetailStore } from "@/stores/stacks/auth/detail"
 import { EditorCodeStore } from "@/stores/stacks/editorCode"
 import { LlmDetailStore } from "@/stores/stacks/llm/detail"
 import { LlmListStore } from "@/stores/stacks/llm/list"
+import { McpServerDetailStore } from "@/stores/stacks/mcpServer/detail"
+import { McpServerListStore } from "@/stores/stacks/mcpServer/list"
+import { McpToolDetailStore } from "@/stores/stacks/mcpTool/detail"
+import { ToolResultListStore } from "@/stores/stacks/mcpTool/resultList"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { PromptListStore } from "@/stores/stacks/room/list"
-import { UsersStore } from "@/stores/stacks/streams"
-import { UserStore } from "@/stores/stacks/streams/detail"
 import { ToolDetailStore } from "@/stores/stacks/tool/detail"
 import { ToolListStore } from "@/stores/stacks/tool/list"
 import { ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE } from "@/types"
 import { FunctionComponent, useMemo } from "react"
-import UserView from "../../app/cards/auth/View"
-import EditorCodeView from "../../app/cards/editorCode/View"
 import TextEditorView from "../../app/cards/agentEditor/View"
+import AuthView from "../../app/cards/auth/View"
+import EditorCodeView from "../../app/cards/editorCode/View"
 import ReflectionView from "../../app/cards/reflection/node/View"
-import UserDetailView from "../../app/cards/user/detail/View"
-import StreamsListView from "../../app/cards/user/list/ListView"
+import AccountDetailView from "../../app/cards/user/detail/View"
+import AccountListView from "../../app/cards/user/list/ListView"
 import { AccountListStore } from "../../stores/stacks/account/list"
 import { ReflectionStore } from "../../stores/stacks/reflection"
-import McpServerListView from "@/app/cards/mcpServer/ListView"
-import McpServerDetailView from "@/app/cards/mcpServer/detail/View"
-import { McpServerListStore } from "@/stores/stacks/mcpServer/list"
-import { McpServerDetailStore } from "@/stores/stacks/mcpServer/detail"
-import McpToolDetailView from "@/app/cards/mcpTool/detail/View"
-import { McpToolDetailStore } from "@/stores/stacks/mcpTool/detail"
-import ToolResultListView from "@/app/cards/mcpTool/result/ListView"
-import { ToolResultListStore } from "@/stores/stacks/mcpTool/resultList"
 
 
 
@@ -51,12 +51,13 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 	const content = useMemo(() => {
 		switch (view.state.type) {
 
+			case DOC_TYPE.AUTH_DETAIL:
+				return <AuthView store={view as AuthDetailStore} />
 			case DOC_TYPE.ACCOUNT_LIST:
-				return <UserView store={view as AccountListStore} />
-			case DOC_TYPE.USERS:
-				return <StreamsListView store={view as UsersStore} />
-			case DOC_TYPE.USER:
-				return <UserDetailView store={view as UserStore} />
+				return <AccountListView store={view as AccountListStore} />
+			case DOC_TYPE.ACCOUNT_DETAIL:
+				return <AccountDetailView store={view as AccountDetailStore} />
+
 
 			case DOC_TYPE.REFLECTION:
 				return <ReflectionView store={view as ReflectionStore} />

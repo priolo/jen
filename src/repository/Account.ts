@@ -33,7 +33,7 @@ export class AccountRepo {
 
 
 
-	/** I providers associati a questo user */
+	/** I providers di accesso associati a questo user */
 	@OneToMany(() => ProviderRepo, provider => provider.user)
 	providers?: Relation<ProviderRepo[]>
 

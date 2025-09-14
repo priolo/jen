@@ -21,13 +21,8 @@ const CardIcon: FunctionComponent<Props> = ({
 }) => {
 	switch (type) {
 
-		case DOC_TYPE.USERS:
-			return <StreamsIcon className={className} style={style} />
-		case DOC_TYPE.USER:
-			return <StreamIcon className={className} style={style} />
-
-		case DOC_TYPE.REFLECTION:
-			return null
+		// case DOC_TYPE.REFLECTION:
+		// 	return null
 
 		case DOC_TYPE.AGENT_EDITOR:
 			return null//<EditorIcon className={className} style={style} />
@@ -74,7 +69,7 @@ const CardIcon: FunctionComponent<Props> = ({
 		case DOC_TYPE.ACCOUNT_LIST:
 			return null
 
-
+			
 		default:
 			return null
 	}

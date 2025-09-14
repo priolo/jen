@@ -15,7 +15,7 @@ interface Props {
 	store?: AuthDetailStore
 }
 
-const UserView: FunctionComponent<Props> = ({
+const AuthView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
@@ -81,5 +81,5 @@ const UserView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default UserView
+export default AuthView
 

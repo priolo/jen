@@ -19,6 +19,8 @@ import reflectionSetup from "../../stacks/reflection";
 import { ViewState, ViewStore } from "../../stacks/viewBase";
 import mcpToolDetailSetup from "@/stores/stacks/mcpTool/detail";
 import toolResultListSetup from "@/stores/stacks/mcpTool/resultList";
+import authDetailSetup from "@/stores/stacks/auth/detail";
+import accountDetailSetup from "@/stores/stacks/account/detail";
 
 
 
@@ -40,9 +42,11 @@ export function createUUID(): string {
 export function buildStore(state: Partial<ViewState>): ViewStore {
 	const setup = {
 
-		[DOC_TYPE.USERS]: usersSetup,
-		[DOC_TYPE.USER]: userSetup,
+		[DOC_TYPE.AUTH_DETAIL]: authDetailSetup,
+		[DOC_TYPE.ACCOUNT_LIST]: accountListSetup,
+		[DOC_TYPE.ACCOUNT_DETAIL]: accountDetailSetup,
 
+		
 		[DOC_TYPE.AGENT_EDITOR]: agentEditorSetup,
 
 
@@ -65,8 +69,6 @@ export function buildStore(state: Partial<ViewState>): ViewStore {
 
 		[DOC_TYPE.CODE_EDITOR]: editCodeSetup,
 		[DOC_TYPE.REFLECTION]: reflectionSetup,
-
-		[DOC_TYPE.ACCOUNT_LIST]: accountListSetup,
 		
 	}[state?.type]
 	if (!setup) return

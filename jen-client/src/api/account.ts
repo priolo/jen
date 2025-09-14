@@ -1,47 +1,40 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService";
-import { User } from "../types/User";
+import { Account } from "../types/User";
 
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<User[]> {
-	return ajax.get(`users`, opt)
+function index(opt?: CallOptions): Promise<Account[]> {
+	return ajax.get(`accounts`, opt)
 }
 
 /** GET */
-async function get(id: string, opt?: CallOptions): Promise<User> {
+async function get(id: string, opt?: CallOptions): Promise<Account> {
 	if (!id) return
-	const user = await ajax.get(`users/${id}`, opt)
+	const user = await ajax.get(`accounts/${id}`, opt)
 	return user
 }
 
 /** DELETE */
 function remove(id: string, opt?: CallOptions): Promise<void> {
 	if (!id) return
-	return ajax.delete(`users/${id}`, null, opt)
+	return ajax.delete(`accounts/${id}`, null, opt)
 }
 
 /** CREATE */
-function create(user: User, opt?: CallOptions): Promise<User> {
+function create(user: Account, opt?: CallOptions): Promise<Account> {
 	if (!user) return
-	return ajax.post(`users`, user, opt)
+	return ajax.post(`accounts`, user, opt)
 }
 
 /** UPDATE */
-function update(user: User, opt?: CallOptions): Promise<User> {
+function update(user: Account, opt?: CallOptions): Promise<Account> {
 	if (!user) return
-	return ajax.post(`users/${user.id}`, user, opt)
-}
-
-
-
-function _error(connectionId: string, opt?: CallOptions): Promise<User[]> {
-	return ajax.get(`connection/${connectionId}/stream_error`, opt)
+	return ajax.post(`accounts/${user.id}`, user, opt)
 }
 
 
 const accountApi = {
-	_error,
 	index,
 	get,
 	remove,

@@ -1,8 +1,8 @@
 import authApi from "@/api/auth";
-import { User } from "@/types/User";
+import { Account } from "@/types/User";
 import { StoreCore, createStore } from "@priolo/jon";
-import { buildLoginCard } from "../account/factory";
 import { deckCardsSo } from "../../docs/cards";
+import { buildAuthDetailCard } from "./factory";
 
 
 /**
@@ -13,7 +13,7 @@ const setup = {
 
 	state: {
 		token: <string>null,
-		user: <User>null,
+		user: <Account>null,
 	},
 
 	getters: {
@@ -22,7 +22,7 @@ const setup = {
 	actions: {
 		current: async (_: void, store?: AuthStore) => {
 
-			let user: User = null
+			let user: Account = null
 			try {
 				user = (await authApi.current())?.user
 			} catch (error) {
@@ -32,11 +32,11 @@ const setup = {
 			if (!!user) return
 
 			// se non c'e' USER apro la LOGIN CARD
-			const view = buildLoginCard()
+			const view = buildAuthDetailCard()
 			deckCardsSo.add({ view, anim: true })
 		},
 		createSession: async (token: string, store?: AuthStore) => {
-			let user: User = null
+			let user: Account = null
 			try {
 				user = (await authApi.loginGoogle(token))?.user
 			} catch (error) {
