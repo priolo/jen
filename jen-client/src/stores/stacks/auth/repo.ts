@@ -5,6 +5,7 @@ import { deckCardsSo } from "../../docs/cards";
 import { buildAuthDetailCard } from "./factory";
 
 
+
 /**
  * Contiene le info dell'utente loggato
  * e gestisce il login/logout
@@ -20,6 +21,10 @@ const setup = {
 	},
 
 	actions: {
+
+		/**
+		 * Chiamato allo startup dell'app
+		 */
 		current: async (_: void, store?: AuthStore) => {
 
 			let user: Account = null
@@ -35,6 +40,7 @@ const setup = {
 			const view = buildAuthDetailCard()
 			deckCardsSo.add({ view, anim: true })
 		},
+
 		createSession: async (token: string, store?: AuthStore) => {
 			let user: Account = null
 			try {
@@ -46,6 +52,7 @@ const setup = {
 			console.log('User data:', user);
 			authSo.setUser(user)
 		},
+
 		logout: async (_: void, store?: AuthStore) => {
 			store.setUser(null)
 			await authApi.logout()

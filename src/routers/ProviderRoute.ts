@@ -22,19 +22,19 @@ class ProviderRoute extends httpRouter.Service {
 	}
 
 	async getAll(req: Request, res: Response) {
-		const llm = await new Bus(this, this.state.repository).dispatch({
+		const providers = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.ALL
 		})
-		res.json(llm)
+		res.json(providers)
 	}
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const llm: ProviderRepo = await new Bus(this, this.state.repository).dispatch({
+		const provider: ProviderRepo = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.RepoRestActions.GET_BY_ID,
 			payload: id
 		})
-		res.json(llm)
+		res.json(provider)
 	}
 
 

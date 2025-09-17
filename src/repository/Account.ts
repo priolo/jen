@@ -34,11 +34,11 @@ export class AccountRepo {
 
 
 	/** I providers di accesso associati a questo user */
-	@OneToMany(() => ProviderRepo, provider => provider.user)
+	@OneToMany(() => ProviderRepo, provider => provider.account)
 	providers?: Relation<ProviderRepo[]>
 
 	/** Le KEY degli LLM associati a questo user */
-	@OneToMany(() => LlmRepo, (llm) => llm.user)
+	@OneToMany(() => LlmRepo, (llm) => llm.account)
 	llms?: Relation<LlmRepo[]>;
 
 }

@@ -1,4 +1,4 @@
-import llmApi from "@/api/llm"
+import providerApi from "@/api/provider"
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE, EDIT_STATE } from "@/types"
 import { Llm } from "@/types/Llm"
@@ -44,7 +44,7 @@ const setup = {
 
 		fetch: async (_: void, store?: LlmDetailStore) => {
 			if (!store.state.llm?.id) return
-			const llm = await llmApi.get(store.state.llm.id, { store, manageAbort: true })
+			const llm = await providerApi.get(store.state.llm.id, { store, manageAbort: true })
 			store.setLlm(llm)
 			//await loadBaseSetup.actions.fetch(_, store)
 		},

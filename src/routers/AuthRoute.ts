@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { Request, Response } from "express";
 import { OAuth2Client } from 'google-auth-library';
 import { FindManyOptions } from "typeorm";
+import { ENV_TYPE } from "@/types/env.js";
 
 
 
@@ -18,7 +19,7 @@ class AuthRoute extends httpRouter.Service {
 	get stateDefault() {
 		return {
 			...super.stateDefault,
-			path: "/auth",
+			path: "/api/auth",
 			email: "/email",
 			repository: "/typeorm/accounts",
 			jwt: "/jwt",
@@ -36,6 +37,10 @@ class AuthRoute extends httpRouter.Service {
 
 	/** se esiste JWT restituisce l'utente */
 	async current(req: Request, res: Response) {
+
+		if (process.env.NODE_ENV == ENV_TYPE.DEV && process.env.AUTO_AUTH_ENABLE === "true") {
+			return this.currentDemo(req, res);
+		}
 
 		// ricavo JWT dai cookies
 		const token = req.cookies.jwt;
@@ -86,6 +91,38 @@ class AuthRoute extends httpRouter.Service {
 			res.status(401).json({ user: null })
 		}
 	}
+	private async currentDemo(req: Request, res: Response) {
+		// carico l'account DEMO
+		const user: AccountRepo = await new Bus(this, this.state.repository).dispatch({
+			type: typeorm.Actions.FIND_ONE,
+			payload: <FindManyOptions<AccountRepo>>{
+				//select: ["id", "email", "name", "avatar"],
+				where: { id: "id-user-1" },
+			}
+		})
+		// Genera il token JWT con l'email nel payload
+		const jwtToken = await new Bus(this, "/jwt").dispatch({
+			type: jwt.Actions.ENCODE,
+			payload: {
+				payload: {
+					id: user.id,
+					email: user.email,
+				}
+			},
+		})
+		// memorizzo JWT nei cookies. Imposta il cookie HTTP-only
+		res.cookie('jwt', jwtToken, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production', // Assicurati di usare secure solo in produzione
+			maxAge: 24 * 60 * 60 * 1000, // 1 giorno
+		});
+		// restituisco i dati dell'utente loggato
+		delete user.password
+		delete user.salt
+		res.status(200).json({ user });
+	}
+
+
 
 	/** elimino il cookie JWT cosi da chiudere la sessione */
 	async logout(req: Request, res: Response) {
@@ -148,6 +185,7 @@ class AuthRoute extends httpRouter.Service {
 				type: jwt.Actions.ENCODE,
 				payload: {
 					payload: {
+						id: user.id,
 						email: payload.email,
 					}
 				},

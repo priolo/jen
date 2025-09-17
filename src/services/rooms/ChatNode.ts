@@ -1,7 +1,7 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import ChatContext from "@/services/rooms/ChatContext.js";
-import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, UserEnteredS2C } from "@/types/commons/RoomActions.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatInfoS2C } from "@/types/commons/RoomActions.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 
@@ -20,21 +20,25 @@ class ChatNode {
 
 	/** identificativo della CHAT */
 	public id: string = crypto.randomUUID();
-	/** il NODE del contesto */
+	/** il NODE del contesto. Deve implementare ChatContext*/
 	private node: ChatContext;
 	/** le ROOM aperte in questa CHAT */
 	private rooms: RoomTurnBased[]
-	/** tutti i client WS */
+	/** i CLIENTs WS partecipanti */
 	private clientsIds: Set<string> = new Set();
 
 
 	//#region HANDLE CHAT OPERATIONS
 
+	/**
+	 * Creo una nuova CHAT inserendo una MAIN-ROOM
+	 */
 	static async Build(node: ChatContext, room: RoomTurnBased): Promise<ChatNode> {
 		const chat = new ChatNode(node)
 		chat.rooms = [room]
 		return chat
 	}
+
 
 	/**
 	 * comunico alla CHAT che il CLIENT è entrato
@@ -52,18 +56,7 @@ class ChatNode {
 		this.sendMessage(message)
 
 		// invio al nuovo CLIENT i dati della CHAT
-		const msg: UserEnteredS2C = {
-			action: CHAT_ACTION_S2C.USER_ENTERED,
-			chatId: this.id,
-			clientsIds: [...this.clientsIds],
-			rooms: this.rooms.map(r => ({
-				id: r.room.id,
-				parentRoomId: r.room.parentRoomId,
-				history: r.room.history,
-				agentsIds: r.room.agents?.map(a => a.id),
-			})),
-		}
-		this.node.sendMessageToClient(clientId, msg)
+		this.sendInfoToClient(clientId)
 		
 		// inserisco il CLIENT nella CHAT
 		this.clientsIds.add(clientId);
@@ -165,8 +158,28 @@ class ChatNode {
 		return this.rooms.find(room => room.room.id == id)
 	}
 
+
 	/**
-	 * invia alla CHAT un CHAT-MESSAGE
+	 * Invia ad uno specifico CLIENT le INFO della CHATY
+	 */
+	private sendInfoToClient(clientId: string) {
+		if (!clientId) return;
+		const msg: ChatInfoS2C = {
+			action: CHAT_ACTION_S2C.CHAT_INFO,
+			chatId: this.id,
+			clientsIds: [...this.clientsIds],
+			rooms: this.rooms.map(r => ({
+				id: r.room.id,
+				parentRoomId: r.room.parentRoomId,
+				history: r.room.history,
+				agentsIds: r.room.agents?.map(a => a.id),	
+			})),
+		}
+		this.node.sendMessageToClient(clientId, msg)
+	}
+
+	/**
+	 * invia a tutti i partecipanti un CHAT-MESSAGE
 	 */
 	private sendChatMessage(chatMessage: ChatMessage, roomId: string) {
 		const msgToClient: RoomMessageS2C = {
@@ -179,8 +192,7 @@ class ChatNode {
 	}
 
 	/**
-	 * Invia alla CHAT un MESSAGE
-	 * @param message 
+	 * Invia a tutti i partecipanti un MESSAGE
 	 */
 	private sendMessage(message: BaseS2C): void {
 		for (const clientId of this.clientsIds) {

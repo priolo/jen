@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
 import { AccountRepo } from './Account.js';
+import { AccountAssets } from './AccountAssets.js';
 
 
 
@@ -16,7 +17,7 @@ export enum PROVIDER_NAME {
 
 
 @Entity('providers')
-export class ProviderRepo {
+export class ProviderRepo extends AccountAssets {
 
 	@PrimaryGeneratedColumn("uuid")
 	id?: string;
@@ -33,18 +34,11 @@ export class ProviderRepo {
 	@Column({ type: 'text', nullable: true })
 	key?: string;
 
-	/** 
-	 * ID dell'USER a cui appartiene la KEY 
-	 * */
-	@Column({ type: 'varchar', nullable: true })
-	userId?: string;
 
-	/** 
-	 * l'USER a cui appartiene la KEY 
-	 * */
-	@OneToOne(() => AccountRepo)
-	@JoinColumn({ name: 'userId' })
-	user: Relation<AccountRepo>;
+	//#region RELATIONSHIPS
+
+	//#endregion
+
 }
 
 

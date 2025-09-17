@@ -48,7 +48,7 @@ What is 2+2? Just write the answer number.`,
 
 		/** invio un messaggio scritto dall'utente */
 		sendPrompt: async (_: void, store?: RoomDetailStore) => {
-			chatSo.sendPrompt({ 
+			chatSo.addMessageToRoom({ 
 				chatId: store.state.chatId, 
 				roomId: store.state.roomId, 
 				text: store.state.prompt 

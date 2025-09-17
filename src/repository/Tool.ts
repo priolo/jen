@@ -1,6 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { AccountAssets } from './AccountAssets.js';
 import { AgentRepo } from './Agent.js';
 import { McpServerRepo } from './McpServer.js';
+
+
 
 export enum TOOL_TYPE {
 	MCP = 'MCP',
@@ -13,7 +16,7 @@ export enum TOOL_TYPE {
  * E' collegato ad un MCP server
  */
 @Entity('tools')
-export class ToolRepo {
+export class ToolRepo extends AccountAssets {
 
 	@PrimaryGeneratedColumn("uuid")
 	id: string
@@ -35,13 +38,13 @@ export class ToolRepo {
 	parameters?: any
 
 
-	
-    /** Il server MCP */
-    @ManyToOne(() => McpServerRepo, mcp => mcp.id)
+
+	/** Il server MCP */
+	@ManyToOne(() => McpServerRepo, mcp => mcp.id)
 	@JoinColumn({ name: 'mcpId' })
-    mcp?: McpServerRepo
+	mcp?: McpServerRepo
 	@Column({ type: 'uuid', nullable: true })
-    mcpId?: string
+	mcpId?: string
 
 	/** Funzione per eseguire direttamente il codice */
 	@Column({ type: 'varchar', nullable: true })
@@ -53,9 +56,12 @@ export class ToolRepo {
 
 
 
-	// RELATIONSHIPS
+	//#region RELATIONSHIPS
+
 	/** Agenti che utilizzano questo tool */
 	@ManyToMany(() => AgentRepo, agent => agent.tools)
 	agents?: AgentRepo[]
-	
+
+	//#endregion
+
 }

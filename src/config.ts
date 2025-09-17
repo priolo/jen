@@ -52,7 +52,7 @@ export const WS_PORT = +(process.env.WS_PORT || 3010)
 
 
 
-function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: boolean = false, noDb: boolean = false) {
+function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 
 	return [
 
@@ -74,24 +74,37 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 					tools: tools,
 				},
 
-				noRepo ? null : <httpRouter.conf>{
-					class: "http-router",
-					path: "/api",
-					cors: {
-						"origin": "*",
-						// "allowedHeaders": "*",
-						// "credentials": true,
-					},
+				{ class: AuthRoute },
+
+				{
+					class: "http-router/jwt",
+					repository: "/typeorm/user",
+					jwt: "/jwt",
 					children: [
-						{ class: McpServerRoute },
-						{ class: ProviderRoute },
-						{ class: ToolRoute },
-						{ class: AgentRoute },
-						{ class: AuthRoute },
-						{ class: AccountRoute },
-						//{ class: RoomRoute },
-					],
+
+						<httpRouter.conf>{
+							class: "http-router",
+							path: "/api",
+							cors: {
+								"origin": "*",
+								// "allowedHeaders": "*",
+								// "credentials": true,
+							},
+							children: [
+								{ class: McpServerRoute },
+								{ class: ProviderRoute },
+								{ class: ToolRoute },
+								{ class: AgentRoute },
+								// { class: AuthRoute },
+								{ class: AccountRoute },
+								//{ class: RoomRoute },
+							],
+						},
+
+					]
 				},
+
+
 
 				noWs ? null : <ws.conf>{
 					class: "ws",
@@ -109,7 +122,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 			]
 		},
 
-		noDb ? null : <typeorm.conf>{
+		<typeorm.conf>{
 			class: "typeorm",
 			options: {
 				...getDBConnectionConfig(noLog),
@@ -154,11 +167,11 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false, noRepo: 
 			],
 		},
 
-		<jwt.conf> {
+		<jwt.conf>{
 			class: "jwt",
 			secret: "secret_word!!!"
 		},
-		
+
 		// {
 		// 	class: myState,
 		// 	name: "node.1"

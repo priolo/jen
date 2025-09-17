@@ -2,6 +2,7 @@ import { executeMcpTool, getMcpTools } from "@/services/mcp/utils.js";
 import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { McpServerRepo } from "../repository/McpServer.js";
+import { FindManyOptions } from "typeorm";
 
 
 
@@ -32,8 +33,13 @@ class McpServerRoute extends httpRouter.Service {
 	}
 
 	async getAll(req: Request, res: Response) {
+		const user = req["jwtPayload"]
+		console.log("user", user)
 		const mcpServer = await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
-			type: typeorm.RepoRestActions.ALL
+			type: typeorm.Actions.FIND,
+			payload: <FindManyOptions>{
+				where: { accountId: user.id }
+			}
 		})
 		res.json(mcpServer)
 	}

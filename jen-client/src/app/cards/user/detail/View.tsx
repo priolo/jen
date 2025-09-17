@@ -6,6 +6,7 @@ import { DOC_TYPE } from "@/types"
 import { TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
+import AccauntDetailActions from "./Actions"
 
 
 
@@ -34,6 +35,7 @@ const AccountDetailView: FunctionComponent<Props> = ({
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT_DETAIL} />}
 		className={clsCard.root}
 		store={store}
+		actionsRender={<AccauntDetailActions store={store} />}
 	>
 		<TitleAccordion title="BASE">
 

@@ -25,18 +25,51 @@ export type ChatRoom = {
 	agentsIds: string[]
 }
 
+/**
+ * Contiene le info per l'aggiornamento di un messaggio
+ */
+export type MessageUpdate = {
+	/** il messaggio di riferimento per la posizione */
+	refId?: string
+	/** tipo di aggiornamento */
+	type: UPDATE_TYPE
+	/** nuovo testo del messaggio */
+	content: ChatMessage
+}
+
+export enum UPDATE_TYPE {
+	/** inserisce un nuovo messaggio DOPO messageIdRef (=null all'inizio)*/
+	ADD = "add",
+	/** sostituisce il contenuto del messaggio */
+	REPLACE = "replace",
+	/** elimina il messaggio messageIdRef */
+	DELETE = "delete",
+}
 
 
 
 //#region CLIENT TO SERVER
 
 export enum CHAT_ACTION_C2S {
-	/* un CLIENT crea e entra in una CHAT */
-	CHAT_CREATE_ENTER = "chat-create-enter",
-	/* un CLIENT lascia la CHAT */
+	/* un USER crea una CHAT */
+	CHAT_CREATE = "chat-create",
+
+	/** USER entra in CHAT */
+	USER_ENTER = "user-enter",
+	/* USER lascia la CHAT */
 	USER_LEAVE = "user-leave",
-	/* un CLIENT invia un messaggio */
+
+	/** richiesta di avviare il completamento in una ROOM */
+	ROOM_COMPLETE = "room-complete",
+	/** aggiorna la lista degli AGENT in una ROOM */
+	ROOM_AGENTS_UPDATE = "room-agents-update",
+	/** aggiorna la HISTORY di una ROOM */
+	ROOM_HISTORY_UPDATE = "room-history-update",
+
+
+	/* [DA ELIMINARE] USER invia un messaggio in una ROOM della CHAT*/
 	USER_MESSAGE = "user-message",
+
 }
 
 export type BaseC2S = {
@@ -46,21 +79,22 @@ export type BaseC2S = {
 	chatId: string
 }
 
-/** CLIENT crea e entra in una nuova CHAT */
-export type UserCreateEnterC2S = Omit<BaseC2S, "chatId"> & {
-	action: CHAT_ACTION_C2S.CHAT_CREATE_ENTER
-	// in futuro si potranno creare diversi tipi di CHAT
-	// ogni tipo di chat ha un suo parametro di configurazione
-	// type: "single-agent" | "free" | "agile" | "document" 
-	/** LLM-AGENT di riferimento */
-	agentId: string
+/** CLIENT crea una nuova CHAT */
+export type ChatCreateC2S = Omit<BaseC2S, "chatId"> & {
+	action: CHAT_ACTION_C2S.CHAT_CREATE
+	/** OPZIONALE. I primi agenti da inserire nella ROOM  */
+	agentIds?: string[]
+
 }
 
-/** CLIENT lascia la CHAT */
+/** CLIENT entra in una CHAT */
+export type UserEnterC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.USER_ENTER
+}
+
+/** CLIENT lascia una CHAT */
 export type UserLeaveC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.USER_LEAVE
-	/** il client che fa l'azione */
-	clientId: string
 }
 
 /** inserisce un messaggio USER e chiede il COMPLETE */
@@ -72,6 +106,29 @@ export type UserMessageC2S = BaseC2S & {
 	text: string
 }
 
+/** richiesta di completamento di una ROOM */
+export type RoomCompleteC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.ROOM_COMPLETE
+	/** id della ROOM, se null è la MAIN-ROOM */
+	roomId?: string
+}
+
+/** richiesta modifica lista AGENTS in ROOM */
+export type RoomAgentsUpdateC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE
+	roomId: string
+	/** new list of AGENTs in ROOM */
+	agentsIds: string[]
+}
+
+/** richiesta modifica della HISTORY di una ROOM */
+export type RoomHistoryUpdateC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE
+	roomId: string
+	/** UPDATE to HISTORY */
+	updates: MessageUpdate[]
+}
+
 //#endregion
 
 
@@ -80,18 +137,23 @@ export type UserMessageC2S = BaseC2S & {
 //#region SERVER TO CLIENT
 
 export enum CHAT_ACTION_S2C {
-	/** l'USER è entrato in una CHAT */
-	USER_ENTERED = "user-entered",
-	/** un CLIENT è entrato in CHAT */
+
+	/** I dati della CHAT */
+	CHAT_INFO = "chat-info",
+	/** un CLIENT è entrato in CHAT. Potrebbe essere anche un AGENT*/
 	CLIENT_ENTERED = "entered",
-	/** un CLIENT è uscita dalla CHAT */
+	/** un CLIENT è uscita dalla CHAT. Potrebbe essere anche un AGENT */
 	CLIENT_LEAVE = "leave",
 
 	/** creata nuova ROOM in CHAT */
 	ROOM_NEW = "room-new",
-	/** [non usato] informazioni su una ROOM della CHAT */
-	ROOM_GET = "room-get",
-	/** aggiunto MESSAGE in una ROOM della CHAT  */
+	/** comunica un aggiornamento degli AGENTS in una ROOM */
+	ROOM_AGENTS_UPDATE = "room-agents-update",
+	/** comunica l'aggiornamento della HISTORY di una ROOM */
+	ROOM_HISTORY_UPDATE = "room-history-update",
+
+
+	/** [DA ELIMINARE] aggiunto MESSAGE in una ROOM della CHAT  */
 	ROOM_MESSAGE = "room-message",
 }
 
@@ -101,9 +163,11 @@ export type BaseS2C = {
 }
 
 
-/** L'USER è entrato in CHAT */
-export type UserEnteredS2C = BaseS2C & {
-	action: CHAT_ACTION_S2C.USER_ENTERED
+//#region CLIENT
+
+/** Invia ad un CLIENT i dati di una CHAT */
+export type ChatInfoS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.CHAT_INFO
 	/** lista dei CLIENTs presenti */
 	clientsIds: string[]
 	/** lista delle ROOMs. */
@@ -117,14 +181,20 @@ export type ClientEnteredS2C = BaseS2C & {
 	clientId: string
 }
 
-/** un CLIENT è uscito dalla CHAT */
+/** un CLIENT è uscito da una CHAT */
 export type ClientLeaveS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_LEAVE
 	/** id del CLIENT */
 	clientId?: string
 }
 
-/** è stato inserito un MESSAGE in ROOM  */
+//#endregion
+
+
+
+//#region  MESSAGE
+
+/** [DA ELIMINARE] è stato inserito un MESSAGE in ROOM  */
 export type RoomMessageS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ROOM_MESSAGE
 	/** la stanza in cui è stato inserito */
@@ -133,9 +203,13 @@ export type RoomMessageS2C = BaseS2C & {
 	content: ChatMessage
 }
 
+//#endregion
 
 
-/** creata una nuova SUB-ROOM */
+
+//#region ROOM
+
+/** creata una nuova ROOM */
 export type RoomNewS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ROOM_NEW
 	/** id nella nuova ROOM */
@@ -145,5 +219,23 @@ export type RoomNewS2C = BaseS2C & {
 	/** LLM-AGENT di riferimento */
 	agentsIds: string[]
 }
+
+/** richiesta modifica lista AGENTS in ROOM */
+export type RoomAgentsUpdateS2C = BaseC2S & {
+	action: CHAT_ACTION_S2C.ROOM_AGENTS_UPDATE
+	roomId: string
+	/** new list of AGENTs in ROOM */
+	agentsIds: string[]
+}
+
+/** richiesta modifica della HISTORY di una ROOM */
+export type RoomHistoryUpdateS2C = BaseC2S & {
+	action: CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE
+	roomId: string
+	/** UPDATE to HISTORY */
+	updates: MessageUpdate[]
+}
+
+//#endregion
 
 //#endregion

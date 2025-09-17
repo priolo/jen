@@ -18,7 +18,7 @@ export class RoomRepo {
     @Column({ type: 'json', default: '[]' })
     history?: ChatMessage[] = [];
 
-    // RELATIONSHIPS
+    //#region RELATIONSHIPS
 
     /** The agents associated with this room */
     @ManyToMany(() => AgentRepo, agent => agent.rooms)
@@ -37,5 +37,7 @@ export class RoomRepo {
 
     /** ID of the parent room, if this room is a sub-room */
     parentRoomId?: string | null;
+
+    //#endregion
 
 }

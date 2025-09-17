@@ -117,6 +117,7 @@ describe("Test on CHAT", () => {
 	test("domanda in MAIN-ROOM con TOOL", async () => {
 		const room = await RoomTurnBased.Build(nodeSym, [agentAdderRepo.id])
 		const chat = await ChatNode.Build(nodeSym, room)
+		
 		await chat.enterClient("id-user")
 		chat.addUserMessage(
 			`What is 2+2? Just write the answer number.`,

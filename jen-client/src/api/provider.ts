@@ -5,35 +5,35 @@ import { Llm } from "@/types/Llm"
 
 /** INDEX */
 function index(opt?: CallOptions): Promise<Llm[]> {
-	return ajax.get(`llm`, opt)
+	return ajax.get(`providers`, opt)
 }
 
 /** GET */
 function get(id: string, opt?: CallOptions): Promise<Llm> {
-	return ajax.get(`llm/${id}`, opt)
+	return ajax.get(`providers/${id}`, opt)
 }
 
 /** CREATE NEW */
 function create(llm: Partial<Llm>, opt?: CallOptions): Promise<Llm> {
-	return ajax.post(`llm`, { llm }, opt)
+	return ajax.post(`providers`, { llm }, opt)
 }
 
 /** UPDATE */
 function update(llm: Partial<Llm>, opt?: CallOptions): Promise<Llm> {
-	return ajax.patch(`llm/${llm.id}`, { llm }, opt)
+	return ajax.patch(`providers/${llm.id}`, { llm }, opt)
 }
 
 /** DELETE */
 function remove(llmId: string, opt?: CallOptions): Promise<void> {
-	return ajax.delete(`llm/${llmId}`, null, opt)
+	return ajax.delete(`providers/${llmId}`, null, opt)
 }
 
 
-const llmApi = {
+const providerApi = {
 	index,
 	get,
 	create,
 	update,
 	remove,
 }
-export default llmApi
+export default providerApi

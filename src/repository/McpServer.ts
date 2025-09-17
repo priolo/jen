@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { AccountAssets } from './AccountAssets.js';
 
 
 
@@ -6,7 +7,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
  * Rappresenta un server MCP
  */
 @Entity('mcp_servers')
-export class McpServerRepo {
+export class McpServerRepo extends AccountAssets {
 	@PrimaryGeneratedColumn("uuid")
 	id: string;
 
@@ -15,6 +16,12 @@ export class McpServerRepo {
 
 	@Column({ type: 'varchar', default: '' })
 	host: string;
+
+
+	//#region RELATIONSHIPS
+
+	//#endregion
+
 }
 
 

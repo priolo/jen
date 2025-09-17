@@ -32,12 +32,12 @@ export async function StartSession() {
 
 	// LOAD SINGLETONE STORES
 	await mcpServerSo.fetch()
-	await llmSo.fetch()
-	await toolSo.fetch()
-	await agentSo.fetch()
+	// await llmSo.fetch()
+	// await toolSo.fetch()
+	// await agentSo.fetch()
 
 	// WS CONNECTION
-	wsConnection.connect()
+	//wsConnection.connect()
 }
 
 export async function EndSession() {

@@ -7,7 +7,7 @@ import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
-import { BaseS2C, CHAT_ACTION_C2S, UserCreateEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import ChatContext from "../services/rooms/ChatContext.js"
 import McpServerRoute from "./McpServerRoute.js"
@@ -51,7 +51,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		// rimuovo il client da tutte le CHATs
 		const chats = [...this.chats]
 		for (const chat of chats) {
-			this.handleLeave(
+			this.handleUserLeave(
 				client,
 				{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
 			)
@@ -74,12 +74,16 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		const msg = JSON.parse(message)
 
 		switch (msg.action) {
-			case CHAT_ACTION_C2S.CHAT_CREATE_ENTER:
-				await this.handleEnter(client, msg as UserCreateEnterC2S)
+			case CHAT_ACTION_C2S.CHAT_CREATE:
+				await this.handleChatCreate(client, msg as ChatCreateC2S)
+				break
+			case CHAT_ACTION_C2S.USER_ENTER:
+				this.handleUserEnter(client, msg as UserEnterC2S)
 				break
 			case CHAT_ACTION_C2S.USER_LEAVE:
-				this.handleLeave(client, msg as UserLeaveC2S)
+				this.handleUserLeave(client, msg as UserLeaveC2S)
 				break
+			
 			case CHAT_ACTION_C2S.USER_MESSAGE:
 				await this.handleUserMessage(client, msg as UserMessageC2S)
 				break
@@ -92,18 +96,36 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	}
 
 	/**
-	 * Handle client entering in a chat
+	 * Crea una nuova CHAT. 
+	 * Inserisce il CLIENT che l'ha creata
 	 */
-	private async handleEnter(client: ws.IClient, msg: UserCreateEnterC2S) {
-		if (!client?.params.id || !msg?.agentId) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
-
-		const room = await RoomTurnBased.Build(this, [msg.agentId])
+	private async handleChatCreate(client: ws.IClient, msg: ChatCreateC2S) {
+		if (!client?.params.id) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
+		const room = await RoomTurnBased.Build(this, msg.agentIds)
 		const chat = await ChatNode.Build(this, room)
-		await chat.enterClient(client.params.id)
+		this.chats.push(chat)
+		chat.enterClient(client.params.id)
+	}
+
+	/**
+	 * Un CLIENT entra in una CHAT. 
+	 * Avvete tutti i partecipanti 
+	 * Invio al nuovo CLIENT i dati della CHAT
+	 */
+	private async handleUserEnter(client: ws.IClient, msg: UserEnterC2S) {
+		if (!client?.params.id) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
+
+		const chat = this.getChatById(msg.chatId)
+		chat.enterClient(client.params.id)
 		this.chats.push(chat)
 	}
 
-	private handleLeave(client: ws.IClient, msg: UserLeaveC2S) {
+	/**
+	 * Un CLIENT lascia una CHAT
+	 * Avverte tutti i partecipanti
+	 * Se la CHAT è vuota la elimina
+	 */
+	private handleUserLeave(client: ws.IClient, msg: UserLeaveC2S) {
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) return this.log("CHAT", `not found: ${msg.chatId}`, TypeLog.ERROR)
 
@@ -113,6 +135,12 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		this.log(`Client ${client.params.id} left chat ${msg.chatId}`)
 	}
 
+	/**
+	 * Un CLIENT invia un MESSAGE di tipo USER in una ROOM della CHAT
+	 * Inserisce il MESSAGE in HISTORY
+	 * Avverte tutti i partecipanti
+	 * Chiede il COMPLETE alla ROOM
+	 */
 	private async handleUserMessage(client: ws.IClient, msg: UserMessageC2S) {
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) return this.log("CHAT", `Chat not found: ${msg.chatId}`, TypeLog.ERROR)
@@ -125,7 +153,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 
 
-	//#region IMPLEMENTATION OF RoomsChats INTERFACE
+	//#region ChatContext IMPLEMENTATION 
 
 	public async createRoomRepo(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null> {
 		// per il momento non salvo in DB

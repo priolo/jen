@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AccountAssets } from './AccountAssets.js';
 import { LlmRepo } from './Llm.js';
 import { RoomRepo } from './Room.js';
 import { ToolRepo } from './Tool.js';
@@ -13,7 +14,7 @@ export enum AGENT_TYPE {
 }
 
 @Entity('agents')
-export class AgentRepo {
+export class AgentRepo extends AccountAssets {
 
     /** id dell'agente */
     @PrimaryGeneratedColumn("uuid")
@@ -50,7 +51,7 @@ export class AgentRepo {
 
 
 
-    // RELATIONSHIPS
+    //#region RELATIONSHIPS
 
     /** l'LLM utilizzato per il complete */
     @ManyToOne(() => LlmRepo, llm => llm.agents, { nullable: true })
@@ -111,5 +112,7 @@ export class AgentRepo {
     /** Parent agents (inverse side of subAgents) */
     @ManyToMany(() => AgentRepo, (agent) => agent.subAgents)
     parentAgents?: AgentRepo[]
+
+    //#endregion
 
 }

@@ -1,6 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AccountAssets } from './AccountAssets.js';
 import { AgentRepo } from './Agent.js';
-import { AccountRepo } from './Account.js';
 
 
 
@@ -9,7 +9,7 @@ import { AccountRepo } from './Account.js';
  * Tabella per memorizzare le KEY degli LLM
  */
 @Entity('llms')
-export class LlmRepo {
+export class LlmRepo  extends AccountAssets {
 
 	@PrimaryGeneratedColumn("uuid")
 	id?: string;
@@ -27,25 +27,16 @@ export class LlmRepo {
 	key?: string;
 
 
-	/** 
-	 * l'USER a cui appartiene la KEY 
-	 * */
-	@ManyToOne(() => AccountRepo, (user) => user.llms)
-	@JoinColumn({ name: 'userId' })
-	user?: Relation<AccountRepo>;
-
-	/** 
-	 * ID dell'USER a cui appartiene la KEY 
-	 * */
-	@Column({ type: 'varchar', nullable: true })
-	userId?: string;
-
+	//#region RELATIONSHIPS
 
 	/**
 	 * Agents that use this LLM
 	 */
 	@OneToMany(() => AgentRepo, (agent) => agent.llm)
 	agents?: AgentRepo[];
+
+	//#endregion
+
 }
 
 

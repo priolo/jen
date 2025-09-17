@@ -1,7 +1,7 @@
 import { wsConnection } from "@/plugins/session/wsConnection"
 import { deckCardsSo, GetAllCards } from "@/stores/docs/cards"
 import { DOC_TYPE } from "@/types"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, UserCreateEnterC2S, UserEnteredS2C, UserLeaveC2S, UserMessageC2S } from "@/types/commons/RoomActions"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatCreateC2S, ChatInfoS2C, UserLeaveC2S, UserMessageC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE } from "@/types/commons/RoomActions"
 import { utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
 import accountSo from "../account/repo"
@@ -32,55 +32,112 @@ const setup = {
 
 	actions: {
 
-		createChat: async (agentId: string, store?: ChatStore) => {
-			const msgSend: UserCreateEnterC2S = {
-				action: CHAT_ACTION_C2S.CHAT_CREATE_ENTER,
-				agentId: agentId,
+		//#region MESSAGE TO SERVER
+
+		/**
+		 * Create and enter in a CHAT
+		 */
+		createChat: (agentId: string, store?: ChatStore) => {
+			const msgSend: ChatCreateC2S = {
+				action: CHAT_ACTION_C2S.CHAT_CREATE,
+				agentIds: agentId ? [agentId] : [],
 			}
 			wsConnection.send(JSON.stringify(msgSend))
 		},
 
+		/**
+		 * Update the list of AGENTS in a ROOM 
+		 */
+		updateAgentsInRoom: (
+			{ chatId, roomId, agentsIds }: { chatId: string, roomId: string, agentsIds: string[] },
+			store?: ChatStore
+		) => {
+			const message: RoomAgentsUpdateC2S = {
+				action: CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE,
+				chatId: chatId,
+				roomId: roomId,
+				agentsIds: agentsIds,
+			}
+			wsConnection.send(JSON.stringify(message))
+		},
+		/**
+		 * Add AGENTs to a ROOM
+		 */
+		addAgentsToRoom: (
+			{ chatId, roomId, agentsIds }: { chatId: string, roomId: string, agentsIds: string[] },
+			store?: ChatStore
+		) => {
+			const room = store.getRoomById(roomId)
+			if (!room) return
+			const newAgentsIds = [... new Set([...room.agentsIds, ...agentsIds])]
+			store.updateAgentsInRoom({ chatId, roomId, agentsIds: newAgentsIds })
+		},
+		/**
+		 * Add a MESSAGE in the HISTORY of a ROOM
+		 */
+		addMessageToRoom: (
+			{ chatId, roomId, text }: { chatId: string, roomId: string, text: string },
+			store?: ChatStore
+		) => {
+			const room = store.getRoomById(roomId)
+			if (!room) return
+			const lastMessage = room.history[room.history.length - 1]
+			const message: RoomHistoryUpdateC2S = {
+				action: CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE,
+				chatId: chatId,
+				roomId: roomId,
+				updates: [{
+					refId: lastMessage?.id,
+					type: UPDATE_TYPE.ADD,
+					content: { role: "user", content: text }
+				}],
+			}
+			wsConnection.send(JSON.stringify(message))
+		},
+		/** 
+		 * Questo USER lascia una CHAT
+		*/
 		removeChat: async (chatId: string, store?: ChatStore) => {
 			const message: UserLeaveC2S = {
 				action: CHAT_ACTION_C2S.USER_LEAVE,
 				chatId: chatId,
-				clientId: accountSo.state.current?.id
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
-		
-		sendPrompt: async (
-			{ chatId, roomId, text }: { chatId: string, roomId: string, text: string },
-			store?: ChatStore
-		) => {
-			text = text?.trim()
-			if (!text || text.length == 0) return
-			const message: UserMessageC2S = {
-				action: CHAT_ACTION_C2S.USER_MESSAGE,
-				chatId: chatId,
-				roomId: roomId,
-				text: text,
 			}
 			wsConnection.send(JSON.stringify(message))
 		},
 
+		//#endregion
+
+		/**
+		 * HANDLE MESSAGE FROM SERVER
+		 */
 		onMessage: (data: any, store?: ChatStore) => {
 			const message: BaseS2C = JSON.parse(data.payload)
 
 			switch (message.action) {
 
-				case CHAT_ACTION_S2C.USER_ENTERED: {
-					const msgEnter: UserEnteredS2C = JSON.parse(data.payload)
-					let chat: Chat = {
-						id: msgEnter.chatId,
-						clientsIds: msgEnter.clientsIds,
-						rooms: msgEnter.rooms,
+				/**
+				 * fornsce le info di una CHAT
+				 * tipicamente risposnta di CHAT_CREATE
+				 */
+				case CHAT_ACTION_S2C.CHAT_INFO: {
+					const msg: ChatInfoS2C = JSON.parse(data.payload)
+					let chat = {
+						id: msg.chatId,
+						clientsIds: msg.clientsIds,
+						rooms: msg.rooms,
 					}
-					store.setAll([...store.state.all, chat])
+					const chatOld = store.getChatById(msg.chatId)
+					if (!!chatOld) {
+						chat = { ...chatOld, ...chat }
+						store.setAll([...store.state.all])
+					} else {
+						store.setAll([...store.state.all, chat])
+					}
 
+					// creo e apro una CARD per la gestione della ROOM
 					const view = buildRoomDetail({
-						chatId: msgEnter.chatId,
-						roomId: msgEnter.rooms[0]?.id,
+						chatId: chat.id,
+						roomId: chat.rooms[0]?.id,
 					})
 					deckCardsSo.add({ view, anim: true })
 
