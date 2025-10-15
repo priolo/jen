@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
-import { ProviderRepo } from './Provider.js';
-import { LlmRepo } from './Llm.js';
+//import { ProviderRepo } from './Provider.js';
+//import { LlmRepo } from './Llm.js';
 
 
 
@@ -10,6 +10,7 @@ export class AccountRepo {
 	@PrimaryGeneratedColumn("uuid")
 	id?: string;
 
+
 	@Column({ type: 'varchar', default: '' })
 	email: string;
 
@@ -18,6 +19,7 @@ export class AccountRepo {
 
 	@Column({ type: 'varchar', default: '' })
 	avatarUrl: string;
+
 
 	/**
 	 * visibile agli LLMs
@@ -33,12 +35,21 @@ export class AccountRepo {
 
 
 
+	/**
+	 * account google
+	 */
+	@Column({ type: 'varchar', nullable: true })
+	googleEmail?: string;
+
+
+	
+
 	/** I providers di accesso associati a questo user */
-	@OneToMany(() => ProviderRepo, provider => provider.account)
-	providers?: Relation<ProviderRepo[]>
+	// @OneToMany(() => ProviderRepo, provider => provider.account)
+	// providers?: Relation<ProviderRepo[]>
 
 	/** Le KEY degli LLM associati a questo user */
-	@OneToMany(() => LlmRepo, (llm) => llm.account)
-	llms?: Relation<LlmRepo[]>;
+	// @OneToMany(() => LlmRepo, (llm) => llm.account)
+	// llms?: Relation<LlmRepo[]>;
 
 }

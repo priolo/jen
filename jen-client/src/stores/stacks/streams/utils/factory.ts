@@ -1,6 +1,6 @@
 import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE, EDIT_STATE } from "@/types";
-import { Account } from "@/types/User";
+import { Account } from "@/types/Account";
 import { UsersState, UsersStore } from "..";
 import { UserState, UserStore } from "../detail";
 

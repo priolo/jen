@@ -220,7 +220,7 @@ export type RoomNewS2C = BaseS2C & {
 }
 
 /** richiesta modifica lista AGENTS in ROOM */
-export type RoomAgentsUpdateS2C = BaseC2S & {
+export type RoomAgentsUpdateS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ROOM_AGENTS_UPDATE
 	roomId: string
 	/** new list of AGENTs in ROOM */
@@ -228,7 +228,7 @@ export type RoomAgentsUpdateS2C = BaseC2S & {
 }
 
 /** richiesta modifica della HISTORY di una ROOM */
-export type RoomHistoryUpdateS2C = BaseC2S & {
+export type RoomHistoryUpdateS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE
 	roomId: string
 	/** UPDATE to HISTORY */

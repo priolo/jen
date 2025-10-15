@@ -1,6 +1,6 @@
 import { BaseOperation } from "slate"
 import { NodeType } from "../components/slate/elements/doc/types"
-import { Account } from "./User"
+import { Account } from "./Account"
 
 
 

@@ -1,5 +1,5 @@
 import { ViewState, ViewStore, default as docSetup, default as viewSetup } from "@/stores/stacks/viewBase"
-import { Account } from "@/types/User"
+import { Account } from "@/types/Account"
 import { mixStores, StoreCore } from "@priolo/jon"
 import accountApi from "../../../api/account"
 import { buildUser } from "./utils/factory"

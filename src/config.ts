@@ -76,7 +76,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 
 				{ class: AuthRoute },
 
-				{
+				<httpRouter.jwt.conf>{
 					class: "http-router/jwt",
 					repository: "/typeorm/user",
 					jwt: "/jwt",

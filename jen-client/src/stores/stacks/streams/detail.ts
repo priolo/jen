@@ -5,7 +5,7 @@ import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE, EDIT_STATE } from "@/types"
 import { StoreCore, mixStores } from "@priolo/jon"
 import { UsersState, UsersStore } from "."
-import { Account } from "../../../types/User"
+import { Account } from "../../../types/Account"
 import { loadBaseSetup, LoadBaseState, LoadBaseStore, VIEW_SIZE } from "@priolo/jack"
 import docApi from "../../../api/doc"
 

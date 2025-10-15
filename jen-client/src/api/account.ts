@@ -1,5 +1,5 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService";
-import { Account } from "../types/User";
+import { Account } from "../types/Account";
 
 
 

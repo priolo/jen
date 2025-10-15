@@ -1,5 +1,5 @@
 import authApi from "@/api/auth";
-import { Account } from "@/types/User";
+import { Account } from "@/types/Account";
 import { StoreCore, createStore } from "@priolo/jon";
 import { deckCardsSo } from "../../docs/cards";
 import { buildAuthDetailCard } from "./factory";

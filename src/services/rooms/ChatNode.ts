@@ -1,7 +1,7 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import ChatContext from "@/services/rooms/ChatContext.js";
-import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatInfoS2C } from "@/types/commons/RoomActions.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatInfoS2C, MessageUpdate, RoomAgentsUpdateS2C, UPDATE_TYPE, RoomHistoryUpdateS2C } from "@/types/commons/RoomActions.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 
@@ -46,7 +46,7 @@ class ChatNode {
 	 */
 	enterClient(clientId: string) {
 		if (!clientId || this.clientsIds.has(clientId)) return;
-		
+
 		// avverto gli altri CLIENT
 		const message: ClientEnteredS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
@@ -57,7 +57,7 @@ class ChatNode {
 
 		// invio al nuovo CLIENT i dati della CHAT
 		this.sendInfoToClient(clientId)
-		
+
 		// inserisco il CLIENT nella CHAT
 		this.clientsIds.add(clientId);
 	}
@@ -79,7 +79,7 @@ class ChatNode {
 		return this.clientsIds.size == 0
 	}
 
-	/**
+	/** DA ELIMINARE
 	 * MESSAGE di tipo USER è stato inserito in una ROOM della CHAT
 	 * con clientId=null è GENERIC-USER
 	 * con roomId=null  è la MAIN-ROOM
@@ -99,6 +99,65 @@ class ChatNode {
 		// [II] assumo che da completare sia sempre la MAIN-ROOM
 		let room: RoomTurnBased = this.getMainRoom()
 		return await this.recursiveRequest(room)
+	}
+
+	async updateAgents(agentsIds: string[] = [], roomId?: string): Promise<void> {
+		const room = this.getRoomById(roomId) ?? this.getMainRoom()
+		if (!room) return
+
+		const agents: AgentRepo[] = []
+		for (const agentId of agentsIds) {
+			const agent = await this.node.getAgentRepoById(agentId)
+			if (agent) agents.push(agent)
+		}
+		room.room.agents = agents
+
+		// avviso tutti i partecipanti
+		const msg: RoomAgentsUpdateS2C = {
+			action: CHAT_ACTION_S2C.ROOM_AGENTS_UPDATE,
+			chatId: this.id,
+			roomId: room.room.id,
+			agentsIds: agentsIds,
+		}
+		this.sendMessage(msg)
+	}
+
+	updateHistory(updates: MessageUpdate[], roomId?: string): void {
+		const room = this.getRoomById(roomId) ?? this.getMainRoom()
+		if (!room) return;
+
+		const history = [...room.room.history]
+		for (const update of updates) {
+			const index = history.findIndex(m => m.id == update.refId)
+			switch (update.type) {
+				case UPDATE_TYPE.ADD: {
+					if (index == -1) {
+						history.unshift(update.content)
+					} else {
+						history.splice(index + 1, 0, update.content)
+					}
+					break
+				}
+				case UPDATE_TYPE.DELETE: {
+					if (index != -1) history.splice(index, 1)
+					break
+				}
+				case UPDATE_TYPE.REPLACE: {
+					if (index != -1) history[index] = update.content
+					break
+				}
+			}
+		}
+		room.room.history = history
+
+		// avviso tutti i partecipanti
+		const msg: RoomHistoryUpdateS2C = {
+			action: CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE,
+			chatId: this.id,
+			roomId: room.room.id,
+			updates: updates,
+		}
+		this.sendMessage(msg)
 	}
 
 	//#endregion
@@ -140,12 +199,12 @@ class ChatNode {
 
 			// effettuo la ricorsione su questa nuova ROOM-AGENT
 			const response = await this.recursiveRequest(subRoom)
-			return { 
-				response, 
+			return {
+				response,
 				roomId: subRoom.room.id
 			}
 		}
-		room.onMessage = (chatMessage: ChatMessage, roomId: string) => 
+		room.onMessage = (chatMessage: ChatMessage, roomId: string) =>
 			this.sendChatMessage(chatMessage, roomId)
 
 		return await room.getResponse()
@@ -172,7 +231,7 @@ class ChatNode {
 				id: r.room.id,
 				parentRoomId: r.room.parentRoomId,
 				history: r.room.history,
-				agentsIds: r.room.agents?.map(a => a.id),	
+				agentsIds: r.room.agents?.map(a => a.id),
 			})),
 		}
 		this.node.sendMessageToClient(clientId, msg)

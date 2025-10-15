@@ -1,4 +1,4 @@
-import { Uuid } from "./global"
+import { Uuid } from "./global.js"
 
 
 

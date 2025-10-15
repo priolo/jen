@@ -1,5 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Relation } from 'typeorm';
-import { AccountRepo } from './Account.js';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { AccountAssets } from './AccountAssets.js';
 
 

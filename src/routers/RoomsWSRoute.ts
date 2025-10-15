@@ -7,7 +7,7 @@ import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, RoomAgentsUpdateC2S, RoomCompleteC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import ChatContext from "../services/rooms/ChatContext.js"
 import McpServerRoute from "./McpServerRoute.js"
@@ -71,22 +71,43 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 */
 	async onMessage(client: ws.IClient, message: string) {
 		if (!client || !message) return
-		const msg = JSON.parse(message)
+		let msg = JSON.parse(message)
+
+		if (msg.action === CHAT_ACTION_C2S.CHAT_CREATE) {
+			await this.handleChatCreate(client, msg as ChatCreateC2S)
+			return
+		}
+
+		const chat = this.getChatById(msg.chatId)
+		if (!chat) return this.log("CHAT", `not found: ${msg.chatId}`, TypeLog.ERROR)
 
 		switch (msg.action) {
-			case CHAT_ACTION_C2S.CHAT_CREATE:
-				await this.handleChatCreate(client, msg as ChatCreateC2S)
-				break
 			case CHAT_ACTION_C2S.USER_ENTER:
 				this.handleUserEnter(client, msg as UserEnterC2S)
 				break
 			case CHAT_ACTION_C2S.USER_LEAVE:
 				this.handleUserLeave(client, msg as UserLeaveC2S)
 				break
-			
+			case CHAT_ACTION_C2S.ROOM_COMPLETE:
+				await this.handleRoomComplete(client, msg as RoomCompleteC2S)
+				break
+
+			case CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE: {
+				const msgUp: RoomAgentsUpdateC2S = msg
+				chat.updateAgents(msgUp.agentsIds, msgUp.roomId)
+				break
+			}
+
+			case CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE: {
+				const msgUp: RoomHistoryUpdateC2S = msg
+				chat.updateHistory(msgUp.updates, msgUp.roomId)
+				break
+			}
+
 			case CHAT_ACTION_C2S.USER_MESSAGE:
 				await this.handleUserMessage(client, msg as UserMessageC2S)
 				break
+				
 			default:
 				console.warn(`Unknown action: ${msg.action}`)
 				return
@@ -254,7 +275,6 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	}
 
 	//#endregion
-
 
 
 
