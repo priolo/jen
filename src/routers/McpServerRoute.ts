@@ -23,6 +23,7 @@ class McpServerRoute extends httpRouter.Service {
 			]
 		}
 	}
+	declare state: typeof this.stateDefault
 
 	public static async GetById(mcpId: string, node: INode, repository: string): Promise<McpServerRepo> {
 		const mcpServer = await new Bus(node, repository).dispatch<McpServerRepo>({

@@ -1,29 +1,25 @@
-import { http, httpRouter, jwt, log, ServiceBase, typeorm, ws } from "@priolo/julian";
+import { http, httpRouter, jwt, log, typeorm, ws } from "@priolo/julian";
+import { TypeLog } from "@priolo/julian/dist/core/types.js";
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import tools from "./config_tools.js";
+import { AccountRepo } from "./repository/Account.js";
 import { AgentRepo } from './repository/Agent.js';
-import { getDBConnectionConfig } from './repository/dbConfig.js';
 import { LlmRepo } from './repository/Llm.js';
-import { ProviderRepo } from "./repository/Provider.js";
+import { McpServerRepo } from "./repository/McpServer.js";
 import { RoomRepo } from "./repository/Room.js";
 import { ToolRepo } from "./repository/Tool.js";
+import AccountRoute from "./routers/AccountRoute.js";
 import AgentRoute from './routers/AgentRoute.js';
-import { WSDocConf, WSDocService } from "./routers/DocsWSRoute.js";
+import AuthRoute from "./routers/AuthRoute.js";
+import McpServerRoute from "./routers/McpServerRoute.js";
 import ProviderRoute from "./routers/ProviderRoute.js";
 import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
-import McpServerRoute from "./routers/McpServerRoute.js";
-import { McpServerRepo } from "./repository/McpServer.js";
-import tools from "./config_tools.js";
-import { TypeLog } from "@priolo/julian/dist/core/types.js";
-import { envInit } from "./types/env.js";
-import AuthRoute from "./routers/AuthRoute.js";
-import { AccountRepo } from "./repository/Account.js";
-import AccountRoute from "./routers/AccountRoute.js";
+import { getDBConnectionConfig } from './startup/dbConfig.js';
 
 
 
-envInit();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export const PORT = process.env.PORT || 3000;
@@ -130,14 +126,14 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 			},
 			children: [
 				{
+					name: "accounts",
+					class: "typeorm/repo",
+					model: AccountRepo,
+				},
+				{
 					name: "mcp_servers",
 					class: "typeorm/repo",
 					model: McpServerRepo,
-				},
-				{
-					name: "providers",
-					class: "typeorm/repo",
-					model: ProviderRepo,
 				},
 				{
 					name: "agents",
@@ -155,11 +151,6 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 					model: RoomRepo,
 				},
 				{
-					name: "accounts",
-					class: "typeorm/repo",
-					model: AccountRepo,
-				},
-				{
 					name: "llms",
 					class: "typeorm/repo",
 					model: LlmRepo,
@@ -171,12 +162,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 			class: "jwt",
 			secret: "secret_word!!!"
 		},
-
-		// {
-		// 	class: myState,
-		// 	name: "node.1"
-		// }
-
+		
 	]
 }
 

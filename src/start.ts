@@ -1,11 +1,12 @@
+// deve essere il primo import
+import "./startup/envPreload.js";
+
 import { RootService } from "@priolo/julian";
 import buildNodeConfig from "./config.js";
-import { ENV_TYPE, envInit } from "./types/env.js";
-import { seeding } from "./seeding.js";
+import { seeding } from "./startup/seeding.js";
+import { ENV_TYPE } from "./types/env.js";
 
 
-
-envInit();
 
 (async () => {
 

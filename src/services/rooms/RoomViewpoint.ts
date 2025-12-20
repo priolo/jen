@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 import AgentLlm from "../agents/AgentLlm.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import { printLlmResponse } from "../agents/utils/print.js";
-import { AGENT_TYPE } from "@/repository/Agent.js";
+import { AGENT_TYPE, AgentRepo } from "@/repository/Agent.js";
 import AgentMock from "../agents/AgentMock.js";
 import ChatContext from "./ChatContext.js";
 
@@ -21,12 +21,14 @@ class RoomViewpoint {
 	}
 
 	static async Build(node: ChatContext, agentsIds: string[]): Promise<RoomViewpoint> {
-		// carico l'agente e lo inserisco nella MAIN-ROOM
-		const agentRepo = await node.getAgentRepoById(agentId)
-		if (!agentRepo) throw new Error(`Agent with id ${agentId} not found`);
-
+		// carico gli agenti REPO
+		const agentsRepo: AgentRepo[] = []
+		for (const agentId of agentsIds) {
+			const agentRepo = await node.getAgentRepoById(agentId)
+			if (agentRepo) agentsRepo.push(agentRepo)
+		}
 		// creo una nuova MAIN-ROOM
-		const roomRepo = await node.createRoomRepo([agentRepo], null)
+		const roomRepo = await node.createRoomRepo(agentsRepo, null)
 		const room = new RoomViewpoint(roomRepo)
 		return room
 	}

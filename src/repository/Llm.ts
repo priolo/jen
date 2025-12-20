@@ -9,7 +9,7 @@ import { AgentRepo } from './Agent.js';
  * Tabella per memorizzare le KEY degli LLM
  */
 @Entity('llms')
-export class LlmRepo  extends AccountAssets {
+export class LlmRepo extends AccountAssets {
 
 	@PrimaryGeneratedColumn("uuid")
 	id?: string;

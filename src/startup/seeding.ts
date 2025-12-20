@@ -1,17 +1,13 @@
-import { RootService, Bus } from "@priolo/julian";
-import { typeorm } from "@priolo/julian";
-import { AGENT_TYPE, AgentRepo } from "./repository/Agent.js";
-import { TOOL_TYPE, ToolRepo } from "./repository/Tool.js";
-import { McpServerRepo } from "./repository/McpServer.js";
-import { ProviderRepo } from "./repository/Provider.js";
-import { LLM_MODELS } from "./types/commons/LlmProviders.js";
-import { envInit } from "./types/env.js";
-import { LlmRepo } from "./repository/Llm.js";
-import { AccountRepo } from "./repository/Account.js";
+import { Bus, RootService, typeorm } from "@priolo/julian";
+import { AccountRepo } from "../repository/Account.js";
+import { AGENT_TYPE, AgentRepo } from "../repository/Agent.js";
+import { LlmRepo } from "../repository/Llm.js";
+import { McpServerRepo } from "../repository/McpServer.js";
+import { ProviderRepo } from "../repository/Provider.js";
+import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js";
+import { LLM_MODELS } from "../types/commons/LlmProviders.js";
 
 
-
-envInit();
 
 export async function seeding(root: RootService) {
 

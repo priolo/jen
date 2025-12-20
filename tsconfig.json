@@ -1,21 +1,20 @@
 {
   "extends": "@tsconfig/node22",
   "compilerOptions": {
-
     // "target": "ESNext",
     // "module": "NodeNext",
     // "moduleResolution": "nodenext",
-    //"isolatedModules": true,
-
+    "isolatedModules": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
-    "preserveConstEnums": true,
-    "allowJs": true,
+
+    //"preserveConstEnums": true,
     
+    "allowJs": true,
     "paths": {
       "@/*": [
         "./src/*"
@@ -28,13 +27,27 @@
     "strict": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
+
+
+    // ✅ AGGIUNGI: controlli aggiuntivi moderni
+    "noUncheckedIndexedAccess": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+
+    // ✅ AGGIUNGI: per import resolution moderno
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
   },
   "include": [
-    "src"
-, "tests"  ],
+    "src",
+    "tests"
+  ],
   "exclude": [
     "node_modules",
     "dist",
-    "**/*.test.ts"
   ]
 }

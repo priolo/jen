@@ -34,6 +34,7 @@ class AuthRoute extends httpRouter.Service {
 			]
 		}
 	}
+	declare state: typeof this.stateDefault
 
 	/** se esiste JWT restituisce l'utente */
 	async current(req: Request, res: Response) {

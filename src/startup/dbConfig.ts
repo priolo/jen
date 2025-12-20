@@ -1,14 +1,12 @@
 import fs from "fs";
-import { ENV_TYPE, envInit } from "../types/env.js";
-import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { ENV_TYPE } from "../types/env.js";
 
 
 
-envInit();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 
 // in base ai settaggi dell'env imposto la connessione al DB
 export const getDBConnectionConfig = (noLog:boolean = false) => {

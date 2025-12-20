@@ -101,6 +101,9 @@ class ChatNode {
 		return await this.recursiveRequest(room)
 	}
 
+	/**
+	 * Aggiorno la lista degli AGENTS in una ROOM della CHAT
+	 */
 	async updateAgents(agentsIds: string[] = [], roomId?: string): Promise<void> {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
 		if (!room) return
@@ -219,7 +222,7 @@ class ChatNode {
 
 
 	/**
-	 * Invia ad uno specifico CLIENT le INFO della CHATY
+	 * Invia ad uno specifico CLIENT le INFO della CHAT
 	 */
 	private sendInfoToClient(clientId: string) {
 		if (!clientId) return;

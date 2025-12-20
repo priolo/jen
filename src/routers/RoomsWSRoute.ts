@@ -34,7 +34,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 			mcpRepository: "/typeorm/mcp_servers",
 		}
 	}
-
+	declare state: typeof this.stateDefault
 
 
 	//#region SocketCommunicator
@@ -122,6 +122,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 */
 	private async handleChatCreate(client: ws.IClient, msg: ChatCreateC2S) {
 		if (!client?.params.id) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
+			
 		const room = await RoomTurnBased.Build(this, msg.agentIds)
 		const chat = await ChatNode.Build(this, room)
 		this.chats.push(chat)
@@ -138,7 +139,6 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 		const chat = this.getChatById(msg.chatId)
 		chat.enterClient(client.params.id)
-		this.chats.push(chat)
 	}
 
 	/**

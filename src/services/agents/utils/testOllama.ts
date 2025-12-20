@@ -1,7 +1,9 @@
-import { ProviderRepo } from "@/repository/Provider.js";
-import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
+import { LlmRepo } from "@/repository/Llm.js";
 import { getModel } from "@/services/agents/utils/vercel.js";
+import { LLM_MODELS } from "@/types/commons/LlmProviders.js";
 import { generateText } from "ai";
+
+
 
 /**
  * Simple test to verify Ollama integration works
@@ -10,11 +12,11 @@ async function testOllamaIntegration() {
     console.log("Testing Ollama integration...");
     
     // Create a mock LlmRepo for Ollama
-    const mockLlmRepo: ProviderRepo = {
+    const mockLlmRepo: LlmRepo = {
         id: "test-ollama",
         code: LLM_MODELS.OLLAMA_LLAMA_3_2_3B,
         key: null, // Ollama doesn't need an API key
-    } as ProviderRepo;
+    }
 
     try {
         // Get the model
@@ -46,3 +48,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 export { testOllamaIntegration };
+

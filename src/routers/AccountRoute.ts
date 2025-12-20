@@ -6,7 +6,7 @@ import { Request, Response } from "express";
 
 class AccountRoute extends httpRouter.Service {
 
-	get stateDefault(): httpRouter.conf & any {
+	get stateDefault() {
 		return {
 			...super.stateDefault,
 			path: "/accounts",
@@ -20,10 +20,11 @@ class AccountRoute extends httpRouter.Service {
 			]
 		}
 	}
+	declare state: typeof this.stateDefault
 
 	async getAll(req: Request, res: Response) {
 		const users = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.ALL
+			type: typeorm.Actions.ALL
 		})
 		res.json(users)
 	}
@@ -31,7 +32,7 @@ class AccountRoute extends httpRouter.Service {
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
 		const tool: AccountRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.GET_BY_ID,
+			type: typeorm.Actions.GET_BY_ID,
 			payload: id
 		})
 		res.json(tool)
@@ -41,7 +42,7 @@ class AccountRoute extends httpRouter.Service {
 	async create(req: Request, res: Response) {
 		const { user }: { user: AccountRepo } = req.body
 		const userNew: AccountRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: user
 		})
 		res.json(userNew)
@@ -50,7 +51,7 @@ class AccountRoute extends httpRouter.Service {
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
 		await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.DELETE,
+			type: typeorm.Actions.DELETE,
 			payload: id
 		})
 		res.json({ data: "ok" })
@@ -61,7 +62,7 @@ class AccountRoute extends httpRouter.Service {
 		const { user }: { user: AccountRepo } = req.body
 		if (!id || !user) return
 		const userUp = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: user,
 		})
 		res.json(userUp)

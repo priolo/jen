@@ -30,12 +30,12 @@ class RoomTurnBased {
 			const agentRepo = await node.getAgentRepoById(agentId)
 			if (agentRepo) agentsRepo.push(agentRepo)
 		}
-
 		// creo una nuova MAIN-ROOM
 		const roomRepo = await node.createRoomRepo(agentsRepo, null)
 		const room = new RoomTurnBased(roomRepo)
 		return room
 	}
+	
 	/**
 	 * Costruisce un messaggio di tipo AGENT
 	 */

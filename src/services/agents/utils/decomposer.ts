@@ -40,7 +40,7 @@ export async function storeTextInDb(text: string, tableName: string, ref?: strin
 	// CUTTING
 	const chaptersDescStart = await textCutterChapter(text)
 	const chaptersTxt: string[] = breakWords(text, chaptersDescStart.map(c => c.opening_words))
-	const chaptersDesc = chaptersTxt.map((c, i) => ({
+	const chaptersDesc = chaptersTxt.map((c) => ({
 		text: c,
 	}))
 

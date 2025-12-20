@@ -6,7 +6,7 @@ import { Request, Response } from "express";
 
 class ToolRoute extends httpRouter.Service {
 
-	get stateDefault(): httpRouter.conf & any {
+	get stateDefault() {
 		return {
 			...super.stateDefault,
 			path: "/tools",
@@ -20,6 +20,7 @@ class ToolRoute extends httpRouter.Service {
 			]
 		}
 	}
+	declare state: typeof this.stateDefault
 
 	async getAll(req: Request, res: Response) {
 		const tools = await new Bus(this, this.state.repository).dispatch({

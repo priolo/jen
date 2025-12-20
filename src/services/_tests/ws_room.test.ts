@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from "axios"
 import { WebSocket } from "ws"
 import buildNodeConfig, { PORT, WS_PORT } from "../../config.js"
 import { AgentRepo } from "../../repository/Agent.js"
-import { seeding } from "../../seeding.js"
+import { seeding } from "../../startup/seeding.js"
 import { ContentCompleted, LLM_RESPONSE_TYPE, LlmResponse } from "../../types/commons/LlmResponse.js"
 import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatMessage, RoomMessageS2C, RoomNewS2C, UserCreateEnterC2S, UserEnteredS2C, UserMessageC2S } from "../../types/commons/RoomActions.js"
 

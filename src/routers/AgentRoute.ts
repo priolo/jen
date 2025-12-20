@@ -25,8 +25,9 @@ class AgentRoute extends httpRouter.Service {
 		})
 		return agent
 	}
+	
 
-	get stateDefault(): httpRouter.conf & any {
+	get stateDefault() {
 		return {
 			...super.stateDefault,
 			path: "/agents",
@@ -40,6 +41,7 @@ class AgentRoute extends httpRouter.Service {
 			]
 		}
 	}
+	declare state: typeof this.stateDefault
 
 	async getAll(req: Request, res: Response) {
 		const agents = await new Bus(this, this.state.repository).dispatch({

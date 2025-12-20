@@ -22,6 +22,7 @@ export class WSDocService extends ws.route {
 			repository: "/typeorm/docs",
 		}
 	}
+	declare state: typeof this.stateDefault
 
 	protected onInit(): Promise<void> {
 		server.onSend = async (client: ws.IClient, message) => this.sendToClient(client, JSON.stringify(message))
