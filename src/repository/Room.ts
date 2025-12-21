@@ -1,4 +1,4 @@
-import { ChatMessage } from '@/types/commons/RoomActions.js';
+import { ChatMessage } from '../types/commons/RoomActions.js';
 import type { Relation } from 'typeorm';
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AgentRepo } from './Agent.js';

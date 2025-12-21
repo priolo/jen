@@ -1,4 +1,4 @@
-import { RoomRepo } from "@/repository/Room.js";
+import { RoomRepo } from "../repository/Room.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 

@@ -15,9 +15,9 @@ export async function seeding(root: RootService) {
 		type: typeorm.RepoStructActions.SEED,
 		payload: <AccountRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{ id: "id-user-1", name: "Giuseppe Verdi", email: "giuseppe.verdi@gmail.com", password: "test" },
-			{ id: "id-user-2", name: "Mario Rossi", email: "mario.rossi@gmail.com", password: "test" },
-			{ id: "id-user-3", name: "Luigi Bianchi", email: "luigi.bianchi@gmail.com", password: "test" },
+			{ id: "id-user-1", name: "Giuseppe Verdi", email: "giuseppe.verdi@gmail.com" },
+			{ id: "id-user-2", name: "Mario Rossi", email: "mario.rossi@gmail.com" },
+			{ id: "id-user-3", name: "Luigi Bianchi", email: "luigi.bianchi@gmail.com" },
 		]
 	});
 

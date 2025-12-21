@@ -1,6 +1,5 @@
 import logSo from "@/stores/log"
 import { MESSAGE_TYPE } from "@/stores/log/utils"
-import { camelToSnake, snakeToCamel } from "@/utils/object"
 import { LOAD_STATE, LoadBaseStore } from "@priolo/jack"
 
 
@@ -19,6 +18,7 @@ const optionsDefault = {
 	isLogin: false,
 	loading: true,
 	noError: false,
+	/** store dove settare lo stato di loading */
 	store: null,
 	/** utilizza questo signal per fare l'abort */
 	signal: <AbortSignal>null,

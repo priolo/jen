@@ -1,4 +1,4 @@
-import { executeMcpTool, getMcpTools } from "@/services/mcp/utils.js";
+import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js";
 import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { McpServerRepo } from "../repository/McpServer.js";
@@ -27,7 +27,7 @@ class McpServerRoute extends httpRouter.Service {
 
 	public static async GetById(mcpId: string, node: INode, repository: string): Promise<McpServerRepo> {
 		const mcpServer = await new Bus(node, repository).dispatch<McpServerRepo>({
-			type: typeorm.RepoRestActions.GET_BY_ID,
+			type: typeorm.Actions.GET_BY_ID,
 			payload: mcpId
 		})
 		return mcpServer
@@ -48,7 +48,7 @@ class McpServerRoute extends httpRouter.Service {
 	async create(req: Request, res: Response) {
 		const { mcpServer }: { mcpServer: McpServerRepo } = req.body
 		const mcpServerNew = await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: mcpServer
 		})
 		res.json(mcpServerNew)
@@ -57,7 +57,7 @@ class McpServerRoute extends httpRouter.Service {
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
 		await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
-			type: typeorm.RepoRestActions.DELETE,
+			type: typeorm.Actions.DELETE,
 			payload: id
 		})
 		res.json({ data: "ok" })
@@ -68,7 +68,7 @@ class McpServerRoute extends httpRouter.Service {
 		const { mcpServer }: { mcpServer: McpServerRepo } = req.body
 		if (!id || !mcpServer) return
 		const mcpServerUp = await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: mcpServer,
 		})
 		res.json(mcpServerUp)

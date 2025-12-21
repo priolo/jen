@@ -1,4 +1,4 @@
-import { ProviderRepo } from "@/repository/Provider.js";
+import { ProviderRepo } from "../repository/Provider.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 

@@ -20,18 +20,22 @@
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource/darker-grotesque": "^5.0.8",
-    "@monaco-editor/react": "^4.6.0",
-    "@priolo/jack": "file:C:/Users/ivano.iorio/Documents/jack",
-    "@priolo/jess": "file:C:/Users/ivano.iorio/Documents/jess",
-    "@priolo/jon": "^0.7.7",
-    "@priolo/jon-utils": "file:C:/Users/ivano.iorio/Documents/jon-utils",
+
+    "@monaco-editor/react": "^4.7.0",
+    "monaco-editor": "^0.55.1",
+    "prismjs": "^1.30.0",
+
+    "@priolo/jack": "^0.2.14",
+    "@priolo/jess": "^0.1.1",
+    "@priolo/jon": "^0.7.9",
+    "@priolo/jon-utils": "^0.5.6",
+
     "@react-oauth/google": "^0.12.1",
     "cross-env": "^7.0.3",
-    "dayjs": "^1.11.13",
-    "monaco-editor": "^0.52.2",
-    "prismjs": "^1.30.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "dayjs": "^1.11.19",
+    
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-virtuoso": "^4.12.2",
     "slate": "^0.114.0",
     "slate-history": "^0.113.1",
@@ -40,13 +44,13 @@
   },
   "devDependencies": {
     "@types/prismjs": "^1.26.5",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react-swc": "^3.9.0",
-    "msw": "^2.3.4",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.4",
-    "vitest": "^3.1.2"
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "msw": "^2.12.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0",
+    "vitest": "^4.0.16"
   },
   "msw": {
     "workerDirectory": "public"

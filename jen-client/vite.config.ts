@@ -15,8 +15,15 @@ export default defineConfig(() => {
         },
         resolve: {
             alias: {
-                '@': path.resolve(__dirname, './src')
+                '@': path.resolve(__dirname, './src'),
+                // // Force Vite to resolve React to the project's single copy
+                // react: path.resolve(__dirname, './node_modules/react'),
+                // 'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
+                // 'react-dom/client': path.resolve(__dirname, './node_modules/react-dom/client')
             }
+            ,
+            // Dedupe React to avoid multiple copies (fixes ReactCurrentDispatcher issues)
+            dedupe: ['react', 'react-dom']
         },
         server: {
             proxy: {

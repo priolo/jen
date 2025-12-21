@@ -3,7 +3,8 @@
   "compilerOptions": {
     // "target": "ESNext",
     // "module": "NodeNext",
-    // "moduleResolution": "nodenext",
+    // "moduleResolution": "NodeNext",
+    
     "isolatedModules": true,
     "outDir": "./dist",
     "rootDir": "./src",
@@ -11,15 +12,14 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
-
-    //"preserveConstEnums": true,
-    
+    "preserveConstEnums": true,
     "allowJs": true,
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
+    "baseUrl": ".",
+    // "paths": {
+    //   "@/*": [
+    //     "./src/*"
+    //   ]
+    // },
     "declaration": true,
     "declarationMap": true,
     "experimentalDecorators": true,
@@ -27,27 +27,15 @@
     "strict": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
-
-
-    // ✅ AGGIUNGI: controlli aggiuntivi moderni
-    "noUncheckedIndexedAccess": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false,
-
-    // ✅ AGGIUNGI: per import resolution moderno
-    "resolveJsonModule": true,
-    "moduleDetection": "force",
   },
   "include": [
     "src",
     "tests"
   ],
   "exclude": [
+    "scripts/**/*",
     "node_modules",
     "dist",
+    "**/*.test.ts"
   ]
 }

@@ -62,15 +62,21 @@ const AuthView: FunctionComponent<Props> = ({
 			) : (
 				<div style={{ display: 'flex', flexDirection: "column", gap: 10, alignItems: 'center' }}>
 					<div>ANONYMOUS</div>
-					<GoogleOAuthProvider clientId="106027300810-0udm0cjghhjr87626qrvcoug5ahgq1bh.apps.googleusercontent.com">
-						<div>
-							<h2>Login with Google</h2>
-							<GoogleLogin
-								onSuccess={handleLoginSuccess}
-								onError={handleLoginFailure}
-							/>
-						</div>
-					</GoogleOAuthProvider>
+
+
+					
+					
+					<GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID}>
+                        <GoogleLogin
+                            onSuccess={handleLoginSuccess}
+                            onError={handleLoginFailure}
+                            // theme="filled_black"
+                            // shape="circle"
+                            // text="signin"
+                            // size="medium"
+                            // type='standard'
+                        />
+                    </GoogleOAuthProvider>
 				</div>
 			)}
 

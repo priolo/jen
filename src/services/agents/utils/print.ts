@@ -1,5 +1,5 @@
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse.js"
-import { colorPrint, ColorType } from "@/utils/index.js"
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../../types/commons/LlmResponse.js"
+import { colorPrint, ColorType } from "../../../utils/index.js"
 
 
 

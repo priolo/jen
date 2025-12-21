@@ -1,6 +1,6 @@
-import { McpTool } from "@/services/mcp/types.js"
-import { executeMcpTool, getMcpTools } from "@/services/mcp/utils.js"
-import ChatNode from "@/services/rooms/ChatNode.js"
+import { McpTool } from "../services/mcp/types.js"
+import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
+import ChatNode from "../services/rooms/ChatNode.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { TypeLog } from "@priolo/julian/dist/core/types.js"
 import { randomUUID } from "crypto"
@@ -11,7 +11,7 @@ import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, 
 import AgentRoute from "./AgentRoute.js"
 import ChatContext from "../services/rooms/ChatContext.js"
 import McpServerRoute from "./McpServerRoute.js"
-import RoomTurnBased from "@/services/rooms/RoomTurnBased.js"
+import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
 
 
 

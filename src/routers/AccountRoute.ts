@@ -1,4 +1,4 @@
-import { AccountRepo } from "@/repository/Account.js";
+import { AccountRepo } from "../repository/Account.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 
@@ -10,7 +10,7 @@ class AccountRoute extends httpRouter.Service {
 		return {
 			...super.stateDefault,
 			path: "/accounts",
-			repository: "/typeorm/accounts",
+			accounts_repo: "/typeorm/accounts",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
@@ -23,7 +23,7 @@ class AccountRoute extends httpRouter.Service {
 	declare state: typeof this.stateDefault
 
 	async getAll(req: Request, res: Response) {
-		const users = await new Bus(this, this.state.repository).dispatch({
+		const users = await new Bus(this, this.state.accounts_repo).dispatch({
 			type: typeorm.Actions.ALL
 		})
 		res.json(users)
@@ -31,7 +31,7 @@ class AccountRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const tool: AccountRepo = await new Bus(this, this.state.repository).dispatch({
+		const tool: AccountRepo = await new Bus(this, this.state.accounts_repo).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
 			payload: id
 		})
@@ -41,7 +41,7 @@ class AccountRoute extends httpRouter.Service {
 
 	async create(req: Request, res: Response) {
 		const { user }: { user: AccountRepo } = req.body
-		const userNew: AccountRepo = await new Bus(this, this.state.repository).dispatch({
+		const userNew: AccountRepo = await new Bus(this, this.state.accounts_repo).dispatch({
 			type: typeorm.Actions.SAVE,
 			payload: user
 		})
@@ -50,7 +50,7 @@ class AccountRoute extends httpRouter.Service {
 
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
-		await new Bus(this, this.state.repository).dispatch({
+		await new Bus(this, this.state.accounts_repo).dispatch({
 			type: typeorm.Actions.DELETE,
 			payload: id
 		})
@@ -61,7 +61,7 @@ class AccountRoute extends httpRouter.Service {
 		const id = req.params["id"]
 		const { user }: { user: AccountRepo } = req.body
 		if (!id || !user) return
-		const userUp = await new Bus(this, this.state.repository).dispatch({
+		const userUp = await new Bus(this, this.state.accounts_repo).dispatch({
 			type: typeorm.Actions.SAVE,
 			payload: user,
 		})

@@ -2,6 +2,7 @@ import { Column, JoinColumn, ManyToOne } from 'typeorm';
 import { AccountRepo } from './Account.js';
 
 
+
 /**
  * Rappresenta un entità che appartiene ad un ACCOUNT
  */
@@ -12,7 +13,8 @@ export abstract class AccountAssets {
 	@JoinColumn({ name: 'accountId' })
 	account?: AccountRepo
 
-	@Column({ type: 'varchar', default: null })
+	/** l'ID dell'ACCOUNT proprietario */
+	@Column({ type: 'uuid', default: null })
 	accountId?: string
 
 }

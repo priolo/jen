@@ -14,7 +14,7 @@ export class AccountRepo {
 	id?: string;
 
 	@Column({ type: 'varchar', default: '' })
-	name: string;
+	name?: string;
 
 	/** lingua preferita dell'utente */
 	@Column({ type: 'varchar', nullable: true, default: 'en' })
@@ -28,7 +28,7 @@ export class AccountRepo {
 
 	/** valorizzata alla registrazione oppure da accesso google */
 	@Column({ type: 'varchar', nullable: true })
-	email: string;
+	email?: string;
 	/** il codice di verifica dell'email */
 	@Column({ type: 'varchar', default: EMAIL_CODE.UNVERIFIED, nullable: true })
 	emailCode?: string;
@@ -48,8 +48,7 @@ export class AccountRepo {
 
 	/** immagine dell'avatar */
 	@Column({ type: 'varchar', default: '' })
-	avatarUrl: string;
-
+	avatarUrl?: string;
 
 
 
@@ -59,16 +58,22 @@ export class AccountRepo {
 
 }
 
+/**
+ * Payload memorizzato nel JWT token
+ */
 export type JWTPayload = {
 	id: string;
 	email: string;
 	name: string;
 }
 
+/** 
+ * restituisce una versione "sendable" dell'ACCOUNT, senza campi sensibili 
+ */
 export function accountSendable(account: AccountRepo) {
 	if (!account) return null
 	const {
-		id, name, language, notificationsEnabled,
+		id, name, language, notificationsEnabled, 
 		email, avatarUrl, googleEmail, githubId, githubName,
 	} = account
 	return {
@@ -78,6 +83,9 @@ export function accountSendable(account: AccountRepo) {
 		emailVerified: account.emailCode == EMAIL_CODE.VERIFIED,
 	}
 }
+/**
+ * Restituisce una lista di ACCOUNT in versione "sendable"
+ */
 export function accountSendableList(accounts: AccountRepo[]) {
 	return accounts.map(account => accountSendable(account))
 }

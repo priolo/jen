@@ -1,8 +1,7 @@
-import { http, httpRouter, jwt, log, typeorm, ws } from "@priolo/julian";
+import { http, httpRouter, httpStatic, jwt, log, typeorm, types, ws } from "@priolo/julian";
 import { TypeLog } from "@priolo/julian/dist/core/types.js";
-import { dirname } from 'path';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import tools from "./config_tools.js";
 import { AccountRepo } from "./repository/Account.js";
 import { AgentRepo } from './repository/Agent.js';
 import { LlmRepo } from './repository/Llm.js';
@@ -11,11 +10,15 @@ import { RoomRepo } from "./repository/Room.js";
 import { ToolRepo } from "./repository/Tool.js";
 import AccountRoute from "./routers/AccountRoute.js";
 import AgentRoute from './routers/AgentRoute.js';
+import AuthEmailRoute from "./routers/AuthEmailRoute.js";
+import AuthGithubRoute from "./routers/AuthGithubRoute.js";
+import AuthGoogleRoute from "./routers/AuthGoogleRoute.js";
 import AuthRoute from "./routers/AuthRoute.js";
 import McpServerRoute from "./routers/McpServerRoute.js";
 import ProviderRoute from "./routers/ProviderRoute.js";
 import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
+import tools from "./startup/config_tools.js";
 import { getDBConnectionConfig } from './startup/dbConfig.js';
 
 
@@ -25,44 +28,52 @@ const __dirname = dirname(__filename);
 export const PORT = process.env.PORT || 3000;
 export const WS_PORT = +(process.env.WS_PORT || 3010)
 
-// class MyStateClass extends ServiceBase {
-// 	// definico lo STATE
-// 	get stateDefault() {
-// 		return {
-// 			...super.stateDefault,
-// 			text: "",
-// 		}
-// 	}
-// 	// le ACTION di questo NODE
-// 	get executablesMap() {
-// 		return {
-// 			...super.executablesMap,
-// 			["set-text"]: (payload) => {
-// 				this.setState({ text: payload })
-// 				return "ok fatto!"
-// 			}
-// 		}
-// 	}
-// }
+type ConfigParams = {
+	noWs?: boolean,
+	noLog?: boolean,
+	noHttp?: boolean,
+	port?: number,
+}
 
+const logTerminal = process.env.LOG_TERMINAL_ENABLE == "true"
+const logFile = process.env.LOG_FILE_ENABLE == "true"
 
+function buildNodeConfig(params: ConfigParams) {
 
-
-function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
+	const { noWs, noHttp, port } = params ?? {}
 
 	return [
 
 		<log.conf>{
 			class: "log",
-			exclude: [TypeLog.SYSTEM],
-			onParentLog: (log) => {
-				if (!!log?.payload && ['nc:init', 'nc:destroy', "ns:set-state"].includes(log.payload.type)) return false
+			exclude: [types.TypeLog.SYSTEM],
+			onParentLog: (logItem) => {
+				if (!logFile && !logTerminal) return false
+				if (logItem.type != TypeLog.ERROR) {
+					// no log interni di init e destroy dei nodi
+					if (!!logItem?.payload && ['nc:init', 'nc:destroy', "ns:set-state"].includes(logItem.payload.type)) return false
+					// no log su source = /jwt
+					if (logItem.source == "/jwt") return false
+					// se è un email non mandare anche il payload!
+					if (logItem.source == "/email-noreply") logItem.payload = "[HIDDEN EMAIL PAYLOAD]"
+					if (logItem.name == "HTTP POST /api/stripe/webhook") logItem.payload = "[HIDDEN STRIPE WEBHOOK PAYLOAD]"
+				}
+				if (logFile) {
+					// const msg = `${logItem.source} :: ${logItem.name}`
+					// if (logItem.type == types.TypeLog.ERROR) {
+					// 	logger.error(logItem.payload, msg)
+					// } else {
+					// 	logger.info(logItem.payload, msg)
+					// }
+				}
+				return logTerminal
 			}
 		},
 
-		<http.conf>{
+		!noHttp && <http.conf>{
 			class: "http",
-			port: PORT,
+			log: { body: true },
+			port: port ?? PORT,
 			children: [
 
 				{
@@ -71,12 +82,22 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 				},
 
 				{ class: AuthRoute },
+				{ class: AuthEmailRoute },
+				{ class: AuthGithubRoute },
+				{ class: AuthGoogleRoute },
 
 				<httpRouter.jwt.conf>{
 					class: "http-router/jwt",
 					repository: "/typeorm/user",
 					jwt: "/jwt",
 					children: [
+
+						<httpStatic.conf>{
+							class: "http-static",
+							dir: path.join(__dirname, "../jen-client/dist"),
+							path: "/app/",
+							spaFile: "index.html",
+						},
 
 						<httpRouter.conf>{
 							class: "http-router",
@@ -100,8 +121,6 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 					]
 				},
 
-
-
 				noWs ? null : <ws.conf>{
 					class: "ws",
 					port: WS_PORT,
@@ -121,8 +140,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 		<typeorm.conf>{
 			class: "typeorm",
 			options: {
-				...getDBConnectionConfig(noLog),
-				//entities: repositories
+				...getDBConnectionConfig(),
 			},
 			children: [
 				{
@@ -162,7 +180,7 @@ function buildNodeConfig(noWs: boolean = false, noLog: boolean = false) {
 			class: "jwt",
 			secret: "secret_word!!!"
 		},
-		
+
 	]
 }
 

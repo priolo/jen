@@ -1,7 +1,7 @@
-import { AgentRepo } from "@/repository/Agent.js";
-import { RoomRepo } from "@/repository/Room.js";
-import ChatContext from "@/services/rooms/ChatContext.js";
-import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatInfoS2C, MessageUpdate, RoomAgentsUpdateS2C, UPDATE_TYPE, RoomHistoryUpdateS2C } from "@/types/commons/RoomActions.js";
+import { AgentRepo } from "../../repository/Agent.js";
+import { RoomRepo } from "../../repository/Room.js";
+import ChatContext from "../../services/rooms/ChatContext.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatInfoS2C, MessageUpdate, RoomAgentsUpdateS2C, UPDATE_TYPE, RoomHistoryUpdateS2C } from "../../types/commons/RoomActions.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
 

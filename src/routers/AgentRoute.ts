@@ -1,7 +1,7 @@
-import { AgentRepo } from "@/repository/Agent.js";
+import { AgentRepo } from "../repository/Agent.js";
 import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
-import { FindManyOptions } from "typeorm";
+import { FindOneOptions } from "typeorm";
 
 
 
@@ -13,7 +13,7 @@ class AgentRoute extends httpRouter.Service {
 			payload: {
 				where: { id: agentId },
 				relations: ["tools", "subAgents", "llm"],
-				select: <FindManyOptions<AgentRepo>>{
+				select: <FindOneOptions<AgentRepo>>{
 					subAgents: { id: true, name: true, description: true },
 					tools: { 
 						id: true, type: true, name: true, description: true, 
@@ -31,7 +31,7 @@ class AgentRoute extends httpRouter.Service {
 		return {
 			...super.stateDefault,
 			path: "/agents",
-			repository: "/typeorm/agents",
+			agents_repo: "/typeorm/agents",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
@@ -44,8 +44,8 @@ class AgentRoute extends httpRouter.Service {
 	declare state: typeof this.stateDefault
 
 	async getAll(req: Request, res: Response) {
-		const agents = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.ALL,
+		const agents = await new Bus(this, this.state.agents_repo).dispatch({
+			type: typeorm.Actions.ALL,
 			payload: {
 				relations: ["tools", "subAgents"],
 				select: {
@@ -59,14 +59,14 @@ class AgentRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const agent: AgentRepo = await AgentRoute.GetById(id, this, this.state.repository)
+		const agent: AgentRepo = await AgentRoute.GetById(id, this, this.state.agents_repo)
 		res.json(agent)
 	}
 
 	async create(req: Request, res: Response) {
 		const agent: AgentRepo = req.body?.agent
-		const agentNew: AgentRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+		const agentNew: AgentRepo = await new Bus(this, this.state.agents_repo).dispatch({
+			type: typeorm.Actions.SAVE,
 			payload: agent
 		})
 		res.json(agentNew)
@@ -74,8 +74,8 @@ class AgentRoute extends httpRouter.Service {
 
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
-		await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.DELETE,
+		await new Bus(this, this.state.agents_repo).dispatch({
+			type: typeorm.Actions.DELETE,
 			payload: id
 		})
 		res.json({ data: "ok" })
@@ -93,8 +93,8 @@ class AgentRoute extends httpRouter.Service {
 		const payload = { ...agent, id };
 
 		try {
-			const updatedAgent: AgentRepo = await new Bus(this, this.state.repository).dispatch({
-				type: typeorm.RepoRestActions.SAVE,
+			const updatedAgent: AgentRepo = await new Bus(this, this.state.agents_repo).dispatch({
+				type: typeorm.Actions.SAVE,
 				payload,
 			})
 			if (!updatedAgent) {
@@ -109,5 +109,3 @@ class AgentRoute extends httpRouter.Service {
 }
 
 export default AgentRoute
-
-

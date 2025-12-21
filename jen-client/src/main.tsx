@@ -1,13 +1,12 @@
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client'
 import App from './app/App.tsx';
 
-
 //#region CSS
-import "prismjs/themes/prism-funky.css";
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-python';
-import 'prismjs/components/prism-markdown';
-import 'prismjs/components/prism-css';
+// import "prismjs/themes/prism-funky.css";
+// import 'prismjs/components/prism-javascript';
+// import 'prismjs/components/prism-python';
+// import 'prismjs/components/prism-markdown';
+// import 'prismjs/components/prism-css';
 
 import '@fontsource/darker-grotesque/800.css';
 import '@fontsource-variable/inter';
@@ -20,18 +19,16 @@ import './css/label.css';
 import './css/layout.css';
 import './css/scrollbar.css';
 import './css/monaco.css';
-import "@priolo/jack/dist/jack.css";
-//import "@priolo/jack/dist/jack.css";
-
+import "@priolo/jack/style.css";
 
 
 //#region PLUGIN
 //import '@/plugins/msw';
-import "./plugins/session/index.ts";
+//import "./plugins/session/index.ts";
 //#endregion
 
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById('root')!).render(
   // <React.StrictMode>
     <App />
   // </React.StrictMode>,

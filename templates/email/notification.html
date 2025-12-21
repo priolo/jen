@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>PUCE - Notification</title>
+		<!--[if !mso]><!-->
+		<style type="text/css">
+			body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+			table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+			img { -ms-interpolation-mode: bicubic; }
+			a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
+			.ExternalClass { width: 100%; }
+			.ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div { line-height: 100%; }
+			table { border-collapse: collapse !important; }
+			body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; background-color: #f9f9f9; }
+		</style>
+		<!--<![endif]-->
+	</head>
+	<body style="margin:0; padding:0; width:100% !important; height:100% !important;">
+		<center style="width:100%;">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+				<tr>
+					<td align="center" style="padding:40px 0;">
+						<table width="600" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background:#232336; border-radius:16px; max-width:600px; width:100%;">
+
+							<tr>
+								<td align="center" style="padding:40px 40px 0 40px;">
+									<img alt="PUCE Logo" width="80" style="display:block; margin-bottom:20px; width:80px; height:auto;" 
+										src="{{logo_url}}"
+									/>
+									<h2 style="color:#e149fc; margin:0; font-size:28px; font-weight:700; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+										{{title}}
+									</h2>
+								</td>
+							</tr>
+							
+							<tr>
+								<td align="center" style="padding:24px 40px 0 40px;">
+									<p style="color:#f3f3f3; font-size:16px; line-height:1.6; text-align:center; margin:0 0 24px 0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+										{{message}}
+									</p>
+								</td>
+							</tr>
+
+							<tr>
+								<td align="center" style="padding:0 40px;">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#241c2b; border-radius:12px; margin:30px 0;">
+										<tr>
+											<td align="center" style="padding:20px;">
+												<!-- <div style="font-size:12px; color:#bbb; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+													Status Change
+												</div> -->
+												<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto;">
+													<tr>
+														<td style="padding:0 6px;">
+															<span style="display:inline-block; padding:6px 12px; border-radius:6px; font-size:14px; font-weight:600; text-transform:uppercase; background-color:#232336; color:#888; text-decoration:line-through; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+																{{old_status}}
+															</span>
+														</td>
+														<td style="padding:0 6px;">
+															<span style="color:#e149fc; font-size:18px; font-weight:bold; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">&rarr;</span>
+														</td>
+														<td style="padding:0 6px;">
+															<span style="display:inline-block; padding:6px 12px; border-radius:6px; font-size:14px; font-weight:600; text-transform:uppercase; background-color:#e149fc; color:#241c2b; box-shadow:3px 3px 0px #91ff00; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+																{{new_status}}
+															</span>
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							
+							<tr>
+								<td align="center" style="padding:0 40px;">
+									<!--[if mso]>
+									<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{action_url}}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="50%" stroke="f" fillcolor="#e149fc">
+										<w:anchorlock/>
+										<center style="color:#ffffff;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;font-size:16px;font-weight:600;">{{action_label}}</center>
+									</v:roundrect>
+									<![endif]-->
+									<!--[if !mso]><!-- -->
+									<a href="{{action_url}}" target="_blank" style="display:inline-block; background-color:#e149fc; color:#241c2b; font-size:16px; font-weight:700; text-decoration:none; padding:14px 30px; border-radius:50px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:30px 0;">
+										{{action_label}}
+									</a>
+									<!--<![endif]-->
+								</td>
+							</tr>
+							<tr>
+								<td align="center" style="padding:0 40px;">
+									<hr style="margin:30px 0; border:none; border-top:1px solid #333;" />
+								</td>
+							</tr>
+							<tr>
+								<td align="center" style="padding:0 40px 40px 40px;">
+									<p style="font-size:12px; color:#bbb; text-align:center; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0;">
+										For any questions, contact us by writing to 
+										<a href="mailto:{{support}}" style="color:#e149fc; text-decoration:none; font-weight:600;">
+											{{support}}
+										</a>.
+									</p>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</center>
+	</body>
+</html>
