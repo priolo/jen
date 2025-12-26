@@ -1,5 +1,5 @@
 import { Bus, RootService, typeorm } from "@priolo/julian";
-import { AccountRepo } from "../repository/Account.js";
+import { AccountRepo, EMAIL_CODE } from "../repository/Account.js";
 import { AGENT_TYPE, AgentRepo } from "../repository/Agent.js";
 import { LlmRepo } from "../repository/Llm.js";
 import { McpServerRepo } from "../repository/McpServer.js";
@@ -15,7 +15,16 @@ export async function seeding(root: RootService) {
 		type: typeorm.RepoStructActions.SEED,
 		payload: <AccountRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{ id: "id-user-1", name: "Giuseppe Verdi", email: "giuseppe.verdi@gmail.com" },
+			{ 
+				id: "id-user-1", 
+				name: "Ivano Iorio", 
+				email: "iorioivano@gmail.com", 
+				googleEmail: "iorioivano@gmail.com",
+				avatarUrl: "https://lh3.googleusercontent.com/a/ACg8ocKA4wD4lM9V5uEQ17xEAUPziv77OEdGj04wZ-uZPG5H9l7CEukn=s96-c",
+				emailCode: EMAIL_CODE.VERIFIED,
+				githubId: 402921, //"octocat"
+				githubName: "priolo",
+			},
 			{ id: "id-user-2", name: "Mario Rossi", email: "mario.rossi@gmail.com" },
 			{ id: "id-user-3", name: "Luigi Bianchi", email: "luigi.bianchi@gmail.com" },
 		]
@@ -25,10 +34,10 @@ export async function seeding(root: RootService) {
 		type: typeorm.RepoStructActions.SEED,
 		payload: <LlmRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, userId: accounts[0].id },
-			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY, userId: accounts[0].id },
-			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, userId: accounts[1].id },
-			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY, userId: accounts[1].id },
+			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, accountId: accounts[0].id },
+			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY, accountId: accounts[0].id },
+			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, accountId: accounts[1].id },
+			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY, accountId: accounts[1].id },
 
 		]
 	});

@@ -1,7 +1,6 @@
 import { Bus, httpRouter, jwt, typeorm } from "@priolo/julian";
-import crypto from "crypto";
 import { Request, Response } from "express";
-import { FindManyOptions } from "typeorm";
+import { FindOneOptions } from "typeorm";
 import { AccountRepo, accountSendable, JWTPayload } from "../repository/Account.js";
 import { ENV_TYPE } from "../types/env.js";
 
@@ -75,22 +74,13 @@ class AuthRoute extends httpRouter.Service {
 
 	/** eseguo autologin per DEV e TEST */
 	async autoLogin(req: Request, res: Response) {
-		// fai autologin solo in DEV o TEST
-		if (!(
-			process.env.NODE_ENV == ENV_TYPE.TEST
-			|| (process.env.NODE_ENV == ENV_TYPE.DEV && process.env.AUTO_AUTH_ENABLE == "true")
-		)) {
-			res.status(401).json({ user: null });
-			return 
-		}
-
 		let { userId }: { userId: string } = req.body
 		if (!userId) userId = "id-user-1"
 
 		// carico l'account DEMO
 		const user: AccountRepo = await new Bus(this, this.state.accounts_repo).dispatch({
 			type: typeorm.Actions.FIND_ONE,
-			payload: <FindManyOptions<AccountRepo>>{
+			payload: <FindOneOptions<AccountRepo>>{
 				where: { id: userId },
 			}
 		})

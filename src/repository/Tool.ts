@@ -39,18 +39,27 @@ export class ToolRepo extends AccountAssets {
 
 
 
-	/** Il server MCP */
+	/** 
+	 * Server MCP 
+	 * Se non c'e' magari è un tool di tipo CODE
+	 */
 	@ManyToOne(() => McpServerRepo, mcp => mcp.id)
 	@JoinColumn({ name: 'mcpId' })
 	mcp?: McpServerRepo
 	@Column({ type: 'uuid', nullable: true })
 	mcpId?: string
 
-	/** Funzione per eseguire direttamente il codice */
+	/** 
+	 * Funzione per eseguire direttamente il codice 
+	 * alternativa al server MCP
+	 */
 	@Column({ type: 'varchar', nullable: true })
 	code?: string
 
-	/** Percorso per eseguire il tool in julian */
+	/** 
+	 * Percorso per eseguire il tool in julian 
+	 * alternativa al server MCP
+	 */
 	@Column({ type: 'varchar', nullable: true })
 	pathNode?: string
 

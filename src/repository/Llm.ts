@@ -6,7 +6,8 @@ import { AgentRepo } from './Agent.js';
 
 
 /**
- * Tabella per memorizzare le KEY degli LLM
+ * Memorizza un modello di LLM (p.e. GPT-4, Mistral Large, ecc.)
+ * e, eventualmente, la api key associata
  */
 @Entity('llms')
 export class LlmRepo extends AccountAssets {

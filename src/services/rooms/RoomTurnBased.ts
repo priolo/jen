@@ -1,6 +1,6 @@
-import { AgentRepo } from "@/repository/Agent.js";
-import { RoomRepo } from "@/repository/Room.js";
-import { ChatMessage } from "@/types/commons/RoomActions.js";
+import { AgentRepo } from "../../repository/Agent.js";
+import { RoomRepo } from "../../repository/Room.js";
+import { ChatMessage } from "../../types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import AgentLlm from "../agents/AgentLlm.js";
@@ -21,7 +21,8 @@ class RoomTurnBased {
 	}
 
 	/**
-	 * Crea una MAIN-ROOM con gli AGENTs specificati
+	 * Crea una MAIN-ROOM con gli AGENTs specificatiù
+	 * [II] da spostare in ChatNode:(static async Build)
 	 */
 	static async Build(node: ChatContext, agentsIds: string[] = []): Promise<RoomTurnBased> {
 		// carico gli agenti REPO
@@ -50,20 +51,22 @@ class RoomTurnBased {
 	}
 
 	/** 
-	 * Su utilizzo di un TOOL 
-	 * Restituisce il risultato del tool
+	 * HOOK: Su utilizzo di un TOOL  
+	 * Restituisce il risultato del TOOL
 	 * */
 	public onTool: (id: string, args: any) => Promise<any> = null
 
 	/**
-	 * Su utilizzo di un sub-agente
-	 * Restituisce il risultato della domanda al sub-agente
+	 * HOOK: l'LLM ha deciso di chiedere ad un SUB-AGENT  
+	 * Elaboro la domanda con il SUB-AGENT  
+	 * e restituisco il risultato  
 	 */
 	public onSubAgent: (requestAgentId: string, responseAgentId: string, question: string) =>
 		Promise<{ response: LlmResponse, roomId: string }> = null;
 
 	/**
-	 * Chiamato quando l'AGENT risponde e quindi si completa un ciclo del LOOP di risposte
+	 * HOOK: Chiamato quando l'AGENT risponde 
+	 * e quindi si completa un ciclo del LOOP di risposte
 	 */
 	public onMessage: (chatMessage: ChatMessage, roomId: string) => void = null;
 

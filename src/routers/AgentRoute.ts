@@ -10,10 +10,10 @@ class AgentRoute extends httpRouter.Service {
 	public static async GetById(agentId: string, node: INode, repository: string): Promise<AgentRepo> {
 		const agent: AgentRepo = await new Bus(node, repository).dispatch({
 			type: typeorm.Actions.FIND_ONE,
-			payload: {
+			payload: <FindOneOptions<AgentRepo>>{
 				where: { id: agentId },
 				relations: ["tools", "subAgents", "llm"],
-				select: <FindOneOptions<AgentRepo>>{
+				select: {
 					subAgents: { id: true, name: true, description: true },
 					tools: { 
 						id: true, type: true, name: true, description: true, 

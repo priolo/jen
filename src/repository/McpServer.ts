@@ -8,6 +8,7 @@ import { AccountAssets } from './AccountAssets.js';
  */
 @Entity('mcp_servers')
 export class McpServerRepo extends AccountAssets {
+	
 	@PrimaryGeneratedColumn("uuid")
 	id: string;
 

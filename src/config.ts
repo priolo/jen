@@ -1,4 +1,4 @@
-import { http, httpRouter, httpStatic, jwt, log, typeorm, types, ws } from "@priolo/julian";
+import { http, httpRouter, httpStatic, jwt, log, typeorm, types, ws, email as emailNs } from "@priolo/julian";
 import { TypeLog } from "@priolo/julian/dist/core/types.js";
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -38,7 +38,7 @@ type ConfigParams = {
 const logTerminal = process.env.LOG_TERMINAL_ENABLE == "true"
 const logFile = process.env.LOG_FILE_ENABLE == "true"
 
-function buildNodeConfig(params: ConfigParams) {
+function buildNodeConfig(params?: ConfigParams) {
 
 	const { noWs, noHttp, port } = params ?? {}
 
@@ -68,6 +68,20 @@ function buildNodeConfig(params: ConfigParams) {
 				}
 				return logTerminal
 			}
+		},
+
+		{
+			class: "email",
+			name: "email-noreply",
+			account: <emailNs.IAccount>{
+				host: process.env.EMAIL_HOST,
+				port: Number(process.env.EMAIL_PORT),
+				secure: true,
+				auth: {
+					user: process.env.EMAIL_USER,
+					pass: process.env.EMAIL_PASSWORD,
+				}
+			},
 		},
 
 		!noHttp && <http.conf>{

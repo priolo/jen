@@ -20,11 +20,17 @@ class ChatNode {
 
 	/** identificativo della CHAT */
 	public id: string = crypto.randomUUID();
-	/** il NODE del contesto. Deve implementare ChatContext*/
+	/** 
+	 * il NODE del contesto. Deve implementare ChatContext
+	 * probabilmente è un WSRoomsService
+	 * */
 	private node: ChatContext;
 	/** le ROOM aperte in questa CHAT */
 	private rooms: RoomTurnBased[]
-	/** i CLIENTs WS partecipanti */
+	/** 
+	 * gli ids dei CLIENTs-WS partecipanti 
+	 * cioe' che devono essere aggiornati
+	 */
 	private clientsIds: Set<string> = new Set();
 
 
@@ -129,6 +135,7 @@ class ChatNode {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
 		if (!room) return;
 
+		// [II] va fatta nella ROOM la gestione degli aggiornamenti
 		const history = [...room.room.history]
 		for (const update of updates) {
 			const index = history.findIndex(m => m.id == update.refId)
@@ -173,6 +180,7 @@ class ChatNode {
 	 */
 	private async recursiveRequest(room: RoomTurnBased): Promise<LlmResponse> {
 
+		// [II] onTool, onSubAgent, onMessage devono essere dei parametri di getResponse
 		room.onTool = async (toolId: string, args: any) => {
 			return this.node.executeTool(toolId, args)
 		}

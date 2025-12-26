@@ -18,7 +18,8 @@ import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
 export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
 
 /**
- * WebSocket service for managing prompt chat rooms
+ * GLOBAL: WebSocket service for managing prompt chat rooms
+ * Contiene le CHAT-ROOMS ognuna composta da piu' ROOMS e CLIENTs
  */
 export class WSRoomsService extends ws.route implements ChatContext {
 
@@ -88,9 +89,9 @@ export class WSRoomsService extends ws.route implements ChatContext {
 			case CHAT_ACTION_C2S.USER_LEAVE:
 				this.handleUserLeave(client, msg as UserLeaveC2S)
 				break
-			case CHAT_ACTION_C2S.ROOM_COMPLETE:
-				await this.handleRoomComplete(client, msg as RoomCompleteC2S)
-				break
+			// case CHAT_ACTION_C2S.ROOM_COMPLETE:
+			// 	await this.handleRoomComplete(client, msg as RoomCompleteC2S)
+			// 	break
 
 			case CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE: {
 				const msgUp: RoomAgentsUpdateC2S = msg
@@ -195,11 +196,15 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 	static McpCache: Map<string, McpTool[]> = new Map()
 
+	/**
+	 * Restitui un AGENT pronto per l'uso
+	 */
 	public async getAgentRepoById(agentId: string): Promise<AgentRepo> {
+		// [II] non va bene! deve raggiungere il nodo con una path!
 		const agent: AgentRepo = await AgentRoute.GetById(agentId, this, this.state.agentRepository)
 
 		// [II] --- mettere in una funzione a parte
-		// bisogna recuperare la "description" e "parameters"
+		// bisogna recuperare la "description" e "parameters" per i TOOLS
 		for (const tool of agent.tools ?? []) {
 
 			// se il TOOL ha la description e i parameters non c'e' bisogno di caricarli
@@ -210,6 +215,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 				// non sono in CACHE allora li carico e li metto in CACHE
 				if (!WSRoomsService.McpCache.has(tool.mcpId)) {
+					// [II] anche questo va ricavato tramite path
 					const mcpServer = await McpServerRoute.GetById(tool.mcpId, this, this.state.mcpRepository)
 					if (!mcpServer) continue
 					const mcpTools = await getMcpTools(mcpServer.host)
@@ -235,7 +241,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 */
 	public async executeTool(toolId: string, args: any): Promise<any> {
 		const toolRepo: ToolRepo = await new Bus(this, this.state.toolRepository).dispatch({
-			type: typeorm.RepoRestActions.GET_BY_ID,
+			type: typeorm.Actions.GET_BY_ID,
 			payload: toolId
 		})
 
@@ -280,6 +286,9 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 	//#region UTILS
 
+	/**
+	 * 
+	 */
 	private getChatById(chatId: string): ChatNode | undefined {
 		return this.chats.find(c => c.id === chatId)
 	}
