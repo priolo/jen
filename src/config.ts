@@ -138,6 +138,10 @@ function buildNodeConfig(params?: ConfigParams) {
 				noWs ? null : <ws.conf>{
 					class: "ws",
 					port: WS_PORT,
+					jwt: "/jwt",
+					onAuth: function (jwtPayload) {
+						return jwtPayload != null
+					},
 					children: [
 						// { class: "npm:@priolo/julian-ws-reflection" }
 						<WSRoomsConf>{

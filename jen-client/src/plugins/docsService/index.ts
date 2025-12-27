@@ -58,7 +58,7 @@ function splitMessages(messages: ClientMessage[]): { msgGen: ClientMessage[], ms
 
 
 
-let idTimeout: NodeJS.Timeout
+let idTimeout: any= null
 /** chiamato dal componente SLATE su "apply"
  * memorizzo dei COMMANDs e li invio quando tutto è calmo
  */

@@ -31,10 +31,6 @@ const setup = {
 
 		//#region OVERRIDE LOADBASE
 
-		async fetch(_: void, store?: LoadBaseStore) {
-			await agentSo.fetch()
-		},
-
 		//#endregion
 
 		/** apro/chiudo la CARD del dettaglio */

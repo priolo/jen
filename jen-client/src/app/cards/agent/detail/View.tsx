@@ -70,6 +70,9 @@ const AgentView: FunctionComponent<Props> = ({
 	}
 
 	// RENDER
+	const inRead = store.state.editState == EDIT_STATE.READ
+	const inNew = store.state.editState == EDIT_STATE.NEW
+
 	if ( !store.state.agent ) return null
 
 	const llm = llmSo.state.all ?? []
@@ -82,9 +85,7 @@ const AgentView: FunctionComponent<Props> = ({
 	const toolsSelected = store.state.agent?.tools?.map(tool => tool.id) ?? []
 	const tools = toolSo.state.all ?? []
 
-	const inRead = store.state.editState == EDIT_STATE.READ
-	const inNew = store.state.editState == EDIT_STATE.NEW
-
+	
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -153,7 +154,7 @@ const AgentView: FunctionComponent<Props> = ({
 					readOnly={inRead}
 					onChangeSelect={handleToolsSelectChange}
 					fnGetId={(item: Tool) => item.id}
-					fnGetString={(item: Tool) => item.name}
+					fnGetString={(item: Tool) => item?.name}
 				/>
 			</div>
 
@@ -166,7 +167,7 @@ const AgentView: FunctionComponent<Props> = ({
 					readOnly={inRead}
 					onChangeSelect={handleAgentsSelectChange}
 					fnGetId={(item: AgentLlm) => item.id}
-					fnGetString={(item: AgentLlm) => item.name}
+					fnGetString={(item: AgentLlm) => item?.name}
 				/>
 			</div>
 

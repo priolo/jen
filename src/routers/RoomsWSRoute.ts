@@ -12,6 +12,7 @@ import AgentRoute from "./AgentRoute.js"
 import ChatContext from "../services/rooms/ChatContext.js"
 import McpServerRoute from "./McpServerRoute.js"
 import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
+import { log } from "console"
 
 
 
@@ -122,12 +123,13 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Inserisce il CLIENT che l'ha creata
 	 */
 	private async handleChatCreate(client: ws.IClient, msg: ChatCreateC2S) {
-		if (!client?.params.id) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
+		const userId = client?.jwtPayload?.id
+		if (!userId) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
 			
 		const room = await RoomTurnBased.Build(this, msg.agentIds)
 		const chat = await ChatNode.Build(this, room)
 		this.chats.push(chat)
-		chat.enterClient(client.params.id)
+		chat.enterClient(userId)
 	}
 
 	/**
@@ -136,10 +138,10 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Invio al nuovo CLIENT i dati della CHAT
 	 */
 	private async handleUserEnter(client: ws.IClient, msg: UserEnterC2S) {
-		if (!client?.params.id) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
-
+		const userId = client?.jwtPayload?.id
+		if (!userId) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
 		const chat = this.getChatById(msg.chatId)
-		chat.enterClient(client.params.id)
+		chat.enterClient(userId)
 	}
 
 	/**
@@ -150,11 +152,12 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	private handleUserLeave(client: ws.IClient, msg: UserLeaveC2S) {
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) return this.log("CHAT", `not found: ${msg.chatId}`, TypeLog.ERROR)
+		const userId = client.jwtPayload?.id
+		if (!userId) return this.log("CHAT", `Invalid userId`, TypeLog.ERROR)
 
-		const isVoid = chat.removeClient(client.params.id)
+		const isVoid = chat.removeClient(userId)
 		if (isVoid) this.removeChat(chat.id)
-
-		this.log(`Client ${client.params.id} left chat ${msg.chatId}`)
+		this.log(`Client ${userId} left chat ${msg.chatId}`)
 	}
 
 	/**
@@ -166,8 +169,9 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	private async handleUserMessage(client: ws.IClient, msg: UserMessageC2S) {
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) return this.log("CHAT", `Chat not found: ${msg.chatId}`, TypeLog.ERROR)
-
-		chat.addUserMessage(msg.text, client.params.id, msg.roomId)
+		const userId = client?.jwtPayload?.id
+		if (!userId) return this.log("CHAT", `Invalid userId`, TypeLog.ERROR)
+		chat.addUserMessage(msg.text, userId, msg.roomId)
 		await chat.complete()
 	}
 
@@ -275,8 +279,8 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Invia un messaggio ad un client specifico
 	 */
 	public sendMessageToClient(clientId: string, message: BaseS2C) {
-		const client = this.getClients()?.find(c => c.params.id == clientId)
-		if (!client) return
+		const client = this.getClients()?.find(c => c?.jwtPayload?.id == clientId)
+		if (!client) return this.log("CHAT", `Client not found: ${clientId}`, TypeLog.ERROR)
 		this.sendToClient(client, JSON.stringify(message))
 	}
 

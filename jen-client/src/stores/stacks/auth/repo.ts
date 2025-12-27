@@ -1,5 +1,6 @@
 import authApi from "@/api/auth";
 import authEmailApi from "@/api/authEmail";
+import { wsConnection } from "@/plugins/session/wsConnection";
 import { Account } from "@/types/Account";
 import { StoreCore, createStore } from "@priolo/jon";
 
@@ -42,8 +43,9 @@ const setup = {
 		current: async (_: void, store?: AuthStore) => {
 			if (!!store.state.user) return
 			let user: Account = (await authApi.current({ noError: true }))?.user
-			store.setUser(user)
+			store.login(user)
 		},
+
 		/**
 		 * Aggiorna le info dell'account dell'utente loggato
 		 */
@@ -61,9 +63,26 @@ const setup = {
 				...newAccount,
 			})
 		},
+
+		/**
+		 * effettua il logout dell'utente corrente
+		 */
 		logout: async (_: void, store?: AuthStore) => {
-			store.setUser(null)
+			store.login(null)
 			await authApi.logout()
+		},
+
+		/** 
+		 * chiamato quando c'e' un cambio di account 
+		 */
+		login: async (user: Account, store?: AuthStore) => {
+			store.setUser(user)
+			//if (user?.language) i18n.changeLanguage(user.language)
+			if ( !user ) {
+				wsConnection.disconnect()
+			} else {
+				wsConnection.connect()
+			}
 		},
 
 
@@ -79,7 +98,7 @@ const setup = {
 		 */
 		emailVerifyCode: async (code: string, store?: AuthStore) => {
 			const user = (await authEmailApi.emailVerify(code))?.user
-			store.setUser(user)
+			store.login(user)
 		},
 
 
@@ -110,7 +129,7 @@ const setup = {
 				console.error('Error fetching current user:', error);
 				return
 			}
-			authSo.setUser(user)
+			authSo.login(user)
 		},
 		/** 
 		 * attacca un account GOOGLE all'ACCOUNT attualmente loggato 
@@ -118,7 +137,7 @@ const setup = {
 		attachGoogle: async (token: string, store?: AuthStore) => {
 			const res = await authApi.googleAttach(token)
 			const user = res.user as Account
-			store.setUser(<Account>{
+			store.login(<Account>{
 				...store.state.user,
 				googleEmail: user.googleEmail,
 			})

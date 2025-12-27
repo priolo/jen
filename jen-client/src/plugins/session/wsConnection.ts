@@ -1,5 +1,6 @@
-import accountSo from "@/stores/stacks/account/repo";
+import authSo from "@/stores/stacks/auth/repo";
 import { SocketService } from "../SocketService";
+
 
 
 export const wsConnection: SocketService = new SocketService({
@@ -7,5 +8,4 @@ export const wsConnection: SocketService = new SocketService({
 	host: window.location.hostname,
 	port: import.meta.env.VITE_API_WS_PORT ?? 3010,
 	base: "",
-	userId: accountSo.state.current?.id
 })

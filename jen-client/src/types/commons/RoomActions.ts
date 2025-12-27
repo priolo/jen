@@ -7,7 +7,7 @@ import { LlmResponse } from "./LlmResponse.js";
 export type ChatMessage = {
 	/** identificativo del MESSAGE */
 	id?: string;
-	/** identifica di chi è il messaggio. Se null è l'utente principale */
+	/** identifica il proprietario del messaggio. Se null è l'utente principale */
 	clientId?: string
 	/** il ruolo di chi ha scritto il messaggio */
 	role: "user" | "agent" | "system"
@@ -221,7 +221,7 @@ export type RoomNewS2C = BaseS2C & {
 }
 
 /** richiesta modifica lista AGENTS in ROOM */
-export type RoomAgentsUpdateS2C = BaseC2S & {
+export type RoomAgentsUpdateS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ROOM_AGENTS_UPDATE
 	roomId: string
 	/** new list of AGENTs in ROOM */
@@ -229,7 +229,7 @@ export type RoomAgentsUpdateS2C = BaseC2S & {
 }
 
 /** richiesta modifica della HISTORY di una ROOM */
-export type RoomHistoryUpdateS2C = BaseC2S & {
+export type RoomHistoryUpdateS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE
 	roomId: string
 	/** UPDATE to HISTORY */

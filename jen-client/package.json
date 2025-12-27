@@ -27,7 +27,7 @@
 
     "@priolo/jack": "file:C://Users//ivano.iorio//Documents//jack",
     "@priolo/jess": "^0.1.1",
-    "@priolo/jon": "^0.7.9",
+    "@priolo/jon": "file:C://Users//ivano.iorio//Documents//jon",
     "@priolo/jon-utils": "^0.5.6",
 
     "@react-oauth/google": "^0.13.0",

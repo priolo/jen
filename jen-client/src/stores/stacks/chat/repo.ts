@@ -1,10 +1,10 @@
 import { wsConnection } from "@/plugins/session/wsConnection"
+import { SS_EVENT } from "@/plugins/SocketService/types"
 import { deckCardsSo, GetAllCards } from "@/stores/docs/cards"
 import { DOC_TYPE } from "@/types"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatCreateC2S, ChatInfoS2C, UserLeaveC2S, UserMessageC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE } from "@/types/commons/RoomActions"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, ClientEnteredS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomMessageS2C, RoomNewS2C, UPDATE_TYPE, UserLeaveC2S } from "@/types/commons/RoomActions"
 import { utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
-import accountSo from "../account/repo"
 import { buildRoomDetail } from "../room/factory"
 import { Chat, getRoomById } from "./types"
 
@@ -14,6 +14,7 @@ const setup = {
 
 	state: {
 		all: <Chat[]>[],
+		online: <boolean>false,
 	},
 
 	getters: {
@@ -156,6 +157,38 @@ const setup = {
 					break
 				}
 
+				case CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE: {
+					const msg:RoomHistoryUpdateS2C = message as RoomHistoryUpdateS2C
+					const room = store.getRoomById(msg.roomId)
+					if (!room) break
+
+					const history = [...room.history]
+					for (const update of msg.updates) {
+						const index = history.findIndex(m => m.id == update.refId)
+						switch (update.type) {
+							case UPDATE_TYPE.ADD: {
+								if (index == -1) {
+									history.unshift(update.content)
+								} else {
+									history.splice(index + 1, 0, update.content)
+								}
+								break
+							}
+							case UPDATE_TYPE.DELETE: {
+								if (index != -1) history.splice(index, 1)
+								break
+							}
+							case UPDATE_TYPE.REPLACE: {
+								if (index != -1) history[index] = update.content
+								break
+							}
+						}
+					}
+					room.history = history
+					store._update()
+					break
+				}
+
 				case CHAT_ACTION_S2C.ROOM_MESSAGE: {
 					const msg: RoomMessageS2C = message as RoomMessageS2C
 					const room = store.getRoomById(msg.roomId)
@@ -195,6 +228,7 @@ const setup = {
 
 	mutators: {
 		setAll: (all: Chat[]) => ({ all }),
+		setOnline: (online: boolean) => ({ online }),
 	},
 }
 
@@ -210,5 +244,7 @@ const chatSo = createStore<ChatState>(setup) as ChatStore
 export default chatSo;
 
 
-
-wsConnection.emitter.on("message", chatSo.onMessage)
+wsConnection.emitter.on(SS_EVENT.MESSAGE, chatSo.onMessage)
+wsConnection.emitter.on(SS_EVENT.CONNECTION, 
+	({ payload }: { payload: number }) => chatSo.setOnline(payload == WebSocket.OPEN)
+)

@@ -20,6 +20,7 @@ import { DOC_TYPE } from "../../types"
 import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import StoreButton from "./StoreButton"
+import chatSo from "@/stores/stacks/chat/repo"
 
 
 
@@ -34,6 +35,7 @@ const MainMenu: FunctionComponent<Props> = ({
 	// STORE
 	useStore(menuSo)
 	useStore(docsSo)
+	useStore(chatSo)
 
 	// HOOKS
 
@@ -113,19 +115,19 @@ const MainMenu: FunctionComponent<Props> = ({
 		{/* <Button children="EDIT" onClick={handleEdit} /> */}
 		{/* <Button children="REF" onClick={handleReflection} /> */}
 		{/* <Button children="DOC DEV" onClick={handleDocDev} /> */}
-		<Button children="AUTH" onClick={handleAuth} /> 
-		<Button children="ACCOUNTS" onClick={handleAccountList} /> 
+		<Button children="AUTH" onClick={handleAuth} />
+		<Button children="ACCOUNTS" onClick={handleAccountList} />
 
 		<Button children="AGENTS" onClick={handleAgentList} />
 		<Button children="LLM" onClick={handleLlmList} />
 		<Button children="MCP" onClick={handleMcpServerList} />
 		<Button children="TOOLS" onClick={handleToolList} />
-		
-		{/* <Button children="ROOM" onClick={handleRoom} /> */}
 
+		{/* <Button children="ROOM" onClick={handleRoom} /> */}
+		<div>*{chatSo.state.online ? "ON" : "OFF"}*</div>
 
 		{/* *** DEBUG *** */}
-		{process.env.NODE_ENV === 'development' && <>
+		{import.meta.env.MODE === 'development' && <>
 			<Button children="JSON" onClick={() => JsonShema()} />
 			<Button children="SAVE" onClick={() => EndSession()} />
 			<Button children="LOAD" onClick={() => StartSession()} />

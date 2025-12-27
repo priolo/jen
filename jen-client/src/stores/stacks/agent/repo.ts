@@ -48,12 +48,6 @@ const setup = {
 		},
 		//#endregion
 
-		async fetchIfVoid(_: void, store?: AgentStore) {
-			if (!!store.state.all) return
-			await store.fetch()
-		},
-
-
 		async save(agent: Partial<AgentLlm>, store?: AgentStore): Promise<AgentLlm> {
 			let agentSaved: AgentLlm = null
 			if (!agent.id) {

@@ -1,7 +1,7 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { FunctionComponent, useMemo } from "react"
+import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
 import { AgentListStore } from "@/stores/stacks/agent/list"
@@ -26,6 +26,9 @@ const AgentListView: FunctionComponent<Props> = ({
 
 	
 	// HOOKs
+	useEffect(() => {
+		store.fetch()
+	}, [store])
 	const agents = useMemo(() => {
 		return agentSo.state.all//?.sort((c1, c2) => c1.name?.localeCompare(c2.name))
 	}, [agentSo.state.all])
