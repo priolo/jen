@@ -1,7 +1,8 @@
 import { AgentRepo } from "../repository/Agent.js";
 import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
-import { FindOneOptions } from "typeorm";
+import { AccountRepo } from "src/repository/Account.js";
+import { FindManyOptions, FindOneOptions } from "typeorm";
 
 
 
@@ -44,9 +45,15 @@ class AgentRoute extends httpRouter.Service {
 	declare state: typeof this.stateDefault
 
 	async getAll(req: Request, res: Response) {
+		const userJwt: AccountRepo = req["jwtPayload"]
+
 		const agents = await new Bus(this, this.state.agents_repo).dispatch({
-			type: typeorm.Actions.ALL,
-			payload: {
+			type: typeorm.Actions.FIND,
+			payload: <FindManyOptions<AgentRepo>>{
+				where: [
+					{ accountId: userJwt.id },
+					{ accountId: null }
+				],
 				relations: ["tools", "subAgents"],
 				select: {
 					subAgents: { id: true },

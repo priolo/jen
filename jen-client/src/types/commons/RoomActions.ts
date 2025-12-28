@@ -7,7 +7,7 @@ import { LlmResponse } from "./LlmResponse.js";
 export type ChatMessage = {
 	/** identificativo del MESSAGE */
 	id?: string;
-	/** identifica il proprietario del messaggio. Se null è l'utente principale */
+	/** identifica di chi è il messaggio. Se null è l'utente principale */
 	clientId?: string
 	/** il ruolo di chi ha scritto il messaggio */
 	role: "user" | "agent" | "system"
@@ -84,7 +84,6 @@ export type ChatCreateC2S = Omit<BaseC2S, "chatId"> & {
 	action: CHAT_ACTION_C2S.CHAT_CREATE
 	/** OPZIONALE. I primi agenti da inserire nella ROOM  */
 	agentIds?: string[]
-
 }
 
 /** CLIENT entra in una CHAT */

@@ -1,6 +1,9 @@
 import { ProviderRepo } from "../repository/Provider.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
+import { AccountRepo } from "src/repository/Account.js";
+import { LlmRepo } from "src/repository/Llm.js";
+import { FindManyOptions } from "typeorm";
 
 
 
@@ -23,10 +26,18 @@ class ProviderRoute extends httpRouter.Service {
 	declare state: typeof this.stateDefault
 
 	async getAll(req: Request, res: Response) {
+		const userJwt: AccountRepo = req["jwtPayload"]
+		
 		const providers = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.ALL
+			type: typeorm.Actions.FIND,
+			payload: <FindManyOptions<LlmRepo>>{
+				where: [
+					{ accountId: userJwt.id },
+					{ accountId: null }
+				],
+			}
 		})
-		res.json(providers)
+		res.json({ providers })
 	}
 
 	async getById(req: Request, res: Response) {

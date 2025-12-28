@@ -25,12 +25,8 @@ const setup = {
 
 		//#region OVERWRITE
 		async fetch(_: void, store?: LlmStore) {
-			//const s = <LlmStore>store
-			// const cnnStore = utils.findAll(docsSo.getAllCards(), { type: DOC_TYPE.CONNECTIONS })?.[0]
-			// socketPool.closeAll()
-			const llm = await providerApi.index({ store })
+			const llm = (await providerApi.index({ store }))?.providers ?? []
 			store.setAll(llm)
-			//await loadBaseSetup.actions.fetch(_, store)
 		},
 		//#endregion
 

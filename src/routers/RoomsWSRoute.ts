@@ -7,7 +7,7 @@ import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, RoomAgentsUpdateC2S, RoomCompleteC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S } from "../types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, RoomAgentsUpdateC2S, RoomCompleteC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S, UPDATE_TYPE } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import ChatContext from "../services/rooms/ChatContext.js"
 import McpServerRoute from "./McpServerRoute.js"
@@ -103,12 +103,15 @@ export class WSRoomsService extends ws.route implements ChatContext {
 			case CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE: {
 				const msgUp: RoomHistoryUpdateC2S = msg
 				chat.updateHistory(msgUp.updates, msgUp.roomId)
+				if (msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.ADD)) {
+					await chat.complete()
+				}
 				break
 			}
 
-			case CHAT_ACTION_C2S.USER_MESSAGE:
-				await this.handleUserMessage(client, msg as UserMessageC2S)
-				break
+			// case CHAT_ACTION_C2S.USER_MESSAGE:
+			// 	await this.handleUserMessage(client, msg as UserMessageC2S)
+			// 	break
 				
 			default:
 				console.warn(`Unknown action: ${msg.action}`)

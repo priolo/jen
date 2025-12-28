@@ -4,6 +4,7 @@ import ChatContext from "../../services/rooms/ChatContext.js";
 import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatInfoS2C, MessageUpdate, RoomAgentsUpdateS2C, UPDATE_TYPE, RoomHistoryUpdateS2C } from "../../types/commons/RoomActions.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import RoomTurnBased from "./RoomTurnBased.js";
+import { th } from "zod/v4/locales";
 
 
 /**
@@ -133,7 +134,7 @@ class ChatNode {
 
 	updateHistory(updates: MessageUpdate[], roomId?: string): void {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
-		if (!room) return;
+		if (!room) throw new Error("Room not found")
 
 		// [II] va fatta nella ROOM la gestione degli aggiornamenti
 		const history = [...room.room.history]

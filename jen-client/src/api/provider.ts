@@ -4,7 +4,7 @@ import { Llm } from "@/types/Llm"
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<Llm[]> {
+function index(opt?: CallOptions): Promise<{providers: Llm[]}> {
 	return ajax.get(`providers`, opt)
 }
 
