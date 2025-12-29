@@ -26,7 +26,9 @@ class AccountRoute extends httpRouter.Service {
 	}
 	declare state: typeof this.stateDefault
 
-
+	/**
+	 * Restituisce un certo numero di ACCOUNTS (10 di default) eventualmente filtrati su testo libero
+	 */
 	async getAll(req: Request, res: Response) {
 		const { text } = req.query as { text?: string };
 
@@ -55,6 +57,9 @@ class AccountRoute extends httpRouter.Service {
 		});
 	}
 
+	/**
+	 * Restituisce l'ACCOUNT, se esiste, dato il suo ID
+	 */
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"];
 		if (!id) return res.status(400).json({ error: "Missing id parameter" });
@@ -88,6 +93,9 @@ class AccountRoute extends httpRouter.Service {
 		})
 	}
 
+	/**
+	 * Aggiorno i dati aggiornabili di un ACCOUNT
+	 */
 	async update(req: Request, res: Response) {
 		const userJwt: AccountRepo = req["jwtPayload"]
 		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
@@ -107,7 +115,9 @@ class AccountRoute extends httpRouter.Service {
 			payload: newAccount
 		});
 
-		res.json({ account: savedAccount });
+		res.json({ 
+			account: savedAccount(savedAccount) 
+		});
 	}
 }
 

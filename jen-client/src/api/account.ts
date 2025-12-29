@@ -4,8 +4,14 @@ import { Account } from "../types/Account";
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<Account[]> {
-	return ajax.get(`accounts`, opt)
+function index(filter?: { text?: string }, opt?: CallOptions): Promise<{ accounts: Account[] }> {
+	const params = new URLSearchParams();
+	if (filter?.text) {
+		params.append('text', filter.text);
+	}
+	const queryString = params.toString();
+	const url = queryString ? `accounts?${queryString}` : 'accounts';
+	return ajax.get(url, opt)
 }
 
 /** GET */

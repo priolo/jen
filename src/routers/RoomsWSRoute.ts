@@ -20,7 +20,9 @@ export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
 
 /**
  * GLOBAL: WebSocket service for managing prompt chat rooms
- * Contiene le CHAT-ROOMS ognuna composta da piu' ROOMS e CLIENTs
+ * Contiene le CHAT-ROOMS ognuna di queste composta da piu' ROOMS e CLIENTs
+ * in pratica è un servizio di CHAT multi-room e multi-agente 
+ * gestisce prevalentemente i messaggi
  */
 export class WSRoomsService extends ws.route implements ChatContext {
 
@@ -30,10 +32,10 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		return {
 			...super.stateDefault,
 			name: "ws-rooms",
-			repository: "/typeorm/rooms",
-			agentRepository: "/typeorm/agents",
-			toolRepository: "/typeorm/tools",
-			mcpRepository: "/typeorm/mcp_servers",
+			room_repo: "/typeorm/rooms",
+			agent_repo: "/typeorm/agents",
+			tool_repo: "/typeorm/tools",
+			mcp_repo: "/typeorm/mcp_servers",
 		}
 	}
 	declare state: typeof this.stateDefault
@@ -81,7 +83,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		}
 
 		const chat = this.getChatById(msg.chatId)
-		if (!chat) return this.log("CHAT", `not found: ${msg.chatId}`, TypeLog.ERROR)
+		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 
 		switch (msg.action) {
 			case CHAT_ACTION_C2S.USER_ENTER:
@@ -112,7 +114,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 			// case CHAT_ACTION_C2S.USER_MESSAGE:
 			// 	await this.handleUserMessage(client, msg as UserMessageC2S)
 			// 	break
-				
+
 			default:
 				console.warn(`Unknown action: ${msg.action}`)
 				return
@@ -122,13 +124,14 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	}
 
 	/**
-	 * Crea una nuova CHAT. 
+	 * Crea una nuova CHAT.  
 	 * Inserisce il CLIENT che l'ha creata
+	 * e crea la MAIN-ROOMe ed eventualmente gli AGENTs specificati
 	 */
 	private async handleChatCreate(client: ws.IClient, msg: ChatCreateC2S) {
 		const userId = client?.jwtPayload?.id
-		if (!userId) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
-			
+		if (!userId) throw new Error(`Invalid userId`)
+
 		const room = await RoomTurnBased.Build(this, msg.agentIds)
 		const chat = await ChatNode.Build(this, room)
 		this.chats.push(chat)
@@ -142,7 +145,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 */
 	private async handleUserEnter(client: ws.IClient, msg: UserEnterC2S) {
 		const userId = client?.jwtPayload?.id
-		if (!userId) return this.log("CHAT", `Invalid enter message`, TypeLog.ERROR)
+		if (!userId) throw new Error(`Invalid userId`)
 		const chat = this.getChatById(msg.chatId)
 		chat.enterClient(userId)
 	}
@@ -154,9 +157,9 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 */
 	private handleUserLeave(client: ws.IClient, msg: UserLeaveC2S) {
 		const chat = this.getChatById(msg.chatId)
-		if (!chat) return this.log("CHAT", `not found: ${msg.chatId}`, TypeLog.ERROR)
+		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 		const userId = client.jwtPayload?.id
-		if (!userId) return this.log("CHAT", `Invalid userId`, TypeLog.ERROR)
+		if (!userId) throw new Error(`Invalid userId`)
 
 		const isVoid = chat.removeClient(userId)
 		if (isVoid) this.removeChat(chat.id)
@@ -169,14 +172,14 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Avverte tutti i partecipanti
 	 * Chiede il COMPLETE alla ROOM
 	 */
-	private async handleUserMessage(client: ws.IClient, msg: UserMessageC2S) {
-		const chat = this.getChatById(msg.chatId)
-		if (!chat) return this.log("CHAT", `Chat not found: ${msg.chatId}`, TypeLog.ERROR)
-		const userId = client?.jwtPayload?.id
-		if (!userId) return this.log("CHAT", `Invalid userId`, TypeLog.ERROR)
-		chat.addUserMessage(msg.text, userId, msg.roomId)
-		await chat.complete()
-	}
+	// private async handleUserMessage(client: ws.IClient, msg: UserMessageC2S) {
+	// 	const chat = this.getChatById(msg.chatId)
+	// 	if (!chat) return this.log("CHAT", `Chat not found: ${msg.chatId}`, TypeLog.ERROR)
+	// 	const userId = client?.jwtPayload?.id
+	// 	if (!userId) return this.log("CHAT", `Invalid userId`, TypeLog.ERROR)
+	// 	chat.addUserMessage(msg.text, userId, msg.roomId)
+	// 	await chat.complete()
+	// }
 
 	//#endregion 
 
@@ -207,8 +210,9 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Restitui un AGENT pronto per l'uso
 	 */
 	public async getAgentRepoById(agentId: string): Promise<AgentRepo> {
+		
 		// [II] non va bene! deve raggiungere il nodo con una path!
-		const agent: AgentRepo = await AgentRoute.GetById(agentId, this, this.state.agentRepository)
+		const agent: AgentRepo = await AgentRoute.GetById(agentId, this, this.state.agent_repo)
 
 		// [II] --- mettere in una funzione a parte
 		// bisogna recuperare la "description" e "parameters" per i TOOLS
@@ -223,7 +227,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 				// non sono in CACHE allora li carico e li metto in CACHE
 				if (!WSRoomsService.McpCache.has(tool.mcpId)) {
 					// [II] anche questo va ricavato tramite path
-					const mcpServer = await McpServerRoute.GetById(tool.mcpId, this, this.state.mcpRepository)
+					const mcpServer = await McpServerRoute.GetById(tool.mcpId, this, this.state.mcp_repo)
 					if (!mcpServer) continue
 					const mcpTools = await getMcpTools(mcpServer.host)
 					WSRoomsService.McpCache.set(mcpServer.id, mcpTools)
@@ -247,7 +251,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Esegue un TOOL e ne restituisce il risultato
 	 */
 	public async executeTool(toolId: string, args: any): Promise<any> {
-		const toolRepo: ToolRepo = await new Bus(this, this.state.toolRepository).dispatch({
+		const toolRepo: ToolRepo = await new Bus(this, this.state.tool_repo).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
 			payload: toolId
 		})
@@ -270,7 +274,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		}
 
 		if (toolRepo.type == TOOL_TYPE.MCP) {
-			const mcpServer = await McpServerRoute.GetById(toolRepo.mcpId, this, this.state.mcpRepository)
+			const mcpServer = await McpServerRoute.GetById(toolRepo.mcpId, this, this.state.mcp_repo)
 			if (!mcpServer) return `MCP Server not found: ${toolRepo.mcpId}`
 			return await executeMcpTool(mcpServer.host, toolRepo.name, args)
 		}

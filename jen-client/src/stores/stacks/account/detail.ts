@@ -27,6 +27,7 @@ const setup = {
 			const state = store.state as AccountDetailState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
+				account: { id: state.account?.id }
 			}
 		},
 		//#endregion
@@ -36,16 +37,17 @@ const setup = {
 		//#region VIEWBASE
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
+			store.state = {...store.state, ...data }
 		},
 		//#endregion
 
 		async fetch(_: void, store?: AccountDetailStore) {
 			if (!store.state.account?.id) return
-			const account = await accountApi.get(store.state.account.id, { store, manageAbort: true })
+			const account = (await accountApi.get(store.state.account.id, { store, manageAbort: true }))?.account
 			store.setAccount(account)
 		},
 		async fetchIfVoid(_: void, store?: AccountDetailStore) {
-			if (!!store.state.account?.email) return 
+			if (!!store.state.account?.email) return
 			await store.fetch()
 		},
 	},

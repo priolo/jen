@@ -15,7 +15,7 @@ import AuthGithubRoute from "./routers/AuthGithubRoute.js";
 import AuthGoogleRoute from "./routers/AuthGoogleRoute.js";
 import AuthRoute from "./routers/AuthRoute.js";
 import McpServerRoute from "./routers/McpServerRoute.js";
-import ProviderRoute from "./routers/ProviderRoute.js";
+import LlmRoute from "./routers/LlmRoute.js";
 import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
 import tools from "./startup/config_tools.js";
@@ -123,7 +123,7 @@ function buildNodeConfig(params?: ConfigParams) {
 							},
 							children: [
 								{ class: McpServerRoute },
-								{ class: ProviderRoute },
+								{ class: LlmRoute },
 								{ class: ToolRoute },
 								{ class: AgentRoute },
 								// { class: AuthRoute },

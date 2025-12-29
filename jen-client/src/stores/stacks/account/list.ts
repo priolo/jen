@@ -1,9 +1,11 @@
+import accountApi from "@/api/account"
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
+import { Account } from "@/types/Account"
+import { debounce } from "@/utils/time"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
 import { buildAccountDetailCard } from "./factory"
-import accountSo from "./repo"
 
 
 /**
@@ -14,6 +16,8 @@ const setup = {
 	state: {
 		//#region VIEWBASE
 		//#endregion
+		textSearch: <string>null,
+		all: <Account[]>[],
 	},
 
 	getters: {
@@ -24,19 +28,10 @@ const setup = {
 			const state = store.state as AccountListState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
+				textSearch: state.textSearch,
 			}
 		},
 		//#endregion
-
-		/** gli USERS filtrati e da visualizzare in lista */
-		getFiltered(_: void, store?: AccountListStore) {
-			return accountSo.state.all
-			// const text = store.state.textSearch?.toLocaleLowerCase()?.trim()
-			// if (!text || text.trim().length == 0 || !store.state.all) return store.state.all
-			// return store.state.all.filter(user =>
-			// 	user.name.toLowerCase().includes(text)
-			// )
-		},
 	},
 
 	actions: {
@@ -46,6 +41,11 @@ const setup = {
 		},
 		//#endregion
 
+		async fetchFiltered(_: void, store?: AccountListStore) {
+			const accounts = (await accountApi.index({ text: store.state.textSearch }))?.accounts ?? []
+			store.setAll(accounts)
+		},
+
 		openDetail(accountId: string, store?: AccountListStore) {
 			const view = buildAccountDetailCard({ id: accountId })
 			deckCardsSo.addLink({ view, parent: store, anim: true })
@@ -53,6 +53,15 @@ const setup = {
 	},
 
 	mutators: {
+		setAll: (all: Account[]) => ({ all }),
+		setTextSearch: (textSearch: string, store?: AccountListStore) => {
+			debounce(
+				"AccountListView.setTextSearch",
+				() => store.fetchFiltered(),
+				500
+			)
+			return { textSearch }
+		},
 	},
 }
 

@@ -1,4 +1,3 @@
-import { ProviderRepo } from "../repository/Provider.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { AccountRepo } from "src/repository/Account.js";
@@ -7,13 +6,13 @@ import { FindManyOptions } from "typeorm";
 
 
 
-class ProviderRoute extends httpRouter.Service {
+class LlmRoute extends httpRouter.Service {
 
 	get stateDefault() {
 		return {
 			...super.stateDefault,
-			path: "/providers",
-			repository: "/typeorm/providers",
+			path: "/llms",
+			repository: "/typeorm/llms",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
@@ -27,8 +26,8 @@ class ProviderRoute extends httpRouter.Service {
 
 	async getAll(req: Request, res: Response) {
 		const userJwt: AccountRepo = req["jwtPayload"]
-		
-		const providers = await new Bus(this, this.state.repository).dispatch({
+
+		const llms:LlmRepo[] = await new Bus(this, this.state.repository).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<LlmRepo>>{
 				where: [
@@ -37,23 +36,23 @@ class ProviderRoute extends httpRouter.Service {
 				],
 			}
 		})
-		res.json({ providers })
+		res.json({ llms })
 	}
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const provider: ProviderRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.GET_BY_ID,
+		const llm: LlmRepo = await new Bus(this, this.state.repository).dispatch({
+			type: typeorm.Actions.GET_BY_ID,
 			payload: id
 		})
-		res.json(provider)
+		res.json(llm)
 	}
 
 
 	async create(req: Request, res: Response) {
-		const { llm }: { llm: ProviderRepo } = req.body
-		const llmNew: ProviderRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+		const { llm }: { llm: LlmRepo } = req.body
+		const llmNew: LlmRepo = await new Bus(this, this.state.repository).dispatch({
+			type: typeorm.Actions.SAVE,
 			payload: llm
 		})
 		res.json(llmNew)
@@ -62,7 +61,7 @@ class ProviderRoute extends httpRouter.Service {
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
 		await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.DELETE,
+			type: typeorm.Actions.DELETE,
 			payload: id
 		})
 		res.json({ data: "ok" })
@@ -70,16 +69,16 @@ class ProviderRoute extends httpRouter.Service {
 
 	async update(req: Request, res: Response) {
 		const id = req.params["id"]
-		const { llm }: { llm: ProviderRepo } = req.body
+		const { llm }: { llm: LlmRepo } = req.body
 		if (!id || !llm) return
 		const llmUp = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: llm,
 		})
 		res.json(llmUp)
 	}
 }
 
-export default ProviderRoute
+export default LlmRoute
 
 

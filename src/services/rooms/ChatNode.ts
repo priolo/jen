@@ -26,7 +26,9 @@ class ChatNode {
 	 * probabilmente è un WSRoomsService
 	 * */
 	private node: ChatContext;
-	/** le ROOM aperte in questa CHAT */
+	/** 
+	 * le ROOM aperte in questa CHAT 
+	 */
 	private rooms: RoomTurnBased[]
 	/** 
 	 * gli ids dei CLIENTs-WS partecipanti 

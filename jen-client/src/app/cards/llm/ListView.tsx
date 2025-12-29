@@ -77,7 +77,7 @@ const LlmListView: FunctionComponent<Props> = ({
 				return <div key={llm.id} className={clsCard.item}>
 					<div 
 						onClick={(e) => handleSelect(llm)}
-					>{llm.name} {isSelected(llm) ? "**": ""}</div>
+					>{llm.code} {isSelected(llm) ? "**": ""}</div>
 				</div>
 			})}
 		</div>

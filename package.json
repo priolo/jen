@@ -19,14 +19,15 @@
     "@priolo/jess": "file://C:/Users/iorio/Documents/jess"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.52",
-    "@ai-sdk/cohere": "^2.0.14",
-    "@ai-sdk/google": "^2.0.23",
-    "@ai-sdk/mistral": "^2.0.19",
+
+    "ai": "^6.0.3",
+    "@ai-sdk/openai": "^3.0.1",
+    "@ai-sdk/cohere": "^3.0.1",
+    "@ai-sdk/google": "^3.0.1",
+    "@ai-sdk/mistral": "^3.0.1",
     "@lancedb/lancedb": "^0.22.2",
     "@langchain/core": "^0.3.78",
-    "langchain": "^0.3.36",
-    "ai": "^5.0.72",    
+    "langchain": "^0.3.36",    
     "@modelcontextprotocol/sdk": "^1.20.0",
     "ollama-ai-provider-v2": "^1.1.2",
 

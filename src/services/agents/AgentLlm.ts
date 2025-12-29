@@ -1,5 +1,5 @@
-import { AgentRepo } from '@/repository/Agent.js';
-import { ChatMessage } from '@/types/commons/RoomActions.js';
+import { AgentRepo } from '../../repository/Agent.js';
+import { ChatMessage } from '../../types/commons/RoomActions.js';
 import { time } from '@priolo/jon-utils';
 import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet } from "ai";
 import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
@@ -78,10 +78,10 @@ class AgentLlm {
 
 
 		// DALLA RISPOSTA RECUPERO I DATI UTILI
-		const content: ToolResultPart = lastMsg.content[0]
+		const content = lastMsg.content[0] as ToolResultPart
 		const toolName: string = content.toolName
 		// per il momento gestisco solo i text
-		const result: any = content.output.value
+		const result: any = 'value' in content.output ? content.output.value : (content.output as any).reason
 
 
 		// FINAL RESPONSE

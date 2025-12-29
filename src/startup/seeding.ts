@@ -3,7 +3,6 @@ import { AccountRepo, EMAIL_CODE } from "../repository/Account.js";
 import { AGENT_TYPE, AgentRepo } from "../repository/Agent.js";
 import { LlmRepo } from "../repository/Llm.js";
 import { McpServerRepo } from "../repository/McpServer.js";
-import { ProviderRepo } from "../repository/Provider.js";
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js";
 import { LLM_MODELS } from "../types/commons/LlmProviders.js";
 
@@ -30,14 +29,16 @@ export async function seeding(root: RootService) {
 		]
 	});
 
-	const llms = await new Bus(root, "/typeorm/llms").dispatch<ProviderRepo[]>({
+	const llms = await new Bus(root, "/typeorm/llms").dispatch<LlmRepo[]>({
 		type: typeorm.RepoStructActions.SEED,
 		payload: <LlmRepo[]>[
 			{ type: typeorm.RepoStructActions.TRUNCATE },
-			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, accountId: accounts[0].id },
+
 			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY, accountId: accounts[0].id },
-			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, accountId: accounts[1].id },
+			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, accountId: accounts[0].id },
+			
 			{ code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH, key: process.env.GOOGLE_GENERATIVE_AI_API_KEY, accountId: accounts[1].id },
+			{ code: LLM_MODELS.MISTRAL_LARGE, key: process.env.MISTRAL_API_KEY, accountId: accounts[1].id },
 
 		]
 	});
@@ -122,7 +123,9 @@ export async function seeding(root: RootService) {
 				contextPrompt: "",
 				askInformation: true,
 				killOnResponse: true,
-				//llmId: llms[0].id,
+
+				accountId: accounts[0].id,
+				llmId: llms[1].id,
 				tools: [
 					{ id: tools[0].id }, { id: tools[1].id },
 				],
@@ -142,7 +145,9 @@ export async function seeding(root: RootService) {
 				contextPrompt: "",
 				askInformation: true,
 				killOnResponse: false,
-				//llm: llms[0],
+
+				accountId: accounts[0].id,
+				llmId: llms[1].id,
 				subAgents: [
 					{ id: agentMath.id },
 				]

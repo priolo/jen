@@ -127,7 +127,7 @@ const AgentView: FunctionComponent<Props> = ({
 					items={llm}
 					readOnly={inRead}
 					fnGetId={(item: Llm) => item?.id}
-					fnGetString={(item: Llm) => item?.name}
+					fnGetString={(item: Llm) => item?.code}
 					onChangeSelect={handleLlmChange}
 				/>
 			</div>

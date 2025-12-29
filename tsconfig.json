@@ -15,11 +15,11 @@
     "preserveConstEnums": true,
     "allowJs": true,
     "baseUrl": ".",
-    // "paths": {
-    //   "@/*": [
-    //     "./src/*"
-    //   ]
-    // },
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
     "declaration": true,
     "declarationMap": true,
     "experimentalDecorators": true,

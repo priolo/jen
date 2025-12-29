@@ -36,7 +36,7 @@ const LlmDetailForm: FunctionComponent<Props> = ({
     const inNew = store.state.editState == EDIT_STATE.NEW
 
     const models = Object.values(LLM_MODELS)
-    const modelIndex = models.indexOf(llm.name as LLM_MODELS ?? LLM_MODELS.MISTRAL_LARGE)
+    const modelIndex = models.indexOf(llm.code as LLM_MODELS ?? LLM_MODELS.MISTRAL_LARGE)
 
 
     return <div className="jack-lyt-form var-dialog">
@@ -51,7 +51,7 @@ const LlmDetailForm: FunctionComponent<Props> = ({
         </div> */}
 
         <div className="lyt-v">
-            <div className="jack-lbl-prop">PROVIDER</div>
+            <div className="jack-lbl-prop">LLMs</div>
             <ListDialog width={80}
                 store={store}
                 select={modelIndex}

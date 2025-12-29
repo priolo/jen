@@ -58,12 +58,12 @@ const setup = {
 			const state = store.state as UsersState
 			state.select = data.select
 		},
-		async fetch(_: void, store?: LoadBaseStore) {
-			const s = <UsersStore>store
-			const users = await accountApi.index({ store, manageAbort: true })
-			s.setAll(users)
-			await loadBaseSetup.actions.fetch(_, store)
-		},
+		// async fetch(_: void, store?: LoadBaseStore) {
+		// 	const s = <UsersStore>store
+		// 	const users = await accountApi.index({ store, manageAbort: true })
+		// 	s.setAll(users)
+		// 	await loadBaseSetup.actions.fetch(_, store)
+		// },
 		//#endregion
 
 		async fetchIfVoid(_: void, store?: UsersStore) {

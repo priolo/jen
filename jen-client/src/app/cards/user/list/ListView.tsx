@@ -1,10 +1,9 @@
 import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AccountListStore } from "@/stores/stacks/account/list"
-import accountSo from "@/stores/stacks/account/repo"
 import { DOC_TYPE } from "@/types"
 import { Account } from "@/types/Account"
-import { AlertDialog, Table } from "@priolo/jack"
+import { AlertDialog, FindInputHeader, Table } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
 
@@ -23,19 +22,18 @@ const AccountListView: FunctionComponent<Props> = ({
 
 	// STORE
 	useStore(store)
-	useStore(accountSo)
 	useStore(store.state.group)
 
 	// HOOKs
 	useEffect(() => {
-		accountSo.fetchIfVoid()
-	}, [])
+		store.fetchFiltered()
+	},[])
 
 	// HANDLER
 	const handleSelect = (account: Account) => store.openDetail(account.id)
 
 	// RENDER
-	const accounts = store.getFiltered() ?? []
+	const accounts = store.state.all
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}
@@ -44,11 +42,11 @@ const AccountListView: FunctionComponent<Props> = ({
 			{/* <OptionsCmp
 				style={{ marginLeft: 5, backgroundColor: "rgba(255,255,255,.4)" }}
 				store={store}
-			/>
-			<FindInputHeader
-				value={state.textSearch}
-				onChange={text => store.setTextSearch(text)}
 			/> */}
+			<FindInputHeader
+				value={store.state.textSearch}
+				onChange={text => store.setTextSearch(text)}
+			/>
 		</>}
 	>
 		<Table

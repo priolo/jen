@@ -4,28 +4,28 @@ import { Llm } from "@/types/Llm"
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<{providers: Llm[]}> {
-	return ajax.get(`providers`, opt)
+function index(opt?: CallOptions): Promise<{llms: Llm[]}> {
+	return ajax.get(`llms`, opt)
 }
 
 /** GET */
 function get(id: string, opt?: CallOptions): Promise<Llm> {
-	return ajax.get(`providers/${id}`, opt)
+	return ajax.get(`llms/${id}`, opt)
 }
 
 /** CREATE NEW */
 function create(llm: Partial<Llm>, opt?: CallOptions): Promise<Llm> {
-	return ajax.post(`providers`, { llm }, opt)
+	return ajax.post(`llms`, { llm }, opt)
 }
 
 /** UPDATE */
 function update(llm: Partial<Llm>, opt?: CallOptions): Promise<Llm> {
-	return ajax.patch(`providers/${llm.id}`, { llm }, opt)
+	return ajax.patch(`llms/${llm.id}`, { llm }, opt)
 }
 
 /** DELETE */
 function remove(llmId: string, opt?: CallOptions): Promise<void> {
-	return ajax.delete(`providers/${llmId}`, null, opt)
+	return ajax.delete(`llms/${llmId}`, null, opt)
 }
 
 

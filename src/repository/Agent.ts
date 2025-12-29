@@ -57,6 +57,7 @@ export class AgentRepo extends AccountAssets {
     @ManyToOne(() => LlmRepo, llm => llm.agents, { nullable: true })
     @JoinColumn({ name: 'llmId' })
     llm?: LlmRepo
+    @Column({ type: 'uuid', nullable: true })
     llmId?: string
 
 

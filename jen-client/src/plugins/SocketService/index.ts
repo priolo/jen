@@ -74,6 +74,7 @@ export class SocketService {
 	 * invia un messaggio al server
 	 */
 	send(msg: string) {
+		if (import.meta.env.DEV) console.log("socket:send", JSON.parse(msg))
 		this.websocket.send(msg)
 	}
 
@@ -94,7 +95,7 @@ export class SocketService {
 	}
 
 	handleMessage = (event: MessageEvent) => {
-		console.log("socket:message")
+		if (import.meta.env.DEV) console.log("socket:message", JSON.parse(event.data))
 		this.emitter.emit(SS_EVENT.MESSAGE, event.data)
 	}
 
