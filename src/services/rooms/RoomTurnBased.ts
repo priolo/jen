@@ -1,6 +1,6 @@
 import { AgentRepo } from "../../repository/Agent.js";
 import { RoomRepo } from "../../repository/Room.js";
-import { ChatMessage } from "../../types/commons/RoomActions.js";
+import { ChatMessage, MessageUpdate, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import AgentLlm from "../agents/AgentLlm.js";
@@ -14,29 +14,49 @@ class RoomTurnBased {
 
 	constructor(
 		public room: Partial<RoomRepo>,
+		// [II] in room dovrebbero poterci essere dei TOOLS e dei CONTEXT condivisi per tutti gli AGENTS che partecipano
 	) {
 		if (!this.room.history) {
 			this.room.history = [];
 		}
 	}
 
-	/**
-	 * Crea una MAIN-ROOM con gli AGENTs specificatiù
-	 * [II] da spostare in ChatNode:(static async Build)
-	 */
-	static async Build(node: ChatContext, agentsIds: string[] = []): Promise<RoomTurnBased> {
-		// carico gli agenti REPO
-		const agentsRepo: AgentRepo[] = []
-		for (const agentId of agentsIds) {
-			const agentRepo = await node.getAgentRepoById(agentId)
-			if (agentRepo) agentsRepo.push(agentRepo)
+
+	/** aggiorno la HISTORY con una serie di MessageUpdate */
+	updateHistory(updates: MessageUpdate[] | MessageUpdate): void {
+		if (!updates) return;
+		if (!Array.isArray(updates)) updates = [updates];
+		if (updates.length == 0) return;
+
+		const history = [...this.room.history]
+		for (const update of updates) {
+			if (update.type === UPDATE_TYPE.APPEND) {
+				history.push(update.content)
+				continue;
+			}
+			const index = history.findIndex(m => m.id == update.refId)
+			switch (update.type) {
+				case UPDATE_TYPE.ADD: {
+					if (index == -1) {
+						history.unshift(update.content)
+					} else {
+						history.splice(index + 1, 0, update.content)
+					}
+					break
+				}
+				case UPDATE_TYPE.DELETE: {
+					if (index != -1) history.splice(index, 1)
+					break
+				}
+				case UPDATE_TYPE.REPLACE: {
+					if (index != -1) history[index] = update.content
+					break
+				}
+			}
 		}
-		// creo una nuova MAIN-ROOM
-		const roomRepo = await node.createRoomRepo(agentsRepo, null)
-		const room = new RoomTurnBased(roomRepo)
-		return room
+		this.room.history = history
 	}
-	
+
 	/**
 	 * Costruisce un messaggio di tipo AGENT
 	 */
@@ -71,22 +91,8 @@ class RoomTurnBased {
 	public onMessage: (chatMessage: ChatMessage, roomId: string) => void = null;
 
 
-	/**
-	 * Inserisce in HISTORY un messaggio di tipo UTENTE
-	 * con clientId = null è GENERIC-USER
-	 */
-	public addUserMessage(message: string, clientId?: string): ChatMessage {
-		const msg: ChatMessage = {
-			id: randomUUID(),
-			clientId: clientId,
-			role: "user",
-			content: message,
-		}
-		this.room.history.push(msg)
-		return msg;
-	}
-
 	
+
 
 
 
@@ -136,12 +142,12 @@ class RoomTurnBased {
 	private async getResponseParallel(): Promise<LlmResponse> {
 		if (this.room.agents.length == 0) return null
 
-		const startIndex = this.room.history.length 
+		const startIndex = this.room.history.length
 
 		const promises = this.room.agents.map(agentRepo => this.getAgentResponse(agentRepo, [...this.room.history]))
 		const histories = await Promise.all(promises)
 
-		for ( const h of histories) {
+		for (const h of histories) {
 			this.room.history.push(...h.slice(startIndex))
 		}
 

@@ -1,15 +1,19 @@
+import "../../../startup/envPreload.js"
+
 import { randomUUID } from 'crypto';
 import { AgentRepo } from '../../../repository/Agent.js';
 import { RoomRepo } from '../../../repository/Room.js';
 import { ToolRepo } from '../../../repository/Tool.js';
-import ChatNode from '../../rooms/ChatNode.js';
-import ChatContext from '../../rooms/ChatContext.js';
-import RoomTurnBased from '../../rooms/RoomTurnBased.js';
 import { LLM_RESPONSE_TYPE } from '../../../types/commons/LlmResponse.js';
-
+import type ChatContext from '../../rooms/ChatContext.js';
+import ChatNode from '../../rooms/ChatNode.js';
+import RoomTurnBased from '../../rooms/RoomTurnBased.js';
 
 
 describe("Test on CHAT", () => {
+
+	beforeEach(() => {
+	});
 
 	const addTool: ToolRepo = {
 		id: "id-tool-1",
@@ -71,7 +75,7 @@ describe("Test on CHAT", () => {
 				}
 			},
 			getAgentRepoById: async (agentId) => {
-				return agentsRepo.find(agent => agent.id === agentId) || null
+				return agentsRepo.find(agent => agent.id === agentId)!
 			},
 			executeTool: async (id: string, args: any) => {
 				const tools: { [key: string]: any } = {
@@ -95,7 +99,7 @@ describe("Test on CHAT", () => {
 			}
 		},
 		getAgentRepoById: async (agentId) => {
-			return agentsRepo.find(agent => agent.id === agentId) || null
+			return agentsRepo.find(agent => agent.id === agentId)!
 		},
 		executeTool: async (id: string, args: any) => {
 			const tools: { [key: string]: any } = {
@@ -149,7 +153,7 @@ describe("Test on CHAT", () => {
 		expect(response?.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect(response?.content.result).toBe("4")
 
-	}, 100000)
+	}, 10000)
 
 	test("due USER parlano tra di loro", async () => {
 		const recorder = new Recorder()
@@ -166,9 +170,9 @@ describe("Test on CHAT", () => {
 		chat.addUserMessage(`first message from user 2`, user2)
 		chat.addUserMessage(`second message from user 1`, user1)
 
-		debugger
+		expect(recorder.messages.length).toBeGreaterThan(0)
 
-	}, 100000)
+	}, 10000)
 
 	test("due AGENTs", async () => {
 
@@ -180,8 +184,9 @@ describe("Test on CHAT", () => {
 		chat.addUserMessage(`do you like philosophy or physics more?`)
 		const response = await chat.complete()
 
-		debugger
+		expect(response).not.toBeNull()
+		expect(response?.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 
-	}, 100000)
+	}, 10000)
 
 })

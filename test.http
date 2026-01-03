@@ -15,3 +15,7 @@ content-type: application/json
 {
     "email": "sample@test.com"
 }
+
+###
+
+GET https://api.groq.com/openai/v1/models

@@ -7,8 +7,9 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
 import { ModelMessage, UserModelMessage } from "ai";
 import { createOllama } from 'ollama-ai-provider-v2';
-
-
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createGroq } from '@ai-sdk/groq';
 
 /**
  * Istanzio un MODELLO LLM in base alla configurazione
@@ -21,6 +22,11 @@ export function getModel(llm?: LlmRepo) {
 
 	switch (code) {
 		default:
+		case LLM_MODELS.GROQ_GPT_OSS_20B:
+			provider = createGroq({
+				apiKey: key ?? process.env.GROQ_API_KEY,
+			});
+			break;
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH_PRO:
 		case LLM_MODELS.GOOGLE_GEMINI_2_5_PRO_EXP:
@@ -44,11 +50,27 @@ export function getModel(llm?: LlmRepo) {
 				apiKey: key ?? process.env.MISTRAL_API_KEY,
 			});
 			break;
+		case LLM_MODELS.MINMAX_M2:
+			provider = createOpenAICompatible({
+				name: 'minmax',
+				apiKey: key ?? process.env.MINMAX_API_KEY,
+				baseURL: 'https://api.minimax.io/v1',
+			});
+			break;
+		case LLM_MODELS.GPT_4O_MINI:
+			provider = createOpenAI({
+				apiKey: key ?? process.env.OPEN_AI_API_KEY,
+			});
+			break;
+
 	}
 
 	let model = null
 	switch (code) {
 		default:
+		case LLM_MODELS.GROQ_GPT_OSS_20B:
+			model = provider('openai/gpt-oss-20b')
+			break;
 		case LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH:
 			model = provider('gemini-2.0-flash')
 			break;
@@ -70,6 +92,12 @@ export function getModel(llm?: LlmRepo) {
 		case LLM_MODELS.MISTRAL_LARGE:
 			model = provider('mistral-large-latest')
 			break
+		case LLM_MODELS.MINMAX_M2:
+			model = provider('minimax-m2')
+			break;
+		case LLM_MODELS.GPT_4O_MINI:
+			model = provider('gpt-4o-mini')
+			break;
 	}
 	return model
 }

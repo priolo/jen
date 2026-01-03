@@ -3,7 +3,7 @@ import SendIcon from "@/icons/SendIcon"
 import agentSo from "@/stores/stacks/agent/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { AgentLlm } from "@/types/Agent"
-import { FloatButton, TextInput } from "@priolo/jack"
+import { Accordion, FloatButton, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
@@ -71,6 +71,10 @@ const RoomView: FunctionComponent<Props> = ({
 			<div className="jack-lbl-prop">ROOM PARENT ID</div>
 			<div className="jack-lbl-readonly">{room?.parentRoomId ?? "--"}</div>
 		</div>
+
+		<TitleAccordion title="AGENTS">
+			
+		</TitleAccordion>
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
 			{history.map((chatMessage) => (

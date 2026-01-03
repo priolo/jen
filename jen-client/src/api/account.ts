@@ -15,27 +15,26 @@ function index(filter?: { text?: string }, opt?: CallOptions): Promise<{ account
 }
 
 /** GET */
-async function get(id: string, opt?: CallOptions): Promise<Account> {
-	if (!id) return
-	const user = await ajax.get(`accounts/${id}`, opt)
-	return user
+async function get(id: string, opt?: CallOptions): Promise<{ account: Account }> {
+	if (!id) throw new Error("Account ID is required");
+	return await ajax.get(`accounts/${id}`, opt)
 }
 
 /** DELETE */
 function remove(id: string, opt?: CallOptions): Promise<void> {
-	if (!id) return
+	if (!id) throw new Error("Account ID is required");
 	return ajax.delete(`accounts/${id}`, null, opt)
 }
 
 /** CREATE */
-function create(user: Account, opt?: CallOptions): Promise<Account> {
-	if (!user) return
+function create(user: Account, opt?: CallOptions): Promise<{ account: Account }> {
+	if (!user) throw new Error("Account data is required");
 	return ajax.post(`accounts`, user, opt)
 }
 
 /** UPDATE */
-function update(user: Account, opt?: CallOptions): Promise<Account> {
-	if (!user) return
+function update(user: Account, opt?: CallOptions): Promise<{account: Account}> {
+	if (!user) throw new Error("Account data is required");
 	return ajax.post(`accounts/${user.id}`, user, opt)
 }
 

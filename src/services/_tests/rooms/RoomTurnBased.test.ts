@@ -1,3 +1,5 @@
+import "../../../startup/envPreload.js"
+
 import { AgentRepo } from "../../../repository/Agent.js";
 import { RoomRepo } from "../../../repository/Room.js";
 import { TOOL_TYPE, ToolRepo } from "../../../repository/Tool.js";
@@ -65,7 +67,7 @@ describe("Test on ROOM", () => {
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED);
 		expect(resp.content.result).toBe("42");
 
-	}, 100000)
+	}, 10000)
 
 	test("semplice domanda con utilizzo di un tool", async () => {
 
@@ -90,7 +92,7 @@ describe("Test on ROOM", () => {
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED);
 		expect(resp.content.result).toBe("4");
 
-	}, 100000)
+	}, 10000)
 
 	test("semplice domanda con call subagent", async () => {
 
@@ -128,7 +130,7 @@ describe("Test on ROOM", () => {
 			})
 			room.addUserMessage(question, requestAgentId)
 			const response = await room.getResponse()
-			return { response, roomId: room.room.id }
+			return { response, roomId: room.room.id! }
 		}
 
 		room.addUserMessage("How much is 2+2? Just write the result.")
@@ -137,7 +139,7 @@ describe("Test on ROOM", () => {
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect(resp.content.result).toBe("4")
 
-	}, 100000)
+	}, 10000)
 
 	test("chiamata ricorsiva ", async () => {
 
@@ -150,7 +152,7 @@ describe("Test on ROOM", () => {
 		const agentMathRepo: AgentRepo = {
 			id: "id-agent-math",
 			name: "math",
-			description: "Agent who deals with mathematics",
+			description: "Agent who deals with mathematics. Never respond directly but use sub-agents to answer questions.",
 			subAgents: [agentAdderRepo],
 		}
 		const agentLeadRepo: AgentRepo = {
@@ -195,7 +197,7 @@ describe("Test on ROOM", () => {
 				// chiamo ricorsivamente la funzione
 				return {
 					response: await recursiveRequest(roomRepo, question),
-					roomId: roomRepo.id
+					roomId: roomRepo.id!
 				}
 			}
 
@@ -210,6 +212,6 @@ describe("Test on ROOM", () => {
 		expect(resp.content.result).toBe("4")
 		expect(agentTimeline).toEqual(["id-agent-lead", "id-agent-math", "id-agent-adder"])
 
-	}, 100000)
+	}, 10000)
 
 })

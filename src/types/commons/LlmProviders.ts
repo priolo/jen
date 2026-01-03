@@ -7,4 +7,7 @@ export enum LLM_MODELS {
 	GOOGLE_GEMMA_3_27B = "gemma-3-27b-it",
 	COHERE_COMMAND_R_PLUS = "command-r-plus",
 	OLLAMA_LLAMA_3_2_3B = "llama3.2:3b",
+	MINMAX_M2 = "openai-compatible",
+	GPT_4O_MINI = "gpt-4o-mini",
+	GROQ_GPT_OSS_20B = "groq-gpt-4o-mini",
 }

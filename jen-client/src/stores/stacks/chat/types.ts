@@ -6,9 +6,3 @@ export interface Chat {
 	clientsIds: string[]
 	rooms: ChatRoom[]
 }
-
-
-export function getRoomById( chat: Chat, roomId: string ): ChatRoom {
-	return chat.rooms?.find(r => r.id == roomId) ?? null
-}
-

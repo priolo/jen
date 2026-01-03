@@ -1,10 +1,10 @@
+import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
 import { RoomRepo } from "../../repository/Room.js";
 import ChatContext from "../../services/rooms/ChatContext.js";
-import { BaseS2C, CHAT_ACTION_S2C, ChatMessage, ClientEnteredS2C, RoomMessageS2C, RoomNewS2C, ChatInfoS2C, MessageUpdate, RoomAgentsUpdateS2C, UPDATE_TYPE, RoomHistoryUpdateS2C } from "../../types/commons/RoomActions.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
+import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomMessageS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
 import RoomTurnBased from "./RoomTurnBased.js";
-import { th } from "zod/v4/locales";
 
 
 /**
@@ -48,6 +48,23 @@ class ChatNode {
 		return chat
 	}
 
+	/**
+	 * Crea una MAIN-ROOM con gli AGENTs specificatiù
+	 */
+	static async BuildRoom(node: ChatContext, agentsIds: string[] = []): Promise<RoomTurnBased> {
+		// carico gli agenti REPO
+		const agentsRepo: AgentRepo[] = []
+		for (const agentId of agentsIds) {
+			const agentRepo = await node.getAgentRepoById(agentId)
+			if (agentRepo) agentsRepo.push(agentRepo)
+		}
+		// creo una nuova MAIN-ROOM
+		const roomRepo = await node.createRoomRepo(agentsRepo, null)
+		const room = new RoomTurnBased(roomRepo)
+		return room
+	}
+
+
 
 	/**
 	 * comunico alla CHAT che il CLIENT è entrato
@@ -88,17 +105,45 @@ class ChatNode {
 		return this.clientsIds.size == 0
 	}
 
-	/** DA ELIMINARE
+	/** 
 	 * MESSAGE di tipo USER è stato inserito in una ROOM della CHAT
 	 * con clientId=null è GENERIC-USER
 	 * con roomId=null  è la MAIN-ROOM
 	 */
-	addUserMessage(text: string, clientId?: string, roomId?: string): void {
+	private addUserMessage(text: string, clientId?: string, roomId?: string): void {
 		// inserisco il messaggio nella history
 		const room: RoomTurnBased = this.getRoomById(roomId) ?? this.getMainRoom()
-		const chatMessage = room.addUserMessage(text, clientId)
+		const msg: ChatMessage = {
+			id: randomUUID(),
+			clientId: clientId,
+			role: "user",
+			content: text,
+		}
+		room.updateHistory({
+			type: UPDATE_TYPE.APPEND,
+			content: msg,
+		})
 		// e lo invio a tutti i partecipanti alla chat
-		this.sendChatMessage(chatMessage, room.room.id)
+		this.sendChatMessage(msg, room.room.id)
+	}
+
+	/** 
+	 * aggiorno la HISTORY con una serie di MessageUpdate 
+	 */
+	updateHistory(updates: MessageUpdate[], roomId?: string): void {
+		const room = this.getRoomById(roomId) ?? this.getMainRoom()
+		if (!room) throw new Error("Room not found")
+
+		room.updateHistory(updates);
+
+		// avviso tutti i partecipanti
+		const msg: RoomHistoryUpdateS2C = {
+			action: CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE,
+			chatId: this.id,
+			roomId: room.room.id,
+			updates: updates,
+		}
+		this.sendMessage(msg)
 	}
 
 	/**
@@ -134,44 +179,7 @@ class ChatNode {
 		this.sendMessage(msg)
 	}
 
-	updateHistory(updates: MessageUpdate[], roomId?: string): void {
-		const room = this.getRoomById(roomId) ?? this.getMainRoom()
-		if (!room) throw new Error("Room not found")
 
-		// [II] va fatta nella ROOM la gestione degli aggiornamenti
-		const history = [...room.room.history]
-		for (const update of updates) {
-			const index = history.findIndex(m => m.id == update.refId)
-			switch (update.type) {
-				case UPDATE_TYPE.ADD: {
-					if (index == -1) {
-						history.unshift(update.content)
-					} else {
-						history.splice(index + 1, 0, update.content)
-					}
-					break
-				}
-				case UPDATE_TYPE.DELETE: {
-					if (index != -1) history.splice(index, 1)
-					break
-				}
-				case UPDATE_TYPE.REPLACE: {
-					if (index != -1) history[index] = update.content
-					break
-				}
-			}
-		}
-		room.room.history = history
-
-		// avviso tutti i partecipanti
-		const msg: RoomHistoryUpdateS2C = {
-			action: CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE,
-			chatId: this.id,
-			roomId: room.room.id,
-			updates: updates,
-		}
-		this.sendMessage(msg)
-	}
 
 	//#endregion
 

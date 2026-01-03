@@ -6,7 +6,7 @@ import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, 
 import { utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
 import { buildRoomDetail } from "../room/factory"
-import { Chat, getRoomById } from "./types"
+import { Chat } from "./types"
 
 
 
@@ -25,7 +25,7 @@ const setup = {
 		getRoomById(id: string, store?: ChatStore) {
 			if (!id) return null
 			for (const chat of store.state.all) {
-				const room = getRoomById(chat, id)
+				const room = chat.rooms?.find(r => r.id == id) ?? null
 				if (room) return room
 			}
 		}
@@ -37,8 +37,9 @@ const setup = {
 
 		/**
 		 * Create and enter in a CHAT
+		 * response CHAT_INFO
 		 */
-		createChat: (agentId: string, store?: ChatStore) => {
+		createChat: (agentId?: string, store?: ChatStore) => {
 			const msgSend: ChatCreateC2S = {
 				action: CHAT_ACTION_C2S.CHAT_CREATE,
 				agentIds: agentId ? [agentId] : [],

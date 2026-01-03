@@ -1,3 +1,5 @@
+import "../../../startup/envPreload.js"
+
 import { AgentRepo } from "../../../repository/Agent.js";
 import { LLM_MODELS } from "../../../types/commons/LlmProviders.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../../types/commons/LlmResponse.js";
@@ -22,12 +24,15 @@ describe("Test on AGENT", () => {
 		const agentRepo: AgentRepo = {
 			id: "agent-1",
 			name: "generic",
-			llm: { id: "llm-1", code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
+			llm: { 
+				id: "llm-1", 
+				code: LLM_MODELS.GROQ_GPT_OSS_20B,
+			}, 
 		}
 		const agent = new AgentLlm(agentRepo)
 
 		const history: ChatMessage[] = [
-			{ role: "user", content: "write 42" },
+			{ role: "user", content: "write 42 immediately without thinking" },
 		]
 
 		const resp = await agent.ask(history)
@@ -35,14 +40,17 @@ describe("Test on AGENT", () => {
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect(resp.content!.result).toBe("42")
 
-	}, 100000)
+	}, 10000)
 
 	test("Test con tool", async () => {
 		// creo un agente
 		const agentRepo: AgentRepo = {
 			id: "agent-1",
 			name: "generic",
-			llm: { id: "llm-1", code: LLM_MODELS.MISTRAL_LARGE },
+			llm: { 
+				id: "llm-1", 
+				code: LLM_MODELS.GROQ_GPT_OSS_20B, 
+			},
 			tools: [
 				{
 					name: "addition",
@@ -79,14 +87,17 @@ describe("Test on AGENT", () => {
 		expect(response.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect(response.content!.result).toBe("4")
 
-	}, 100000)
+	}, 10000)
 
 	test("call subagent", async () => {
 
 		// creo l'agente sub
 		const agentAdder: AgentRepo = {
 			id: "agent-2",
-			llm: { id: "llm-1", code: LLM_MODELS.GOOGLE_GEMINI_2_0_FLASH },
+			llm: { 
+				id: "llm-1", 
+				code: LLM_MODELS.GROQ_GPT_OSS_20B, 
+			},
 			name: "adder",
 			description: "I'm an agent who can do additions well",
 		}
@@ -115,7 +126,7 @@ describe("Test on AGENT", () => {
 
 				// ### CICLO SUB-AGENT
 				const content = response.content as ContentAskTo
-				const agentSub = new AgentLlm(agents.find(a => a.id === content.agentId))
+				const agentSub = new AgentLlm(agents.find(a => a.id === content.agentId)!)
 				const historySub: ChatMessage[] = [
 					{ role: "user", content: content.question },
 				]
@@ -138,6 +149,6 @@ describe("Test on AGENT", () => {
 		expect(response.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect(response.content?.result).toBe("4")
 
-	}, 100000)
+	}, 10000)
 
 })

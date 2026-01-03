@@ -40,6 +40,8 @@ export type MessageUpdate = {
 export enum UPDATE_TYPE {
 	/** inserisce un nuovo messaggio DOPO messageIdRef (=null all'inizio)*/
 	ADD = "add",
+	/** inserisce un nuovo messaggio alla fine (messageIdRef è ignorato) */
+	APPEND = "append",
 	/** sostituisce il contenuto del messaggio */
 	REPLACE = "replace",
 	/** elimina il messaggio messageIdRef */

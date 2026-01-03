@@ -132,8 +132,11 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		const userId = client?.jwtPayload?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
-		const room = await RoomTurnBased.Build(this, msg.agentIds)
+		// creo chat e room
+		const room = await ChatNode.BuildRoom(this, msg.agentIds)
 		const chat = await ChatNode.Build(this, room)
+		
+		// salvo la chat e faccio entrare il client
 		this.chats.push(chat)
 		chat.enterClient(userId)
 	}

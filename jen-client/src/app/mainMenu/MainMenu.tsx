@@ -58,6 +58,10 @@ const MainMenu: FunctionComponent<Props> = ({
 		deckCardsSo.add({ view, anim: true })
 	}
 
+	const handleChat = () => {
+		chatSo.createChat()
+	}
+
 
 
 
@@ -122,6 +126,7 @@ const MainMenu: FunctionComponent<Props> = ({
 		<Button children="LLM" onClick={handleLlmList} />
 		<Button children="MCP" onClick={handleMcpServerList} />
 		<Button children="TOOLS" onClick={handleToolList} />
+		<Button children="CHAT" onClick={handleChat} />
 
 		{/* <Button children="ROOM" onClick={handleRoom} /> */}
 		<div>*{chatSo.state.online ? "ON" : "OFF"}*</div>
