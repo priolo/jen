@@ -124,6 +124,10 @@ export class SocketService {
 
 	/**
 	 * Sends a message and waits for a specific response that matches the callback condition.
+	 * @param msg The message to send.
+	 * @param callback A function that takes the received data and returns true if it matches the expected response.
+	 * @param timeout Optional timeout in milliseconds to wait for the response (default is 5000ms).
+	 * @returns A promise that resolves with the received data when the callback condition is met, or rejects on timeout.
 	 */
 	async sendAndWait(msg: string, callback: (data: any) => boolean, timeout: number = 5000): Promise<any> {
 		return new Promise<MessageEvent>((resolve, reject) => {

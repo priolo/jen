@@ -7,6 +7,7 @@ import { utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
 import { buildRoomDetail } from "../room/factory"
 import { Chat } from "./types"
+import { createUUID } from "@/stores/docs/utils/factory"
 
 
 
@@ -39,18 +40,39 @@ const setup = {
 		 * Create and enter in a CHAT
 		 * response CHAT_INFO
 		 */
-		createChat: (agentId?: string, store?: ChatStore) => {
+		createChat: async (agentId?: string, store?: ChatStore) => {
+			const chatId = createUUID()
 			const msgSend: ChatCreateC2S = {
+				chatId,
 				action: CHAT_ACTION_C2S.CHAT_CREATE,
 				agentIds: agentId ? [agentId] : [],
 			}
-			wsConnection.send(JSON.stringify(msgSend))
+
+			//wsConnection.send(JSON.stringify(msgSend))
+
+			const responseStr = await wsConnection.sendAndWait(
+				JSON.stringify(msgSend),
+				data => {
+					if ( !data ) return false
+					const msg = JSON.parse(data) as ChatInfoS2C
+					return msg.action == CHAT_ACTION_S2C.CHAT_INFO && msg.chatId == chatId
+				}
+			)
+			const msg: ChatInfoS2C = JSON.parse(responseStr)
+
+			// creo e apro una CARD per la gestione della ROOM
+			const view = buildRoomDetail({
+				chatId: msg.chatId,
+				roomId: msg.rooms[0]?.id,
+			})
+			deckCardsSo.add({ view, anim: true })
 		},
 
 		/** 
-		 * recupera i dati di una CHAT ramite l'id di una ROOM 
+		 * recupera i dati di una CHAT tramite l'id di una ROOM 
 		 */
 		fetchChatByRoomId: (roomId: string, store?: ChatStore) => {
+			// se non c'e' in locale la chiedo al server
 			const room = chatSo.getRoomById(roomId)
 			if (room) return
 			const msgSend: ChatGetByRoomC2S = {
@@ -148,14 +170,6 @@ const setup = {
 					} else {
 						store.setAll([...store.state.all, chat])
 					}
-
-					// creo e apro una CARD per la gestione della ROOM
-					// const view = buildRoomDetail({
-					// 	chatId: chat.id,
-					// 	roomId: chat.rooms[0]?.id,
-					// })
-					// deckCardsSo.add({ view, anim: true })
-
 					break
 				}
 

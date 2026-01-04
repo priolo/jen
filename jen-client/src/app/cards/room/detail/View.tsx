@@ -44,6 +44,9 @@ const RoomView: FunctionComponent<Props> = ({
 
 	// RENDER
 	useEffect(() => {
+		if ( !store.state.roomId ) {
+			chatSo.createChat()
+		}
 		chatSo.fetchChatByRoomId(store.state.roomId)
 	}, [store.state.roomId])
 

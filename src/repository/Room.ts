@@ -15,6 +15,10 @@ export class RoomRepo extends AccountAssets {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
+    /** ID of the chat this room belongs to */
+    @Column({ type: 'uuid' })
+    chatId?: string;    
+
     /** History of prompt conversation */
     @Column({ type: 'json', default: '[]' })
     history?: ChatMessage[] = [];
@@ -40,13 +44,9 @@ export class RoomRepo extends AccountAssets {
     @Column({ type: 'uuid', nullable: true })
     parentRoomId?: string | null;
 
-    /** ID of the chat this room belongs to */
-    @Column({ type: 'uuid' })
-    chatId?: string | null;
-
     //#endregion
 
 
-    
+
 
 }

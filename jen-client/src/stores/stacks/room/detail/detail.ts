@@ -39,6 +39,7 @@ What is 2+2? Just write the answer number.`,
 			const state = store.state as RoomDetailState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
+				chatId: state.chatId,
 				roomId: state.roomId,
 			}
 		},
@@ -57,6 +58,7 @@ What is 2+2? Just write the answer number.`,
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
 			const state = store.state as RoomDetailState
+			state.chatId = data.chatId
 			state.roomId = data.roomId
 		},
 		/** chiamata quando la CARD è stata costruita (vedere la build) */
