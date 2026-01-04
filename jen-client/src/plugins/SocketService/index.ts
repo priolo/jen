@@ -122,6 +122,9 @@ export class SocketService {
 		})
 	}
 
+	/**
+	 * Sends a message and waits for a specific response that matches the callback condition.
+	 */
 	async sendAndWait(msg: string, callback: (data: any) => boolean, timeout: number = 5000): Promise<any> {
 		return new Promise<MessageEvent>((resolve, reject) => {
 

@@ -2,7 +2,7 @@ import { wsConnection } from "@/plugins/session/wsConnection"
 import { SS_EVENT } from "@/plugins/SocketService/types"
 import { deckCardsSo, GetAllCards } from "@/stores/docs/cards"
 import { DOC_TYPE } from "@/types"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, ClientEnteredS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomMessageS2C, RoomNewS2C, UPDATE_TYPE, UserLeaveC2S } from "@/types/commons/RoomActions"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoomC2S, ChatInfoS2C, ClientEnteredS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomMessageS2C, RoomNewS2C, UPDATE_TYPE, UserLeaveC2S } from "@/types/commons/RoomActions"
 import { utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
 import { buildRoomDetail } from "../room/factory"
@@ -43,6 +43,19 @@ const setup = {
 			const msgSend: ChatCreateC2S = {
 				action: CHAT_ACTION_C2S.CHAT_CREATE,
 				agentIds: agentId ? [agentId] : [],
+			}
+			wsConnection.send(JSON.stringify(msgSend))
+		},
+
+		/** 
+		 * recupera i dati di una CHAT ramite l'id di una ROOM 
+		 */
+		fetchChatByRoomId: (roomId: string, store?: ChatStore) => {
+			const room = chatSo.getRoomById(roomId)
+			if (room) return
+			const msgSend: ChatGetByRoomC2S = {
+				action: CHAT_ACTION_C2S.CHAT_GET_BY_ROOM,
+				roomId: roomId,
 			}
 			wsConnection.send(JSON.stringify(msgSend))
 		},
@@ -118,8 +131,8 @@ const setup = {
 			switch (message.action) {
 
 				/**
-				 * fornsce le info di una CHAT
-				 * tipicamente risposnta di CHAT_CREATE
+				 * arrivate le INFO di una CHAT
+				 * le integro nella store
 				 */
 				case CHAT_ACTION_S2C.CHAT_INFO: {
 					const msg: ChatInfoS2C = JSON.parse(data.payload)
@@ -137,15 +150,16 @@ const setup = {
 					}
 
 					// creo e apro una CARD per la gestione della ROOM
-					const view = buildRoomDetail({
-						chatId: chat.id,
-						roomId: chat.rooms[0]?.id,
-					})
-					deckCardsSo.add({ view, anim: true })
+					// const view = buildRoomDetail({
+					// 	chatId: chat.id,
+					// 	roomId: chat.rooms[0]?.id,
+					// })
+					// deckCardsSo.add({ view, anim: true })
 
 					break
 				}
 
+				
 				case CHAT_ACTION_S2C.CLIENT_ENTERED: {
 					const msg = message as ClientEnteredS2C
 					//*** */
@@ -190,6 +204,7 @@ const setup = {
 					break
 				}
 
+				/** [II] DA ELIMINARE */
 				case CHAT_ACTION_S2C.ROOM_MESSAGE: {
 					const msg: RoomMessageS2C = message as RoomMessageS2C
 					const room = store.getRoomById(msg.roomId)
@@ -237,6 +252,10 @@ export type ChatState = typeof setup.state
 export type ChatGetters = typeof setup.getters
 export type ChatActions = typeof setup.actions
 export type ChatMutators = typeof setup.mutators
+
+/**
+ * Si occupa di mentenere i dati delle CHAT sul client comunicando con il server via WEBSOCKET
+ */
 export interface ChatStore extends StoreCore<ChatState>, ChatGetters, ChatActions, ChatMutators {
 	state: ChatState
 }

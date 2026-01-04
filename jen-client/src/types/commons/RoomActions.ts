@@ -40,6 +40,8 @@ export type MessageUpdate = {
 export enum UPDATE_TYPE {
 	/** inserisce un nuovo messaggio DOPO messageIdRef (=null all'inizio)*/
 	ADD = "add",
+	/** inserisce un nuovo messaggio alla fine (messageIdRef è ignorato) */
+	APPEND = "append",
 	/** sostituisce il contenuto del messaggio */
 	REPLACE = "replace",
 	/** elimina il messaggio messageIdRef */
@@ -51,8 +53,10 @@ export enum UPDATE_TYPE {
 //#region CLIENT TO SERVER
 
 export enum CHAT_ACTION_C2S {
-	/* un USER crea una CHAT */
+	/* un USER crea una CHAT ed entra*/
 	CHAT_CREATE = "chat-create",
+	/** cerca/carica una CHAT tramite una ROOM ed entra */
+	CHAT_GET_BY_ROOM = "chat-get-by-room",
 
 	/** USER entra in CHAT */
 	USER_ENTER = "user-enter",
@@ -79,14 +83,37 @@ export type BaseC2S = {
 	chatId: string
 }
 
-/** CLIENT crea una nuova CHAT */
+/** 
+ * CLIENT cerca/crea una CHAT trmite l'id di una ROOM esistente
+ * - se la ROOM esiste in una CHAT, restituisce la CHAT
+ * - altrimenti crea una nuova CHAT con la ROOM specificata
+ * - restituisce i dati della CHAT [ChatInfoS2C]
+ */
+export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
+	action: CHAT_ACTION_C2S.CHAT_GET_BY_ROOM
+	/** id della ROOM da cercare nelle CHATs */
+	roomId: string
+}
+
+
+/** 
+ * CLIENT crea una nuova CHAT 
+ * - eventualmente inserisce degli AGENTS nella MAIN ROOM
+ * - inserisce l'user nella CHAT
+ * - restituisce i dati della CHAT creata [ChatInfoS2C]
+ */
 export type ChatCreateC2S = Omit<BaseC2S, "chatId"> & {
 	action: CHAT_ACTION_C2S.CHAT_CREATE
 	/** OPZIONALE. I primi agenti da inserire nella ROOM  */
 	agentIds?: string[]
 }
 
-/** CLIENT entra in una CHAT */
+/** 
+ * CLIENT entra in una CHAT gia' esistente
+ * - inserisce lo USER in CHAT
+ * - avverto tuti gli altri USER della CHAT
+ * - restituisce i dati della CHAT [ChatInfoS2C]
+ */
 export type UserEnterC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.USER_ENTER
 }
@@ -164,7 +191,12 @@ export type BaseS2C = {
 
 //#region CLIENT
 
-/** Invia ad un CLIENT i dati di una CHAT */
+/** 
+ * Invia ad un CLIENT i dati di una CHAT 
+ * tipicamente su
+ * CHAT_ACTION_C2S.CHAT_CREATE
+ * CHAT_ACTION_C2S.USER_ENTER
+ * */
 export type ChatInfoS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CHAT_INFO
 	/** lista dei CLIENTs presenti */

@@ -53,12 +53,12 @@ export enum UPDATE_TYPE {
 //#region CLIENT TO SERVER
 
 export enum CHAT_ACTION_C2S {
-	/* un USER crea una CHAT */
+	/** un USER crea una CHAT e ci entra*/
 	CHAT_CREATE = "chat-create",
-	/** restituisce una CHAT tramite l'id di una ROOM */
+	/** un USER cerca/carica una CHAT tramite una ROOM ed entra */
 	CHAT_GET_BY_ROOM = "chat-get-by-room",
 
-	/** USER entra in CHAT */
+	/** [II] da eliminare --- USER entra in CHAT */
 	USER_ENTER = "user-enter",
 	/* USER lascia la CHAT */
 	USER_LEAVE = "user-leave",
@@ -71,7 +71,7 @@ export enum CHAT_ACTION_C2S {
 	ROOM_HISTORY_UPDATE = "room-history-update",
 
 
-	/* [DA ELIMINARE] USER invia un messaggio in una ROOM della CHAT*/
+	/* [II][DA ELIMINARE] USER invia un messaggio in una ROOM della CHAT*/
 	USER_MESSAGE = "user-message",
 
 }
@@ -86,7 +86,7 @@ export type BaseC2S = {
 /** 
  * CLIENT cerca/crea una CHAT trmite l'id di una ROOM esistente
  * - se la ROOM esiste in una CHAT, restituisce la CHAT
- * - altrimenti crea una nuova CHAT con la ROOM specificata
+ * - inserisce l'user nella CHAT
  * - restituisce i dati della CHAT [ChatInfoS2C]
  */
 export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
@@ -102,7 +102,7 @@ export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
  * - inserisce l'user nella CHAT
  * - restituisce i dati della CHAT creata [ChatInfoS2C]
  */
-export type ChatCreateC2S = Omit<BaseC2S, "chatId"> & {
+export type ChatCreateC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.CHAT_CREATE
 	/** OPZIONALE. I primi agenti da inserire nella ROOM  */
 	agentIds?: string[]
@@ -164,7 +164,7 @@ export type RoomHistoryUpdateC2S = BaseC2S & {
 
 export enum CHAT_ACTION_S2C {
 
-	/** I dati della CHAT */
+	/** I dati di una CHAT */
 	CHAT_INFO = "chat-info",
 	/** un CLIENT è entrato in CHAT. Potrebbe essere anche un AGENT*/
 	CLIENT_ENTERED = "entered",

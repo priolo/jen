@@ -30,7 +30,9 @@ What is 2+2? Just write the answer number.`,
 	},
 
 	getters: {
+
 		//#region VIEWBASE
+
 		getTitle: (_: void, store?: ViewStore) => "ROOM",
 		getSubTitle: (_: void, store?: ViewStore) => "room detail",
 		getSerialization: (_: void, store?: ViewStore) => {
@@ -40,7 +42,9 @@ What is 2+2? Just write the answer number.`,
 				roomId: state.roomId,
 			}
 		},
+
 		//#endregion
+
 
 		getAgentsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.AGENT_LIST,
 		getRoomDetailOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_DETAIL,
@@ -49,6 +53,7 @@ What is 2+2? Just write the answer number.`,
 	actions: {
 
 		//#region VIEWBASE
+
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
 			const state = store.state as RoomDetailState
@@ -64,6 +69,7 @@ What is 2+2? Just write the answer number.`,
 		// },
 
 		//#endregion
+
 
 		/** invio un messaggio scritto dall'utente */
 		sendPrompt: async (_: void, store?: RoomDetailStore) => {

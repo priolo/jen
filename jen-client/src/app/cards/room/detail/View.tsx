@@ -5,7 +5,7 @@ import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { AgentLlm } from "@/types/Agent"
 import { Accordion, FloatButton, List, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { FunctionComponent, useMemo } from "react"
+import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
@@ -43,6 +43,10 @@ const RoomView: FunctionComponent<Props> = ({
 
 
 	// RENDER
+	useEffect(() => {
+		chatSo.fetchChatByRoomId(store.state.roomId)
+	}, [store.state.roomId])
+
 	/** la ROOM rappresentata  */
 	const { room, agents, history } = useMemo(()=>{
 		const room = chatSo.getRoomById(store.state.roomId)
@@ -52,6 +56,8 @@ const RoomView: FunctionComponent<Props> = ({
 	}, [store.state.roomId])
 	
 	const agentRef = agentSo.state.all.find((a: AgentLlm) => a.id === room?.agentsIds[0])
+
+
 
 	return <FrameworkCard
 		className={clsCard.root}

@@ -1,19 +1,18 @@
-import { McpTool } from "../services/mcp/types.js"
-import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
-import ChatNode from "../services/rooms/ChatNode.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { TypeLog } from "@priolo/julian/dist/core/types.js"
 import { randomUUID } from "crypto"
+import { FindManyOptions } from "typeorm"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoomC2S, ChatInfoS2C, RoomAgentsUpdateC2S, RoomCompleteC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S, UPDATE_TYPE } from "../types/commons/RoomActions.js"
-import AgentRoute from "./AgentRoute.js"
+import { McpTool } from "../services/mcp/types.js"
+import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
 import ChatContext from "../services/rooms/ChatContext.js"
-import McpServerRoute from "./McpServerRoute.js"
+import ChatNode from "../services/rooms/ChatNode.js"
 import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
-import { log } from "console"
-import { FindManyOptions } from "typeorm"
+import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserEnterC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
+import AgentRoute from "./AgentRoute.js"
+import McpServerRoute from "./McpServerRoute.js"
 
 
 
@@ -142,6 +141,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		// creo chat e room
 		const room = await ChatNode.BuildRoom(this, msg.agentIds)
 		const chat = await ChatNode.Build(this, [room])
+		chat.id = msg.chatId
 
 		// salvo la chat e faccio entrare il client
 		this.chats.push(chat)
