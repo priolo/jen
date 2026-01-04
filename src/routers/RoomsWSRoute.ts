@@ -7,12 +7,13 @@ import { randomUUID } from "crypto"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatInfoS2C, RoomAgentsUpdateC2S, RoomCompleteC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S, UPDATE_TYPE } from "../types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoomC2S, ChatInfoS2C, RoomAgentsUpdateC2S, RoomCompleteC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S, UserMessageC2S, UPDATE_TYPE } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import ChatContext from "../services/rooms/ChatContext.js"
 import McpServerRoute from "./McpServerRoute.js"
 import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
 import { log } from "console"
+import { FindManyOptions } from "typeorm"
 
 
 
@@ -51,11 +52,11 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	/**
 	 * Handle client disconnection
 	 */
-	onDisconnect(client: ws.IClient) {
+	async onDisconnect(client: ws.IClient) {
 		// rimuovo il client da tutte le CHATs
 		const chats = [...this.chats]
 		for (const chat of chats) {
-			this.handleUserLeave(
+			await this.handleUserLeave(
 				client,
 				{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
 			)
@@ -81,6 +82,12 @@ export class WSRoomsService extends ws.route implements ChatContext {
 			await this.handleChatCreate(client, msg as ChatCreateC2S)
 			return
 		}
+
+		if (msg.action === CHAT_ACTION_C2S.CHAT_GET_BY_ROOM) {
+			await this.handleChatGetByRoom(client, msg as ChatGetByRoomC2S)
+			return
+		}
+
 
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
@@ -134,10 +141,44 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 		// creo chat e room
 		const room = await ChatNode.BuildRoom(this, msg.agentIds)
-		const chat = await ChatNode.Build(this, room)
-		
+		const chat = await ChatNode.Build(this, [room])
+
 		// salvo la chat e faccio entrare il client
 		this.chats.push(chat)
+		chat.enterClient(userId)
+	}
+
+	/**
+	 * Ottiene dalle CHAT esistenti quella che contiene la ROOM specificata
+	 * Eventualmente carica i dati dal DB se la ROOM non è in memoria
+	 */
+	private async handleChatGetByRoom(client: ws.IClient, msg: ChatGetByRoomC2S) {
+		const userId = client?.jwtPayload?.id
+		if (!userId) throw new Error(`Invalid userId`)
+
+		let chat = this.getChatByRoomId(msg.roomId)
+
+		// non la trovo in memoria quindi carico tutta la CHAT dal DB
+		if (!chat) {
+
+			// Carico la ROOM richiesta
+			const roomRepo: RoomRepo = await new Bus(this, this.state.room_repo).dispatch({
+				type: typeorm.Actions.GET_BY_ID,
+				payload: msg.roomId
+			})
+			if (!roomRepo || !roomRepo.chatId) throw new Error(`Room not found: ${msg.roomId}`)
+			// carico tutte le ROOMs di quella CHAT
+			const roomsRepo: RoomRepo[] = await new Bus(this, this.state.room_repo).dispatch({
+				type: typeorm.Actions.FIND,
+				payload: <FindManyOptions<RoomRepo>>{ chatId: roomRepo.chatId }
+			})
+
+			// Creo la CHAT con le ROOMs caricate
+			const rooms = roomsRepo.map(repo => new RoomTurnBased(repo));
+			chat = await ChatNode.Build(this, rooms);
+			this.chats.push(chat)
+		}
+
 		chat.enterClient(userId)
 	}
 
@@ -158,14 +199,14 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Avverte tutti i partecipanti
 	 * Se la CHAT è vuota la elimina
 	 */
-	private handleUserLeave(client: ws.IClient, msg: UserLeaveC2S) {
+	private async handleUserLeave(client: ws.IClient, msg: UserLeaveC2S) {
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 		const userId = client.jwtPayload?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
 		const isVoid = chat.removeClient(userId)
-		if (isVoid) this.removeChat(chat.id)
+		if (isVoid) await this.removeChat(chat.id)
 		this.log(`Client ${userId} left chat ${msg.chatId}`)
 	}
 
@@ -190,6 +231,10 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 	//#region ChatContext IMPLEMENTATION 
 
+	/**
+	 * Crea una RoomRepo (solo in memoria, non salvata su DB).
+	 * Le ROOM verranno salvate sul DB solo quando la CHAT viene eliminata (vedi saveRooms).
+	 */
 	public async createRoomRepo(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null> {
 		// per il momento non salvo in DB
 		// const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
@@ -213,7 +258,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Restitui un AGENT pronto per l'uso
 	 */
 	public async getAgentRepoById(agentId: string): Promise<AgentRepo> {
-		
+
 		// [II] non va bene! deve raggiungere il nodo con una path!
 		const agent: AgentRepo = await AgentRoute.GetById(agentId, this, this.state.agent_repo)
 
@@ -301,22 +346,48 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	//#region UTILS
 
 	/**
-	 * 
+	 * Restituisce la CHAT specificata
 	 */
 	private getChatById(chatId: string): ChatNode | undefined {
 		return this.chats.find(c => c.id === chatId)
 	}
 
 	/**
-	 * Quando un CLIENT lascia la chat se è vuota la rimuove
+	 * Restituisce la CHAT che contiene la ROOM specificata
 	 */
-	private removeChat(chatId: string): void {
+	private getChatByRoomId(roomId: string): ChatNode | undefined {
+		return this.chats.find(c => !!c.getRoomById(roomId))
+	}
+
+	/**
+	 * Quando un CLIENT lascia la chat se è vuota la rimuove
+	 * Prima di rimuovere, salva tutte le ROOM sul DB
+	 */
+	private async removeChat(chatId: string): Promise<void> {
 		const index = this.chats.findIndex(c => c.id === chatId)
 		if (index !== -1) {
-			this.chats.splice(index, 1)
-			this.log(`Chat removed: ${chatId}`)
+			const chat = this.chats[index];
+
+			// Salvo tutte le ROOM sul DB prima di eliminare la CHAT
+			for (const roomTourn of chat.rooms) {
+				const room = roomTourn.room
+
+				await new Bus(this, this.state.room_repo).dispatch({
+					type: typeorm.Actions.SAVE,
+					payload: <Partial<RoomRepo>>{
+						id: room.id,
+						history: room.history || [],
+						parentRoomId: room.parentRoomId,
+						// Gli agents devono essere già presenti nel DB, salvo solo gli id
+						agents: room.agents ?? [],
+					}
+				})
+			}
+
+			this.chats.splice(index, 1);
+			this.log(`Chat removed and rooms saved: ${chatId}`);
 		} else {
-			this.log(`Chat not found: ${chatId}`)
+			this.log(`Chat not found: ${chatId}`);
 		}
 	}
 

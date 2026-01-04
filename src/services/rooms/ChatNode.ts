@@ -29,7 +29,7 @@ class ChatNode {
 	/** 
 	 * le ROOM aperte in questa CHAT 
 	 */
-	private rooms: RoomTurnBased[]
+	public rooms: RoomTurnBased[]
 	/** 
 	 * gli ids dei CLIENTs-WS partecipanti 
 	 * cioe' che devono essere aggiornati
@@ -42,14 +42,14 @@ class ChatNode {
 	/**
 	 * Creo una nuova CHAT inserendo una MAIN-ROOM
 	 */
-	static async Build(node: ChatContext, room: RoomTurnBased): Promise<ChatNode> {
+	static async Build(node: ChatContext, rooms: RoomTurnBased[]): Promise<ChatNode> {
 		const chat = new ChatNode(node)
-		chat.rooms = [room]
+		chat.rooms = rooms
 		return chat
 	}
 
 	/**
-	 * Crea una MAIN-ROOM con gli AGENTs specificatiù
+	 * Crea una MAIN-ROOM con gli AGENTs specificati
 	 */
 	static async BuildRoom(node: ChatContext, agentsIds: string[] = []): Promise<RoomTurnBased> {
 		// carico gli agenti REPO
@@ -235,7 +235,8 @@ class ChatNode {
 	private getMainRoom(): RoomTurnBased {
 		return this.rooms.find(room => room.room.parentRoomId == null)
 	}
-	private getRoomById(id?: string): RoomTurnBased {
+	public getRoomById(id?: string): RoomTurnBased {
+		if (!id || !this.rooms) return null
 		return this.rooms.find(room => room.room.id == id)
 	}
 

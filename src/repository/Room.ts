@@ -1,14 +1,15 @@
-import { ChatMessage } from '../types/commons/RoomActions.js';
 import type { Relation } from 'typeorm';
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ChatMessage } from '../types/commons/RoomActions.js';
 import { AgentRepo } from './Agent.js';
+import { AccountAssets } from './AccountAssets.js';
 
 
 /**
  * E' uno spazio dotato di HISTORY dove i CLIENT possono comunicare
  */
 @Entity('rooms')
-export class RoomRepo {
+export class RoomRepo extends AccountAssets {
 
     /** Unique identifier for the room */
     @PrimaryGeneratedColumn("uuid")
@@ -36,8 +37,16 @@ export class RoomRepo {
     agents?: Relation<AgentRepo[]>;
 
     /** ID of the parent room, if this room is a sub-room */
+    @Column({ type: 'uuid', nullable: true })
     parentRoomId?: string | null;
 
+    /** ID of the chat this room belongs to */
+    @Column({ type: 'uuid' })
+    chatId?: string | null;
+
     //#endregion
+
+
+    
 
 }

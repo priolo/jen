@@ -23,7 +23,7 @@ class RoomRoute extends httpRouter.Service {
 
 	async getAll(req: Request, res: Response) {
 		const rooms = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.ALL
+			type: typeorm.Actions.ALL
 		})
 		res.json(rooms)
 	}
@@ -31,7 +31,7 @@ class RoomRoute extends httpRouter.Service {
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
 		const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.GET_BY_ID,
+			type: typeorm.Actions.GET_BY_ID,
 			payload: id
 		})
 		res.json(room)
@@ -40,7 +40,7 @@ class RoomRoute extends httpRouter.Service {
 	async create(req: Request, res: Response) {
 		const { room }: { room: RoomRepo } = req.body
 		const roomNew: RoomRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: room
 		})
 		res.json(roomNew)
@@ -49,7 +49,7 @@ class RoomRoute extends httpRouter.Service {
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
 		await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.DELETE,
+			type: typeorm.Actions.DELETE,
 			payload: id
 		})
 		res.json({ data: "ok" })
@@ -60,11 +60,12 @@ class RoomRoute extends httpRouter.Service {
 		const { room }: { room: RoomRepo } = req.body
 		if (!id || !room) return
 		const roomUp = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: room,
 		})
 		res.json(roomUp)
 	}
+
 }
 
 export default RoomRoute

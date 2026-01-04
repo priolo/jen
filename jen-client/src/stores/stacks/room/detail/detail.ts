@@ -2,6 +2,11 @@ import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { mixStores } from "@priolo/jon"
 import chatSo from "../../chat/repo"
 import { EditorState } from "../../editorBase"
+import { DOC_TYPE } from "@/types"
+import { buildAgentList } from "../../agent/factory"
+import { ChatMessage } from "@/types/commons/RoomActions"
+import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
+import { buildRoomDetail } from "../factory"
 
 
 
@@ -28,13 +33,27 @@ What is 2+2? Just write the answer number.`,
 		//#region VIEWBASE
 		getTitle: (_: void, store?: ViewStore) => "ROOM",
 		getSubTitle: (_: void, store?: ViewStore) => "room detail",
+		getSerialization: (_: void, store?: ViewStore) => {
+			const state = store.state as RoomDetailState
+			return {
+				...viewSetup.getters.getSerialization(null, store),
+				roomId: state.roomId,
+			}
+		},
 		//#endregion
+
+		getAgentsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.AGENT_LIST,
+		getRoomDetailOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_DETAIL,
 	},
 
 	actions: {
 
 		//#region VIEWBASE
-
+		setSerialization: (data: any, store?: ViewStore) => {
+			viewSetup.actions.setSerialization(data, store)
+			const state = store.state as RoomDetailState
+			state.roomId = data.roomId
+		},
 		/** chiamata quando la CARD è stata costruita (vedere la build) */
 		// onCreated: async (_: void, store?: ViewStore) => {
 		// },
@@ -48,15 +67,32 @@ What is 2+2? Just write the answer number.`,
 
 		/** invio un messaggio scritto dall'utente */
 		sendPrompt: async (_: void, store?: RoomDetailStore) => {
-			chatSo.addMessageToRoom({ 
-				chatId: store.state.chatId, 
-				roomId: store.state.roomId, 
-				text: store.state.prompt 
+			chatSo.addMessageToRoom({
+				chatId: store.state.chatId,
+				roomId: store.state.roomId,
+				text: store.state.prompt
 			})
 			// cancella la text
 			store.setPrompt("")
 		},
 
+		/** apertura della CARD LIST AGENNTS */
+		openAgents(_: void, store?: RoomDetailStore) {
+			const isOpen = store.getAgentsOpen()
+			const view = !isOpen ? buildAgentList() : null
+			store.state.group.addLink({ view, parent: store, anim: true })
+		},
+
+		openSubRoom(chatMessage: ChatMessage, store?: RoomDetailStore) {
+			const content: ContentAskTo = (chatMessage?.content as LlmResponse)?.content as ContentAskTo
+			if (!content) return
+			const isOpen = store.getRoomDetailOpen()
+			const view = !isOpen ? buildRoomDetail({
+				chatId: store.state.chatId,
+				roomId: content.roomId,
+			}) : null
+			store.state.group.addLink({ view, parent: store, anim: true })
+		},
 	},
 
 	mutators: {

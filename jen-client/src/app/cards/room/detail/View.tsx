@@ -3,9 +3,9 @@ import SendIcon from "@/icons/SendIcon"
 import agentSo from "@/stores/stacks/agent/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { AgentLlm } from "@/types/Agent"
-import { Accordion, FloatButton, TextInput, TitleAccordion } from "@priolo/jack"
+import { Accordion, FloatButton, List, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { FunctionComponent } from "react"
+import { FunctionComponent, useMemo } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
@@ -15,6 +15,8 @@ import chatSo from "@/stores/stacks/chat/repo"
 import { ChatMessage } from "@/types/commons/RoomActions"
 import { buildRoomDetail } from "@/stores/stacks/room/factory"
 import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
+import LinkButton from "@/components/buttons/LinkButton"
+import RowButton from "@/components/buttons/RowButton"
 
 
 
@@ -35,24 +37,20 @@ const RoomView: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleSendClick = () => {
-		store.sendPrompt()
-	}
-	const handleOpenSubroom = (chatMessage: ChatMessage) => {
-		const content:ContentAskTo = (chatMessage?.content as LlmResponse)?.content as ContentAskTo
-		if (!content) return
-
-		const view = buildRoomDetail({
-			chatId: store.state.chatId,
-			roomId: content.roomId,
-		})
-		store.state.group.addLink({ view, parent: store, anim: true })
-	}
+	const handleSendClick = () => store.sendPrompt()
+	const handleOpenSubroom = (chatMessage: ChatMessage) => store.openSubRoom(chatMessage)
+	const handleAgentsClick = () => store.openAgents()
 
 
 	// RENDER
-	const room = chatSo.getRoomById(store.state.roomId)
-	const history = room?.history ?? []
+	/** la ROOM rappresentata  */
+	const { room, agents, history } = useMemo(()=>{
+		const room = chatSo.getRoomById(store.state.roomId)
+		const agents = room?.agentsIds?.map( id=> agentSo.state.all.find(a=> a.id === id) ) ?? []
+		const history = room?.history ?? []
+		return { room, agents, history }
+	}, [store.state.roomId])
+	
 	const agentRef = agentSo.state.all.find((a: AgentLlm) => a.id === room?.agentsIds[0])
 
 	return <FrameworkCard
@@ -72,9 +70,11 @@ const RoomView: FunctionComponent<Props> = ({
 			<div className="jack-lbl-readonly">{room?.parentRoomId ?? "--"}</div>
 		</div>
 
-		<TitleAccordion title="AGENTS">
-			
-		</TitleAccordion>
+		<RowButton
+			icon={<EditorIcon />}
+			label="AGENTS"
+			onClick={handleAgentsClick}
+		/>
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
 			{history.map((chatMessage) => (

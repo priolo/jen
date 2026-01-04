@@ -15,18 +15,33 @@ const setup = {
 		width: 370,
 		widthMax: 1000,
 		//#endregion
+
+		noSelection: <boolean>false,
+		selectedIds: <string[]>[],
 	},
 
 	getters: {
 		//#region VIEWBASE
 		getTitle: (_: void, store?: ViewStore) => "AGENT",
 		getSubTitle: (_: void, store?: ViewStore) => "agent list",
+		getSerialization: (_: void, store?: ViewStore) => {
+			const state = store.state as AgentListState
+			return {
+				...viewSetup.getters.getSerialization(null, store),
+				selectedIds: state.selectedIds,
+			}
+		},
 		//#endregion
 	},
 
 	actions: {
 
 		//#region OVERRIDE VIEWBASE
+		setSerialization: (data: any, store?: ViewStore) => {
+			viewSetup.actions.setSerialization(data, store)
+			const state = store.state as AgentListState
+			state.selectedIds = data.selectedIds ?? []
+		},
 		//#endregion
 
 		//#region OVERRIDE LOADBASE
@@ -34,7 +49,7 @@ const setup = {
 		//#endregion
 
 		/** apro/chiudo la CARD del dettaglio */
-		select(agentId: string, store?: AgentListStore) {
+		openDetail(agentId: string, store?: AgentListStore) {
 			const detached = focusSo.state.shiftKey
 			const oldId = (store.state.linked as AgentDetailStore)?.state?.agent?.id
 			const newId = (agentId && oldId !== agentId) ? agentId : null
@@ -74,7 +89,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: AgentLlm[]) => ({ all }),
+		setSelectedIds: (selectedIds: string[]) => ({ selectedIds }),
 	},
 }
 
