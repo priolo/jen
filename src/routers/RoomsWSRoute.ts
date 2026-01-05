@@ -365,30 +365,26 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 */
 	private async removeChat(chatId: string): Promise<void> {
 		const index = this.chats.findIndex(c => c.id === chatId)
-		if (index !== -1) {
-			const chat = this.chats[index];
+		if (index == -1) throw new Error(`Chat not found: ${chatId}`)
 
-			// Salvo tutte le ROOM sul DB prima di eliminare la CHAT
-			for (const roomTourn of chat.rooms) {
-				const room = roomTourn.room
+		const chat = this.chats[index];
 
-				await new Bus(this, this.state.room_repo).dispatch({
-					type: typeorm.Actions.SAVE,
-					payload: <Partial<RoomRepo>>{
-						id: room.id,
-						history: room.history || [],
-						parentRoomId: room.parentRoomId,
-						// Gli agents devono essere già presenti nel DB, salvo solo gli id
-						agents: room.agents ?? [],
-					}
-				})
-			}
-
-			this.chats.splice(index, 1);
-			this.log(`Chat removed and rooms saved: ${chatId}`);
-		} else {
-			this.log(`Chat not found: ${chatId}`);
+		// Salvo tutte le ROOM sul DB prima di eliminare la CHAT
+		for (const roomTourn of chat.rooms) {
+			const room = roomTourn.room
+			await new Bus(this, this.state.room_repo).dispatch({
+				type: typeorm.Actions.SAVE,
+				payload: <Partial<RoomRepo>>{
+					chatId: chat.id,
+					id: room.id,
+					history: room.history || [],
+					parentRoomId: room.parentRoomId,
+					// Gli agents devono essere già presenti nel DB, salvo solo gli id
+					agents: room.agents ?? [],
+				}
+			})
 		}
+		this.chats.splice(index, 1);
 	}
 
 	//#endregion

@@ -6,6 +6,7 @@ import { buildAccountListCard } from "@/stores/stacks/account/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
 import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
+import chatSo from "@/stores/stacks/chat/repo"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
 import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
 import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
@@ -20,7 +21,6 @@ import { DOC_TYPE } from "../../types"
 import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import StoreButton from "./StoreButton"
-import chatSo from "@/stores/stacks/chat/repo"
 
 
 
@@ -59,7 +59,9 @@ const MainMenu: FunctionComponent<Props> = ({
 	}
 
 	const handleChat = () => {
-		chatSo.createChat()
+		//chatSo.createChat()
+		//const view = buildRoomDetail()
+		//deckCardsSo.add({ view, anim: true })
 	}
 
 

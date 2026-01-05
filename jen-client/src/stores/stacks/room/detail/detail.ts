@@ -1,11 +1,13 @@
+import { wsConnection } from "@/plugins/session/wsConnection"
+import { createUUID } from "@/stores/docs/utils/factory"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
+import { DOC_TYPE } from "@/types"
+import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
+import { CHAT_ACTION_C2S, ChatGetByRoomC2S, ChatMessage } from "@/types/commons/RoomActions"
 import { mixStores } from "@priolo/jon"
+import { buildAgentList } from "../../agent/factory"
 import chatSo from "../../chat/repo"
 import { EditorState } from "../../editorBase"
-import { DOC_TYPE } from "@/types"
-import { buildAgentList } from "../../agent/factory"
-import { ChatMessage } from "@/types/commons/RoomActions"
-import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
 import { buildRoomDetail } from "../factory"
 
 
@@ -18,6 +20,8 @@ const setup = {
 		chatId: <string>null,
 		// Id della ROOM. Settato in creazione
 		roomId: <string>null,
+
+		agentsIds: <string[]>[],
 
 		// prompt della textbox in basso
 		prompt: `Don't answer directly, but use the tools available to you.
@@ -65,12 +69,23 @@ What is 2+2? Just write the answer number.`,
 		// onCreated: async (_: void, store?: ViewStore) => {
 		// },
 
-		// onRemoval(_: void, store?: ViewStore) {
-		// 	const roomSo = store as RoomDetailStore
-		// 	chatSo.removeChat(roomSo.state.chatId)
-		// },
+		onRemoval(_: void, store?: ViewStore) {
+			const roomSo = store as RoomDetailStore
+			chatSo.removeChat(roomSo.state.chatId)
+		},
 
 		//#endregion
+
+		fetch: async (_: void, store?: RoomDetailStore) => {
+			// se esiste la room
+			if (store.state.roomId) {
+				chatSo.fetchChatByRoomId(store.state.roomId)
+				return
+			}
+			// altrimenti creo una nuova chat (e room)
+			if (!store.state.chatId) store.state.chatId = createUUID()
+			chatSo.createChat({ chatId: store.state.chatId, agentIds: store.state.agentsIds })
+		},
 
 
 		/** invio un messaggio scritto dall'utente */
@@ -105,6 +120,7 @@ What is 2+2? Just write the answer number.`,
 
 	mutators: {
 		setPrompt: (prompt: string) => ({ prompt }),
+		setRoomId: (roomId: string) => ({ roomId }),
 	},
 
 }

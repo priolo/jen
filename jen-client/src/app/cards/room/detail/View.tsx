@@ -1,9 +1,10 @@
+import RowButton from "@/components/buttons/RowButton"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
-import agentSo from "@/stores/stacks/agent/repo"
+import chatSo, { getMainRoom } from "@/stores/stacks/chat/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
-import { AgentLlm } from "@/types/Agent"
-import { Accordion, FloatButton, List, TextInput, TitleAccordion } from "@priolo/jack"
+import { ChatMessage } from "@/types/commons/RoomActions"
+import { FloatButton, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
@@ -11,12 +12,6 @@ import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import MessageCmp from "./history/MessageCmp"
 import RoleDialog from "./RoleDialog"
-import chatSo from "@/stores/stacks/chat/repo"
-import { ChatMessage } from "@/types/commons/RoomActions"
-import { buildRoomDetail } from "@/stores/stacks/room/factory"
-import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
-import LinkButton from "@/components/buttons/LinkButton"
-import RowButton from "@/components/buttons/RowButton"
 
 
 
@@ -28,6 +23,7 @@ const RoomView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
+	
 	// STORE
 	useStore(store)
 	useStore(chatSo)
@@ -44,24 +40,25 @@ const RoomView: FunctionComponent<Props> = ({
 
 	// RENDER
 	useEffect(() => {
-		if ( !store.state.roomId ) {
-			chatSo.createChat()
-		}
-		chatSo.fetchChatByRoomId(store.state.roomId)
-	}, [store.state.roomId])
+		store.fetch()
+	}, [])
+
+	useEffect(() => {
+		if ( !!store.state.roomId ) return
+		// se è una nuova ROOM allora la setto
+		const chat = chatSo.getChatById( store.state.chatId )
+		const room = getMainRoom( chat?.rooms )
+		store.setRoomId(room?.id)
+	}, [chatSo.state.all])
 
 	/** la ROOM rappresentata  */
-	const { room, agents, history } = useMemo(()=>{
+	const { room, history } = useMemo(()=>{
+		if ( !store.state.roomId ) return { room: null, agents: [], history: [] }
 		const room = chatSo.getRoomById(store.state.roomId)
-		const agents = room?.agentsIds?.map( id=> agentSo.state.all.find(a=> a.id === id) ) ?? []
 		const history = room?.history ?? []
-		return { room, agents, history }
+		return { room, history }
 	}, [store.state.roomId])
 	
-	const agentRef = agentSo.state.all.find((a: AgentLlm) => a.id === room?.agentsIds[0])
-
-
-
 	return <FrameworkCard
 		className={clsCard.root}
 		icon={<EditorIcon />}
@@ -71,8 +68,6 @@ const RoomView: FunctionComponent<Props> = ({
 	>
 
 		<div className="lyt-v">
-			<div className="jack-lbl-prop">AGENT</div>
-			<div className="jack-lbl-readonly">{agentRef?.name ?? "--"}</div>
 			<div className="jack-lbl-prop">ROOM ID</div>
 			<div className="jack-lbl-readonly">{room?.id ?? "--"}</div>
 			<div className="jack-lbl-prop">ROOM PARENT ID</div>

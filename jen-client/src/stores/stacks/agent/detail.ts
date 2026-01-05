@@ -8,6 +8,8 @@ import { buildEditorFromAgent } from "../agentEditor/factory"
 import chatSo from "../chat/repo"
 import { EditorState } from "../editorBase"
 import agentSo from "./repo"
+import { buildRoomDetail } from "../room/factory"
+import { deckCardsSo } from "@/stores/docs/cards"
 
 
 
@@ -86,7 +88,11 @@ const setup = {
 
 		/** apertura della CARD ROOM */
 		openChatRoom(_: void, store?: AgentDetailStore) {
-			chatSo.createChat(store.state.agent?.id)
+			//chatSo.createChat(store.state.agent?.id)
+			const view = buildRoomDetail({
+				agentsIds: [store.state.agent?.id],
+			})
+			deckCardsSo.add({ view, anim: true })
 		},
 
 		/** apertura della CARD EDITOR */

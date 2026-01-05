@@ -73,7 +73,7 @@ export enum CHAT_ACTION_C2S {
 
 
 	/* [II][DA ELIMINARE] USER invia un messaggio in una ROOM della CHAT*/
-	USER_MESSAGE = "user-message",
+	//USER_MESSAGE = "user-message",
 
 }
 
@@ -125,13 +125,13 @@ export type UserLeaveC2S = BaseC2S & {
 }
 
 /** inserisce un messaggio USER e chiede il COMPLETE */
-export type UserMessageC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.USER_MESSAGE
-	/** id della ROOM, se null è la MAIN-ROOM */
-	roomId?: string
-	/** il testo del messaggio */
-	text: string
-}
+// export type UserMessageC2S = BaseC2S & {
+// 	action: CHAT_ACTION_C2S.USER_MESSAGE
+// 	/** id della ROOM, se null è la MAIN-ROOM */
+// 	roomId?: string
+// 	/** il testo del messaggio */
+// 	text: string
+// }
 
 /** richiesta di completamento di una ROOM */
 export type RoomCompleteC2S = BaseC2S & {
@@ -181,7 +181,7 @@ export enum CHAT_ACTION_S2C {
 
 
 	/** [DA ELIMINARE] aggiunto MESSAGE in una ROOM della CHAT  */
-	ROOM_MESSAGE = "room-message",
+	//ROOM_MESSAGE = "room-message",
 }
 
 export type BaseS2C = {
@@ -227,13 +227,13 @@ export type ClientLeaveS2C = BaseS2C & {
 //#region  MESSAGE
 
 /** [DA ELIMINARE] è stato inserito un MESSAGE in ROOM  */
-export type RoomMessageS2C = BaseS2C & {
-	action: CHAT_ACTION_S2C.ROOM_MESSAGE
-	/** la stanza in cui è stato inserito */
-	roomId: string
-	/** il conenuto del messaggio */
-	content: ChatMessage
-}
+// export type RoomMessageS2C = BaseS2C & {
+// 	action: CHAT_ACTION_S2C.ROOM_MESSAGE
+// 	/** la stanza in cui è stato inserito */
+// 	roomId: string
+// 	/** il conenuto del messaggio */
+// 	content: ChatMessage
+// }
 
 //#endregion
 

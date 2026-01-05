@@ -251,6 +251,7 @@ class ChatNode {
 			chatId: this.id,
 			clientsIds: [...this.clientsIds],
 			rooms: this.rooms.map(r => ({
+				chatId: this.id,
 				id: r.room.id,
 				parentRoomId: r.room.parentRoomId,
 				history: r.room.history,
