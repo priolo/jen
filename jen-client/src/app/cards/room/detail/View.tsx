@@ -25,24 +25,18 @@ const RoomView: FunctionComponent<Props> = ({
 
 	
 	// STORE
+
 	useStore(store)
 	useStore(chatSo)
 
 
-	// HOOKs
+	// HOOKS
 
-
-	// HANDLER
-	const handleSendClick = () => store.sendPrompt()
-	const handleOpenSubroom = (chatMessage: ChatMessage) => store.openSubRoom(chatMessage)
-	const handleAgentsClick = () => store.openAgents()
-
-
-	// RENDER
 	useEffect(() => {
 		store.fetch()
 	}, [])
 
+	// eventualmente settoa la ROOM se non esiste
 	useEffect(() => {
 		if ( !!store.state.roomId ) return
 		// se è una nuova ROOM allora la setto
@@ -51,14 +45,24 @@ const RoomView: FunctionComponent<Props> = ({
 		store.setRoomId(room?.id)
 	}, [chatSo.state.all])
 
-	/** la ROOM rappresentata  */
+	/** recupero l'oggetto ROOM  */
 	const { room, history } = useMemo(()=>{
 		if ( !store.state.roomId ) return { room: null, agents: [], history: [] }
 		const room = chatSo.getRoomById(store.state.roomId)
 		const history = room?.history ?? []
 		return { room, history }
 	}, [store.state.roomId])
-	
+
+
+	// HANDLER
+
+	const handleSendClick = () => store.sendPrompt()
+	const handleOpenSubroom = (chatMessage: ChatMessage) => store.openSubRoom(chatMessage)
+	const handleAgentsClick = () => store.openAgents()
+
+
+	// RENDER
+
 	return <FrameworkCard
 		className={clsCard.root}
 		icon={<EditorIcon />}

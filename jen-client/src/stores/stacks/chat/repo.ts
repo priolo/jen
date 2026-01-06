@@ -130,7 +130,7 @@ const setup = {
 		/** 
 		 * Questo USER lascia una CHAT
 		*/
-		removeChat: async (chatId: string, store?: ChatStore) => {
+		leaveChat: async (chatId: string, store?: ChatStore) => {
 			const message: UserLeaveC2S = {
 				action: CHAT_ACTION_C2S.USER_LEAVE,
 				chatId: chatId,
@@ -139,6 +139,18 @@ const setup = {
 		},
 
 		//#endregion
+
+		/**
+		 * Chiamato quando una ROOM non è più visualizzata da nessuna CARD
+		 */
+		removeRoom: async ({ chatId, viewId }: { chatId: string, viewId?: string }, store?: ChatStore) => {
+			const rooms = utils.findAll(GetAllCards(), { type: DOC_TYPE.ROOM_DETAIL, chatId: chatId })
+			const activeRooms = rooms.filter((r: any) => r.state.uuid != viewId)
+			if (activeRooms.length > 0) return
+			store.leaveChat(chatId)
+			store.setAll(store.state.all.filter(c => c.id != chatId))
+		},
+
 
 		/**
 		 * HANDLE MESSAGE FROM SERVER

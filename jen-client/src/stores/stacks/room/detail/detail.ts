@@ -1,9 +1,8 @@
-import { wsConnection } from "@/plugins/session/wsConnection"
 import { createUUID } from "@/stores/docs/utils/factory"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE } from "@/types"
 import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
-import { CHAT_ACTION_C2S, ChatGetByRoomC2S, ChatMessage } from "@/types/commons/RoomActions"
+import { ChatMessage } from "@/types/commons/RoomActions"
 import { mixStores } from "@priolo/jon"
 import { buildAgentList } from "../../agent/factory"
 import chatSo from "../../chat/repo"
@@ -71,11 +70,12 @@ What is 2+2? Just write the answer number.`,
 
 		onRemoval(_: void, store?: ViewStore) {
 			const roomSo = store as RoomDetailStore
-			chatSo.removeChat(roomSo.state.chatId)
+			chatSo.removeRoom({ chatId: roomSo.state.chatId, viewId: roomSo.state.uuid })
 		},
 
 		//#endregion
 
+		/** chiamata sul MOUNTH del componente */
 		fetch: async (_: void, store?: RoomDetailStore) => {
 			// se esiste la room
 			if (store.state.roomId) {
