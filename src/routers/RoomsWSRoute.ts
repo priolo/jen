@@ -77,27 +77,30 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		if (!client || !message) return
 		let msg = JSON.parse(message)
 
-		if (msg.action === CHAT_ACTION_C2S.CHAT_CREATE) {
+
+		if (msg.action === CHAT_ACTION_C2S.CHAT_CREATE_AND_ENTER) {
 			await this.handleChatCreate(client, msg as ChatCreateC2S)
 			return
 		}
-
-		if (msg.action === CHAT_ACTION_C2S.CHAT_GET_BY_ROOM) {
-			await this.handleChatGetByRoom(client, msg as ChatGetByRoomC2S)
+		if (msg.action === CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER) {
+			await this.handleChatLoadByRoom(client, msg as ChatGetByRoomC2S)
 			return
 		}
 
-
+		// messaggi che necessitano di una CHAT esistente
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 
 		switch (msg.action) {
+
 			case CHAT_ACTION_C2S.USER_ENTER:
 				this.handleUserEnter(client, msg as UserEnterC2S)
 				break
+
 			case CHAT_ACTION_C2S.USER_LEAVE:
 				this.handleUserLeave(client, msg as UserLeaveC2S)
 				break
+
 			// case CHAT_ACTION_C2S.ROOM_COMPLETE:
 			// 	await this.handleRoomComplete(client, msg as RoomCompleteC2S)
 			// 	break
@@ -117,16 +120,10 @@ export class WSRoomsService extends ws.route implements ChatContext {
 				break
 			}
 
-			// case CHAT_ACTION_C2S.USER_MESSAGE:
-			// 	await this.handleUserMessage(client, msg as UserMessageC2S)
-			// 	break
-
 			default:
 				console.warn(`Unknown action: ${msg.action}`)
 				return
 		}
-
-		console.log(`WSPromptService.onMessage`, msg)
 	}
 
 	/**
@@ -144,15 +141,15 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		chat.id = msg.chatId
 
 		// salvo la chat e faccio entrare il client
-		this.chats.push(chat)
-		chat.enterClient(userId)
+		this.addChat(chat)
+		chat.addClient(userId)
 	}
 
 	/**
 	 * Ottiene dalle CHAT esistenti quella che contiene la ROOM specificata
 	 * Eventualmente carica i dati dal DB se la ROOM non è in memoria
 	 */
-	private async handleChatGetByRoom(client: ws.IClient, msg: ChatGetByRoomC2S) {
+	private async handleChatLoadByRoom(client: ws.IClient, msg: ChatGetByRoomC2S) {
 		const userId = client?.jwtPayload?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
@@ -167,6 +164,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 				payload: msg.roomId
 			})
 			if (!roomRepo || !roomRepo.chatId) throw new Error(`Room not found: ${msg.roomId}`)
+
 			// carico tutte le ROOMs di quella CHAT
 			const roomsRepo: RoomRepo[] = await new Bus(this, this.state.room_repo).dispatch({
 				type: typeorm.Actions.FIND,
@@ -176,10 +174,10 @@ export class WSRoomsService extends ws.route implements ChatContext {
 			// Creo la CHAT con le ROOMs caricate
 			const rooms = roomsRepo.map(repo => new RoomTurnBased(repo));
 			chat = await ChatNode.Build(this, rooms);
-			this.chats.push(chat)
+			this.addChat(chat)
 		}
 
-		chat.enterClient(userId)
+		chat.addClient(userId)
 	}
 
 	/**
@@ -190,8 +188,9 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	private async handleUserEnter(client: ws.IClient, msg: UserEnterC2S) {
 		const userId = client?.jwtPayload?.id
 		if (!userId) throw new Error(`Invalid userId`)
+			
 		const chat = this.getChatById(msg.chatId)
-		chat.enterClient(userId)
+		chat.addClient(userId)
 	}
 
 	/**
@@ -200,30 +199,17 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Se la CHAT è vuota la elimina
 	 */
 	private async handleUserLeave(client: ws.IClient, msg: UserLeaveC2S) {
-		const chat = this.getChatById(msg.chatId)
-		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 		const userId = client.jwtPayload?.id
 		if (!userId) throw new Error(`Invalid userId`)
+		const chat = this.getChatById(msg.chatId)
+		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 
 		const isVoid = chat.removeClient(userId)
-		if (isVoid) await this.removeChat(chat.id)
-		this.log(`Client ${userId} left chat ${msg.chatId}`)
+		if (isVoid) {
+			await this.removeChat(chat.id)
+			await this.saveChat(chat)
+		}
 	}
-
-	/**
-	 * Un CLIENT invia un MESSAGE di tipo USER in una ROOM della CHAT
-	 * Inserisce il MESSAGE in HISTORY
-	 * Avverte tutti i partecipanti
-	 * Chiede il COMPLETE alla ROOM
-	 */
-	// private async handleUserMessage(client: ws.IClient, msg: UserMessageC2S) {
-	// 	const chat = this.getChatById(msg.chatId)
-	// 	if (!chat) return this.log("CHAT", `Chat not found: ${msg.chatId}`, TypeLog.ERROR)
-	// 	const userId = client?.jwtPayload?.id
-	// 	if (!userId) return this.log("CHAT", `Invalid userId`, TypeLog.ERROR)
-	// 	chat.addUserMessage(msg.text, userId, msg.roomId)
-	// 	await chat.complete()
-	// }
 
 	//#endregion 
 
@@ -360,16 +346,27 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	}
 
 	/**
+	 * Inserisce una CHAT
+	 */
+	private addChat(chat: ChatNode): void {
+		this.chats.push(chat)
+	}
+
+	/**
 	 * Quando un CLIENT lascia la chat se è vuota la rimuove
 	 * Prima di rimuovere, salva tutte le ROOM sul DB
 	 */
 	private async removeChat(chatId: string): Promise<void> {
 		const index = this.chats.findIndex(c => c.id === chatId)
 		if (index == -1) throw new Error(`Chat not found: ${chatId}`)
+		this.chats.splice(index, 1);
+	}
 
-		const chat = this.chats[index];
-
-		// Salvo tutte le ROOM sul DB prima di eliminare la CHAT
+	/** 
+	 * Salvo tutte le ROOM sul DB prima di eliminare la CHAT
+	 */
+	private async saveChat(chat: ChatNode): Promise<void> {
+		if (!chat) return;
 		for (const roomTourn of chat.rooms) {
 			const room = roomTourn.room
 			await new Bus(this, this.state.room_repo).dispatch({
@@ -384,7 +381,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 				}
 			})
 		}
-		this.chats.splice(index, 1);
+
 	}
 
 	//#endregion

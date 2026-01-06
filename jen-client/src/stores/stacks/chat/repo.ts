@@ -48,20 +48,10 @@ const setup = {
 			const { chatId, agentIds } = props
 			const msgSend: ChatCreateC2S = {
 				chatId: chatId,
-				action: CHAT_ACTION_C2S.CHAT_CREATE,
+				action: CHAT_ACTION_C2S.CHAT_CREATE_AND_ENTER,
 				agentIds,
 			}
 			wsConnection.send(JSON.stringify(msgSend))
-
-			// const responseStr = await wsConnection.sendAndWait(
-			// 	JSON.stringify(msgSend),
-			// 	data => {
-			// 		if ( !data ) return false
-			// 		const msg = JSON.parse(data) as ChatInfoS2C
-			// 		return msg.action == CHAT_ACTION_S2C.CHAT_INFO && msg.chatId == chatId
-			// 	}
-			// )
-			// const msg: ChatInfoS2C = JSON.parse(responseStr)
 		},
 
 		/** 
@@ -72,7 +62,7 @@ const setup = {
 			const room = chatSo.getRoomById(roomId)
 			if (room) return
 			const msgSend: ChatGetByRoomC2S = {
-				action: CHAT_ACTION_C2S.CHAT_GET_BY_ROOM,
+				action: CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER,
 				roomId: roomId,
 			}
 			wsConnection.send(JSON.stringify(msgSend))
@@ -93,18 +83,7 @@ const setup = {
 			}
 			wsConnection.send(JSON.stringify(message))
 		},
-		/**
-		 * Add AGENTs to a ROOM
-		 */
-		// addAgentsToRoom: (
-		// 	{ chatId, roomId, agentsIds }: { chatId: string, roomId: string, agentsIds: string[] },
-		// 	store?: ChatStore
-		// ) => {
-		// 	const room = store.getRoomById(roomId)
-		// 	if (!room) return
-		// 	const newAgentsIds = [... new Set([...room.agentsIds, ...agentsIds])]
-		// 	store.updateAgentsInRoom({ chatId, roomId, agentsIds: newAgentsIds })
-		// },
+
 		/**
 		 * Add a MESSAGE in the HISTORY of a ROOM
 		 */
@@ -127,6 +106,7 @@ const setup = {
 			}
 			wsConnection.send(JSON.stringify(message))
 		},
+
 		/** 
 		 * Questo USER lascia una CHAT
 		*/
@@ -140,6 +120,8 @@ const setup = {
 
 		//#endregion
 
+
+
 		/**
 		 * Chiamato quando una ROOM non è più visualizzata da nessuna CARD
 		 */
@@ -151,7 +133,6 @@ const setup = {
 			store.setAll(store.state.all.filter(c => c.id != chatId))
 		},
 
-
 		/**
 		 * HANDLE MESSAGE FROM SERVER
 		 */
@@ -160,10 +141,7 @@ const setup = {
 
 			switch (message.action) {
 
-				/**
-				 * arrivate le INFO di una CHAT
-				 * le integro nella store
-				 */
+				// arrivate le INFO di una CHAT le integro nella store
 				case CHAT_ACTION_S2C.CHAT_INFO: {
 					const msg: ChatInfoS2C = JSON.parse(data.payload)
 					let chat = {
@@ -181,7 +159,6 @@ const setup = {
 					break
 				}
 
-
 				case CHAT_ACTION_S2C.CLIENT_ENTERED: {
 					const msg = message as ClientEnteredS2C
 					//*** */
@@ -194,6 +171,7 @@ const setup = {
 					break
 				}
 
+				// aggiorno la HISTORY di una ROOM
 				case CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE: {
 					const msg: RoomHistoryUpdateS2C = message as RoomHistoryUpdateS2C
 					const room = store.getRoomById(msg.roomId)
@@ -225,16 +203,8 @@ const setup = {
 					store._update()
 					break
 				}
-
-				/** [II] DA ELIMINARE */
-				// case CHAT_ACTION_S2C.ROOM_MESSAGE: {
-				// 	const msg: RoomMessageS2C = message as RoomMessageS2C
-				// 	const room = store.getRoomById(msg.roomId)
-				// 	room?.history.push(msg.content)
-				// 	store._update()
-				// 	break
-				// }
-
+				
+				// è stata creata una nuova ROOM in una CHAT esistente. Tipicamente quando c'e' il reasoning
 				case CHAT_ACTION_S2C.ROOM_NEW: {
 					const msg = message as RoomNewS2C
 					const chat = store.getChatById(msg.chatId)

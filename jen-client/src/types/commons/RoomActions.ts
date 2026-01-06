@@ -55,9 +55,9 @@ export enum UPDATE_TYPE {
 
 export enum CHAT_ACTION_C2S {
 	/** un USER crea una CHAT e ci entra*/
-	CHAT_CREATE = "chat-create",
+	CHAT_CREATE_AND_ENTER = "chat-create",
 	/** un USER cerca/carica una CHAT tramite una ROOM ed entra */
-	CHAT_GET_BY_ROOM = "chat-get-by-room",
+	CHAT_LOAD_BY_ROOM_AND_ENTER = "chat-get-by-room",
 
 	/** [II] da eliminare --- USER entra in CHAT */
 	USER_ENTER = "user-enter",
@@ -91,7 +91,7 @@ export type BaseC2S = {
  * - restituisce i dati della CHAT [ChatInfoS2C]
  */
 export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
-	action: CHAT_ACTION_C2S.CHAT_GET_BY_ROOM
+	action: CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER
 	/** id della ROOM da cercare nelle CHATs */
 	roomId: string
 }
@@ -104,7 +104,7 @@ export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
  * - restituisce i dati della CHAT creata [ChatInfoS2C]
  */
 export type ChatCreateC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.CHAT_CREATE
+	action: CHAT_ACTION_C2S.CHAT_CREATE_AND_ENTER
 	/** OPZIONALE. I primi agenti da inserire nella ROOM  */
 	agentIds?: string[]
 }
