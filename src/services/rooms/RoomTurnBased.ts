@@ -13,7 +13,7 @@ import ChatContext from "./ChatContext.js";
 class RoomTurnBased {
 
 	constructor(
-		public room: Partial<RoomRepo>,
+		public room: RoomRepo,
 		// [II] in room dovrebbero poterci essere dei TOOLS e dei CONTEXT condivisi per tutti gli AGENTS che partecipano
 	) {
 		if (!this.room.history) {

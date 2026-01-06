@@ -157,28 +157,14 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 		// non la trovo in memoria quindi carico tutta la CHAT dal DB
 		if (!chat) {
-
-			// Carico la ROOM richiesta
-			const roomRepo: RoomRepo = await new Bus(this, this.state.room_repo).dispatch({
-				type: typeorm.Actions.GET_BY_ID,
-				payload: msg.roomId
-			})
-			if (!roomRepo || !roomRepo.chatId) throw new Error(`Room not found: ${msg.roomId}`)
-
-			// carico tutte le ROOMs di quella CHAT
-			const roomsRepo: RoomRepo[] = await new Bus(this, this.state.room_repo).dispatch({
-				type: typeorm.Actions.FIND,
-				payload: <FindManyOptions<RoomRepo>>{ chatId: roomRepo.chatId }
-			})
-
-			// Creo la CHAT con le ROOMs caricate
-			const rooms = roomsRepo.map(repo => new RoomTurnBased(repo));
-			chat = await ChatNode.Build(this, rooms);
+			chat = await this.loadChatByRoomId(msg.roomId)
 			this.addChat(chat)
 		}
 
 		chat.addClient(userId)
 	}
+
+
 
 	/**
 	 * Un CLIENT entra in una CHAT. 
@@ -188,7 +174,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	private async handleUserEnter(client: ws.IClient, msg: UserEnterC2S) {
 		const userId = client?.jwtPayload?.id
 		if (!userId) throw new Error(`Invalid userId`)
-			
+
 		const chat = this.getChatById(msg.chatId)
 		chat.addClient(userId)
 	}
@@ -222,14 +208,6 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 * Le ROOM verranno salvate sul DB solo quando la CHAT viene eliminata (vedi saveRooms).
 	 */
 	public async createRoomRepo(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null> {
-		// per il momento non salvo in DB
-		// const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
-		// 	type: typeorm.RepoRestActions.SAVE,
-		// 	payload: {
-		// 		history: [],
-		// 		agents: [],
-		// 	}
-		// })
 		return {
 			id: randomUUID() as string,
 			parentRoomId: parentId,
@@ -321,7 +299,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	 */
 	public sendMessageToClient(clientId: string, message: BaseS2C) {
 		const client = this.getClients()?.find(c => c?.jwtPayload?.id == clientId)
-		if (!client) return this.log("CHAT", `Client not found: ${clientId}`, TypeLog.ERROR)
+		if (!client) throw new Error(`Client not found: ${clientId}`)
 		this.sendToClient(client, JSON.stringify(message))
 	}
 
@@ -329,7 +307,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 
 
-	//#region UTILS
+	//#region CHATS MANAGEMENT
 
 	/**
 	 * Restituisce la CHAT specificata
@@ -353,8 +331,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	}
 
 	/**
-	 * Quando un CLIENT lascia la chat se è vuota la rimuove
-	 * Prima di rimuovere, salva tutte le ROOM sul DB
+	 * Rimuove una CHAT
 	 */
 	private async removeChat(chatId: string): Promise<void> {
 		const index = this.chats.findIndex(c => c.id === chatId)
@@ -363,25 +340,58 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	}
 
 	/** 
-	 * Salvo tutte le ROOM sul DB prima di eliminare la CHAT
+	 * Salvo tutte le ROOM di una CHAT sul DB 
 	 */
 	private async saveChat(chat: ChatNode): Promise<void> {
 		if (!chat) return;
-		for (const roomTourn of chat.rooms) {
-			const room = roomTourn.room
-			await new Bus(this, this.state.room_repo).dispatch({
-				type: typeorm.Actions.SAVE,
-				payload: <Partial<RoomRepo>>{
-					chatId: chat.id,
-					id: room.id,
-					history: room.history || [],
-					parentRoomId: room.parentRoomId,
-					// Gli agents devono essere già presenti nel DB, salvo solo gli id
-					agents: room.agents ?? [],
-				}
-			})
+		for (const roomChat of chat.rooms) {
+			const room = roomChat.room
+			await this.saveRoom(room)
 		}
+	}
 
+	/**
+	 * Carica una CHAT dal DB partendo da una ROOM
+	 */
+	private async loadChatByRoomId(roomId: string): Promise<ChatNode> {
+		// Carico la ROOM richiesta
+		const roomRepo: RoomRepo = await new Bus(this, this.state.room_repo).dispatch({
+			type: typeorm.Actions.GET_BY_ID,
+			payload: roomId
+		})
+		if (!roomRepo || !roomRepo.chatId) throw new Error(`Room not found: ${roomId}`)
+
+		// carico tutte le ROOMs di quella CHAT
+		const roomsRepo: RoomRepo[] = await new Bus(this, this.state.room_repo).dispatch({
+			type: typeorm.Actions.FIND,
+			payload: <FindManyOptions<RoomRepo>>{ chatId: roomRepo.chatId }
+		})
+
+		// Creo la CHAT con le ROOMs caricate
+		const rooms = roomsRepo.map(repo => new RoomTurnBased(repo));
+		const chat = await ChatNode.Build(this, rooms);
+		chat.id = roomRepo.chatId
+		return chat
+	}
+
+	//#endregion
+
+
+
+	//#region ROOMS MANAGEMENT
+
+	private async saveRoom(room: RoomRepo): Promise<void> {
+		await new Bus(this, this.state.room_repo).dispatch({
+			type: typeorm.Actions.SAVE,
+			payload: <RoomRepo>{
+				id: room.id,
+				chatId: room.chatId,
+				accountId: room.accountId,
+				history: room.history ?? [],
+				parentRoomId: room.parentRoomId,
+				agents: room.agents ?? [],
+			}
+		})
 	}
 
 	//#endregion
