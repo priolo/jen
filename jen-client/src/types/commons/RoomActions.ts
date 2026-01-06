@@ -27,7 +27,7 @@ export type ChatRoom = {
 }
 
 /**
- * Contiene le info per l'aggiornamento di un messaggio
+ * Contiene le info per l'aggiornamento di un messaggio nella history
  */
 export type MessageUpdate = {
 	/** il messaggio di riferimento per la posizione */
@@ -70,11 +70,6 @@ export enum CHAT_ACTION_C2S {
 	ROOM_AGENTS_UPDATE = "room-agents-update",
 	/** aggiorna la HISTORY di una ROOM */
 	ROOM_HISTORY_UPDATE = "room-history-update",
-
-
-	/* [II][DA ELIMINARE] USER invia un messaggio in una ROOM della CHAT*/
-	//USER_MESSAGE = "user-message",
-
 }
 
 export type BaseC2S = {
@@ -124,15 +119,6 @@ export type UserLeaveC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.USER_LEAVE
 }
 
-/** inserisce un messaggio USER e chiede il COMPLETE */
-// export type UserMessageC2S = BaseC2S & {
-// 	action: CHAT_ACTION_C2S.USER_MESSAGE
-// 	/** id della ROOM, se null è la MAIN-ROOM */
-// 	roomId?: string
-// 	/** il testo del messaggio */
-// 	text: string
-// }
-
 /** richiesta di completamento di una ROOM */
 export type RoomCompleteC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.ROOM_COMPLETE
@@ -178,10 +164,6 @@ export enum CHAT_ACTION_S2C {
 	ROOM_AGENTS_UPDATE = "room-agents-update",
 	/** comunica l'aggiornamento della HISTORY di una ROOM */
 	ROOM_HISTORY_UPDATE = "room-history-update",
-
-
-	/** [DA ELIMINARE] aggiunto MESSAGE in una ROOM della CHAT  */
-	//ROOM_MESSAGE = "room-message",
 }
 
 export type BaseS2C = {
@@ -221,22 +203,6 @@ export type ClientLeaveS2C = BaseS2C & {
 }
 
 //#endregion
-
-
-
-//#region  MESSAGE
-
-/** [DA ELIMINARE] è stato inserito un MESSAGE in ROOM  */
-// export type RoomMessageS2C = BaseS2C & {
-// 	action: CHAT_ACTION_S2C.ROOM_MESSAGE
-// 	/** la stanza in cui è stato inserito */
-// 	roomId: string
-// 	/** il conenuto del messaggio */
-// 	content: ChatMessage
-// }
-
-//#endregion
-
 
 
 //#region ROOM
