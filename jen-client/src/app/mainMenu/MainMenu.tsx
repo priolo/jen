@@ -21,6 +21,7 @@ import { DOC_TYPE } from "../../types"
 import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import StoreButton from "./StoreButton"
+import { buildRoomDetail } from "@/stores/stacks/room/factory"
 
 
 
@@ -59,9 +60,8 @@ const MainMenu: FunctionComponent<Props> = ({
 	}
 
 	const handleChat = () => {
-		//chatSo.createChat()
-		//const view = buildRoomDetail()
-		//deckCardsSo.add({ view, anim: true })
+		const view = buildRoomDetail()
+		deckCardsSo.add({ view, anim: true })
 	}
 
 

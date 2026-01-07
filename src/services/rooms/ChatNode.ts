@@ -1,37 +1,44 @@
+import { WSRoomsService } from "@/routers/RoomsWSRoute.js";
 import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
-import { RoomRepo } from "../../repository/Room.js";
-import ChatContext from "../../services/rooms/ChatContext.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
 import RoomTurnBased from "./RoomTurnBased.js";
+import { RoomRepo } from "@/repository/Room.js";
 
 
 
 /**
- * contiente i CLIENTs che vengono aggiornati
- * contiene le ROOMs dove avvengono le elaborazioni con gli AGENTs
- * ha node che è il CONTEXT che gli fornisce i REPOSITORY
+ * permette di gestire una CHAT, i suoi CLIENTs e le sue ROOMs
  */
 class ChatNode {
 	constructor(
-		node: ChatContext,
+		node: WSRoomsService,
+		accountId?: string,
 	) {
 		this.node = node;
+		this.accountId = accountId;
 	}
 
-	/** identificativo della CHAT */
-	public id: string = crypto.randomUUID();
+	/** 
+	 * identificativo della CHAT 
+	 */
+	public id: string = null
 
 	/** 
-	 * [WSRoomsService] il NODE del contesto. Deve implementare ChatContext
-	 * */
-	private node: ChatContext;
+	 * ACCOUNT che ha creato la CHAT 
+	 */
+	public accountId?: string
+
+	/** 
+	 * il NODE del contesto
+	 */
+	private node: WSRoomsService;
 
 	/** 
 	 * le ROOM aperte in questa CHAT 
 	 */
-	public rooms: RoomTurnBased[]
+	public rooms: RoomTurnBased[] = [];
 
 	/** 
 	 * gli ids dei CLIENTs-WS partecipanti 
@@ -46,8 +53,8 @@ class ChatNode {
 	/**
 	 * Creo una nuova CHAT inserendo una MAIN-ROOM
 	 */
-	static async Build(node: ChatContext, rooms: RoomTurnBased[]): Promise<ChatNode> {
-		const chat = new ChatNode(node)
+	static async Build(node: WSRoomsService, rooms: RoomTurnBased[], accountId?: string): Promise<ChatNode> {
+		const chat = new ChatNode(node, accountId)
 		chat.rooms = rooms
 		return chat
 	}
@@ -55,20 +62,38 @@ class ChatNode {
 	/**
 	 * Crea una MAIN-ROOM con gli AGENTs specificati
 	 */
-	static async BuildRoom(node: ChatContext, agentsIds: string[] = []): Promise<RoomTurnBased> {
-		// carico gli agenti REPO
-		const agentsRepo: AgentRepo[] = []
-		for (const agentId of agentsIds) {
-			const agentRepo = await node.getAgentRepoById(agentId)
-			if (agentRepo) agentsRepo.push(agentRepo)
+	static BuildRoom(chatId: string, agentsRepo: AgentRepo[] = [], accountId?: string, parentRoomId?: string): RoomTurnBased {
+		const roomRepo: RoomRepo = {
+			id: randomUUID() as string,
+			chatId,
+			parentRoomId,
+			accountId,
+
+			history: [],
+			agents: agentsRepo ?? [],
 		}
-		// creo una nuova MAIN-ROOM
-		const roomRepo = await node.createRoomRepo(agentsRepo, null)
 		const room = new RoomTurnBased(roomRepo)
 		return room
 	}
 
 	//#endregion
+
+
+	
+	/**
+	 * Recupera la MAIN-ROOM della CHAT
+	 */
+	private getMainRoom(): RoomTurnBased {
+		return this.rooms.find(room => room.room.parentRoomId == null)
+	}
+
+	/**
+	 * Recupera una ROOM dalla CHAT
+	 */
+	public getRoomById(id?: string): RoomTurnBased {
+		if (!id || !this.rooms) return null
+		return this.rooms.find(room => room.room.id == id)
+	}
 
 
 
@@ -119,7 +144,7 @@ class ChatNode {
 	 * aggiorno la HISTORY con una serie di MessageUpdate 
 	 * Manda il messaggio di aggiornamento a tutti i partecipanti alla CHAT
 	 */
-	updateHistory(updates: MessageUpdate[], roomId?: string): void {
+	updateHistory(updates: MessageUpdate[], roomId?: string): RoomTurnBased {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
 		if (!room) throw new Error("Room not found")
 
@@ -133,6 +158,8 @@ class ChatNode {
 			updates: updates,
 		}
 		this.sendMessage(msg)
+
+		return room
 	}
 
 	/**
@@ -159,8 +186,41 @@ class ChatNode {
 		this.sendMessage(msg)
 	}
 
+	/**
+	 * Invia ad uno specifico CLIENT le INFO della CHAT
+	 */
+	private sendInfoToClient(clientId: string) {
+		if (!clientId) return;
+		const msg: ChatInfoS2C = {
+			action: CHAT_ACTION_S2C.CHAT_INFO,
+			chatId: this.id,
+			clientsIds: [...this.clientsIds],
+			rooms: this.rooms.map(r => ({
+				id: r.room.id,
+				chatId: this.id,
+				parentRoomId: r.room.parentRoomId,
+				accountId: r.room.accountId,
+				history: r.room.history,
+				agentsIds: r.room.agents?.map(a => a.id),
+			})),
+		}
+		this.node.sendMessageToClient(clientId, msg)
+	}
+
+	/**
+	 * Invia a tutti i partecipanti della CHAT un MESSAGE
+	 */
+	private sendMessage(message: BaseS2C): void {
+		for (const clientId of this.clientsIds) {
+			this.node.sendMessageToClient(clientId, message)
+		}
+	}
+
 	//#endregion
 
+
+
+	//#region CHAT PROCESSING
 
 	/**
 	 * Indico alla CHAT che una ROOM deve essere "completata"
@@ -187,8 +247,7 @@ class ChatNode {
 			if (!agentRepo) return null;
 
 			// creo una nuova room per il sub-agente
-			const subRoomRepo: RoomRepo = await this.node.createRoomRepo([agentRepo], room.room.id)
-			const subRoom = new RoomTurnBased(subRoomRepo)
+			const subRoom = ChatNode.BuildRoom(this.id, [agentRepo], this.accountId, room.room.id)
 			this.rooms.push(subRoom);
 
 			// invia la nuova ROOM-AGENT al CLIENT
@@ -231,48 +290,7 @@ class ChatNode {
 		return await room.getResponse()
 	}
 
-	private getMainRoom(): RoomTurnBased {
-		return this.rooms.find(room => room.room.parentRoomId == null)
-	}
-	public getRoomById(id?: string): RoomTurnBased {
-		if (!id || !this.rooms) return null
-		return this.rooms.find(room => room.room.id == id)
-	}
-
-
-
-
-
-
-	/**
-	 * Invia ad uno specifico CLIENT le INFO della CHAT
-	 */
-	private sendInfoToClient(clientId: string) {
-		if (!clientId) return;
-		const msg: ChatInfoS2C = {
-			action: CHAT_ACTION_S2C.CHAT_INFO,
-			chatId: this.id,
-			clientsIds: [...this.clientsIds],
-			rooms: this.rooms.map(r => ({
-				chatId: this.id,
-				id: r.room.id,
-				parentRoomId: r.room.parentRoomId,
-				history: r.room.history,
-				agentsIds: r.room.agents?.map(a => a.id),
-			})),
-		}
-		this.node.sendMessageToClient(clientId, msg)
-	}
-
-	/**
-	 * Invia a tutti i partecipanti un MESSAGE
-	 */
-	private sendMessage(message: BaseS2C): void {
-		for (const clientId of this.clientsIds) {
-			this.node.sendMessageToClient(clientId, message)
-		}
-	}
-
+	//#endregion
 
 }
 

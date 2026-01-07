@@ -19,9 +19,11 @@ export type ChatMessage = {
  * E' uno spazio dotato di HISTORY dove i CLIENT possono comunicare
  */
 export type ChatRoom = {
-	chatId: string
 	id: string
+	chatId: string
 	parentRoomId?: string
+	accountId?: string
+
 	history: ChatMessage[]
 	agentsIds: string[]
 }

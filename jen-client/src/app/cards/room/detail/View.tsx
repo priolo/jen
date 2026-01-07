@@ -23,7 +23,7 @@ const RoomView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
-	
+
 	// STORE
 
 	useStore(store)
@@ -36,24 +36,20 @@ const RoomView: FunctionComponent<Props> = ({
 		store.fetch()
 	}, [])
 
-	// eventualmente settoa la ROOM se non esiste
+	// eventualmente chiedo la ROOM se non esiste
 	useEffect(() => {
-		if ( !!store.state.roomId ) return
+		if (!!store.state.roomId) return
 		// se è una nuova ROOM allora la setto
-		const chat = chatSo.getChatById( store.state.chatId )
-		const room = getMainRoom( chat?.rooms )
+		const chat = chatSo.getChatById(store.state.chatId)
+		const room = getMainRoom(chat?.rooms)
 		store.setRoomId(room?.id)
 	}, [chatSo.state.all])
 
 	/** recupero l'oggetto ROOM  */
-	const { room, history } = useMemo(()=>{
-		if ( !store.state.roomId ) return { room: null, agents: [], history: [] }
-		const room = chatSo.getRoomById(store.state.roomId)
-		const history = room?.history ?? []
-		return { room, history }
-	}, [store.state.roomId])
+	const room = useMemo(() => chatSo.getRoomById(store.state.roomId), [store.state.roomId])
+	const history = room?.history ?? []
 
-
+	
 	// HANDLER
 
 	const handleSendClick = () => store.sendPrompt()

@@ -144,7 +144,7 @@ const setup = {
 				// arrivate le INFO di una CHAT le integro nella store
 				case CHAT_ACTION_S2C.CHAT_INFO: {
 					const msg: ChatInfoS2C = JSON.parse(data.payload)
-					let chat = {
+					let chat:Chat = {
 						id: msg.chatId,
 						clientsIds: msg.clientsIds,
 						rooms: msg.rooms,

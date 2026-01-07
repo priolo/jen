@@ -5,7 +5,7 @@ import { PromptListState, PromptListStore } from "./list";
 
 
 
-export function buildRoomDetail(state: Partial<RoomDetailState>) {
+export function buildRoomDetail(state: Partial<RoomDetailState> = {}) {
 	const store = buildStore({
 		type: DOC_TYPE.ROOM_DETAIL,
 		...state,

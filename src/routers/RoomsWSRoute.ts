@@ -1,18 +1,16 @@
 import { Bus, typeorm, ws } from "@priolo/julian"
-import { TypeLog } from "@priolo/julian/dist/core/types.js"
-import { randomUUID } from "crypto"
 import { FindManyOptions } from "typeorm"
 import { AgentRepo } from "../repository/Agent.js"
 import { RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
 import { McpTool } from "../services/mcp/types.js"
 import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
-import ChatContext from "../services/rooms/ChatContext.js"
 import ChatNode from "../services/rooms/ChatNode.js"
 import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
 import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserEnterC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
+import { TypeLog } from "@priolo/julian/dist/core/types.js"
 
 
 
@@ -24,7 +22,7 @@ export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
  * in pratica è un servizio di CHAT multi-room e multi-agente 
  * gestisce prevalentemente i messaggi
  */
-export class WSRoomsService extends ws.route implements ChatContext {
+export class WSRoomsService extends ws.route {
 
 	private chats: ChatNode[] = []
 
@@ -41,26 +39,28 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	declare state: typeof this.stateDefault
 
 
-	//#region SocketCommunicator
+	//#region OVERWRITING SocketCommunicator
 
 	async onConnect(client: ws.IClient) {
 		// qua posso mettere tutti i dati utili al client
 		super.onConnect(client)
 	}
 
-	/**
-	 * Handle client disconnection
-	 */
 	async onDisconnect(client: ws.IClient) {
-		// rimuovo il client da tutte le CHATs
-		const chats = [...this.chats]
-		for (const chat of chats) {
-			await this.handleUserLeave(
-				client,
-				{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
-			)
+		// [II] il try va messo nell'oggetto base ws.route
+		try {
+			// rimuovo il client da tutte le CHATs
+			const chats = [...this.chats]
+			for (const chat of chats) {
+				await this.handleUserLeave(
+					client,
+					{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
+				)
+			}
+			super.onDisconnect(client)
+		} catch (error) {
+			this.log(`Error onDisconnect: ${error}`, TypeLog.ERROR)
 		}
-		super.onDisconnect(client)
 	}
 
 	//#endregion
@@ -113,31 +113,33 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 			case CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE: {
 				const msgUp: RoomHistoryUpdateC2S = msg
-				chat.updateHistory(msgUp.updates, msgUp.roomId)
-				if (msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.ADD)) {
+				const room = chat.updateHistory(msgUp.updates, msgUp.roomId)
+				if (room.room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.ADD)) {
 					await chat.complete()
 				}
 				break
 			}
-
-			default:
-				console.warn(`Unknown action: ${msg.action}`)
-				return
 		}
 	}
 
 	/**
 	 * Crea una nuova CHAT.  
+	 * crea la MAIN-ROOM
+	 * carica gli AGENTs specificati
 	 * Inserisce il CLIENT che l'ha creata
-	 * e crea la MAIN-ROOMe ed eventualmente gli AGENTs specificati
 	 */
 	private async handleChatCreate(client: ws.IClient, msg: ChatCreateC2S) {
 		const userId = client?.jwtPayload?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
+		// carico gli agenti REPO
+		const agentsRepo = (await Promise.all(
+			(msg.agentIds ?? []).map(id => this.getAgentRepoById(id))
+		)).filter(agent => !!agent) as AgentRepo[]
+
 		// creo chat e room
-		const room = await ChatNode.BuildRoom(this, msg.agentIds)
-		const chat = await ChatNode.Build(this, [room])
+		const room = ChatNode.BuildRoom(msg.chatId, agentsRepo, userId)
+		const chat = await ChatNode.Build(this, [room], userId)
 		chat.id = msg.chatId
 
 		// salvo la chat e faccio entrare il client
@@ -157,7 +159,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 		// non la trovo in memoria quindi carico tutta la CHAT dal DB
 		if (!chat) {
-			chat = await this.loadChatByRoomId(msg.roomId)
+			chat = await this.loadChatByRoomId(msg.roomId, userId)
 			this.addChat(chat)
 		}
 
@@ -202,19 +204,6 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 
 	//#region ChatContext IMPLEMENTATION 
-
-	/**
-	 * Crea una RoomRepo (solo in memoria, non salvata su DB).
-	 * Le ROOM verranno salvate sul DB solo quando la CHAT viene eliminata (vedi saveRooms).
-	 */
-	public async createRoomRepo(agents?: AgentRepo[], parentId?: string): Promise<RoomRepo | null> {
-		return {
-			id: randomUUID() as string,
-			parentRoomId: parentId,
-			history: [],
-			agents: agents ?? [],
-		}
-	}
 
 	static McpCache: Map<string, McpTool[]> = new Map()
 
@@ -353,7 +342,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	/**
 	 * Carica una CHAT dal DB partendo da una ROOM
 	 */
-	private async loadChatByRoomId(roomId: string): Promise<ChatNode> {
+	private async loadChatByRoomId(roomId: string, accountId?: string): Promise<ChatNode> {
 		// Carico la ROOM richiesta
 		const roomRepo: RoomRepo = await new Bus(this, this.state.room_repo).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
@@ -368,8 +357,8 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		})
 
 		// Creo la CHAT con le ROOMs caricate
-		const rooms = roomsRepo.map(repo => new RoomTurnBased(repo));
-		const chat = await ChatNode.Build(this, rooms);
+		const rooms = roomsRepo.map(repo => new RoomTurnBased(repo))
+		const chat = await ChatNode.Build(this, rooms, accountId)
 		chat.id = roomRepo.chatId
 		return chat
 	}
