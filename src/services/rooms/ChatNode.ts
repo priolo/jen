@@ -1,4 +1,4 @@
-import { WSRoomsService } from "@/routers/RoomsWSRoute.js";
+import { ChatContext, WSRoomsService } from "@/routers/RoomsWSRoute.js";
 import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
@@ -13,7 +13,7 @@ import { RoomRepo } from "@/repository/Room.js";
  */
 class ChatNode {
 	constructor(
-		node: WSRoomsService,
+		node: ChatContext,
 		accountId?: string,
 	) {
 		this.node = node;
@@ -33,7 +33,7 @@ class ChatNode {
 	/** 
 	 * il NODE del contesto
 	 */
-	private node: WSRoomsService;
+	private node: ChatContext;
 
 	/** 
 	 * le ROOM aperte in questa CHAT 
@@ -79,7 +79,7 @@ class ChatNode {
 	//#endregion
 
 
-	
+
 	/**
 	 * Recupera la MAIN-ROOM della CHAT
 	 */

@@ -22,7 +22,7 @@ export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
  * in pratica è un servizio di CHAT multi-room e multi-agente 
  * gestisce prevalentemente i messaggi
  */
-export class WSRoomsService extends ws.route {
+export class WSRoomsService extends ws.route implements ChatContext {
 
 	private chats: ChatNode[] = []
 
@@ -387,3 +387,8 @@ export class WSRoomsService extends ws.route {
 
 }
 
+export interface ChatContext {
+	executeTool: (toolId: string, args: any) => Promise<any>
+	getAgentRepoById: (agentId: string) => Promise<AgentRepo>
+	sendMessageToClient: (clientId: string, message: BaseS2C) => void
+}
