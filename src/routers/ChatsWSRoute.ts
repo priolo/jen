@@ -1,3 +1,4 @@
+import { ChatContext } from "@/services/rooms/ChatContext.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { FindManyOptions } from "typeorm"
 import { AgentRepo } from "../repository/Agent.js"
@@ -7,14 +8,13 @@ import { McpTool } from "../services/mcp/types.js"
 import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
 import ChatNode from "../services/rooms/ChatNode.js"
 import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
-import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserEnterC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserEnterC2S, UserLeaveC2S, UserStatusS2C, UsersAllOnlineC2S, UsersAllOnlineS2C } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
-import { TypeLog } from "@priolo/julian/dist/core/types.js"
 
 
 
-export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
+export type ChatsWSConf = Partial<ChatsWSService['stateDefault']>
 
 /**
  * GLOBAL: WebSocket service for managing prompt chat rooms
@@ -22,7 +22,7 @@ export type WSRoomsConf = Partial<WSRoomsService['stateDefault']>
  * in pratica è un servizio di CHAT multi-room e multi-agente 
  * gestisce prevalentemente i messaggi
  */
-export class WSRoomsService extends ws.route implements ChatContext {
+export class ChatsWSService extends ws.route implements ChatContext {
 
 	private chats: ChatNode[] = []
 
@@ -34,6 +34,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 			agent_repo: "/typeorm/agents",
 			tool_repo: "/typeorm/tools",
 			mcp_repo: "/typeorm/mcp_servers",
+			account_repo: "/typeorm/accounts",
 		}
 	}
 	declare state: typeof this.stateDefault
@@ -42,25 +43,41 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	//#region OVERWRITING SocketCommunicator
 
 	async onConnect(client: ws.IClient) {
+		const userId = client.jwtPayload?.id
+
 		// qua posso mettere tutti i dati utili al client
 		super.onConnect(client)
+		this.broadcastUserStatus(userId, "online")
 	}
 
 	async onDisconnect(client: ws.IClient) {
-		// [II] il try va messo nell'oggetto base ws.route
-		try {
-			// rimuovo il client da tutte le CHATs
-			const chats = [...this.chats]
-			for (const chat of chats) {
-				await this.handleUserLeave(
-					client,
-					{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
-				)
-			}
-			super.onDisconnect(client)
-		} catch (error) {
-			this.log(`Error onDisconnect: ${error}`, TypeLog.ERROR)
+		const userId = client.jwtPayload?.id
+		
+		// rimuovo il client da tutte le CHATs
+		const chats = [...this.chats]
+		for (const chat of chats) {
+			await this.handleUserLeave(
+				client,
+				{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
+			)
 		}
+
+		this.broadcastUserStatus(userId, "offline")
+		super.onDisconnect(client)
+	}
+
+	/** 
+	 * Invia a tutti i CLIENTs lo stato (online/offline) di un USER
+	 */
+	private broadcastUserStatus(userId: string, status: "online" | "offline") {
+		if (!userId) return
+		const msg: UserStatusS2C = {
+			action: CHAT_ACTION_S2C.USER_STATUS,
+			userId,
+			status
+		}
+		const msgStr = JSON.stringify(msg)
+		this.getClients().forEach(c => this.sendToClient(c, msgStr))
 	}
 
 	//#endregion
@@ -84,6 +101,11 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		}
 		if (msg.action === CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER) {
 			await this.handleChatLoadByRoom(client, msg as ChatGetByRoomC2S)
+			return
+		}
+
+		if (msg.action === CHAT_ACTION_C2S.USERS_ALL_ONLINE) {
+			await this.handleGetAllOnline(client, msg as UsersAllOnlineC2S)
 			return
 		}
 
@@ -166,7 +188,22 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		chat.addClient(userId)
 	}
 
+	/**
+	 * Restituisce la lista di tutti gli USER id che sono ONLINE
+	 */
+	private async handleGetAllOnline(client: ws.IClient, msg: UsersAllOnlineC2S) {
+		//const userId = client?.jwtPayload?.id
+		//if (!userId) throw new Error(`Invalid userId`)
 
+		// Recupero gli utenti connessi (online)
+		const usersIds = this.getClients().map(c => c.jwtPayload?.id).filter(id => !!id)
+
+		const response: UsersAllOnlineS2C = {
+			action: CHAT_ACTION_S2C.USERS_ALL_ONLINE,
+			usersIds,
+		}
+		this.sendToClient(client, JSON.stringify(response))
+	}
 
 	/**
 	 * Un CLIENT entra in una CHAT. 
@@ -207,9 +244,6 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 	static McpCache: Map<string, McpTool[]> = new Map()
 
-	/**
-	 * Restitui un AGENT pronto per l'uso
-	 */
 	public async getAgentRepoById(agentId: string): Promise<AgentRepo> {
 
 		// [II] non va bene! deve raggiungere il nodo con una path!
@@ -226,16 +260,16 @@ export class WSRoomsService extends ws.route implements ChatContext {
 			if (!!tool.mcpId) {
 
 				// non sono in CACHE allora li carico e li metto in CACHE
-				if (!WSRoomsService.McpCache.has(tool.mcpId)) {
+				if (!ChatsWSService.McpCache.has(tool.mcpId)) {
 					// [II] anche questo va ricavato tramite path
 					const mcpServer = await McpServerRoute.GetById(tool.mcpId, this, this.state.mcp_repo)
 					if (!mcpServer) continue
 					const mcpTools = await getMcpTools(mcpServer.host)
-					WSRoomsService.McpCache.set(mcpServer.id, mcpTools)
+					ChatsWSService.McpCache.set(mcpServer.id, mcpTools)
 				}
 
 				// prendo i tools dal CACHE
-				const mcpTools = WSRoomsService.McpCache.get(tool.mcpId)
+				const mcpTools = ChatsWSService.McpCache.get(tool.mcpId)
 				if (!mcpTools) continue
 				const cachedTool = mcpTools.find(t => t.name == tool.name)
 				tool.description = cachedTool.description
@@ -248,9 +282,6 @@ export class WSRoomsService extends ws.route implements ChatContext {
 		return agent
 	}
 
-	/**
-	 * Esegue un TOOL e ne restituisce il risultato
-	 */
 	public async executeTool(toolId: string, args: any): Promise<any> {
 		const toolRepo: ToolRepo = await new Bus(this, this.state.tool_repo).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
@@ -282,10 +313,7 @@ export class WSRoomsService extends ws.route implements ChatContext {
 
 		return "Tool type not supported"
 	}
-
-	/**
-	 * Invia un messaggio ad un client specifico
-	 */
+	
 	public sendMessageToClient(clientId: string, message: BaseS2C) {
 		const client = this.getClients()?.find(c => c?.jwtPayload?.id == clientId)
 		if (!client) throw new Error(`Client not found: ${clientId}`)
@@ -313,14 +341,14 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	}
 
 	/**
-	 * Inserisce una CHAT
+	 * Inizia una SESSION di una CHAT
 	 */
 	private addChat(chat: ChatNode): void {
 		this.chats.push(chat)
 	}
 
 	/**
-	 * Rimuove una CHAT
+	 * Termina una SESSION di una CHAT
 	 */
 	private async removeChat(chatId: string): Promise<void> {
 		const index = this.chats.findIndex(c => c.id === chatId)
@@ -384,11 +412,4 @@ export class WSRoomsService extends ws.route implements ChatContext {
 	}
 
 	//#endregion
-
-}
-
-export interface ChatContext {
-	executeTool: (toolId: string, args: any) => Promise<any>
-	getAgentRepoById: (agentId: string) => Promise<AgentRepo>
-	sendMessageToClient: (clientId: string, message: BaseS2C) => void
 }

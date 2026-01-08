@@ -1,4 +1,5 @@
-import { ChatContext, WSRoomsService } from "@/routers/RoomsWSRoute.js";
+import { ChatsWSService } from "@/routers/ChatsWSRoute.js";
+import { ChatContext } from "./ChatContext.js";
 import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
@@ -13,10 +14,10 @@ import { RoomRepo } from "@/repository/Room.js";
  */
 class ChatNode {
 	constructor(
-		node: ChatContext,
+		context: ChatContext,
 		accountId?: string,
 	) {
-		this.node = node;
+		this.node = context;
 		this.accountId = accountId;
 	}
 
@@ -53,7 +54,7 @@ class ChatNode {
 	/**
 	 * Creo una nuova CHAT inserendo una MAIN-ROOM
 	 */
-	static async Build(node: WSRoomsService, rooms: RoomTurnBased[], accountId?: string): Promise<ChatNode> {
+	static async Build(node: ChatsWSService, rooms: RoomTurnBased[], accountId?: string): Promise<ChatNode> {
 		const chat = new ChatNode(node, accountId)
 		chat.rooms = rooms
 		return chat

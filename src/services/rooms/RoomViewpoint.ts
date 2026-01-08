@@ -1,6 +1,6 @@
 import { AGENT_TYPE, AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
-import { WSRoomsService } from "@/routers/RoomsWSRoute.js";
+import { ChatsWSService } from "@/routers/ChatsWSRoute.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
@@ -20,7 +20,7 @@ class RoomViewpoint {
 		}
 	}
 
-	static async Build(node: WSRoomsService, agentsIds: string[]): Promise<RoomViewpoint> {
+	static async Build(node: ChatsWSService, agentsIds: string[]): Promise<RoomViewpoint> {
 		// carico gli agenti REPO
 		const agentsRepo: AgentRepo[] = []
 		for (const agentId of agentsIds) {

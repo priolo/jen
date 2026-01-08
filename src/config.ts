@@ -4,19 +4,21 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { AccountRepo } from "./repository/Account.js";
 import { AgentRepo } from './repository/Agent.js';
+import { ChatRepo } from './repository/Chat.js';
 import { LlmRepo } from './repository/Llm.js';
 import { McpServerRepo } from "./repository/McpServer.js";
 import { RoomRepo } from "./repository/Room.js";
 import { ToolRepo } from "./repository/Tool.js";
 import AccountRoute from "./routers/AccountRoute.js";
 import AgentRoute from './routers/AgentRoute.js';
+import ChatRoute from './routers/ChatRoute.js';
 import AuthEmailRoute from "./routers/AuthEmailRoute.js";
 import AuthGithubRoute from "./routers/AuthGithubRoute.js";
 import AuthGoogleRoute from "./routers/AuthGoogleRoute.js";
 import AuthRoute from "./routers/AuthRoute.js";
 import McpServerRoute from "./routers/McpServerRoute.js";
 import LlmRoute from "./routers/LlmRoute.js";
-import { WSRoomsConf, WSRoomsService } from "./routers/RoomsWSRoute.js";
+import { ChatsWSConf, ChatsWSService } from "./routers/ChatsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
 import tools from "./startup/config_tools.js";
 import { getDBConnectionConfig } from './startup/dbConfig.js';
@@ -126,6 +128,7 @@ function buildNodeConfig(params?: ConfigParams) {
 								{ class: LlmRoute },
 								{ class: ToolRoute },
 								{ class: AgentRoute },
+								{ class: ChatRoute },
 								// { class: AuthRoute },
 								{ class: AccountRoute },
 								//{ class: RoomRoute },
@@ -144,8 +147,8 @@ function buildNodeConfig(params?: ConfigParams) {
 					},
 					children: [
 						// { class: "npm:@priolo/julian-ws-reflection" }
-						<WSRoomsConf>{
-							class: WSRoomsService
+						<ChatsWSConf>{
+							class: ChatsWSService
 						},
 						// <WSDocConf>{
 						// 	class: WSDocService
@@ -180,6 +183,11 @@ function buildNodeConfig(params?: ConfigParams) {
 					name: "tools",
 					class: "typeorm/repo",
 					model: ToolRepo,
+				},
+				{
+					name: "chats",
+					class: "typeorm/repo",
+					model: ChatRepo,
 				},
 				{
 					name: "rooms",
