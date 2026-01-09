@@ -23,7 +23,7 @@ const AccauntDetailActions: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleInviteClick = async () => store.setEditState(EDIT_STATE.EDIT)
+	//const handleInviteClick = async () => store.setEditState(EDIT_STATE.EDIT)
 
 
 	// LOADING
@@ -35,10 +35,10 @@ const AccauntDetailActions: FunctionComponent<Props> = ({
 	// RENDER
 
 	return <>
-		<Button
+		{/* <Button
 			children="INVITE"
 			onClick={handleInviteClick}
-		/>
+		/> */}
 	</>
 }
 
