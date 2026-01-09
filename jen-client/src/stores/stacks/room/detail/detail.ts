@@ -8,6 +8,8 @@ import { buildAgentList } from "../../agent/factory"
 import chatSo from "../../chat/repo"
 import { EditorState } from "../../editorBase"
 import { buildRoomDetail } from "../factory"
+import { buildAccountList } from "../../account/factory"
+import docsSo from "@/stores/docs"
 
 
 
@@ -51,7 +53,11 @@ What is 2+2? Just write the answer number.`,
 
 
 		getAgentsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.AGENT_LIST,
+		getAccountsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ACCOUNT_LIST,
 		getRoomDetailOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_DETAIL,
+		canInvite: (_: void, store?: RoomDetailStore) => {
+			
+		}
 	},
 
 	actions: {
@@ -99,13 +105,14 @@ What is 2+2? Just write the answer number.`,
 			store.setPrompt("")
 		},
 
-		/** apertura della CARD LIST AGENNTS */
+
+		/** apertura della CARD LIST AGENTS */
 		openAgents(_: void, store?: RoomDetailStore) {
 			const isOpen = store.getAgentsOpen()
 			const view = !isOpen ? buildAgentList() : null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
-
+		/** ho cliccato su un MESSAGE che è linked ad una SUB-ROOM */
 		openSubRoom(chatMessage: ChatMessage, store?: RoomDetailStore) {
 			const content: ContentAskTo = (chatMessage?.content as LlmResponse)?.content as ContentAskTo
 			if (!content) return
@@ -116,6 +123,13 @@ What is 2+2? Just write the answer number.`,
 			}) : null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
+		/** apro gli ACCOUNTS che partecipano alla CHAT */
+		openAccounts(_: void, store?: RoomDetailStore) {
+			const isOpen = store.getAccountsOpen()
+			const view = !isOpen ? buildAccountList() : null
+			store.state.group.addLink({ view, parent: store, anim: true })
+		}
+
 	},
 
 	mutators: {

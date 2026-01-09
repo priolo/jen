@@ -1,8 +1,10 @@
 import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
+import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
+import accountSo from "@/stores/stacks/account/repo"
 import { DOC_TYPE } from "@/types"
-import { Account } from "@/types/Account"
+import { Account, ACCOUNT_STATUS } from "@/types/Account"
 import { AlertDialog, FindInputHeader, Table } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
@@ -27,13 +29,15 @@ const AccountListView: FunctionComponent<Props> = ({
 	// HOOKs
 	useEffect(() => {
 		store.fetchFiltered()
-	},[])
+	}, [])
 
 	// HANDLER
 	const handleSelect = (account: Account) => store.openDetail(account.id)
 
 	// RENDER
 	const accounts = store.state.all
+	const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
+	const isSelected = (account: Account) => account.id == selectId
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}
@@ -49,7 +53,7 @@ const AccountListView: FunctionComponent<Props> = ({
 			/>
 		</>}
 	>
-		<Table
+		{/* <Table
 			items={accounts}
 			props={[
 				{ label: "NAME", getValue: s => s.name, isMain: true },
@@ -59,7 +63,17 @@ const AccountListView: FunctionComponent<Props> = ({
 			onSelectChange={handleSelect}
 			getId={item => item.id}
 			//singleRow={store.getWidth() > 430}
-		/>
+		/> */}
+
+		{accounts.map(account => {
+			return (
+				<div key={account.id}
+					onClick={() => handleSelect(account)}
+				>
+					{isSelected(account)? "***" : ""} {account.name} - {account.status == ACCOUNT_STATUS.ONLINE ? "ONLINE" : "OFFLINE"}
+				</div>
+			)
+		})}
 
 		<AlertDialog store={store} />
 

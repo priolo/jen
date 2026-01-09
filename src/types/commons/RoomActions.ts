@@ -61,9 +61,6 @@ export enum CHAT_ACTION_C2S {
 	/** un USER cerca/carica una CHAT tramite una ROOM ed entra */
 	CHAT_LOAD_BY_ROOM_AND_ENTER = "chat-get-by-room",
 
-	/** Chiede tutti gli USERS-ID che sono ONLINE */
-	USERS_ALL_ONLINE = "users-all-online",
-
 	/** [II] da eliminare --- USER entra in CHAT */
 	USER_ENTER = "user-enter",
 	/* USER lascia la CHAT */
@@ -95,12 +92,6 @@ export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
 	/** id della ROOM da cercare nelle CHATs */
 	roomId: string
 }
-
-/** Richiesta lista di tutti gli utenti */
-export type UsersAllOnlineC2S = Omit<BaseC2S, "chatId"> & {
-	action: CHAT_ACTION_C2S.USERS_ALL_ONLINE
-}
-
 
 /** 
  * CLIENT crea una nuova CHAT 
@@ -163,12 +154,13 @@ export enum CHAT_ACTION_S2C {
 
 	/** I dati di una CHAT */
 	CHAT_INFO = "chat-info",	
-	/** Restituisce tutti gli USERS-ID ONLINE */
-	USERS_ALL_ONLINE = "users-all-online",	
+
 	/** un CLIENT è entrato in CHAT. Potrebbe essere anche un AGENT*/
 	CLIENT_ENTERED = "entered",
 	/** un CLIENT è uscita dalla CHAT. Potrebbe essere anche un AGENT */
 	CLIENT_LEAVE = "leave",
+	/** comunica lo stato di connessione di un CLIENT */
+	USER_STATUS = "user-status",
 
 	/** creata nuova ROOM in CHAT */
 	ROOM_NEW = "room-new",
@@ -176,24 +168,12 @@ export enum CHAT_ACTION_S2C {
 	ROOM_AGENTS_UPDATE = "room-agents-update",
 	/** comunica l'aggiornamento della HISTORY di una ROOM */
 	ROOM_HISTORY_UPDATE = "room-history-update",
-	/** comunica lo stato di connessione di un CLIENT */
-	USER_STATUS = "user-status",
 }
+
 
 export type BaseS2C = {
 	action: CHAT_ACTION_S2C
 	chatId: string
-}
-
-export type UserStatusS2C = {
-	action: CHAT_ACTION_S2C.USER_STATUS
-	userId: string
-	status: "online" | "offline"
-}
-
-export type UsersAllOnlineS2C = Omit<BaseS2C, "chatId"> & {
-	action: CHAT_ACTION_S2C.USERS_ALL_ONLINE
-	usersIds: string[]
 }
 
 
@@ -225,6 +205,12 @@ export type ClientLeaveS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_LEAVE
 	/** id del CLIENT */
 	clientId?: string
+}
+
+export type UserStatusS2C = {
+	action: CHAT_ACTION_S2C.USER_STATUS
+	userId: string
+	status: "online" | "offline"
 }
 
 //#endregion

@@ -70,8 +70,6 @@ class AuthRoute extends httpRouter.Service {
 		res.status(200).send('Logout successful');
 	}
 
-
-
 	/** eseguo autologin per DEV e TEST */
 	async autoLogin(req: Request, res: Response) {
 		let { userId }: { userId: string } = req.body

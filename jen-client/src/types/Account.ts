@@ -2,9 +2,15 @@ import { Uuid } from "./global.js"
 
 
 
+export enum ACCOUNT_STATUS {
+	OFFLINE = 0,
+	ONLINE,
+}
+
 export interface Account {
 	id: Uuid
 	name: string
+	status: ACCOUNT_STATUS
 	email: string
 	emailVerified?: boolean
 	avatarUrl?: string

@@ -104,6 +104,7 @@ const AgentListView: FunctionComponent<Props> = ({
 			}
 
 
+
 			<div className="jack-divider-h" />
 
 			<div className="jack-lbl-prop">SELECTABLE</div>

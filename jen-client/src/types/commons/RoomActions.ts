@@ -93,7 +93,6 @@ export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
 	roomId: string
 }
 
-
 /** 
  * CLIENT crea una nuova CHAT 
  * - eventualmente inserisce degli AGENTS nella MAIN ROOM
@@ -154,11 +153,14 @@ export type RoomHistoryUpdateC2S = BaseC2S & {
 export enum CHAT_ACTION_S2C {
 
 	/** I dati di una CHAT */
-	CHAT_INFO = "chat-info",
+	CHAT_INFO = "chat-info",	
+
 	/** un CLIENT è entrato in CHAT. Potrebbe essere anche un AGENT*/
 	CLIENT_ENTERED = "entered",
 	/** un CLIENT è uscita dalla CHAT. Potrebbe essere anche un AGENT */
 	CLIENT_LEAVE = "leave",
+	/** comunica lo stato di connessione di un CLIENT */
+	USER_STATUS = "user-status",
 
 	/** creata nuova ROOM in CHAT */
 	ROOM_NEW = "room-new",
@@ -167,6 +169,7 @@ export enum CHAT_ACTION_S2C {
 	/** comunica l'aggiornamento della HISTORY di una ROOM */
 	ROOM_HISTORY_UPDATE = "room-history-update",
 }
+
 
 export type BaseS2C = {
 	action: CHAT_ACTION_S2C
@@ -202,6 +205,12 @@ export type ClientLeaveS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_LEAVE
 	/** id del CLIENT */
 	clientId?: string
+}
+
+export type UserStatusS2C = {
+	action: CHAT_ACTION_S2C.USER_STATUS
+	userId: string
+	status: "online" | "offline"
 }
 
 //#endregion

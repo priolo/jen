@@ -8,7 +8,7 @@ import { McpTool } from "../services/mcp/types.js"
 import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
 import ChatNode from "../services/rooms/ChatNode.js"
 import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserEnterC2S, UserLeaveC2S, UserStatusS2C, UsersAllOnlineC2S, UsersAllOnlineS2C } from "../types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserEnterC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
 
@@ -24,12 +24,13 @@ export type ChatsWSConf = Partial<ChatsWSService['stateDefault']>
  */
 export class ChatsWSService extends ws.route implements ChatContext {
 
+	/** tuttele CHAT esistenti */
 	private chats: ChatNode[] = []
 
 	get stateDefault() {
 		return {
 			...super.stateDefault,
-			name: "ws-rooms",
+			name: "ws-chats",
 			room_repo: "/typeorm/rooms",
 			agent_repo: "/typeorm/agents",
 			tool_repo: "/typeorm/tools",
@@ -43,16 +44,15 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	//#region OVERWRITING SocketCommunicator
 
 	async onConnect(client: ws.IClient) {
-		const userId = client.jwtPayload?.id
+		//const userId = client.jwtPayload?.id
 
 		// qua posso mettere tutti i dati utili al client
 		super.onConnect(client)
-		this.broadcastUserStatus(userId, "online")
 	}
 
 	async onDisconnect(client: ws.IClient) {
 		const userId = client.jwtPayload?.id
-		
+
 		// rimuovo il client da tutte le CHATs
 		const chats = [...this.chats]
 		for (const chat of chats) {
@@ -62,22 +62,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 			)
 		}
 
-		this.broadcastUserStatus(userId, "offline")
 		super.onDisconnect(client)
-	}
-
-	/** 
-	 * Invia a tutti i CLIENTs lo stato (online/offline) di un USER
-	 */
-	private broadcastUserStatus(userId: string, status: "online" | "offline") {
-		if (!userId) return
-		const msg: UserStatusS2C = {
-			action: CHAT_ACTION_S2C.USER_STATUS,
-			userId,
-			status
-		}
-		const msgStr = JSON.stringify(msg)
-		this.getClients().forEach(c => this.sendToClient(c, msgStr))
 	}
 
 	//#endregion
@@ -101,11 +86,6 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		}
 		if (msg.action === CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER) {
 			await this.handleChatLoadByRoom(client, msg as ChatGetByRoomC2S)
-			return
-		}
-
-		if (msg.action === CHAT_ACTION_C2S.USERS_ALL_ONLINE) {
-			await this.handleGetAllOnline(client, msg as UsersAllOnlineC2S)
 			return
 		}
 
@@ -186,23 +166,6 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		}
 
 		chat.addClient(userId)
-	}
-
-	/**
-	 * Restituisce la lista di tutti gli USER id che sono ONLINE
-	 */
-	private async handleGetAllOnline(client: ws.IClient, msg: UsersAllOnlineC2S) {
-		//const userId = client?.jwtPayload?.id
-		//if (!userId) throw new Error(`Invalid userId`)
-
-		// Recupero gli utenti connessi (online)
-		const usersIds = this.getClients().map(c => c.jwtPayload?.id).filter(id => !!id)
-
-		const response: UsersAllOnlineS2C = {
-			action: CHAT_ACTION_S2C.USERS_ALL_ONLINE,
-			usersIds,
-		}
-		this.sendToClient(client, JSON.stringify(response))
 	}
 
 	/**
@@ -313,11 +276,16 @@ export class ChatsWSService extends ws.route implements ChatContext {
 
 		return "Tool type not supported"
 	}
-	
+
 	public sendMessageToClient(clientId: string, message: BaseS2C) {
-		const client = this.getClients()?.find(c => c?.jwtPayload?.id == clientId)
+		const client = this.getClientById(clientId)
 		if (!client) throw new Error(`Client not found: ${clientId}`)
 		this.sendToClient(client, JSON.stringify(message))
+	}
+
+	public getClientById(clientId: string): ws.IClient {
+		if ( !clientId ) return null
+		return this.getClients()?.find(c => c?.jwtPayload?.id == clientId)
 	}
 
 	//#endregion

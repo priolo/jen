@@ -2,7 +2,7 @@ import { ClearSession, EndSession, StartSession } from "@/plugins/session"
 import docsSo, { FIXED_CARD } from "@/stores/docs"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
-import { buildAccountListCard } from "@/stores/stacks/account/factory"
+import { buildAccountList } from "@/stores/stacks/account/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
 import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
@@ -69,7 +69,7 @@ const MainMenu: FunctionComponent<Props> = ({
 
 
 	const handleAccountList = () => {
-		const view = buildAccountListCard()
+		const view = buildAccountList()
 		deckCardsSo.add({ view, anim: true })
 	}
 	const handleAuth = () => {

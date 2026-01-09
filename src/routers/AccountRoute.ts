@@ -1,7 +1,8 @@
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, Like } from "typeorm";
-import { AccountRepo, accountSendable, accountSendableList } from "../repository/Account.js";
+import { ACCOUNT_STATUS, AccountRepo, accountSendable, accountSendableList } from "../repository/Account.js";
+import { ChatsWSService } from "./ChatsWSRoute.js";
 
 
 
@@ -20,23 +21,20 @@ class AccountRoute extends httpRouter.Service {
 				{ path: "/:id", verb: "get", method: "getById" },
 				{ path: "/", verb: "patch", method: "update" },
 				{ path: "/github/:id", verb: "get", method: "getByGithubUserId" },
-
 			]
 		}
 	}
 	declare state: typeof this.stateDefault
 
 	/**
-	 * Restituisce un certo numero di ACCOUNTS (10 di default) eventualmente filtrati su testo libero
+	 * Restituisce un certo numero di ACCOUNTS (10 di default) 
+	 * eventualmente filtrati su testo libero
 	 */
 	async getAll(req: Request, res: Response) {
 		const { text } = req.query as { text?: string };
 
-		let findOptions: FindManyOptions<AccountRepo> = {
-			take: 10  // Limit to 10 results
-		};
-
-		// If text filter is provided, search in text properties
+		// preparo le opzioni di ricerca
+		let findOptions: FindManyOptions<AccountRepo> = { take: 10 }
 		if (!!text && text.trim().length > 0) {
 			const searchText = `%${text.trim()}%`;
 			findOptions.where = [
@@ -46,29 +44,36 @@ class AccountRoute extends httpRouter.Service {
 				{ githubName: Like(searchText) },
 			];
 		}
-
-		const accounts = await new Bus(this, this.state.account_repo).dispatch({
+		// eseguo la ricerca
+		const accounts:AccountRepo[] = await new Bus(this, this.state.account_repo).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: findOptions
-		});
+		})
+
+		// aggiorno lo status online/offline
+		const chats = this.nodeByPath<ChatsWSService>("/>ws-chats")
+		for ( const account of accounts ){
+			const isOnline = !!chats.getClientById( account.id)
+			account.status = isOnline ? ACCOUNT_STATUS.ONLINE : ACCOUNT_STATUS.OFFLINE
+		}
 
 		res.json({
 			accounts: accountSendableList(accounts)
-		});
+		})
 	}
 
 	/**
 	 * Restituisce l'ACCOUNT, se esiste, dato il suo ID
 	 */
 	async getById(req: Request, res: Response) {
-		const id = req.params["id"];
-		if (!id) return res.status(400).json({ error: "Missing id parameter" });
+		const id = req.params["id"]
+		if (!id) return res.status(400).json({ error: "Missing id parameter" })
 
 		const account: AccountRepo = await new Bus(this, this.state.account_repo).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
 			payload: id
-		});
-		if (!account) return res.status(404).json({ error: "Account not found" });
+		})
+		if (!account) return res.status(404).json({ error: "Account not found" })
 
 		res.json({
 			account: accountSendable(account)
@@ -115,8 +120,8 @@ class AccountRoute extends httpRouter.Service {
 			payload: newAccount
 		});
 
-		res.json({ 
-			account: savedAccount(savedAccount) 
+		res.json({
+			account: savedAccount(savedAccount)
 		});
 	}
 }

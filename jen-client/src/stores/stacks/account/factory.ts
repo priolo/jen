@@ -9,7 +9,7 @@ import { Account } from "./types";
 /**
  * Costruisce la CARD per il dettaglio di un ACCOUNT
  */
-export function buildAccountDetailCard(account: Partial<Account>) {
+export function buildAccountDetail(account: Partial<Account>) {
 	const store = buildStore({
 		type: DOC_TYPE.ACCOUNT_DETAIL,
 		account: account,
@@ -20,9 +20,10 @@ export function buildAccountDetailCard(account: Partial<Account>) {
 /**
  * Costruisce la CARD per la lista di ACCOUNT
  */
-export function buildAccountListCard() {
+export function buildAccountList(state: Partial<AccountListState> = {}) {
 	const store = buildStore({
 		type: DOC_TYPE.ACCOUNT_LIST,
+		...state,
 	} as AccountListState) as AccountListStore
 	return store;
 }

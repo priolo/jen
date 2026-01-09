@@ -1,6 +1,6 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { BaseS2C } from "@/types/commons/RoomActions.js";
-
+import { ws } from "@priolo/julian"
 
 export interface ChatContext {
 	/**
@@ -15,4 +15,9 @@ export interface ChatContext {
 	 * Invia un messaggio ad un client specifico
 	 */
 	sendMessageToClient: (clientId: string, message: BaseS2C) => void
+	/**
+	 * Restituisce un CLIENT dato il suo ID
+	 */
+	getClientById(clientId: string): ws.IClient
+
 }

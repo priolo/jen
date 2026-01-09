@@ -5,7 +5,7 @@ import { Account } from "@/types/Account"
 import { debounce } from "@/utils/time"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
-import { buildAccountDetailCard } from "./factory"
+import { buildAccountDetail } from "./factory"
 
 
 /**
@@ -47,7 +47,7 @@ const setup = {
 		},
 
 		openDetail(accountId: string, store?: AccountListStore) {
-			const view = buildAccountDetailCard({ id: accountId })
+			const view = buildAccountDetail({ id: accountId })
 			deckCardsSo.addLink({ view, parent: store, anim: true })
 		}
 	},
