@@ -1,8 +1,6 @@
-import accountApi from "@/api/account"
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
-import { Account } from "@/types/Account"
-import { debounce } from "@/utils/time"
+import { AccountDTO } from "@/types/account"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
 import { buildAccountDetail } from "./factory"
@@ -17,7 +15,7 @@ const setup = {
 		//#region VIEWBASE
 		//#endregion
 		textSearch: <string>null,
-		all: <Account[]>[],
+		all: <AccountDTO[]>[],
 	},
 
 	getters: {
@@ -41,11 +39,6 @@ const setup = {
 		},
 		//#endregion
 
-		async fetchFiltered(_: void, store?: AccountListStore) {
-			const accounts = (await accountApi.index({ text: store.state.textSearch }))?.accounts ?? []
-			store.setAll(accounts)
-		},
-
 		openDetail(accountId: string, store?: AccountListStore) {
 			const view = buildAccountDetail({ id: accountId })
 			deckCardsSo.addLink({ view, parent: store, anim: true })
@@ -53,17 +46,11 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Account[]) => ({ all }),
-		setTextSearch: (textSearch: string, store?: AccountListStore) => {
-			debounce(
-				"AccountListView.setTextSearch",
-				() => store.fetchFiltered(),
-				500
-			)
-			return { textSearch }
-		},
+		setAll: (all: AccountDTO[]) => ({ all }),
+		setTextSearch: (textSearch: string) => ({ textSearch })
 	},
 }
+
 
 export type AccountListState = typeof setup.state & ViewState
 export type AccountListGetters = typeof setup.getters

@@ -1,10 +1,10 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService";
-import { Account } from "../types/Account";
+import { AccountDTO } from "../types/account";
 
 
 
 /** INDEX */
-function index(filter?: { text?: string }, opt?: CallOptions): Promise<{ accounts: Account[] }> {
+function index(filter?: { text?: string }, opt?: CallOptions): Promise<{ accounts: AccountDTO[] }> {
 	const params = new URLSearchParams();
 	if (filter?.text) {
 		params.append('text', filter.text);
@@ -15,7 +15,7 @@ function index(filter?: { text?: string }, opt?: CallOptions): Promise<{ account
 }
 
 /** GET */
-async function get(id: string, opt?: CallOptions): Promise<{ account: Account }> {
+async function get(id: string, opt?: CallOptions): Promise<{ account: AccountDTO }> {
 	if (!id) throw new Error("Account ID is required");
 	return await ajax.get(`accounts/${id}`, opt)
 }
@@ -27,13 +27,13 @@ function remove(id: string, opt?: CallOptions): Promise<void> {
 }
 
 /** CREATE */
-function create(user: Account, opt?: CallOptions): Promise<{ account: Account }> {
+function create(user: AccountDTO, opt?: CallOptions): Promise<{ account: AccountDTO }> {
 	if (!user) throw new Error("Account data is required");
 	return ajax.post(`accounts`, user, opt)
 }
 
 /** UPDATE */
-function update(user: Account, opt?: CallOptions): Promise<{account: Account}> {
+function update(user: AccountDTO, opt?: CallOptions): Promise<{account: AccountDTO}> {
 	if (!user) throw new Error("Account data is required");
 	return ajax.post(`accounts/${user.id}`, user, opt)
 }

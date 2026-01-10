@@ -1,7 +1,7 @@
 import accountApi from "@/api/account"
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
-import { Account } from "@/types/Account"
+import { AccountDTO } from "@/types/account"
 import { debounce } from "@/utils/time"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
@@ -17,7 +17,7 @@ const setup = {
 		//#region VIEWBASE
 		//#endregion
 		textSearch: <string>null,
-		all: <Account[]>[],
+		all: <AccountDTO[]>[],
 	},
 
 	getters: {
@@ -53,7 +53,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Account[]) => ({ all }),
+		setAll: (all: AccountDTO[]) => ({ all }),
 		setTextSearch: (textSearch: string, store?: AccountFinderStore) => {
 			debounce(
 				"AccountListView.setTextSearch",

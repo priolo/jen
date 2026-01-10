@@ -1,6 +1,6 @@
 import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE, EDIT_STATE } from "@/types";
-import { Account } from "@/types/Account";
+import { AccountDTO } from "@/types/account";
 import { UsersState, UsersStore } from "..";
 import { UserState, UserStore } from "../detail";
 
@@ -15,7 +15,7 @@ export function buildUsers() {
 }
 
 /** new CARD of USER */
-export function buildUser( user: Account ) {
+export function buildUser( user: AccountDTO ) {
 	if (!user) { console.error("no param"); return null; }
 	const store = buildStore({
 		type: DOC_TYPE.USER,

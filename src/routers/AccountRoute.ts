@@ -1,8 +1,11 @@
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, Like } from "typeorm";
-import { ACCOUNT_STATUS, AccountRepo, accountSendable, accountSendableList } from "../repository/Account.js";
+import { AccountRepo } from "../repository/Account.js";
+import { ACCOUNT_STATUS } from '@/types/account.js';
+import { AccountDTO, AccountDTOList } from '@/types/account.js';
 import { ChatsWSService } from "./ChatsWSRoute.js";
+import { REPO_PATHS } from "@/config.js";
 
 
 
@@ -15,7 +18,6 @@ class AccountRoute extends httpRouter.Service {
 		return {
 			...super.stateDefault,
 			path: "/accounts",
-			account_repo: "/typeorm/accounts",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
@@ -45,7 +47,7 @@ class AccountRoute extends httpRouter.Service {
 			];
 		}
 		// eseguo la ricerca
-		const accounts:AccountRepo[] = await new Bus(this, this.state.account_repo).dispatch({
+		const accounts:AccountRepo[] = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: findOptions
 		})
@@ -58,7 +60,7 @@ class AccountRoute extends httpRouter.Service {
 		}
 
 		res.json({
-			accounts: accountSendableList(accounts)
+			accounts: AccountDTOList(accounts)
 		})
 	}
 
@@ -69,14 +71,14 @@ class AccountRoute extends httpRouter.Service {
 		const id = req.params["id"]
 		if (!id) return res.status(400).json({ error: "Missing id parameter" })
 
-		const account: AccountRepo = await new Bus(this, this.state.account_repo).dispatch({
+		const account: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
 			payload: id
 		})
 		if (!account) return res.status(404).json({ error: "Account not found" })
 
 		res.json({
-			account: accountSendable(account)
+			account: AccountDTO(account)
 		})
 	}
 
@@ -87,14 +89,14 @@ class AccountRoute extends httpRouter.Service {
 		const githubId = parseInt(req.params.id)
 		if (isNaN(githubId)) return res.status(400).json({ error: "Invalid GitHub ID" })
 
-		const account: AccountRepo = await new Bus(this, this.state.account_repo).dispatch({
+		const account: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 			type: typeorm.Actions.FIND_ONE,
 			payload: <FindManyOptions<AccountRepo>>{
 				where: { githubId: githubId },
 			}
 		})
 		res.json({
-			account: accountSendable(account),
+			account: AccountDTO(account),
 		})
 	}
 
@@ -115,7 +117,7 @@ class AccountRoute extends httpRouter.Service {
 			notificationsEnabled: account.notificationsEnabled ?? undefined,
 		}
 
-		const savedAccount = await new Bus(this, this.state.account_repo).dispatch({
+		const savedAccount = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 			type: typeorm.Actions.SAVE,
 			payload: newAccount
 		});

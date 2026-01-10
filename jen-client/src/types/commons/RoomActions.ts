@@ -1,3 +1,4 @@
+import { AccountDTO } from '../account.js';
 import { LlmResponse } from "./LlmResponse.js";
 
 
@@ -188,7 +189,7 @@ export type BaseS2C = {
 export type ChatInfoS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CHAT_INFO
 	/** lista dei CLIENTs presenti */
-	clientsIds: string[]
+	clients: AccountDTO[]
 	/** lista delle ROOMs. */
 	rooms: ChatRoom[]
 }
@@ -196,8 +197,8 @@ export type ChatInfoS2C = BaseS2C & {
 /** un CLIENT è entrato in una CHAT */
 export type ClientEnteredS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_ENTERED
-	/** id del CLIENT */
-	clientId: string
+	/** il CLIENT che entra */
+	client: AccountDTO
 }
 
 /** un CLIENT è uscito da una CHAT */

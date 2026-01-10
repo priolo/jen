@@ -1,24 +1,24 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
-import { Account } from "@/types/Account"
+import { AccountDTO } from "@/types/account"
 
 
 /**
  * Cerco di recuperare l'attuale ACCOUNT loggato tramite JWT
  * Se non sono loggato ritorna null
  */
-function current(opt?: CallOptions): Promise<{ user: Account }> {
+function current(opt?: CallOptions): Promise<{ user: AccountDTO }> {
 	return ajax.get(`auth/current`, { ...opt, isLogin: true })
 }
 
 /**
  * Effettual il logout dell'utente 
  */
-function logout(opt?: CallOptions): Promise<{ user: Account }> {
+function logout(opt?: CallOptions): Promise<{ user: AccountDTO }> {
 	return ajax.post(`auth/logout`, null, opt)
 }
 
 /** PATCH: UPDATE */
-function update(account:Partial<Account>, opt?: CallOptions): Promise<{ account: Account }> {
+function update(account:Partial<AccountDTO>, opt?: CallOptions): Promise<{ account: AccountDTO }> {
 	return ajax.patch(`accounts`, { account }, opt)
 }
 
@@ -49,7 +49,7 @@ function githubDetach(opt?: CallOptions): Promise<any> {
 /**
  * prelevo l'ACCOUNT collegato ad un ACCOUNT-GITHUB
  */
-function githubGetAccount(accountId: number, opt?: CallOptions): Promise<{ account: Account }> {
+function githubGetAccount(accountId: number, opt?: CallOptions): Promise<{ account: AccountDTO }> {
 	return ajax.get(`accounts/github/${accountId}`, opt)
 }
 
@@ -57,7 +57,7 @@ function githubGetAccount(accountId: number, opt?: CallOptions): Promise<{ accou
 
 
 
-function loginGoogle(token: string, opt?: CallOptions): Promise<{ user: Account }> {
+function loginGoogle(token: string, opt?: CallOptions): Promise<{ user: AccountDTO }> {
 	return ajax.post(`auth/google/login`, { token }, { ...opt, isLogin: true })
 }
 /** 

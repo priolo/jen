@@ -2,7 +2,9 @@ import { Bus, httpRouter, jwt, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { OAuth2Client } from 'google-auth-library';
 import { FindManyOptions } from "typeorm";
-import { AccountRepo, accountSendable, JWTPayload } from "../repository/Account.js";
+import { AccountRepo } from "../repository/Account.js";
+import { AccountDTO, JWTPayload } from '@/types/account.js';
+import { REPO_PATHS } from "@/config.js";
 
 
 
@@ -15,7 +17,6 @@ class AuthGoogleRoute extends httpRouter.Service {
 			...super.stateDefault,
 			path: "/api/auth/google",
 			email: "/email",
-			repository: "/typeorm/accounts",
 			jwt: "/jwt",
 			routers: [
 				{ path: "/login", verb: "post", method: "login" },
@@ -41,7 +42,7 @@ class AuthGoogleRoute extends httpRouter.Service {
 
 
 			// FIND ACCOUNT or VOID ACCOUNT
-			let user: AccountRepo = await new Bus(this, this.state.repository).dispatch({
+			let user: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 				type: typeorm.Actions.FIND_ONE,
 				payload: <FindManyOptions<AccountRepo>>{
 					where: [
@@ -52,7 +53,7 @@ class AuthGoogleRoute extends httpRouter.Service {
 			}) ?? {}
 
 			// ACCOUNT UPDATE or CREATE
-			user = await new Bus(this, this.state.repository).dispatch({
+			user = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 				type: typeorm.Actions.SAVE,
 				payload: {
 					...user,
@@ -86,7 +87,7 @@ class AuthGoogleRoute extends httpRouter.Service {
 
 			// restituisco i dati dell'utente loggato
 			res.status(200).json({
-				user: accountSendable(user),
+				user: AccountDTO(user),
 			});
 
 		} catch (error) {

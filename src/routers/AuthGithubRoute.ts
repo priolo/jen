@@ -2,7 +2,8 @@ import { OAuthApp } from "@octokit/oauth-app";
 import { Bus, httpRouter, jwt, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, FindOneOptions } from "typeorm";
-import { AccountRepo, JWTPayload } from "../repository/Account.js";
+import { AccountRepo } from "../repository/Account.js";
+import { JWTPayload } from '@/types/account.js';
 import { GithubUser } from "../types/github.js";
 
 

@@ -1,5 +1,5 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
-import { Account } from "@/types/Account"
+import { AccountDTO } from "@/types/account"
 
 
 
@@ -13,7 +13,7 @@ function emailSendCode(email: string, opt?: CallOptions): Promise<{ data: any }>
 /**
  * Verifico un CODE se esiste e restituisco l'ACCOUNT collegato
  */
-function emailVerify(code: string, opt?: CallOptions): Promise<{ user: Account }> {
+function emailVerify(code: string, opt?: CallOptions): Promise<{ user: AccountDTO }> {
 	return ajax.post(`auth/email_verify`, { code }, opt)
 }
 

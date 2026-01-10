@@ -55,9 +55,6 @@ What is 2+2? Just write the answer number.`,
 		getAgentsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.AGENT_LIST,
 		getAccountsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ACCOUNT_LIST,
 		getRoomDetailOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_DETAIL,
-		canInvite: (_: void, store?: RoomDetailStore) => {
-			
-		}
 	},
 
 	actions: {

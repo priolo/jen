@@ -1,4 +1,4 @@
-import { Account } from '@/types/Account';
+import { AccountDTO } from '@/types/account';
 import { TooltipWrapCmp } from '@priolo/jack';
 import React from 'react';
 import Avatar from './Avatar';
@@ -6,7 +6,7 @@ import Avatar from './Avatar';
 
 
 interface Props {
-    account?: Account
+    account?: AccountDTO
     haveTooltip?: boolean
     style?: React.CSSProperties
     className?: string

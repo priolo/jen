@@ -5,7 +5,7 @@ import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoom
 import { docsSo, utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
 import { buildRoomDetail } from "../room/factory"
-import { Chat } from "./types"
+import { Chat } from "../../../types/chat"
 
 
 
@@ -145,7 +145,7 @@ const setup = {
 					const msg: ChatInfoS2C = JSON.parse(data.payload)
 					let chat:Chat = {
 						id: msg.chatId,
-						clientsIds: msg.clientsIds,
+						clients: msg.clients,
 						rooms: msg.rooms,
 					}
 					const chatOld = store.getChatById(msg.chatId)
@@ -160,13 +160,19 @@ const setup = {
 
 				case CHAT_ACTION_S2C.CLIENT_ENTERED: {
 					const msg = message as ClientEnteredS2C
-					//*** */
+					const chat = store.getChatById(msg.chatId)
+					if (!chat) break
+					chat.clients.push(msg.client)
+					store._update()
 					break
 				}
 
 				case CHAT_ACTION_S2C.CLIENT_LEAVE: {
 					const msg = message as ClientLeaveS2C
-					//*** */
+					const chat = store.getChatById(msg.chatId)
+					if (!chat) break
+					chat.clients = chat.clients.filter(c => c.id != msg.clientId)
+					store._update()
 					break
 				}
 

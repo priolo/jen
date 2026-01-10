@@ -211,3 +211,15 @@ function buildNodeConfig(params?: ConfigParams) {
 }
 
 export default buildNodeConfig 
+
+
+
+export enum REPO_PATHS {
+	ACCOUNTS = "/typeorm/accounts",
+	MCP_SERVERS = "/typeorm/mcp_servers",
+	AGENTS = "/typeorm/agents",
+	TOOLS = "/typeorm/tools",
+	CHATS = "/typeorm/chats",
+	ROOMS = "/typeorm/rooms",
+	LLMS = "/typeorm/llms",
+}

@@ -11,6 +11,10 @@ import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
 import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserEnterC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
+import { REPO_PATHS } from "@/config.js"
+import { AccountRepo } from "@/repository/Account.js"
+import { ACCOUNT_STATUS } from '@/types/account.js'
+import { AccountDTO } from '@/types/account.js'
 
 
 
@@ -31,11 +35,6 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		return {
 			...super.stateDefault,
 			name: "ws-chats",
-			room_repo: "/typeorm/rooms",
-			agent_repo: "/typeorm/agents",
-			tool_repo: "/typeorm/tools",
-			mcp_repo: "/typeorm/mcp_servers",
-			account_repo: "/typeorm/accounts",
 		}
 	}
 	declare state: typeof this.stateDefault
@@ -44,9 +43,20 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	//#region OVERWRITING SocketCommunicator
 
 	async onConnect(client: ws.IClient) {
-		//const userId = client.jwtPayload?.id
+		const userId = client.jwtPayload?.id
 
-		// qua posso mettere tutti i dati utili al client
+		// completo i dati del client
+		const account: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
+			type: typeorm.Actions.GET_BY_ID,
+			payload: userId
+		})
+		if ( !account ) throw new Error(`Account not found: ${userId}`)
+		account.status = ACCOUNT_STATUS.ONLINE
+		client.jwtPayload = {
+			...client.jwtPayload,
+			...AccountDTO(account),
+		}
+
 		super.onConnect(client)
 	}
 
@@ -210,7 +220,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	public async getAgentRepoById(agentId: string): Promise<AgentRepo> {
 
 		// [II] non va bene! deve raggiungere il nodo con una path!
-		const agent: AgentRepo = await AgentRoute.GetById(agentId, this, this.state.agent_repo)
+		const agent: AgentRepo = await AgentRoute.GetById(agentId, this, REPO_PATHS.AGENTS)
 
 		// [II] --- mettere in una funzione a parte
 		// bisogna recuperare la "description" e "parameters" per i TOOLS
@@ -225,7 +235,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 				// non sono in CACHE allora li carico e li metto in CACHE
 				if (!ChatsWSService.McpCache.has(tool.mcpId)) {
 					// [II] anche questo va ricavato tramite path
-					const mcpServer = await McpServerRoute.GetById(tool.mcpId, this, this.state.mcp_repo)
+					const mcpServer = await McpServerRoute.GetById(tool.mcpId, this)
 					if (!mcpServer) continue
 					const mcpTools = await getMcpTools(mcpServer.host)
 					ChatsWSService.McpCache.set(mcpServer.id, mcpTools)
@@ -246,7 +256,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	}
 
 	public async executeTool(toolId: string, args: any): Promise<any> {
-		const toolRepo: ToolRepo = await new Bus(this, this.state.tool_repo).dispatch({
+		const toolRepo: ToolRepo = await new Bus(this, REPO_PATHS.TOOLS).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
 			payload: toolId
 		})
@@ -269,7 +279,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		}
 
 		if (toolRepo.type == TOOL_TYPE.MCP) {
-			const mcpServer = await McpServerRoute.GetById(toolRepo.mcpId, this, this.state.mcp_repo)
+			const mcpServer = await McpServerRoute.GetById(toolRepo.mcpId, this)
 			if (!mcpServer) return `MCP Server not found: ${toolRepo.mcpId}`
 			return await executeMcpTool(mcpServer.host, toolRepo.name, args)
 		}
@@ -284,7 +294,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	}
 
 	public getClientById(clientId: string): ws.IClient {
-		if ( !clientId ) return null
+		if (!clientId) return null
 		return this.getClients()?.find(c => c?.jwtPayload?.id == clientId)
 	}
 
@@ -340,14 +350,14 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	 */
 	private async loadChatByRoomId(roomId: string, accountId?: string): Promise<ChatNode> {
 		// Carico la ROOM richiesta
-		const roomRepo: RoomRepo = await new Bus(this, this.state.room_repo).dispatch({
+		const roomRepo: RoomRepo = await new Bus(this, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
 			payload: roomId
 		})
 		if (!roomRepo || !roomRepo.chatId) throw new Error(`Room not found: ${roomId}`)
 
 		// carico tutte le ROOMs di quella CHAT
-		const roomsRepo: RoomRepo[] = await new Bus(this, this.state.room_repo).dispatch({
+		const roomsRepo: RoomRepo[] = await new Bus(this, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<RoomRepo>>{ chatId: roomRepo.chatId }
 		})
@@ -366,7 +376,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	//#region ROOMS MANAGEMENT
 
 	private async saveRoom(room: RoomRepo): Promise<void> {
-		await new Bus(this, this.state.room_repo).dispatch({
+		await new Bus(this, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.SAVE,
 			payload: <RoomRepo>{
 				id: room.id,

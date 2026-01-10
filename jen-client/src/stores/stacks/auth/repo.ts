@@ -1,7 +1,7 @@
 import authApi from "@/api/auth";
 import authEmailApi from "@/api/authEmail";
 import { wsConnection } from "@/plugins/session/wsConnection";
-import { Account } from "@/types/Account";
+import { AccountDTO } from "@/types/account";
 import { StoreCore, createStore } from "@priolo/jon";
 
 
@@ -14,8 +14,8 @@ const setup = {
 
 	state: {
 		token: <string>null,
-		user: <Account>null,
-		userInEdit: <Partial<Account>>null,
+		user: <AccountDTO>null,
+		userInEdit: <Partial<AccountDTO>>null,
 	},
 
 	getters: {
@@ -42,7 +42,7 @@ const setup = {
 		 */
 		current: async (_: void, store?: AuthStore) => {
 			if (!!store.state.user) return
-			let user: Account = (await authApi.current({ noError: true }))?.user
+			let user: AccountDTO = (await authApi.current({ noError: true }))?.user
 			store.login(user)
 		},
 
@@ -51,7 +51,7 @@ const setup = {
 		 */
 		update: async (_: void, store?: AuthStore) => {
 			if (!store.state.userInEdit?.name) return
-			const newAccount: Partial<Account> = {
+			const newAccount: Partial<AccountDTO> = {
 				name: store.state.userInEdit?.name,
 				language: store.state.userInEdit?.language ?? undefined,
 				notificationsEnabled: store.state.userInEdit?.notificationsEnabled ?? undefined,
@@ -75,7 +75,7 @@ const setup = {
 		/** 
 		 * chiamato quando c'e' un cambio di account 
 		 */
-		login: async (user: Account, store?: AuthStore) => {
+		login: async (user: AccountDTO, store?: AuthStore) => {
 			store.setUser(user)
 			//if (user?.language) i18n.changeLanguage(user.language)
 			if ( !user ) {
@@ -122,7 +122,7 @@ const setup = {
 
 
 		loginWithGoogle: async (token: string, store?: AuthStore) => {
-			let user: Account = null
+			let user: AccountDTO = null
 			try {
 				user = (await authApi.loginGoogle(token))?.user
 			} catch (error) {
@@ -136,8 +136,8 @@ const setup = {
 		 */
 		attachGoogle: async (token: string, store?: AuthStore) => {
 			const res = await authApi.googleAttach(token)
-			const user = res.user as Account
-			store.login(<Account>{
+			const user = res.user as AccountDTO
+			store.login(<AccountDTO>{
 				...store.state.user,
 				googleEmail: user.googleEmail,
 			})
@@ -152,11 +152,11 @@ const setup = {
 	},
 
 	mutators: {
-		setUser: (user: Account) => {
+		setUser: (user: AccountDTO) => {
 			//if (user?.language) i18n.changeLanguage(user.language)
 			return { user }
 		},
-		setUserInEdit: (userInEdit: Partial<Account>) => ({ userInEdit }),
+		setUserInEdit: (userInEdit: Partial<AccountDTO>) => ({ userInEdit }),
 	},
 }
 

@@ -6,6 +6,7 @@ import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
 import RoomTurnBased from "./RoomTurnBased.js";
 import { RoomRepo } from "@/repository/Room.js";
+import { AccountDTO } from '@/types/account.js';
 
 
 
@@ -107,19 +108,23 @@ class ChatNode {
 	addClient(clientId: string) {
 		if (!clientId || this.clientsIds.has(clientId)) return;
 
+		// ricavo i dati del CLIENT
+		const client = (this.node.getClientById(clientId))?.jwtPayload as AccountDTO
+
 		// avverto gli altri CLIENT
 		const message: ClientEnteredS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
 			chatId: this.id,
-			clientId: clientId,
+			client,
 		}
 		this.sendMessage(message)
 
-		// invio al nuovo CLIENT i dati della CHAT
-		this.sendInfoToClient(clientId)
-
 		// inserisco il CLIENT nella CHAT
 		this.clientsIds.add(clientId);
+
+		// invio al nuovo CLIENT i dati della CHAT
+		const msg = this.getInfo()
+		this.node.sendMessageToClient(clientId, msg)
 	}
 
 	/**
@@ -188,24 +193,29 @@ class ChatNode {
 	}
 
 	/**
-	 * Invia ad uno specifico CLIENT le INFO della CHAT
+	 * Restituisco le info della CHAT sotto forma di messaggio
 	 */
-	private sendInfoToClient(clientId: string) {
-		if (!clientId) return;
-		const msg: ChatInfoS2C = {
+	private getInfo(): ChatInfoS2C {
+
+		const clients: AccountDTO[] = [...this.clientsIds].map(clientId => {
+			return (this.node.getClientById(clientId))?.jwtPayload as AccountDTO
+		}).filter(a => !!a)
+
+		const rooms = this.rooms.map(r => ({
+			id: r.room.id,
+			chatId: this.id,
+			parentRoomId: r.room.parentRoomId,
+			accountId: r.room.accountId,
+			history: r.room.history,
+			agentsIds: r.room.agents?.map(a => a.id),
+		}))
+
+		return {
 			action: CHAT_ACTION_S2C.CHAT_INFO,
 			chatId: this.id,
-			clientsIds: [...this.clientsIds],
-			rooms: this.rooms.map(r => ({
-				id: r.room.id,
-				chatId: this.id,
-				parentRoomId: r.room.parentRoomId,
-				accountId: r.room.accountId,
-				history: r.room.history,
-				agentsIds: r.room.agents?.map(a => a.id),
-			})),
+			clients,
+			rooms,
 		}
-		this.node.sendMessageToClient(clientId, msg)
 	}
 
 	/**

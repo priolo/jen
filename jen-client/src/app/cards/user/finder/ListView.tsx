@@ -3,7 +3,7 @@ import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import { DOC_TYPE } from "@/types"
-import { Account, ACCOUNT_STATUS } from "@/types/Account"
+import { AccountDTO, ACCOUNT_STATUS } from "@/types/account"
 import { AlertDialog, FindInputHeader } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
@@ -31,12 +31,12 @@ const AccountFinderView: FunctionComponent<Props> = ({
 	}, [])
 
 	// HANDLER
-	const handleSelect = (account: Account) => store.openDetail(account.id)
+	const handleSelect = (account: AccountDTO) => store.openDetail(account.id)
 
 	// RENDER
 	const accounts = store.state.all
 	const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
-	const isSelected = (account: Account) => account.id == selectId
+	const isSelected = (account: AccountDTO) => account.id == selectId
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}

@@ -1,4 +1,4 @@
-import { Account } from '@/types/Account';
+import { AccountDTO } from '@/types/account';
 import { TooltipWrapCmp } from '@priolo/jack';
 import React from 'react';
 import AvatarCmp from './AvatarCmp';
@@ -6,7 +6,7 @@ import AvatarCmp from './AvatarCmp';
 
 
 interface Props {
-    account: Account;
+    account: AccountDTO;
 }
 
 

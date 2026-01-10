@@ -1,6 +1,6 @@
 import { createStore, StoreCore } from "@priolo/jon"
 import accountApi from "@/api/account"
-import { Account } from "@/types/Account"
+import { AccountDTO } from "@/types/account"
 import { wsConnection } from "@/plugins/session/wsConnection"
 
 

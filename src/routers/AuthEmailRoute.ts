@@ -3,7 +3,9 @@ import crypto from "crypto";
 import { Request, Response } from "express";
 import { CodeTemplate, loadTemplate } from "../services/templates/index.js";
 import { FindManyOptions } from "typeorm";
-import { AccountRepo, accountSendable, EMAIL_CODE, JWTPayload } from "../repository/Account.js";
+import { AccountRepo } from "../repository/Account.js";
+import { EMAIL_CODE } from '@/types/account.js';
+import { AccountDTO, JWTPayload } from '@/types/account.js';
 import { ENV_TYPE } from "../types/env.js";
 
 
@@ -134,7 +136,7 @@ class AuthEmailRoute extends httpRouter.Service {
 
 		// restituisco i dati dell'utente loggato
 		res.status(200).json({
-			user: accountSendable(user),
+			user: AccountDTO(user),
 		});
 	}
 

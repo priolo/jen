@@ -1,5 +1,6 @@
 import { Bus, RootService, typeorm } from "@priolo/julian";
-import { AccountRepo, EMAIL_CODE } from "../repository/Account.js";
+import { AccountRepo } from "../repository/Account.js";
+import { EMAIL_CODE } from '@/types/account.js';
 import { AGENT_TYPE, AgentRepo } from "../repository/Agent.js";
 import { LlmRepo } from "../repository/Llm.js";
 import { McpServerRepo } from "../repository/McpServer.js";

@@ -5,7 +5,7 @@ import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE, EDIT_STATE } from "@/types"
 import { StoreCore, mixStores } from "@priolo/jon"
 import { UsersState, UsersStore } from "."
-import { Account } from "../../../types/Account"
+import { AccountDTO } from "../../../types/account"
 import { loadBaseSetup, LoadBaseState, LoadBaseStore, VIEW_SIZE } from "@priolo/jack"
 import docApi from "../../../api/doc"
 
@@ -16,7 +16,7 @@ const setup = {
 
 	state: {
 		/** USER of CARD */
-		user: <Account>null,
+		user: <AccountDTO>null,
 
 		editState: EDIT_STATE.READ,
 
@@ -94,7 +94,7 @@ const setup = {
 		},
 		/** save USER*/
 		async save(_: void, store?: UserStore) {
-			let userSaved: Account = null
+			let userSaved: AccountDTO = null
 			if (store.state.editState == EDIT_STATE.NEW) {
 				userSaved = await accountApi.create(store.state.user, { store })
 			} else {
@@ -119,7 +119,7 @@ const setup = {
 	},
 
 	mutators: {
-		setUser: (stream: Account) => ({ stream }),
+		setUser: (stream: AccountDTO) => ({ stream }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }

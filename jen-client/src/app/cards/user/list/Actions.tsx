@@ -25,6 +25,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// HOOKs
+	useStore
 
 
 	// HANDLER
@@ -39,11 +40,17 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	// RENDER
 	const accountInvite = useMemo(() => {
 		const fw = focusSo.state.view
-		let AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw as AccountDetailStore : null
+		let AccountView = null
+		if (!!fw) {
+			AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_LIST && fw.state.linked.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw.state.linked as AccountDetailStore : null
+			if ( !AccountView ) {
+				AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw as AccountDetailStore : null	
+			}
+		}
 		if (!AccountView) {
 			AccountView = utils.forEachViews(
 				store.state.group.state.all,
-				view => 
+				view =>
 					view.state.parent != store && view.state.type == DOC_TYPE.ACCOUNT_DETAIL ? view as AccountDetailStore : null,
 			)
 		}

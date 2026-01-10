@@ -2,11 +2,13 @@ import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
+import chatSo from "@/stores/stacks/chat/repo"
+import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { DOC_TYPE } from "@/types"
-import { Account, ACCOUNT_STATUS } from "@/types/Account"
+import { ACCOUNT_STATUS, AccountDTO } from "@/types/account"
 import { AlertDialog, FindInputHeader } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { FunctionComponent, useEffect } from "react"
+import { FunctionComponent, useMemo } from "react"
 import ActionsCmp from "./Actions"
 
 
@@ -27,17 +29,20 @@ const AccountListView: FunctionComponent<Props> = ({
 	useStore(store.state.group)
 
 	// HOOKs
-	useEffect(() => {
-		store.fetchFiltered()
+	const clients = useMemo(() => {
+		const roomId = (store.state.parent as RoomDetailStore)?.state.roomId
+		const room = chatSo.getRoomById(roomId)
+		const chat = chatSo.getChatById(room?.chatId)
+		return chat?.clients ?? []
+
 	}, [])
 
 	// HANDLER
-	const handleSelect = (account: Account) => store.openDetail(account.id)
+	const handleSelect = (account: AccountDTO) => store.openDetail(account.id)
 
 	// RENDER
-	const accounts = store.state.all
 	const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
-	const isSelected = (account: Account) => account.id == selectId
+	const isSelected = (account: AccountDTO) => account.id == selectId
 	
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
@@ -67,12 +72,12 @@ const AccountListView: FunctionComponent<Props> = ({
 			//singleRow={store.getWidth() > 430}
 		/> */}
 
-		{accounts.map(account => {
+		{clients.map(clients => {
 			return (
-				<div key={account.id}
-					onClick={() => handleSelect(account)}
+				<div key={clients.id}
+					onClick={() => handleSelect(clients)}
 				>
-					{isSelected(account)? "***" : ""} {account.name} - {account.status == ACCOUNT_STATUS.ONLINE ? "ONLINE" : "OFFLINE"}
+					{isSelected(clients)? "***" : ""} {clients.name} - {clients.status == ACCOUNT_STATUS.ONLINE ? "ONLINE" : "OFFLINE"}
 				</div>
 			)
 		})}

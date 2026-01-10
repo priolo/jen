@@ -3,6 +3,7 @@ import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { McpServerRepo } from "../repository/McpServer.js";
 import { FindManyOptions } from "typeorm";
+import { REPO_PATHS } from "@/config.js";
 
 
 
@@ -12,7 +13,6 @@ class McpServerRoute extends httpRouter.Service {
 		return {
 			...super.stateDefault,
 			path: "/mcp_servers",
-			repository: "/typeorm/mcp_servers",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/", verb: "post", method: "create" },
@@ -25,8 +25,8 @@ class McpServerRoute extends httpRouter.Service {
 	}
 	declare state: typeof this.stateDefault
 
-	public static async GetById(mcpId: string, node: INode, repository: string): Promise<McpServerRepo> {
-		const mcpServer = await new Bus(node, repository).dispatch<McpServerRepo>({
+	public static async GetById(mcpId: string, node: INode): Promise<McpServerRepo> {
+		const mcpServer = await new Bus(node, REPO_PATHS.MCP_SERVERS).dispatch<McpServerRepo>({
 			type: typeorm.Actions.GET_BY_ID,
 			payload: mcpId
 		})
@@ -36,7 +36,7 @@ class McpServerRoute extends httpRouter.Service {
 	async getAll(req: Request, res: Response) {
 		const user = req["jwtPayload"]
 		console.log("user", user)
-		const mcpServer = await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
+		const mcpServer = await new Bus(this, REPO_PATHS.MCP_SERVERS).dispatch<McpServerRepo>({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions>{
 				where: { accountId: user.id }
@@ -47,7 +47,7 @@ class McpServerRoute extends httpRouter.Service {
 
 	async create(req: Request, res: Response) {
 		const { mcpServer }: { mcpServer: McpServerRepo } = req.body
-		const mcpServerNew = await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
+		const mcpServerNew = await new Bus(this, REPO_PATHS.MCP_SERVERS).dispatch<McpServerRepo>({
 			type: typeorm.Actions.SAVE,
 			payload: mcpServer
 		})
@@ -56,7 +56,7 @@ class McpServerRoute extends httpRouter.Service {
 
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
-		await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
+		await new Bus(this, REPO_PATHS.MCP_SERVERS).dispatch<McpServerRepo>({
 			type: typeorm.Actions.DELETE,
 			payload: id
 		})
@@ -67,7 +67,7 @@ class McpServerRoute extends httpRouter.Service {
 		const id = req.params["id"]
 		const { mcpServer }: { mcpServer: McpServerRepo } = req.body
 		if (!id || !mcpServer) return
-		const mcpServerUp = await new Bus(this, this.state.repository).dispatch<McpServerRepo>({
+		const mcpServerUp = await new Bus(this, REPO_PATHS.MCP_SERVERS).dispatch<McpServerRepo>({
 			type: typeorm.Actions.SAVE,
 			payload: mcpServer,
 		})
@@ -76,7 +76,7 @@ class McpServerRoute extends httpRouter.Service {
 
 	async resources(req: Request, res: Response) {
 		const id = req.params["id"]
-		const mcpServer = await McpServerRoute.GetById(id, this, this.state.repository)
+		const mcpServer = await McpServerRoute.GetById(id, this)
 		if (!mcpServer) return
 
 		const resp = await getMcpTools(mcpServer.host)
@@ -87,7 +87,7 @@ class McpServerRoute extends httpRouter.Service {
 	async executeTool(req: Request, res: Response) {
 		const id = req.params["id"]
 		const tool = req.params["tool"]
-		const mcpServer = await McpServerRoute.GetById(id, this, this.state.repository)
+		const mcpServer = await McpServerRoute.GetById(id, this)
 		if (!mcpServer) return
 
 		const resp = await executeMcpTool(mcpServer.host, tool, req.body)
