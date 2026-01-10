@@ -21,6 +21,7 @@ import mcpToolDetailSetup from "@/stores/stacks/mcpTool/detail";
 import toolResultListSetup from "@/stores/stacks/mcpTool/resultList";
 import authDetailSetup from "@/stores/stacks/auth/detail";
 import accountDetailSetup from "@/stores/stacks/account/detail";
+import accountFinderSetup from "@/stores/stacks/account/finder";
 
 
 
@@ -47,6 +48,7 @@ export function buildStore(state: Partial<ViewState>, stateSerializzation?: Part
 
 		[DOC_TYPE.AUTH_DETAIL]: authDetailSetup,
 		[DOC_TYPE.ACCOUNT_LIST]: accountListSetup,
+		[DOC_TYPE.ACCOUNT_FINDER]: accountFinderSetup,
 		[DOC_TYPE.ACCOUNT_DETAIL]: accountDetailSetup,
 
 		

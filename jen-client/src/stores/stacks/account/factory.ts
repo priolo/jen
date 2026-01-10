@@ -3,6 +3,7 @@ import { DOC_TYPE } from "@/types";
 import { AccountDetailState, AccountDetailStore } from "./detail";
 import { AccountListState, AccountListStore } from "./list";
 import { Account } from "./types";
+import { AccountFinderState, AccountFinderStore } from "./finder";
 
 
 
@@ -25,5 +26,16 @@ export function buildAccountList(state: Partial<AccountListState> = {}) {
 		type: DOC_TYPE.ACCOUNT_LIST,
 		...state,
 	} as AccountListState) as AccountListStore
+	return store;
+}
+
+/**
+ * Costruisce la CARD per la lista di ACCOUNT
+ */
+export function buildAccountFinder(state: Partial<AccountFinderState> = {}) {
+	const store = buildStore({
+		type: DOC_TYPE.ACCOUNT_FINDER,
+		...state,
+	} as AccountFinderState) as AccountFinderStore
 	return store;
 }

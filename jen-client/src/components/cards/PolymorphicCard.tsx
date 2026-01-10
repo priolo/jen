@@ -37,6 +37,8 @@ import AccountDetailView from "../../app/cards/user/detail/View"
 import AccountListView from "../../app/cards/user/list/ListView"
 import { AccountListStore } from "../../stores/stacks/account/list"
 import { ReflectionStore } from "../../stores/stacks/reflection"
+import { AccountFinderStore } from "@/stores/stacks/account/finder"
+import AccountFinderView from "@/app/cards/user/finder/ListView"
 
 
 
@@ -53,6 +55,9 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 
 			case DOC_TYPE.AUTH_DETAIL:
 				return <AuthView store={view as AuthDetailStore} />
+
+			case DOC_TYPE.ACCOUNT_FINDER:
+				return <AccountFinderView store={view as AccountFinderStore} />
 			case DOC_TYPE.ACCOUNT_LIST:
 				return <AccountListView store={view as AccountListStore} />
 			case DOC_TYPE.ACCOUNT_DETAIL:

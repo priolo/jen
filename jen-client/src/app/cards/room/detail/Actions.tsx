@@ -1,5 +1,5 @@
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
-import { Button, CircularLoadingCmp, docsSo, utils } from "@priolo/jack"
+import { Button, CircularLoadingCmp, docsSo, focusSo, TooltipWrapCmp, utils } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
 import cls from "./View.module.css"
@@ -18,8 +18,8 @@ const ActionsCmp: FunctionComponent<Props> = ({
 }) => {
 
 	// STORE
-	useStore(store.state.group)
-	useStore(store)
+	// useStore(store.state.group)
+	// useStore(store)
 
 
 	// HOOKs
@@ -35,21 +35,26 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// RENDER
-	const canInvite = useMemo(() => {
-		const result = utils.forEachViews(
-			store.state.group.state.all,
-			view => view.state.type == DOC_TYPE.ACCOUNT_DETAIL,
-		)
-		return result
-	}, [store.state.group.state.all])
+	// const canInvite = useMemo(() => {
+	// 	console.log(focusSo.state.view.getTitle())
+	// 	const result = utils.forEachViews(
+	// 		store.state.group.state.all,
+	// 		view => view.state.type == DOC_TYPE.ACCOUNT_DETAIL,
+	// 	)
+	// 	return result
+	// }, [store.state.group.state.all])
 
 	return (<div
 		className={cls.actions}
 		style={style}
 	>
-		{canInvite && <Button
-		//onClick={() => store.openGroupSettings()}
-		>INVITE</Button>}
+		{/* {canInvite && (
+			<TooltipWrapCmp content="Invite new users to the room">
+				<Button
+				//onClick={() => store.openGroupSettings()}
+				>INVITE</Button>
+			</TooltipWrapCmp>
+		)} */}
 	</div>)
 }
 

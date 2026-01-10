@@ -1,24 +1,23 @@
 import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
-import { AccountListStore } from "@/stores/stacks/account/list"
+import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import { DOC_TYPE } from "@/types"
 import { Account, ACCOUNT_STATUS } from "@/types/Account"
 import { AlertDialog, FindInputHeader } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
-import ActionsCmp from "./Actions"
 
 
 
 interface Props {
-	store?: AccountListStore
+	store?: AccountFinderStore
 }
 
 /**
  * Lista di ACCOUNT registrati nel sistema
  */
-const AccountListView: FunctionComponent<Props> = ({
+const AccountFinderView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
@@ -38,7 +37,6 @@ const AccountListView: FunctionComponent<Props> = ({
 	const accounts = store.state.all
 	const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
 	const isSelected = (account: Account) => account.id == selectId
-	
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}
@@ -52,7 +50,6 @@ const AccountListView: FunctionComponent<Props> = ({
 				value={store.state.textSearch}
 				onChange={text => store.setTextSearch(text)}
 			/>
-			<ActionsCmp store={store} />
 		</>}
 	>
 		{/* <Table
@@ -82,4 +79,4 @@ const AccountListView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default AccountListView
+export default AccountFinderView

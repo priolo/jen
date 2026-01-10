@@ -6,6 +6,7 @@ export enum DOC_TYPE {
 	ACCOUNT_DETAIL = "account_detail",
 	/** lista degli ACCOUNTs */
 	ACCOUNT_LIST = "account_list",
+	ACCOUNT_FINDER = "account_finder",
 	
 	ROOM_DETAIL = "room",
 	ROOM_LIST = "room_list",

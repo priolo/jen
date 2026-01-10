@@ -68,6 +68,8 @@ const CardIcon: FunctionComponent<Props> = ({
 			return null
 		case DOC_TYPE.ACCOUNT_LIST:
 			return null
+		case DOC_TYPE.ACCOUNT_FINDER:
+			return null
 
 			
 		default:
