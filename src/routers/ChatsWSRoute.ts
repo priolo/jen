@@ -1,4 +1,7 @@
+import { REPO_PATHS } from "@/config.js"
+import { AccountRepo } from "@/repository/Account.js"
 import { ChatContext } from "@/services/rooms/ChatContext.js"
+import { ACCOUNT_STATUS, AccountDTO, JWTPayload } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { FindManyOptions } from "typeorm"
 import { AgentRepo } from "../repository/Agent.js"
@@ -8,13 +11,9 @@ import { McpTool } from "../services/mcp/types.js"
 import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
 import ChatNode from "../services/rooms/ChatNode.js"
 import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
-import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserEnterC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
+import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
-import { REPO_PATHS } from "@/config.js"
-import { AccountRepo } from "@/repository/Account.js"
-import { ACCOUNT_STATUS } from '@/types/account.js'
-import { AccountDTO } from '@/types/account.js'
 
 
 
@@ -45,16 +44,20 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	async onConnect(client: ws.IClient) {
 		const userId = client.jwtPayload?.id
 
-		// completo i dati del client
-		const account: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
-			type: typeorm.Actions.GET_BY_ID,
-			payload: userId
-		})
-		if ( !account ) throw new Error(`Account not found: ${userId}`)
-		account.status = ACCOUNT_STATUS.ONLINE
+		// aggiorno i dati del ACCOUNT
+		let account = this.getAccountById(userId)
+		if (!account) {
+			const accountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
+				type: typeorm.Actions.GET_BY_ID,
+				payload: userId
+			})
+			if (!accountRepo) throw new Error(`Account not found: ${userId}`)
+			account = AccountDTO(accountRepo)
+		}
 		client.jwtPayload = {
 			...client.jwtPayload,
-			...AccountDTO(account),
+			...account,
+			status: ACCOUNT_STATUS.ONLINE,
 		}
 
 		super.onConnect(client)
@@ -105,12 +108,12 @@ export class ChatsWSService extends ws.route implements ChatContext {
 
 		switch (msg.action) {
 
-			case CHAT_ACTION_C2S.USER_ENTER:
-				this.handleUserEnter(client, msg as UserEnterC2S)
-				break
-
 			case CHAT_ACTION_C2S.USER_LEAVE:
 				this.handleUserLeave(client, msg as UserLeaveC2S)
+				break
+
+			case CHAT_ACTION_C2S.USER_INVITE:
+				this.handleUserInvite(client, msg as UserInviteC2S)
 				break
 
 			// case CHAT_ACTION_C2S.ROOM_COMPLETE:
@@ -154,7 +157,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		const chat = await ChatNode.Build(this, [room], userId)
 		chat.id = msg.chatId
 
-		// salvo la chat e faccio entrare il client
+		// inserisco la nuova CHAT e faccio entrare il CLIENT
 		this.addChat(chat)
 		chat.addClient(userId)
 	}
@@ -179,19 +182,6 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	}
 
 	/**
-	 * Un CLIENT entra in una CHAT. 
-	 * Avvete tutti i partecipanti 
-	 * Invio al nuovo CLIENT i dati della CHAT
-	 */
-	private async handleUserEnter(client: ws.IClient, msg: UserEnterC2S) {
-		const userId = client?.jwtPayload?.id
-		if (!userId) throw new Error(`Invalid userId`)
-
-		const chat = this.getChatById(msg.chatId)
-		chat.addClient(userId)
-	}
-
-	/**
 	 * Un CLIENT lascia una CHAT
 	 * Avverte tutti i partecipanti
 	 * Se la CHAT è vuota la elimina
@@ -207,6 +197,25 @@ export class ChatsWSService extends ws.route implements ChatContext {
 			await this.removeChat(chat.id)
 			await this.saveChat(chat)
 		}
+	}
+
+	/**
+	 * Un CLIENT lascia una CHAT
+	 * Avverte tutti i partecipanti
+	 * Se la CHAT è vuota la elimina
+	 */
+	private async handleUserInvite(client: ws.IClient, msg: UserInviteC2S) {
+		const userId = client.jwtPayload?.id
+		if (!userId) throw new Error(`Invalid userId`)
+		const chat = this.getChatById(msg.chatId)
+		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
+		const invitedUserId = msg.userId
+		if (!invitedUserId) throw new Error(`Invalid invited userId`)
+		//if ( this.getClientById(invitedUserId) ) return; // già presente
+
+		// inserisco il CLIENT invitato nella CHAT
+		chat.addClient(invitedUserId)
+
 	}
 
 	//#endregion 
@@ -288,15 +297,27 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	}
 
 	public sendMessageToClient(clientId: string, message: BaseS2C) {
-		const client = this.getClientById(clientId)
-		if (!client) throw new Error(`Client not found: ${clientId}`)
-		this.sendToClient(client, JSON.stringify(message))
+		const clients = this.getClientsById(clientId)
+		if (clients.length == 0) throw new Error(`Client not found: ${clientId}`)
+		for (const client of clients) {
+			this.sendToClient(client, JSON.stringify(message))
+		}
 	}
 
-	public getClientById(clientId: string): ws.IClient {
-		if (!clientId) return null
-		return this.getClients()?.find(c => c?.jwtPayload?.id == clientId)
+	/**
+	 * Restituisce tutti i CLIENT associati ad un determinato ACCOUNT-ID
+	 */
+	private getClientsById(accountId: string): ws.IClient[] {
+		if (!accountId) return null
+		return this.getClients()?.filter(c => c?.jwtPayload?.id == accountId)
 	}
+
+	public getAccountById(clientId: string): AccountDTO {
+		if (!clientId) return null
+		return this.getClients()?.find(c => c?.jwtPayload?.id == clientId)?.jwtPayload
+	}
+
+
 
 	//#endregion
 
@@ -359,7 +380,11 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		// carico tutte le ROOMs di quella CHAT
 		const roomsRepo: RoomRepo[] = await new Bus(this, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.FIND,
-			payload: <FindManyOptions<RoomRepo>>{ chatId: roomRepo.chatId }
+			payload: <FindManyOptions<RoomRepo>>{
+				where: {
+					chatId: roomRepo.chatId
+				}
+			}
 		})
 
 		// Creo la CHAT con le ROOMs caricate

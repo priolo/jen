@@ -7,6 +7,7 @@ import { createStore, StoreCore } from "@priolo/jon"
 import { buildRoomDetail } from "../room/factory"
 import { Chat } from "../../../types/chat"
 import { AccountDTO } from "@/types/account"
+import { deckCardsSo } from "@/stores/docs/cards"
 
 
 
@@ -38,7 +39,7 @@ const setup = {
 		//#region MESSAGE TO SERVER
 
 		/**
-		 * Create and enter in a CHAT
+		 * chiedo creazione di una CHAT
 		 * response CHAT_INFO
 		 */
 		createChat: async (
@@ -55,7 +56,8 @@ const setup = {
 		},
 
 		/** 
-		 * recupera i dati di una CHAT tramite l'id di una ROOM 
+		 * chiedo i dati di una CHAT tramite l'id di una ROOM 
+		 * response CHAT_INFO
 		 */
 		fetchChatByRoomId: (roomId: string, store?: ChatStore) => {
 			// se non c'e' in locale la chiedo al server
@@ -149,11 +151,13 @@ const setup = {
 		 */
 		onMessage: (data: any, store?: ChatStore) => {
 			const message: BaseS2C = JSON.parse(data.payload)
-console.log("SERVER->CLIENT: ", message)
+			console.log("SERVER->CLIENT: ", message)
 			switch (message.action) {
 
 				// arrivate le INFO di una CHAT le integro nella store
+				// potrebbe trattarsi anche di un INVITE
 				case CHAT_ACTION_S2C.CHAT_INFO: {
+
 					const msg: ChatInfoS2C = JSON.parse(data.payload)
 					let chat: Chat = {
 						id: msg.chatId,
@@ -167,6 +171,23 @@ console.log("SERVER->CLIENT: ", message)
 					} else {
 						store.setAll([...store.state.all, chat])
 					}
+
+
+
+					// controllo se c'e' una VIEW aperta per questa CHAT
+					const views = utils.findAll(docsSo.getAllCards(), {
+						type: DOC_TYPE.ROOM_DETAIL,
+						chatId: msg.chatId,
+					})
+					if (views.length > 0) break
+					// non c'e': apro la VIEW della ROOM principale
+					const mainRoom = getMainRoom(chat.rooms)
+					if (!mainRoom) break
+					const view = buildRoomDetail({
+						chatId: msg.chatId,
+						roomId: mainRoom.id,
+					})
+					deckCardsSo.add({ view, anim: true })
 					break
 				}
 

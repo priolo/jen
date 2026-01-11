@@ -62,10 +62,10 @@ export enum CHAT_ACTION_C2S {
 	/** un USER cerca/carica una CHAT tramite una ROOM ed entra */
 	CHAT_LOAD_BY_ROOM_AND_ENTER = "chat-get-by-room",
 
-	/** [II] da eliminare --- USER entra in CHAT */
-	USER_ENTER = "user-enter",
 	/* USER lascia la CHAT */
 	USER_LEAVE = "user-leave",
+	/* Invita unn USER alla chat */
+	USER_INVITE = "user-invite",
 
 	/** richiesta di avviare il completamento in una ROOM */
 	ROOM_COMPLETE = "room-complete",
@@ -106,20 +106,26 @@ export type ChatCreateC2S = BaseC2S & {
 	agentIds?: string[]
 }
 
-/** 
- * CLIENT entra in una CHAT gia' esistente
- * - inserisce lo USER in CHAT
- * - avverto tuti gli altri USER della CHAT
- * - restituisce i dati della CHAT [ChatInfoS2C]
- */
-export type UserEnterC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.USER_ENTER
-}
+
+
+//#region USER
 
 /** CLIENT lascia una CHAT */
 export type UserLeaveC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.USER_LEAVE
 }
+
+/** 
+ * invito un CLIENT
+ */
+export type UserInviteC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.USER_INVITE
+	userId: string
+}
+
+//#endregion
+
+
 
 /** richiesta di completamento di una ROOM */
 export type RoomCompleteC2S = BaseC2S & {
@@ -154,7 +160,7 @@ export type RoomHistoryUpdateC2S = BaseC2S & {
 export enum CHAT_ACTION_S2C {
 
 	/** I dati di una CHAT */
-	CHAT_INFO = "chat-info",	
+	CHAT_INFO = "chat-info",
 
 	/** un CLIENT è entrato in CHAT. Potrebbe essere anche un AGENT*/
 	CLIENT_ENTERED = "entered",
@@ -184,7 +190,8 @@ export type BaseS2C = {
  * Invia ad un CLIENT i dati di una CHAT 
  * tipicamente su
  * CHAT_ACTION_C2S.CHAT_CREATE
- * CHAT_ACTION_C2S.USER_ENTER
+ * CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER
+ * CHAT_ACTION_C2S.USER_INVITE
  * */
 export type ChatInfoS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CHAT_INFO
@@ -205,7 +212,7 @@ export type ClientEnteredS2C = BaseS2C & {
 export type ClientLeaveS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_LEAVE
 	/** id del CLIENT */
-	clientId?: string
+	clientId: string
 }
 
 export type UserStatusS2C = {

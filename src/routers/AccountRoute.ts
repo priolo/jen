@@ -1,11 +1,10 @@
+import { REPO_PATHS } from "@/config.js";
+import { ACCOUNT_STATUS, AccountDTO, AccountDTOList } from '@/types/account.js';
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, Like } from "typeorm";
 import { AccountRepo } from "../repository/Account.js";
-import { ACCOUNT_STATUS } from '@/types/account.js';
-import { AccountDTO, AccountDTOList } from '@/types/account.js';
 import { ChatsWSService } from "./ChatsWSRoute.js";
-import { REPO_PATHS } from "@/config.js";
 
 
 
@@ -47,15 +46,15 @@ class AccountRoute extends httpRouter.Service {
 			];
 		}
 		// eseguo la ricerca
-		const accounts:AccountRepo[] = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
+		const accounts: AccountRepo[] = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: findOptions
 		})
 
 		// aggiorno lo status online/offline
 		const chats = this.nodeByPath<ChatsWSService>("/>ws-chats")
-		for ( const account of accounts ){
-			const isOnline = !!chats.getClientById( account.id)
+		for (const account of accounts) {
+			const isOnline = !!chats.getAccountById(account.id)
 			account.status = isOnline ? ACCOUNT_STATUS.ONLINE : ACCOUNT_STATUS.OFFLINE
 		}
 

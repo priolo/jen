@@ -2,6 +2,7 @@ import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
+import chatSo from "@/stores/stacks/chat/repo"
 import { DOC_TYPE } from "@/types"
 import { AccountDTO, ACCOUNT_STATUS } from "@/types/account"
 import { AlertDialog, FindInputHeader } from "@priolo/jack"
@@ -24,7 +25,9 @@ const AccountFinderView: FunctionComponent<Props> = ({
 	// STORE
 	useStore(store)
 	useStore(store.state.group)
+	useStore(chatSo)
 
+	
 	// HOOKs
 	useEffect(() => {
 		store.fetchFiltered()

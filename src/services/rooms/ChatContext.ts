@@ -1,4 +1,5 @@
 import { AgentRepo } from "@/repository/Agent.js";
+import { AccountDTO, JWTPayload } from "@/types/account.js";
 import { BaseS2C } from "@/types/commons/RoomActions.js";
 import { ws } from "@priolo/julian"
 
@@ -16,8 +17,8 @@ export interface ChatContext {
 	 */
 	sendMessageToClient: (clientId: string, message: BaseS2C) => void
 	/**
-	 * Restituisce un CLIENT dato il suo ID
+	 * Restituisce l'ACCOUNT ONLINE associato ad un CLIENT
 	 */
-	getClientById(clientId: string): ws.IClient
+	getAccountById(clientId: string): AccountDTO
 
 }

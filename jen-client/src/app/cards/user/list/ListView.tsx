@@ -27,6 +27,7 @@ const AccountListView: FunctionComponent<Props> = ({
 	// STORE
 	useStore(store)
 	useStore(store.state.group)
+	useStore(chatSo)
 
 	// HOOKs
 	const clients = useMemo(() => {
@@ -34,7 +35,7 @@ const AccountListView: FunctionComponent<Props> = ({
 		const room = chatSo.getRoomById(roomId)
 		const chat = chatSo.getChatById(room?.chatId)
 		return chat?.clients ?? []
-	}, [chatSo.state.all])
+	}, [chatSo.state])
 
 	// HANDLER
 	const handleSelect = (account: AccountDTO) => store.openDetail(account.id)

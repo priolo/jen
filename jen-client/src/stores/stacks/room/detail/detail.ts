@@ -80,12 +80,12 @@ What is 2+2? Just write the answer number.`,
 
 		/** chiamata sul MOUNTH del componente */
 		fetch: async (_: void, store?: RoomDetailStore) => {
-			// se esiste la room
+			// se esiste chiedo dei suoi dati al BE
 			if (store.state.roomId) {
 				chatSo.fetchChatByRoomId(store.state.roomId)
 				return
 			}
-			// altrimenti creo una nuova chat (e room)
+			// altrimenti chiedo la creazione nuova chat al BE
 			if (!store.state.chatId) store.state.chatId = createUUID()
 			chatSo.createChat({ chatId: store.state.chatId, agentIds: store.state.agentsIds })
 		},

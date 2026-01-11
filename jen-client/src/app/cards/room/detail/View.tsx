@@ -25,13 +25,11 @@ const RoomView: FunctionComponent<Props> = ({
 
 
 	// STORE
-
 	useStore(store)
 	useStore(chatSo)
 
 
 	// HOOKS
-
 	useEffect(() => {
 		store.fetch()
 	}, [])

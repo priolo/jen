@@ -3,7 +3,7 @@ import { ChatContext } from "./ChatContext.js";
 import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
-import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
 import RoomTurnBased from "./RoomTurnBased.js";
 import { RoomRepo } from "@/repository/Room.js";
 import { AccountDTO } from '@/types/account.js';
@@ -106,10 +106,11 @@ class ChatNode {
 	 * aggiungo il CLIENT in CHAT
 	 */
 	addClient(clientId: string) {
+		// se il CLIENT è già in CHAT non faccio nulla
 		if (!clientId || this.clientsIds.has(clientId)) return;
 
 		// ricavo i dati del CLIENT
-		const client = (this.node.getClientById(clientId))?.jwtPayload as AccountDTO
+		const client = (this.node.getAccountById(clientId))
 
 		// avverto gli altri CLIENT
 		const message: ClientEnteredS2C = {
@@ -136,11 +137,12 @@ class ChatNode {
 		if (!clientId || !this.clientsIds.has(clientId)) return false;
 
 		// avverto tutti i CLIENTs
-		const message: BaseS2C = {
+		const message: ClientLeaveS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_LEAVE,
 			chatId: this.id,
+			clientId,
 		}
-		this.sendMessage(message)
+		this.sendMessage(message, [clientId]) // escludo il client che lascia
 
 		this.clientsIds.delete(clientId);
 		return this.clientsIds.size == 0
@@ -198,7 +200,7 @@ class ChatNode {
 	private getInfo(): ChatInfoS2C {
 
 		const clients: AccountDTO[] = [...this.clientsIds].map(clientId => {
-			return (this.node.getClientById(clientId))?.jwtPayload as AccountDTO
+			return this.node.getAccountById(clientId)
 		}).filter(a => !!a)
 
 		const rooms = this.rooms.map(r => ({
@@ -221,8 +223,9 @@ class ChatNode {
 	/**
 	 * Invia a tutti i partecipanti della CHAT un MESSAGE
 	 */
-	private sendMessage(message: BaseS2C): void {
+	private sendMessage(message: BaseS2C, esclude:string[]=[]): void {
 		for (const clientId of this.clientsIds) {
+			if(esclude.includes(clientId)) continue;
 			this.node.sendMessageToClient(clientId, message)
 		}
 	}

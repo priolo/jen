@@ -25,7 +25,16 @@ export async function seeding(root: RootService) {
 				githubId: 402921, //"octocat"
 				githubName: "priolo",
 			},
-			{ id: "id-user-2", name: "Mario Rossi", email: "mario.rossi@gmail.com" },
+			{ 
+				id: "id-user-2", 
+				name: "Mario Rossi", 
+				email: "mario.rossi@gmail.com", 
+				googleEmail: "mariorossi@gmail.com",
+				avatarUrl: "https://lh3.googleusercontent.com/a/ACg8ocKA4wD4lM9V5uEQ17xEAUPziv77OEdGj04wZ-uZPG5H9l7CEukn=s96-c",
+				emailCode: EMAIL_CODE.VERIFIED,
+				githubId: 402921, //"octocat"
+				githubName: "priolo",
+			},
 			{ id: "id-user-3", name: "Luigi Bianchi", email: "luigi.bianchi@gmail.com" },
 		]
 	});
