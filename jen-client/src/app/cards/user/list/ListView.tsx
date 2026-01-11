@@ -34,8 +34,7 @@ const AccountListView: FunctionComponent<Props> = ({
 		const room = chatSo.getRoomById(roomId)
 		const chat = chatSo.getChatById(room?.chatId)
 		return chat?.clients ?? []
-
-	}, [])
+	}, [chatSo.state.all])
 
 	// HANDLER
 	const handleSelect = (account: AccountDTO) => store.openDetail(account.id)

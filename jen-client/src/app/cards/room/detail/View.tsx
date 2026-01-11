@@ -46,10 +46,14 @@ const RoomView: FunctionComponent<Props> = ({
 	}, [chatSo.state.all])
 
 	/** recupero l'oggetto ROOM  */
-	const room = useMemo(() => chatSo.getRoomById(store.state.roomId), [store.state.roomId])
+	const room = useMemo(
+		() => chatSo.getRoomById(store.state.roomId), 
+		[store.state.roomId, chatSo.state.all]
+	)
+	
 	const history = room?.history ?? []
 
-	
+
 	// HANDLER
 
 	const handleSendClick = () => store.sendPrompt()

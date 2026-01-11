@@ -1,11 +1,12 @@
 import { wsConnection } from "@/plugins/session/wsConnection"
 import { SS_EVENT } from "@/plugins/SocketService/types"
 import { DOC_TYPE } from "@/types"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoomC2S, ChatInfoS2C, ChatRoom, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE, UserLeaveC2S } from "@/types/commons/RoomActions"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoomC2S, ChatInfoS2C, ChatRoom, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@/types/commons/RoomActions"
 import { docsSo, utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
 import { buildRoomDetail } from "../room/factory"
 import { Chat } from "../../../types/chat"
+import { AccountDTO } from "@/types/account"
 
 
 
@@ -117,6 +118,17 @@ const setup = {
 			wsConnection.send(JSON.stringify(message))
 		},
 
+		invite: async (props: { chatId: string, accountId: string }, store?: ChatStore) => {
+			const { chatId, accountId } = props
+			if (!chatId || !accountId) return
+			const message: UserInviteC2S = {
+				action: CHAT_ACTION_C2S.USER_INVITE,
+				chatId,
+				userId: accountId,
+			}
+			wsConnection.send(JSON.stringify(message))
+		},
+
 		//#endregion
 
 
@@ -137,13 +149,13 @@ const setup = {
 		 */
 		onMessage: (data: any, store?: ChatStore) => {
 			const message: BaseS2C = JSON.parse(data.payload)
-
+console.log("SERVER->CLIENT: ", message)
 			switch (message.action) {
 
 				// arrivate le INFO di una CHAT le integro nella store
 				case CHAT_ACTION_S2C.CHAT_INFO: {
 					const msg: ChatInfoS2C = JSON.parse(data.payload)
-					let chat:Chat = {
+					let chat: Chat = {
 						id: msg.chatId,
 						clients: msg.clients,
 						rooms: msg.rooms,
@@ -208,7 +220,7 @@ const setup = {
 					store._update()
 					break
 				}
-				
+
 				// è stata creata una nuova ROOM in una CHAT esistente. Tipicamente quando c'e' il reasoning
 				case CHAT_ACTION_S2C.ROOM_NEW: {
 					const msg = message as RoomNewS2C

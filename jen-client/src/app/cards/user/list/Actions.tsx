@@ -1,5 +1,8 @@
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
+import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import { AccountListStore } from "@/stores/stacks/account/list"
+import chatSo from "@/stores/stacks/chat/repo"
+import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { DOC_TYPE } from "@/types"
 import { Button, CircularLoadingCmp, focusSo, TooltipWrapCmp, utils } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -25,10 +28,18 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// HOOKs
-	useStore
 
 
 	// HANDLER
+
+	const handleInviteClick = () => {
+		const roomId = (store.state.parent as RoomDetailStore)?.state.roomId
+		const room = chatSo.getRoomById(roomId)
+		chatSo.invite({
+			chatId: room?.chatId,
+			accountId: accountInvite.id
+		})
+	}
 
 
 	// LOADING
@@ -40,11 +51,13 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	// RENDER
 	const accountInvite = useMemo(() => {
 		const fw = focusSo.state.view
-		let AccountView = null
+		let AccountView: AccountDetailStore = null
 		if (!!fw) {
-			AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_LIST && fw.state.linked.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw.state.linked as AccountDetailStore : null
-			if ( !AccountView ) {
-				AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw as AccountDetailStore : null	
+			AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_FINDER && fw.state.linked?.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw.state.linked as AccountDetailStore : null
+			if (!AccountView) {
+				AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw as AccountDetailStore : null
+			} else if (!AccountView.state.account?.email) {
+				return (fw as AccountFinderStore).state.all.find(a => a.id == AccountView.state.account?.id)
 			}
 		}
 		if (!AccountView) {
@@ -55,7 +68,6 @@ const ActionsCmp: FunctionComponent<Props> = ({
 			)
 		}
 		return AccountView?.state.account
-
 	}, [store.state.group.state.all, focusSo.state.view])
 
 	return (<div
@@ -65,7 +77,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		{!!accountInvite ? (
 			<TooltipWrapCmp content={`Invite ${accountInvite.name} in chat room`}>
 				<Button
-				//onClick={() => store.openGroupSettings()}
+					onClick={handleInviteClick}
 				>INVITE</Button>
 			</TooltipWrapCmp>
 		) : (

@@ -4,6 +4,7 @@ import { FindOneOptions } from "typeorm";
 import { AccountRepo } from "../repository/Account.js";
 import { AccountDTO, JWTPayload } from '@/types/account.js';
 import { ENV_TYPE } from "../types/env.js";
+import { REPO_PATHS } from "@/config.js";
 
 
 
@@ -13,7 +14,6 @@ class AuthRoute extends httpRouter.Service {
 		return {
 			...super.stateDefault,
 			path: "/api/auth",
-			accounts_repo: "/typeorm/accounts",
 			jwt: "/jwt",
 			routers: [
 				{ path: "/current", verb: "get", method: "current" },
@@ -46,7 +46,7 @@ class AuthRoute extends httpRouter.Service {
 			})
 
 			// carico l'ACCOUNT dal DB
-			const user: AccountRepo = await new Bus(this, this.state.accounts_repo).dispatch({
+			const user: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 				type: typeorm.Actions.GET_BY_ID,
 				payload: userJwt.id
 			})
@@ -73,11 +73,11 @@ class AuthRoute extends httpRouter.Service {
 
 	/** eseguo autologin per DEV e TEST */
 	async autoLogin(req: Request, res: Response) {
-		let { userId }: { userId: string } = req.body
+		let userId: string | undefined = req.query?.userid as string
 		if (!userId) userId = "id-user-1"
 
 		// carico l'account DEMO
-		const user: AccountRepo = await new Bus(this, this.state.accounts_repo).dispatch({
+		const user: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 			type: typeorm.Actions.FIND_ONE,
 			payload: <FindOneOptions<AccountRepo>>{
 				where: { id: userId },

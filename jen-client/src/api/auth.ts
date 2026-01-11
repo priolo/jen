@@ -7,7 +7,7 @@ import { AccountDTO } from "@/types/account"
  * Se non sono loggato ritorna null
  */
 function current(opt?: CallOptions): Promise<{ user: AccountDTO }> {
-	return ajax.get(`auth/current`, { ...opt, isLogin: true })
+	return ajax.get(`auth/current${window.location.search}`, { ...opt, isLogin: true })
 }
 
 /**
