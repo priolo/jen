@@ -111,6 +111,7 @@ class ChatNode {
 
 		// ricavo i dati del CLIENT
 		const client = (this.node.getAccountById(clientId))
+		if (!client) return;
 
 		// avverto gli altri CLIENT
 		const message: ClientEnteredS2C = {
@@ -124,8 +125,7 @@ class ChatNode {
 		this.clientsIds.add(clientId);
 
 		// invio al nuovo CLIENT i dati della CHAT
-		const msg = this.getInfo()
-		this.node.sendMessageToClient(clientId, msg)
+		this.sendInfo(clientId)
 	}
 
 	/**
@@ -197,7 +197,7 @@ class ChatNode {
 	/**
 	 * Restituisco le info della CHAT sotto forma di messaggio
 	 */
-	private getInfo(): ChatInfoS2C {
+	private sendInfo(clientId:string) {
 
 		const clients: AccountDTO[] = [...this.clientsIds].map(clientId => {
 			return this.node.getAccountById(clientId)
@@ -212,20 +212,22 @@ class ChatNode {
 			agentsIds: r.room.agents?.map(a => a.id),
 		}))
 
-		return {
+		const msg:ChatInfoS2C = {
 			action: CHAT_ACTION_S2C.CHAT_INFO,
 			chatId: this.id,
 			clients,
 			rooms,
 		}
+
+		this.node.sendMessageToClient(clientId, msg)
 	}
 
 	/**
 	 * Invia a tutti i partecipanti della CHAT un MESSAGE
 	 */
-	private sendMessage(message: BaseS2C, esclude:string[]=[]): void {
+	private sendMessage(message: BaseS2C, esclude: string[] = []): void {
 		for (const clientId of this.clientsIds) {
-			if(esclude.includes(clientId)) continue;
+			if (esclude.includes(clientId)) continue;
 			this.node.sendMessageToClient(clientId, message)
 		}
 	}

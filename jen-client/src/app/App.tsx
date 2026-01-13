@@ -1,4 +1,3 @@
-//import srcBg from "@/assets/bg4.jpg"
 import MainMenu from "@/app/mainMenu/MainMenu"
 import docsSo from "@/stores/docs"
 import { DragCmp, TooltipCmp, ZenCard } from "@priolo/jack"

@@ -23,3 +23,19 @@ body {
   --color-element-bg: #393939;
 }
 
+
+.jack-title {
+  margin-top: 5px;
+	font-size: 14px;
+	font-weight: 600;
+	font-family: sans-serif;
+}
+
+/**
+* Sottotitolo di una sezione
+*/
+.jack-subtitle {
+	font-size: 12px;
+	font-weight: 400;
+	opacity: .8;
+}

@@ -1,5 +1,6 @@
 import LogIcon from "@/icons/LogIcon"
 import SyncIcon from "@/icons/SyncIcon"
+import ConnectionsIcon from "@/icons/cards/ConnectionsIcon"
 import StreamIcon from "@/icons/cards/StreamIcon"
 import StreamsIcon from "@/icons/cards/StreamsIcon"
 import { DOC_TYPE } from "@/types"

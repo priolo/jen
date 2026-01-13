@@ -6,6 +6,7 @@ import { debounce } from "@/utils/time"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
 import { buildAccountDetail } from "./factory"
+import { AccountDetailStore } from "./detail"
 
 
 /**
@@ -15,6 +16,7 @@ const setup = {
 
 	state: {
 		//#region VIEWBASE
+
 		//#endregion
 		textSearch: <string>null,
 		all: <AccountDTO[]>[],
@@ -32,6 +34,15 @@ const setup = {
 			}
 		},
 		//#endregion
+
+		/**
+		 * restituisce, se c'e', l'ACCOUNT selezionato
+		 */
+		getAccountSelected: (_: void, store?: AccountFinderStore) => {
+			if ( store.state.group == null ) return null
+			const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
+			return store.state.all.find(a => a.id == selectId)
+		}
 	},
 
 	actions: {

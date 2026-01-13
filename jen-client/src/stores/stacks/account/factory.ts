@@ -1,16 +1,16 @@
 import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE } from "@/types";
+import { AccountDTO } from "@/types/account";
 import { AccountDetailState, AccountDetailStore } from "./detail";
-import { AccountListState, AccountListStore } from "./list";
-import { Account } from "./types";
 import { AccountFinderState, AccountFinderStore } from "./finder";
+import { AccountListState, AccountListStore } from "./list";
 
 
 
 /**
  * Costruisce la CARD per il dettaglio di un ACCOUNT
  */
-export function buildAccountDetail(account: Partial<Account>) {
+export function buildAccountDetail(account: AccountDTO) {
 	const store = buildStore({
 		type: DOC_TYPE.ACCOUNT_DETAIL,
 		account: account,

@@ -82,18 +82,18 @@ What is 2+2? Just write the answer number.`,
 		fetch: async (_: void, store?: RoomDetailStore) => {
 			// se esiste chiedo dei suoi dati al BE
 			if (store.state.roomId) {
-				chatSo.fetchChatByRoomId(store.state.roomId)
+				chatSo.requestByRoomId(store.state.roomId)
 				return
 			}
 			// altrimenti chiedo la creazione nuova chat al BE
 			if (!store.state.chatId) store.state.chatId = createUUID()
-			chatSo.createChat({ chatId: store.state.chatId, agentIds: store.state.agentsIds })
+			chatSo.create({ chatId: store.state.chatId, agentIds: store.state.agentsIds })
 		},
 
 
 		/** invio un messaggio scritto dall'utente */
 		sendPrompt: async (_: void, store?: RoomDetailStore) => {
-			chatSo.addMessageToRoom({
+			chatSo.appendMessage({
 				chatId: store.state.chatId,
 				roomId: store.state.roomId,
 				text: store.state.prompt

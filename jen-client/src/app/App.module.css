@@ -5,9 +5,9 @@
 
 	color: var(--text);
 
-	background-image: url(./../assets/bg4.jpg);
-	background-color: rgba(0, 0, 0, 0.8);
-	background-blend-mode: darken;
+	background-image: url(./../assets/bg5.png);
+	/* background-color: rgba(0, 0, 0, 0.8); */
+	/* background-blend-mode: darken; */
 }
 
 .content {

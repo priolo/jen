@@ -1,7 +1,6 @@
 import { REPO_PATHS } from "@/config.js"
-import { AccountRepo } from "@/repository/Account.js"
 import { ChatContext } from "@/services/rooms/ChatContext.js"
-import { ACCOUNT_STATUS, AccountDTO, JWTPayload } from '@/types/account.js'
+import { ACCOUNT_STATUS, AccountDTO } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { FindManyOptions } from "typeorm"
 import { AgentRepo } from "../repository/Agent.js"
@@ -109,11 +108,11 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		switch (msg.action) {
 
 			case CHAT_ACTION_C2S.USER_LEAVE:
-				this.handleUserLeave(client, msg as UserLeaveC2S)
+				await this.handleUserLeave(client, msg as UserLeaveC2S)
 				break
 
 			case CHAT_ACTION_C2S.USER_INVITE:
-				this.handleUserInvite(client, msg as UserInviteC2S)
+				await this.handleUserInvite(client, msg as UserInviteC2S)
 				break
 
 			// case CHAT_ACTION_C2S.ROOM_COMPLETE:
@@ -122,7 +121,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 
 			case CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE: {
 				const msgUp: RoomAgentsUpdateC2S = msg
-				chat.updateAgents(msgUp.agentsIds, msgUp.roomId)
+				await chat.updateAgents(msgUp.agentsIds, msgUp.roomId)
 				break
 			}
 

@@ -1,9 +1,9 @@
+import accountApi from "@/api/account"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
+import { EDIT_STATE } from "@/types"
+import { AccountDTO } from "@/types/account"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
-import { Account } from "./types"
-import { EDIT_STATE } from "@/types"
-import accountApi from "@/api/account"
 
 
 /**
@@ -15,7 +15,7 @@ const setup = {
 		//#region VIEWBASE
 		//#endregion
 
-		account: <Partial<Account>>null,
+		account: <AccountDTO>null,
 		editState: EDIT_STATE.READ,
 	},
 
@@ -53,7 +53,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAccount: (account: Partial<Account>) => ({ account }),
+		setAccount: (account: AccountDTO) => ({ account }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }

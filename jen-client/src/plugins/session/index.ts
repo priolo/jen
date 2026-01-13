@@ -12,6 +12,8 @@ import { ViewStore } from "@priolo/jack"
 import { buildStore } from "@/stores/docs/utils/factory"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { DOC_TYPE } from "@/types"
+import { buildAccountFinder } from "@/stores/stacks/account/factory"
+import { AccountFinderStore } from "@/stores/stacks/account/finder"
 
 
 
@@ -26,6 +28,8 @@ window.addEventListener('online', function () {
 window.addEventListener('offline', function () {
 	console.log("Sei andato offline!");
 });
+
+export let AccountFinderFixedCard: AccountFinderStore
 
 
 
@@ -50,14 +54,17 @@ export async function StartSession() {
 	const session = loadLocalStorage()
 	docsSo.setSerialization(session.docsState)
 	const { deckStores, drawerStores, menuStores } = buildCards(session)
-	//const allStores = [...deckStores, ...drawerStores, ...menuStores]
+
+	// BUILD SINGLETONE CARDS
+	const allStores = [...deckStores/*, ...drawerStores, ...menuStores*/]
+	AccountFinderFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.ACCOUNT_FINDER) ?? buildAccountFinder()) as AccountFinderStore
+
 	deckCardsSo.setAll(deckStores)
 	//drawerCardsSo.setAll(drawerStores)
 	//menuSo.setAll(menuStores)
 
 
-	// BUILD SINGLETONE CARDS
-	//buildFixedCards(allStores)
+
 
 }
 
@@ -124,10 +131,3 @@ function buildCards(session: Session) {
 	return { deckStores, drawerStores, menuStores }
 }
 
-function buildFixedCards(allStores: ViewStore[]) {
-	// const fixedCnn = (allStores.find(s => s.state.type == DOC_TYPE.CONNECTIONS) ?? buildStore({ type: DOC_TYPE.CONNECTIONS })) as CnnListStore
-	// const fixedLogs = (allStores.find(s => s.state.type == DOC_TYPE.LOGS) ?? buildStore({ type: DOC_TYPE.LOGS })) as ViewLogStore
-	// const fixedAbout = (allStores.find(s => s.state.type == DOC_TYPE.ABOUT) ?? buildStore({ type: DOC_TYPE.ABOUT })) as AboutStore
-	// const fixedHelp = buildStore({ type: DOC_TYPE.HELP }) as HelpStore
-	// docsSo.setFixedViews([fixedCnn, fixedLogs, fixedAbout, fixedHelp])
-}

@@ -1,4 +1,4 @@
-import { ClearSession, EndSession, StartSession } from "@/plugins/session"
+import { AccountFinderFixedCard, ClearSession, EndSession, StartSession } from "@/plugins/session"
 import docsSo, { FIXED_CARD } from "@/stores/docs"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
@@ -12,7 +12,7 @@ import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
 import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
 import { buildRoomDetail } from "@/stores/stacks/room/factory"
 import { buildToolList } from "@/stores/stacks/tool/factory"
-import { Button } from "@priolo/jack"
+import { Button, focusSo } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import React, { FunctionComponent } from "react"
 import { buildStore } from "../../stores/docs/utils/factory"
@@ -64,13 +64,9 @@ const MainMenu: FunctionComponent<Props> = ({
 		deckCardsSo.add({ view, anim: true })
 	}
 
-
-
-
-
-	const handleAccountFinder = () => {
-		const view = buildAccountFinder()
-		deckCardsSo.add({ view, anim: true })
+	const handleAccountFinder = async () => {
+		await deckCardsSo.add({ view: AccountFinderFixedCard, anim: true })
+		focusSo.focus(AccountFinderFixedCard)
 	}
 	const handleAuth = () => {
 		const view = buildAuthDetailCard()

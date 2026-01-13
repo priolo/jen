@@ -1,13 +1,14 @@
+import { AccountFinderFixedCard } from "@/plugins/session"
+import { deckCardsSo } from "@/stores/docs/cards"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
-import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import { AccountListStore } from "@/stores/stacks/account/list"
 import chatSo from "@/stores/stacks/chat/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { DOC_TYPE } from "@/types"
-import { Button, CircularLoadingCmp, focusSo, TooltipWrapCmp, utils } from "@priolo/jack"
+import { AccountDTO } from "@/types/account"
+import { Button, CircularLoadingCmp, focusSo, TooltipWrapCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
-
 
 
 
@@ -25,6 +26,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	useStore(store.state.group)
 	useStore(store)
 	useStore(focusSo)
+	useStore(AccountFinderFixedCard)
 
 
 	// HOOKs
@@ -32,60 +34,56 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 	// HANDLER
 
-	const handleInviteClick = () => {
+	const handleInviteClick = (account: AccountDTO) => {
 		const roomId = (store.state.parent as RoomDetailStore)?.state.roomId
 		const room = chatSo.getRoomById(roomId)
 		chatSo.invite({
 			chatId: room?.chatId,
-			accountId: accountInvite.id
+			accountId: account.id
 		})
 	}
 
-
-	// LOADING
-	if (store.state.disabled) {
-		return <CircularLoadingCmp style={{ width: 25, height: 25, color: "rgba(0,0,0,.5)" }} />
+	const handleFindClick = async () => {
+		await deckCardsSo.add({ view: AccountFinderFixedCard, anim: true })
+		focusSo.focus(AccountFinderFixedCard)
 	}
 
 
 	// RENDER
 	const accountInvite = useMemo(() => {
-		const fw = focusSo.state.view
-		let AccountView: AccountDetailStore = null
-		if (!!fw) {
-			AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_FINDER && fw.state.linked?.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw.state.linked as AccountDetailStore : null
-			if (!AccountView) {
-				AccountView = fw?.state.type == DOC_TYPE.ACCOUNT_DETAIL ? fw as AccountDetailStore : null
-			} else if (!AccountView.state.account?.email) {
-				return (fw as AccountFinderStore).state.all.find(a => a.id == AccountView.state.account?.id)
-			}
-		}
-		if (!AccountView) {
-			AccountView = utils.forEachViews(
-				store.state.group.state.all,
-				view =>
-					view.state.parent != store && view.state.type == DOC_TYPE.ACCOUNT_DETAIL ? view as AccountDetailStore : null,
-			)
-		}
-		return AccountView?.state.account
-	}, [store.state.group.state.all, focusSo.state.view])
+		if ( !AccountFinderFixedCard) return null
+		
+		// se c'e l'ACCOUNT FINDER è in un desk, prendo da li l'ACCOUNT selezionato
+		let accountSelect = AccountFinderFixedCard.getAccountSelected()
 
-	return (<div
+		// se non lo trovo prendo la card ACCOUNT DETAIL se ha il FOCUS
+		if (!accountSelect && focusSo.state.view?.state.type == DOC_TYPE.ACCOUNT_DETAIL) {
+			accountSelect = (focusSo.state.view as AccountDetailStore).state.account
+		}
 
-		style={style}
-	>
-		{!!accountInvite ? (
-			<TooltipWrapCmp content={`Invite ${accountInvite.name} in chat room`}>
+		return accountSelect
+	}, [AccountFinderFixedCard?.state.linked, store.state.group.state.all, focusSo.state.view])
+
+
+	if (store.state.disabled) {
+		return <CircularLoadingCmp style={{ width: 25, height: 25, color: "rgba(0,0,0,.5)" }} />
+	}
+
+	return (
+		<div style={style}>
+			{!!accountInvite ? (
+				<TooltipWrapCmp content={`INVITE ${accountInvite.name.toUpperCase()} IN CHAT ROOM`}>
+					<Button
+						onClick={() => handleInviteClick(accountInvite)}
+					>INVITE</Button>
+				</TooltipWrapCmp>
+			) : (
 				<Button
-					onClick={handleInviteClick}
-				>INVITE</Button>
-			</TooltipWrapCmp>
-		) : (
-			<Button
-			//onClick={() => store.openGroupSettings()}
-			>FIND</Button>
-		)}
-	</div>)
+					onClick={handleFindClick}
+				>FIND</Button>
+			)}
+		</div>
+	)
 }
 
 export default ActionsCmp

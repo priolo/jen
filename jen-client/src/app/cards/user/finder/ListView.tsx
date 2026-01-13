@@ -1,5 +1,6 @@
 import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
+import ConnectionsIcon from "@/icons/cards/ConnectionsIcon"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import chatSo from "@/stores/stacks/chat/repo"
@@ -42,7 +43,7 @@ const AccountFinderView: FunctionComponent<Props> = ({
 	const isSelected = (account: AccountDTO) => account.id == selectId
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
-		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}
+		icon={<ConnectionsIcon />}
 		store={store}
 		actionsRender={<>
 			{/* <OptionsCmp

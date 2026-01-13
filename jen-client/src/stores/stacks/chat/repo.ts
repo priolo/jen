@@ -1,13 +1,12 @@
 import { wsConnection } from "@/plugins/session/wsConnection"
 import { SS_EVENT } from "@/plugins/SocketService/types"
+import { deckCardsSo } from "@/stores/docs/cards"
 import { DOC_TYPE } from "@/types"
 import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetByRoomC2S, ChatInfoS2C, ChatRoom, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@/types/commons/RoomActions"
 import { docsSo, utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
-import { buildRoomDetail } from "../room/factory"
 import { Chat } from "../../../types/chat"
-import { AccountDTO } from "@/types/account"
-import { deckCardsSo } from "@/stores/docs/cards"
+import { buildRoomDetail } from "../room/factory"
 
 
 
@@ -42,7 +41,7 @@ const setup = {
 		 * chiedo creazione di una CHAT
 		 * response CHAT_INFO
 		 */
-		createChat: async (
+		create: async (
 			props: { chatId: string, agentIds: string[] },
 			store?: ChatStore
 		) => {
@@ -56,10 +55,35 @@ const setup = {
 		},
 
 		/** 
+		* Notifico che un USER lascia una CHAT
+		*/
+		leave: async (chatId: string, store?: ChatStore) => {
+			const message: UserLeaveC2S = {
+				action: CHAT_ACTION_C2S.USER_LEAVE,
+				chatId: chatId,
+			}
+			wsConnection.send(JSON.stringify(message))
+		},
+
+		/**
+		 * Invito uno USER ad una CHAT
+		 */
+		invite: async (props: { chatId: string, accountId: string }, store?: ChatStore) => {
+			const { chatId, accountId } = props
+			if (!chatId || !accountId) return
+			const message: UserInviteC2S = {
+				action: CHAT_ACTION_C2S.USER_INVITE,
+				chatId,
+				userId: accountId,
+			}
+			wsConnection.send(JSON.stringify(message))
+		},
+
+		/** 
 		 * chiedo i dati di una CHAT tramite l'id di una ROOM 
 		 * response CHAT_INFO
 		 */
-		fetchChatByRoomId: (roomId: string, store?: ChatStore) => {
+		requestByRoomId: (roomId: string, store?: ChatStore) => {
 			// se non c'e' in locale la chiedo al server
 			const room = chatSo.getRoomById(roomId)
 			if (room) return
@@ -89,44 +113,22 @@ const setup = {
 		/**
 		 * Add a MESSAGE in the HISTORY of a ROOM
 		 */
-		addMessageToRoom: (
+		appendMessage: (
 			{ chatId, roomId, text }: { chatId: string, roomId: string, text: string },
 			store?: ChatStore
 		) => {
 			const room = store.getRoomById(roomId)
 			if (!room) return
-			const lastMessage = room.history[room.history.length - 1]
+			//const lastMessage = room.history[room.history.length - 1]
 			const message: RoomHistoryUpdateC2S = {
 				action: CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE,
 				chatId: chatId,
 				roomId: roomId,
 				updates: [{
-					refId: lastMessage?.id,
-					type: UPDATE_TYPE.ADD,
+					//refId: lastMessage?.id,
+					type: UPDATE_TYPE.APPEND,
 					content: { role: "user", content: text }
 				}],
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
-
-		/** 
-		 * Questo USER lascia una CHAT
-		*/
-		leaveChat: async (chatId: string, store?: ChatStore) => {
-			const message: UserLeaveC2S = {
-				action: CHAT_ACTION_C2S.USER_LEAVE,
-				chatId: chatId,
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
-
-		invite: async (props: { chatId: string, accountId: string }, store?: ChatStore) => {
-			const { chatId, accountId } = props
-			if (!chatId || !accountId) return
-			const message: UserInviteC2S = {
-				action: CHAT_ACTION_C2S.USER_INVITE,
-				chatId,
-				userId: accountId,
 			}
 			wsConnection.send(JSON.stringify(message))
 		},
@@ -142,7 +144,7 @@ const setup = {
 			const rooms = utils.findAll(docsSo.getAllCards(), { type: DOC_TYPE.ROOM_DETAIL, chatId: chatId })
 			const activeRooms = rooms.filter((r: any) => r.state.uuid != viewId)
 			if (activeRooms.length > 0) return
-			store.leaveChat(chatId)
+			store.leave(chatId)
 			store.setAll(store.state.all.filter(c => c.id != chatId))
 		},
 
@@ -189,6 +191,10 @@ const setup = {
 					})
 					deckCardsSo.add({ view, anim: true })
 					break
+
+
+
+
 				}
 
 				case CHAT_ACTION_S2C.CLIENT_ENTERED: {
@@ -217,6 +223,10 @@ const setup = {
 
 					const history = [...room.history]
 					for (const update of msg.updates) {
+						if (update.type === UPDATE_TYPE.APPEND) {
+							history.push(update.content)
+							continue;
+						}
 						const index = history.findIndex(m => m.id == update.refId)
 						switch (update.type) {
 							case UPDATE_TYPE.ADD: {

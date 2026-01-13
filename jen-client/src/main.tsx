@@ -11,7 +11,7 @@ import App from './app/App.tsx';
 import '@fontsource/darker-grotesque/800.css';
 import '@fontsource-variable/inter';
 
-import './css/index.css';
+
 //import './css/colors.css';
 //import './css/colors-var.css';
 //import './css/interaction.css';
@@ -20,7 +20,7 @@ import './css/layout.css';
 import './css/scrollbar.css';
 import './css/monaco.css';
 import "@priolo/jack/style.css";
-
+import './css/index.css';
 
 //#region PLUGIN
 //import '@/plugins/msw';
