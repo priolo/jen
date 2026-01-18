@@ -1,11 +1,12 @@
 import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
+import ElementRow from "@/components/rows/ElementRow.js"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
 import chatSo from "@/stores/stacks/chat/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { DOC_TYPE } from "@/types"
-import { ACCOUNT_STATUS, AccountDTO } from "@/types/account"
+import { AccountDTO } from "@/types/account"
 import { AlertDialog, FindInputHeader } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
@@ -30,7 +31,7 @@ const AccountListView: FunctionComponent<Props> = ({
 	useStore(chatSo)
 
 	// HOOKs
-	const clients = useMemo(() => {
+	const users = useMemo(() => {
 		const roomId = (store.state.parent as RoomDetailStore)?.state.roomId
 		const room = chatSo.getRoomById(roomId)
 		const chat = chatSo.getChatById(room?.chatId)
@@ -43,7 +44,6 @@ const AccountListView: FunctionComponent<Props> = ({
 	// RENDER
 	const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
 	const isSelected = (account: AccountDTO) => account.id == selectId
-	
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}
@@ -60,27 +60,15 @@ const AccountListView: FunctionComponent<Props> = ({
 			<ActionsCmp store={store} />
 		</>}
 	>
-		{/* <Table
-			items={accounts}
-			props={[
-				{ label: "NAME", getValue: s => s.name, isMain: true },
-				{ label: "E-MAIL", getValue: s => s.email },
-			]}
-			//selectId={idSelected}
-			onSelectChange={handleSelect}
-			getId={item => item.id}
-			//singleRow={store.getWidth() > 430}
-		/> */}
-
-		{clients.map(clients => {
-			return (
-				<div key={clients.id}
-					onClick={() => handleSelect(clients)}
-				>
-					{isSelected(clients)? "***" : ""} {clients.name} - {clients.status == ACCOUNT_STATUS.ONLINE ? "ONLINE" : "OFFLINE"}
-				</div>
-			)
-		})}
+		
+		{users.map(user => <ElementRow
+			key={user.id}
+			icon={<div style={{ width: 20, height: "100%", backgroundColor: "#FF0000"}} />}
+			selected={isSelected(user)}
+			title={user.name}
+			subtitle={user.email}
+			onClick={() => handleSelect(user)}
+		/>)}
 
 		<AlertDialog store={store} />
 
@@ -88,3 +76,8 @@ const AccountListView: FunctionComponent<Props> = ({
 }
 
 export default AccountListView
+
+
+// <div>
+// 	{isSelected(clients)? "***" : ""} {clients.name} - {clients.status == ACCOUNT_STATUS.ONLINE ? "ONLINE" : "OFFLINE"}
+// </div>

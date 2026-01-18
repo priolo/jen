@@ -1,15 +1,14 @@
 import agentApi from "@/api/agent"
+import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { EDIT_STATE } from "@/types"
 import { AgentLlm } from "@/types/Agent"
 import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { buildEditorFromAgent } from "../agentEditor/factory"
-import chatSo from "../chat/repo"
 import { EditorState } from "../editorBase"
-import agentSo from "./repo"
 import { buildRoomDetail } from "../room/factory"
-import { deckCardsSo } from "@/stores/docs/cards"
+import agentSo from "./repo"
 
 
 

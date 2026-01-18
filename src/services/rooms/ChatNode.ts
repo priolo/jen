@@ -1,26 +1,41 @@
-import { ChatsWSService } from "@/routers/ChatsWSRoute.js";
-import { ChatContext } from "./ChatContext.js";
+import { AccountDTO } from '@/types/account.js';
 import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
+import { ChatContext } from "./ChatContext.js";
 import RoomTurnBased from "./RoomTurnBased.js";
-import { RoomRepo } from "@/repository/Room.js";
-import { AccountDTO } from '@/types/account.js';
 
 
 
 /**
- * permette di gestire una CHAT, i suoi CLIENTs e le sue ROOMs
+ * Gestion CHAT per quanto riguarda: 
+ * CLIENTs che sono entrati nella CHAT
+ * Le ROOMs create all'interno della CHAT
  */
 class ChatNode {
-	constructor(
+
+	private constructor(
 		context: ChatContext,
 		accountId?: string,
 	) {
-		this.node = context;
+		this.context = context;
 		this.accountId = accountId;
 	}
+
+	/**
+	 * Creo una nuova CHAT inserendo una MAIN-ROOM
+	 * @param context il CONTEXT di gestione della CHAT
+	 * @param rooms le ROOMs iniziali della CHAT
+	 * @param accountId l'ACCOUNT che ha creato la CHAT
+	 */
+	static async Build(context: ChatContext, rooms: RoomTurnBased[], accountId?: string): Promise<ChatNode> {
+		const chat = new ChatNode(context, accountId)
+		chat.rooms = rooms
+		return chat
+	}
+
+
 
 	/** 
 	 * identificativo della CHAT 
@@ -33,9 +48,10 @@ class ChatNode {
 	public accountId?: string
 
 	/** 
-	 * il NODE del contesto
+	 * il CONTEXT per la gestione della CHAT  
+	 * DEPENDENCY che si occupa della comunicazione e risorse
 	 */
-	private node: ChatContext;
+	private context: ChatContext;
 
 	/** 
 	 * le ROOM aperte in questa CHAT 
@@ -47,38 +63,6 @@ class ChatNode {
 	 * cioe' quelli che devono essere aggiornati
 	 */
 	private clientsIds: Set<string> = new Set();
-
-
-
-	//#region FACTORY
-
-	/**
-	 * Creo una nuova CHAT inserendo una MAIN-ROOM
-	 */
-	static async Build(node: ChatsWSService, rooms: RoomTurnBased[], accountId?: string): Promise<ChatNode> {
-		const chat = new ChatNode(node, accountId)
-		chat.rooms = rooms
-		return chat
-	}
-
-	/**
-	 * Crea una MAIN-ROOM con gli AGENTs specificati
-	 */
-	static BuildRoom(chatId: string, agentsRepo: AgentRepo[] = [], accountId?: string, parentRoomId?: string): RoomTurnBased {
-		const roomRepo: RoomRepo = {
-			id: randomUUID() as string,
-			chatId,
-			parentRoomId,
-			accountId,
-
-			history: [],
-			agents: agentsRepo ?? [],
-		}
-		const room = new RoomTurnBased(roomRepo)
-		return room
-	}
-
-	//#endregion
 
 
 
@@ -110,7 +94,7 @@ class ChatNode {
 		if (!clientId || this.clientsIds.has(clientId)) return;
 
 		// ricavo i dati del CLIENT
-		const client = (this.node.getAccountById(clientId))
+		const client = (this.context.getAccountById(clientId))
 		if (!client) return;
 
 		// avverto gli altri CLIENT
@@ -179,7 +163,7 @@ class ChatNode {
 
 		const agents: AgentRepo[] = []
 		for (const agentId of agentsIds) {
-			const agent = await this.node.getAgentRepoById(agentId)
+			const agent = await this.context.getAgentRepoById(agentId)
 			if (agent) agents.push(agent)
 		}
 		room.room.agents = agents
@@ -200,7 +184,7 @@ class ChatNode {
 	private sendInfo(clientId:string) {
 
 		const clients: AccountDTO[] = [...this.clientsIds].map(clientId => {
-			return this.node.getAccountById(clientId)
+			return this.context.getAccountById(clientId)
 		}).filter(a => !!a)
 
 		const rooms = this.rooms.map(r => ({
@@ -219,7 +203,7 @@ class ChatNode {
 			rooms,
 		}
 
-		this.node.sendMessageToClient(clientId, msg)
+		this.context.sendMessageToClient(clientId, msg)
 	}
 
 	/**
@@ -228,7 +212,7 @@ class ChatNode {
 	private sendMessage(message: BaseS2C, esclude: string[] = []): void {
 		for (const clientId of this.clientsIds) {
 			if (esclude.includes(clientId)) continue;
-			this.node.sendMessageToClient(clientId, message)
+			this.context.sendMessageToClient(clientId, message)
 		}
 	}
 
@@ -254,16 +238,16 @@ class ChatNode {
 
 		// [II] onTool, onSubAgent, onMessage devono essere dei parametri di getResponse
 		room.onTool = async (toolId: string, args: any) => {
-			return this.node.executeTool(toolId, args)
+			return this.context.executeTool(toolId, args)
 		}
 		room.onSubAgent = async (requestAgentId, responseAgentId, question) => {
 
 			// recupero il sub-agente dal DB
-			const agentRepo: AgentRepo = await this.node.getAgentRepoById(responseAgentId)
+			const agentRepo: AgentRepo = await this.context.getAgentRepoById(responseAgentId)
 			if (!agentRepo) return null;
 
 			// creo una nuova room per il sub-agente
-			const subRoom = ChatNode.BuildRoom(this.id, [agentRepo], this.accountId, room.room.id)
+			const subRoom = RoomTurnBased.BuildRoom(this.id, [agentRepo], this.accountId, room.room.id)
 			this.rooms.push(subRoom);
 
 			// invia la nuova ROOM-AGENT al CLIENT

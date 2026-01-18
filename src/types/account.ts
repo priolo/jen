@@ -1,28 +1,6 @@
 import { AccountRepo } from '@/repository/Account.js';
 
 
-
-/**
- * Payload memorizzato nel JWT token
- */
-export type JWTPayload = {
-	id: string;
-	email: string;
-	name: string;
-};
-
-/**
- * Metadati essenziali del repository GitHub
- * memorizzati per evitare chiamate API ripetute
- */
-export interface GithubAccountMetadata {
-	name: string;
-	full_name: string;
-	avatar_url: string; // avatar del owner
-	description?: string;
-	html_url?: string;
-}
-
 /**
  * Dati di trasferimento
  */
@@ -39,6 +17,33 @@ export interface AccountDTO {
 	status?: ACCOUNT_STATUS;
 	//description?: string; 
 	emailVerified: boolean;
+}
+
+export enum ACCOUNT_STATUS {
+	OFFLINE = 0,
+	ONLINE
+}
+
+/**
+ * Payload memorizzato nel JWT token
+ */
+export type JWTPayload = {
+	/** id ACCOUNT */
+	id: string;
+	email: string;
+	name: string;
+};
+
+/**
+ * Metadati essenziali del repository GitHub
+ * memorizzati per evitare chiamate API ripetute
+ */
+export interface GithubAccountMetadata {
+	name: string;
+	full_name: string;
+	avatar_url: string; // avatar del owner
+	description?: string;
+	html_url?: string;
 }
 
 /**
@@ -63,6 +68,7 @@ export function AccountDTO(account: AccountRepo): AccountDTO | null {
 		emailVerified: account.emailCode === EMAIL_CODE.VERIFIED,
 	};
 }
+
 /**
  * Restituisce una lista di ACCOUNT in versione "sendable"
  */
@@ -73,8 +79,4 @@ export function AccountDTOList(accounts: AccountRepo[]) {
 	UNVERIFIED = null
 }
 
-export enum ACCOUNT_STATUS {
-	OFFLINE = 0,
-	ONLINE
-}
 

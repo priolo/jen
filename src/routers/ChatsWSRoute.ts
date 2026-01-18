@@ -1,6 +1,6 @@
 import { REPO_PATHS } from "@/config.js"
 import { ChatContext } from "@/services/rooms/ChatContext.js"
-import { ACCOUNT_STATUS, AccountDTO } from '@/types/account.js'
+import { ACCOUNT_STATUS, AccountDTO, JWTPayload } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { FindManyOptions } from "typeorm"
 import { AgentRepo } from "../repository/Agent.js"
@@ -143,7 +143,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	 * Inserisce il CLIENT che l'ha creata
 	 */
 	private async handleChatCreate(client: ws.IClient, msg: ChatCreateC2S) {
-		const userId = client?.jwtPayload?.id
+		const userId = (<JWTPayload>client?.jwtPayload)?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
 		// carico gli agenti REPO
@@ -152,7 +152,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		)).filter(agent => !!agent) as AgentRepo[]
 
 		// creo chat e room
-		const room = ChatNode.BuildRoom(msg.chatId, agentsRepo, userId)
+		const room = RoomTurnBased.BuildRoom(msg.chatId, agentsRepo, userId)
 		const chat = await ChatNode.Build(this, [room], userId)
 		chat.id = msg.chatId
 

@@ -1,4 +1,4 @@
-import { AccountFinderFixedCard, ClearSession, EndSession, StartSession } from "@/plugins/session"
+import { AccountFinderFixedCard, AuthFixedCard, ClearSession, EndSession, StartSession } from "@/plugins/session"
 import docsSo, { FIXED_CARD } from "@/stores/docs"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
@@ -64,13 +64,16 @@ const MainMenu: FunctionComponent<Props> = ({
 		deckCardsSo.add({ view, anim: true })
 	}
 
+
+
 	const handleAccountFinder = async () => {
 		await deckCardsSo.add({ view: AccountFinderFixedCard, anim: true })
 		focusSo.focus(AccountFinderFixedCard)
 	}
-	const handleAuth = () => {
-		const view = buildAuthDetailCard()
-		deckCardsSo.add({ view, anim: true })
+
+	const handleAuth = async () => {
+		await deckCardsSo.add({ view: AuthFixedCard, anim: true })
+		focusSo.focus(AuthFixedCard)
 	}
 
 
@@ -138,10 +141,10 @@ const MainMenu: FunctionComponent<Props> = ({
 		</>}
 		{/* *** DEBUG *** */}
 
-		<StoreButton
+		{/* <StoreButton
 			label="LOG"
 			store={docsSo.state.fixedViews?.[FIXED_CARD.LOGS]}
-		/>
+		/> */}
 
 		<AboutButton />
 

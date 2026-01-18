@@ -11,12 +11,28 @@ import { printLlmResponse } from "../agents/utils/print.js";
 class RoomTurnBased {
 
 	constructor(
+		/** ROOM POCO di riferimento */
 		public room: RoomRepo,
 		// [II] in room dovrebbero poterci essere dei TOOLS e dei CONTEXT condivisi per tutti gli AGENTS che partecipano
 	) {
-		if (!this.room.history) {
-			this.room.history = [];
+		if (!this.room.history) this.room.history = [];
+	}
+
+	/**
+	 * Crea una MAIN-ROOM con gli AGENTs specificati
+	 */
+	static BuildRoom(chatId: string, agentsRepo: AgentRepo[] = [], accountId?: string, parentRoomId?: string): RoomTurnBased {
+		const roomRepo: RoomRepo = {
+			id: randomUUID() as string,
+			chatId,
+			parentRoomId,
+			accountId,
+
+			history: [],
+			agents: agentsRepo ?? [],
 		}
+		const room = new RoomTurnBased(roomRepo)
+		return room
 	}
 
 
@@ -89,7 +105,7 @@ class RoomTurnBased {
 	public onMessage: (chatMessage: ChatMessage, roomId: string) => void = null;
 
 
-	
+
 
 
 

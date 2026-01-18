@@ -21,8 +21,8 @@ const setup = {
 
 	getters: {
 		//#region VIEWBASE
-		getTitle: (_: void, store?: ViewStore) => "ACCOUNT",
-		getSubTitle: (_: void, store?: ViewStore) => "Detail account",
+		getTitle: (_: void, store?: ViewStore) => (<AccountDetailStore>store).state.account?.name?.toUpperCase() ?? "ACCOUNT DETAIL",
+		getSubTitle: (_: void, store?: ViewStore) => "DETAIL ACCOUNT",
 		getSerialization: (_: void, store?: ViewStore) => {
 			const state = store.state as AccountDetailState
 			return {

@@ -14,6 +14,8 @@ import { deckCardsSo } from "@/stores/docs/cards"
 import { DOC_TYPE } from "@/types"
 import { buildAccountFinder } from "@/stores/stacks/account/factory"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
+import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
+import { AuthDetailStore } from "@/stores/stacks/auth/detail"
 
 
 
@@ -29,7 +31,12 @@ window.addEventListener('offline', function () {
 	console.log("Sei andato offline!");
 });
 
+
+
+/** CARD per la ricerca di un ACCOUNT */
 export let AccountFinderFixedCard: AccountFinderStore
+/** CARD la gestione AUTH dell'ACCOUNT */
+export let AuthFixedCard: AuthDetailStore
 
 
 
@@ -58,14 +65,12 @@ export async function StartSession() {
 	// BUILD SINGLETONE CARDS
 	const allStores = [...deckStores/*, ...drawerStores, ...menuStores*/]
 	AccountFinderFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.ACCOUNT_FINDER) ?? buildAccountFinder()) as AccountFinderStore
+	AuthFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.AUTH_DETAIL) ?? buildAuthDetailCard()) as AuthDetailStore
 
 	deckCardsSo.setAll(deckStores)
 	//drawerCardsSo.setAll(drawerStores)
 	//menuSo.setAll(menuStores)
-
-
-
-
+	
 }
 
 export async function EndSession() {

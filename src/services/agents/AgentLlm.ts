@@ -16,6 +16,7 @@ import { getHistory, getModel } from './utils/vercel.js';
 class AgentLlm {
 
 	constructor(
+		/** POCO di riferimento */
 		public agent: Partial<AgentRepo>,
 	) {
 	}
@@ -176,25 +177,25 @@ class AgentLlm {
 				}
 			}),
 
-// 			ask_for_information: tool({
-// 				description: `You can use this procedure if you don't have enough information from the user.
-// For example: 
-// User: "give me the temperature where I am now". You: "where are you now?", User: "I am in Paris"
-// `,
-// 				inputSchema: jsonSchema({
-// 					type: "object",
-// 					properties: {
-// 						request: {
-// 							type: "string",
-// 							description: "The question to ask to get useful information."
-// 						}
-// 					},
-// 					required: ["request"]
-// 				}),
-// 				execute: async (args: any) => {
-// 					return args.request
-// 				}
-// 			}),
+			// 			ask_for_information: tool({
+			// 				description: `You can use this procedure if you don't have enough information from the user.
+			// For example: 
+			// User: "give me the temperature where I am now". You: "where are you now?", User: "I am in Paris"
+			// `,
+			// 				inputSchema: jsonSchema({
+			// 					type: "object",
+			// 					properties: {
+			// 						request: {
+			// 							type: "string",
+			// 							description: "The question to ask to get useful information."
+			// 						}
+			// 					},
+			// 					required: ["request"]
+			// 				}),
+			// 				execute: async (args: any) => {
+			// 					return args.request
+			// 				}
+			// 			}),
 
 			update_strategy: tool({
 				description: "Set up a strategy consisting of a list of steps to follow to solve the main problem.", // and try to minimize the use of tools preferring 'reasoning'. ",
@@ -284,7 +285,7 @@ class AgentLlm {
 
 	//#region SYSTEM PROMPT
 
-	public overrideSystemPrompt: (systemPrompt:string) => string = null
+	public overrideSystemPrompt: (systemPrompt: string) => string = null
 
 	/** System instructions for ReAct agent  */
 	protected getSystemPrompt(): string {

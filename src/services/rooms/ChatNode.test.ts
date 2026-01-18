@@ -1,19 +1,16 @@
-import "../../../startup/envPreload.js"
+import "../../startup/envPreload.js"
 
 import { randomUUID } from 'crypto';
-import { AgentRepo } from '../../../repository/Agent.js';
-import { RoomRepo } from '../../../repository/Room.js';
-import { ToolRepo } from '../../../repository/Tool.js';
-import { LLM_RESPONSE_TYPE } from '../../../types/commons/LlmResponse.js';
-import type ChatContext from '../../rooms/ChatContext.js';
-import ChatNode from '../../rooms/ChatNode.js';
-import RoomTurnBased from '../../rooms/RoomTurnBased.js';
+import { AgentRepo } from '../../repository/Agent.js';
+import { RoomRepo } from '../../repository/Room.js';
+import { ToolRepo } from '../../repository/Tool.js';
+import { LLM_RESPONSE_TYPE } from '../../types/commons/LlmResponse.js';
+import type ChatContext from './ChatContext.js';
+import ChatNode from './ChatNode.js';
+import RoomTurnBased from './RoomTurnBased.js';
 
 
-describe("Test on CHAT", () => {
-
-	beforeEach(() => {
-	});
+describe("Test ChatNode", () => {
 
 	const addTool: ToolRepo = {
 		id: "id-tool-1",
@@ -111,6 +108,9 @@ describe("Test on CHAT", () => {
 			console.log(`SEND: ${clientId}`, msg)
 		}
 	}
+
+	beforeEach(() => {
+	})
 
 	beforeAll(async () => {
 	})
