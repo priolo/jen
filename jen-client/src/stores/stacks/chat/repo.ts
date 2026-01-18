@@ -201,7 +201,7 @@ const setup = {
 					const msg = message as ClientEnteredS2C
 					const chat = store.getChatById(msg.chatId)
 					if (!chat) break
-					chat.clients.push(msg.client)
+					chat.clients.push(msg.user)
 					store._update()
 					break
 				}

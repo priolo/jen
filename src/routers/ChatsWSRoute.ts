@@ -1,5 +1,5 @@
 import { REPO_PATHS } from "@/config.js"
-import { ChatContext } from "@/services/rooms/ChatContext.js"
+import { IChatContext } from "@/services/rooms/IChatContext.js"
 import { ACCOUNT_STATUS, AccountDTO, JWTPayload } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { FindManyOptions } from "typeorm"
@@ -9,7 +9,7 @@ import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
 import { McpTool } from "../services/mcp/types.js"
 import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
 import ChatNode from "../services/rooms/ChatNode.js"
-import RoomTurnBased from "../services/rooms/RoomTurnBased.js"
+import RoomTurnBase from "../services/rooms/RoomTurnBase.js"
 import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
@@ -24,7 +24,7 @@ export type ChatsWSConf = Partial<ChatsWSService['stateDefault']>
  * in pratica è un servizio di CHAT multi-room e multi-agente 
  * gestisce prevalentemente i messaggi
  */
-export class ChatsWSService extends ws.route implements ChatContext {
+export class ChatsWSService extends ws.route implements IChatContext {
 
 	/** tuttele CHAT esistenti */
 	private chats: ChatNode[] = []
@@ -44,7 +44,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		const userId = client.jwtPayload?.id
 
 		// aggiorno i dati del ACCOUNT
-		let account = this.getAccountById(userId)
+		let account = this.getUserById(userId)
 		if (!account) {
 			const accountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 				type: typeorm.Actions.GET_BY_ID,
@@ -143,8 +143,8 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	 * Inserisce il CLIENT che l'ha creata
 	 */
 	private async handleChatCreate(client: ws.IClient, msg: ChatCreateC2S) {
-		const userId = (<JWTPayload>client?.jwtPayload)?.id
-		if (!userId) throw new Error(`Invalid userId`)
+		const accountId = (<JWTPayload>client?.jwtPayload)?.id
+		if (!accountId) throw new Error(`Invalid userId`)
 
 		// carico gli agenti REPO
 		const agentsRepo = (await Promise.all(
@@ -152,13 +152,13 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		)).filter(agent => !!agent) as AgentRepo[]
 
 		// creo chat e room
-		const room = RoomTurnBased.BuildRoom(msg.chatId, agentsRepo, userId)
-		const chat = await ChatNode.Build(this, [room], userId)
+		const room = RoomTurnBase.Build(msg.chatId, agentsRepo, accountId)
+		const chat = await ChatNode.Build(this, [room], accountId)
 		chat.id = msg.chatId
 
 		// inserisco la nuova CHAT e faccio entrare il CLIENT
 		this.addChat(chat)
-		chat.addClient(userId)
+		chat.addUser(accountId)
 	}
 
 	/**
@@ -166,18 +166,18 @@ export class ChatsWSService extends ws.route implements ChatContext {
 	 * Eventualmente carica i dati dal DB se la ROOM non è in memoria
 	 */
 	private async handleChatLoadByRoom(client: ws.IClient, msg: ChatGetByRoomC2S) {
-		const userId = client?.jwtPayload?.id
-		if (!userId) throw new Error(`Invalid userId`)
+		const accountId = client?.jwtPayload?.id
+		if (!accountId) throw new Error(`Invalid userId`)
 
 		let chat = this.getChatByRoomId(msg.roomId)
 
 		// non la trovo in memoria quindi carico tutta la CHAT dal DB
 		if (!chat) {
-			chat = await this.loadChatByRoomId(msg.roomId, userId)
+			chat = await this.loadChatByRoomId(msg.roomId, accountId)
 			this.addChat(chat)
 		}
 
-		chat.addClient(userId)
+		chat.addUser(accountId)
 	}
 
 	/**
@@ -191,7 +191,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		const chat = this.getChatById(msg.chatId)
 		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 
-		const isVoid = chat.removeClient(userId)
+		const isVoid = chat.removeUser(userId)
 		if (isVoid) {
 			await this.removeChat(chat.id)
 			await this.saveChat(chat)
@@ -213,7 +213,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		//if ( this.getClientById(invitedUserId) ) return; // già presente
 
 		// inserisco il CLIENT invitato nella CHAT
-		chat.addClient(invitedUserId)
+		chat.addUser(invitedUserId)
 
 	}
 
@@ -295,9 +295,9 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		return "Tool type not supported"
 	}
 
-	public sendMessageToClient(clientId: string, message: BaseS2C) {
-		const clients = this.getClientsById(clientId)
-		if (clients.length == 0) throw new Error(`Client not found: ${clientId}`)
+	public sendMessageToUser(accountId: string, message: BaseS2C) {
+		const clients = this.getClientsById(accountId)
+		if (clients.length == 0) throw new Error(`Client not found: ${accountId}`)
 		for (const client of clients) {
 			this.sendToClient(client, JSON.stringify(message))
 		}
@@ -311,12 +311,10 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		return this.getClients()?.filter(c => c?.jwtPayload?.id == accountId)
 	}
 
-	public getAccountById(clientId: string): AccountDTO {
+	public getUserById(clientId: string): AccountDTO {
 		if (!clientId) return null
 		return this.getClients()?.find(c => c?.jwtPayload?.id == clientId)?.jwtPayload
 	}
-
-
 
 	//#endregion
 
@@ -387,7 +385,7 @@ export class ChatsWSService extends ws.route implements ChatContext {
 		})
 
 		// Creo la CHAT con le ROOMs caricate
-		const rooms = roomsRepo.map(repo => new RoomTurnBased(repo))
+		const rooms = roomsRepo.map(repo => new RoomTurnBase(repo))
 		const chat = await ChatNode.Build(this, rooms, accountId)
 		chat.id = roomRepo.chatId
 		return chat

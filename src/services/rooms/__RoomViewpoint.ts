@@ -4,8 +4,8 @@ import { ChatsWSService } from "@/routers/ChatsWSRoute.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { randomUUID } from "crypto";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
-import AgentLlm from "../agents/AgentLlm.js";
-import AgentMock from "../agents/AgentMock.js";
+import AgentLlm from "./AgentLlm.js";
+import AgentMock from "./AgentLlm.mock.js";
 import { printLlmResponse } from "../agents/utils/print.js";
 
 

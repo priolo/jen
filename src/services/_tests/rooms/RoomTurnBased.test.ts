@@ -83,10 +83,12 @@ describe("Test on ROOM", () => {
 			agents: [agentRepo],
 		}
 		const room = new RoomTurnBased(roomRepo)
-		room.onTool = (toolId: string, args: any) => toolsExe(toolId, args)
+		//room.onTool = (toolId: string, args: any) => toolsExe(toolId, args)
 
 		room.addUserMessage("How much is 2+2? Just write the result.")
-		const resp = await room.getResponse()
+		const resp = await room.getResponse({
+			onTool: (toolId: string, args: any) => toolsExe(toolId, args)
+		})
 
 		expect(resp).toBeDefined()
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED);
@@ -121,7 +123,7 @@ describe("Test on ROOM", () => {
 
 
 
-		room.onSubAgent = async (requestAgentId, agentId, question) => {
+		const onSubAgent = async (requestAgentId, agentId, question) => {
 			const agentRepo = agentsRepo.find(a => a.id === agentId)!
 			const room = new RoomTurnBased({
 				id: "sub-room",
@@ -134,7 +136,7 @@ describe("Test on ROOM", () => {
 		}
 
 		room.addUserMessage("How much is 2+2? Just write the result.")
-		const resp = await room.getResponse()
+		const resp = await room.getResponse({ onSubAgent })
 
 		expect(resp.type).toBe(LLM_RESPONSE_TYPE.COMPLETED)
 		expect(resp.content.result).toBe("4")
@@ -181,8 +183,7 @@ describe("Test on ROOM", () => {
 
 			// istanzio la ROOM-REPO
 			const room = new RoomTurnBased(roomRepo)
-			room.onTool = (toolId, args) => toolsExe(toolId, args)
-			room.onSubAgent = async (requestAgentId, agentId, question) => {
+			const onSubAgent = async (requestAgentId, agentId, question) => {
 
 				// recupero l'agente che risponde
 				const agentRepo = agentsRepo.find(a => a.id === agentId)!
@@ -203,7 +204,10 @@ describe("Test on ROOM", () => {
 
 			// inserisco la domanda e chiedo la risposta
 			room.addUserMessage(question, roomAgent.id)
-			return await room.getResponse()
+			return await room.getResponse({
+				onTool: (toolId, args) => toolsExe(toolId, args),
+				onSubAgent
+			})
 		}
 
 

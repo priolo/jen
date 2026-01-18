@@ -3,6 +3,7 @@ import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 't
 import { ChatMessage } from '../types/commons/RoomActions.js';
 import { AgentRepo } from './Agent.js';
 import { AccountAssets } from './AccountAssets.js';
+import { randomUUID } from 'crypto';
 
 
 /**
@@ -17,7 +18,7 @@ export class RoomRepo extends AccountAssets {
 
     /** ID of the chat this room belongs to */
     @Column({ type: 'uuid' })
-    chatId?: string;    
+    chatId?: string;
 
     /** History of prompt conversation */
     @Column({ type: 'json', default: '[]' })
@@ -45,8 +46,18 @@ export class RoomRepo extends AccountAssets {
     parentRoomId?: string | null;
 
     //#endregion
+}
 
 
+export function BuildRoomRepo(chatId: string, agentsRepo: AgentRepo[] = [], accountId?: string, parentRoomId?: string): RoomRepo {
+    const room: RoomRepo = {
+        id: randomUUID() as string,
+        chatId,
+        parentRoomId,
+        accountId,
 
-
+        history: [],
+        agents: agentsRepo ?? [],
+    }
+    return room
 }

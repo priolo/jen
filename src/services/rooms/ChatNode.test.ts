@@ -7,7 +7,7 @@ import { ToolRepo } from '../../repository/Tool.js';
 import { LLM_RESPONSE_TYPE } from '../../types/commons/LlmResponse.js';
 import type ChatContext from './ChatContext.js';
 import ChatNode from './ChatNode.js';
-import RoomTurnBased from './RoomTurnBased.js';
+import RoomTurnBase from './RoomTurnBase.js';
 
 
 describe("Test ChatNode", () => {
@@ -119,7 +119,7 @@ describe("Test ChatNode", () => {
 	})
 
 	test("domanda in MAIN-ROOM con TOOL", async () => {
-		const room = await RoomTurnBased.Build(nodeSym, [agentAdderRepo.id])
+		const room = await RoomTurnBase.Build(nodeSym, [agentAdderRepo.id])
 		const chat = await ChatNode.Build(nodeSym, room)
 		
 		await chat.enterClient("id-user")
@@ -139,7 +139,7 @@ describe("Test ChatNode", () => {
 	test("domanda in MAIN-ROOM con SUB-AGENTS", async () => {
 		const recorder = new Recorder()
 
-		const room = await RoomTurnBased.Build(recorder.context, [agentLeadRepo.id])
+		const room = await RoomTurnBase.Build(recorder.context, [agentLeadRepo.id])
 		const chat = await ChatNode.Build(recorder.context, room)
 		await chat.enterClient("id-user")
 		chat.addUserMessage(
@@ -158,7 +158,7 @@ describe("Test ChatNode", () => {
 	test("due USER parlano tra di loro", async () => {
 		const recorder = new Recorder()
 
-		const room = await RoomTurnBased.Build(recorder.context)
+		const room = await RoomTurnBase.Build(recorder.context)
 		const chat = await ChatNode.Build(recorder.context, room)
 
 		const user1 = "user-1"
@@ -178,7 +178,7 @@ describe("Test ChatNode", () => {
 
 		const recorder = new Recorder()
 
-		const room = await RoomTurnBased.Build(recorder.context, [philosopherRepo.id, physicistRepo.id])
+		const room = await RoomTurnBase.Build(recorder.context, [philosopherRepo.id, physicistRepo.id])
 		const chat = await ChatNode.Build(recorder.context, room)
 
 		chat.addUserMessage(`do you like philosophy or physics more?`)

@@ -54,7 +54,7 @@ class AccountRoute extends httpRouter.Service {
 		// aggiorno lo status online/offline
 		const chats = this.nodeByPath<ChatsWSService>("/>ws-chats")
 		for (const account of accounts) {
-			const isOnline = !!chats.getAccountById(account.id)
+			const isOnline = !!chats.getUserById(account.id)
 			account.status = isOnline ? ACCOUNT_STATUS.ONLINE : ACCOUNT_STATUS.OFFLINE
 		}
 

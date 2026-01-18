@@ -1,10 +1,10 @@
-import "../../../startup/envPreload.js"
+import "../../startup/envPreload.js"
 
-import { AgentRepo } from "../../../repository/Agent.js";
-import { LLM_MODELS } from "../../../types/commons/LlmProviders.js";
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../../types/commons/LlmResponse.js";
-import { ChatMessage } from "../../../types/commons/RoomActions.js";
-import AgentLlm from "../../agents/AgentLlm.js";
+import { AgentRepo } from "../../repository/Agent.js";
+import { LLM_MODELS } from "../../types/commons/LlmProviders.js";
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../types/commons/LlmResponse.js";
+import { ChatMessage } from "../../types/commons/RoomActions.js";
+import AgentLlm from "./AgentLlm.js";
 
 
 
@@ -15,8 +15,6 @@ describe("Test on AGENT", () => {
 
 	afterAll(async () => {
 	})
-
-
 
 	test("Test semplice domanda", async () => {
 
@@ -32,7 +30,7 @@ describe("Test on AGENT", () => {
 		const agent = new AgentLlm(agentRepo)
 
 		const history: ChatMessage[] = [
-			{ role: "user", content: "write 42 immediately without thinking" },
+			{ role: "user", content: "write 42" },
 		]
 
 		const resp = await agent.ask(history)

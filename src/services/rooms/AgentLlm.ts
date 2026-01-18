@@ -3,7 +3,8 @@ import { ChatMessage } from '../../types/commons/RoomActions.js';
 import { time } from '@priolo/jon-utils';
 import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet } from "ai";
 import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
-import { getHistory, getModel } from './utils/vercel.js';
+import { getHistory, getModel } from '../agents/utils/vercel.js';
+import { IAgent } from './IAgent.js';
 
 
 
@@ -13,11 +14,11 @@ import { getHistory, getModel } from './utils/vercel.js';
  * The agent can also interact with other agents to solve complex problems.
  * Can ask info from the parent agent 
  */
-class AgentLlm {
+class AgentLlm implements IAgent {
 
 	constructor(
 		/** POCO di riferimento */
-		public agent: Partial<AgentRepo>,
+		public agent: AgentRepo,
 	) {
 	}
 

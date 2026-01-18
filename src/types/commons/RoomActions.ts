@@ -204,15 +204,15 @@ export type ChatInfoS2C = BaseS2C & {
 /** un CLIENT è entrato in una CHAT */
 export type ClientEnteredS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_ENTERED
-	/** il CLIENT che entra */
-	client: AccountDTO
+	/** un ACCOUNT entra */
+	user: AccountDTO
 }
 
 /** un CLIENT è uscito da una CHAT */
 export type ClientLeaveS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_LEAVE
 	/** id del CLIENT */
-	clientId: string
+	userId: string
 }
 
 export type UserStatusS2C = {

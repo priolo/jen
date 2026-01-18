@@ -3,8 +3,11 @@ import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
-import { ChatContext } from "./ChatContext.js";
-import RoomTurnBased from "./RoomTurnBased.js";
+import { IChatContext } from "./IChatContext.js";
+import RoomTurnBase from "./RoomTurnBase.js";
+import { IRoomHandlers } from "./IRoomHandlers.js";
+import AgentLlm from './AgentLlm.js';
+import { RoomConversationManager } from './RoomConversationManager.js';
 
 
 
@@ -16,7 +19,7 @@ import RoomTurnBased from "./RoomTurnBased.js";
 class ChatNode {
 
 	private constructor(
-		context: ChatContext,
+		context: IChatContext,
 		accountId?: string,
 	) {
 		this.context = context;
@@ -29,13 +32,15 @@ class ChatNode {
 	 * @param rooms le ROOMs iniziali della CHAT
 	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
-	static async Build(context: ChatContext, rooms: RoomTurnBased[], accountId?: string): Promise<ChatNode> {
+	static async Build(context: IChatContext, rooms: RoomTurnBase[], accountId?: string): Promise<ChatNode> {
 		const chat = new ChatNode(context, accountId)
 		chat.rooms = rooms
 		return chat
 	}
 
 
+	
+	//#region CHAT PROPERTIES
 
 	/** 
 	 * identificativo della CHAT 
@@ -51,35 +56,42 @@ class ChatNode {
 	 * il CONTEXT per la gestione della CHAT  
 	 * DEPENDENCY che si occupa della comunicazione e risorse
 	 */
-	private context: ChatContext;
+	private context: IChatContext;
 
 	/** 
 	 * le ROOM aperte in questa CHAT 
 	 */
-	public rooms: RoomTurnBased[] = [];
+	public rooms: RoomTurnBase[] = [];
 
 	/** 
-	 * gli ids dei CLIENTs-WS partecipanti 
+	 * gli ids degli ACCOUNT ONLINE partecipanti 
 	 * cioe' quelli che devono essere aggiornati
 	 */
-	private clientsIds: Set<string> = new Set();
+	private usersIds: Set<string> = new Set();
+
+	//#endregion
 
 
+
+	//#region ROOM MANAGEMENT
 
 	/**
-	 * Recupera la MAIN-ROOM della CHAT
+	 * Recupera la MAIN-ROOM della CHAT  
+	 * Quella con il parent a null
 	 */
-	private getMainRoom(): RoomTurnBased {
+	private getMainRoom(): RoomTurnBase {
 		return this.rooms.find(room => room.room.parentRoomId == null)
 	}
 
 	/**
 	 * Recupera una ROOM dalla CHAT
 	 */
-	public getRoomById(id?: string): RoomTurnBased {
+	public getRoomById(id?: string): RoomTurnBase {
 		if (!id || !this.rooms) return null
 		return this.rooms.find(room => room.room.id == id)
 	}
+
+	//#endregion 
 
 
 
@@ -89,27 +101,27 @@ class ChatNode {
 	 * comunico alla CHAT che un CLIENT è entrato
 	 * aggiungo il CLIENT in CHAT
 	 */
-	addClient(clientId: string) {
+	addUser(userId: string) {
 		// se il CLIENT è già in CHAT non faccio nulla
-		if (!clientId || this.clientsIds.has(clientId)) return;
+		if (!userId || this.usersIds.has(userId)) return;
 
 		// ricavo i dati del CLIENT
-		const client = (this.context.getAccountById(clientId))
-		if (!client) return;
+		const user = (this.context.getUserById(userId))
+		if (!user) return;
 
 		// avverto gli altri CLIENT
 		const message: ClientEnteredS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
 			chatId: this.id,
-			client,
+			user: user,
 		}
 		this.sendMessage(message)
 
 		// inserisco il CLIENT nella CHAT
-		this.clientsIds.add(clientId);
+		this.usersIds.add(userId);
 
 		// invio al nuovo CLIENT i dati della CHAT
-		this.sendInfo(clientId)
+		this.sendInfo(userId)
 	}
 
 	/**
@@ -117,26 +129,26 @@ class ChatNode {
 	 * e lo elimino dalla CHAT
 	 * @return true se la chat è vuota e può essere rimossa
 	 */
-	removeClient(clientId: string): boolean {
-		if (!clientId || !this.clientsIds.has(clientId)) return false;
+	removeUser(userId: string): boolean {
+		if (!userId || !this.usersIds.has(userId)) return false;
 
 		// avverto tutti i CLIENTs
 		const message: ClientLeaveS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_LEAVE,
 			chatId: this.id,
-			clientId,
+			userId: userId,
 		}
-		this.sendMessage(message, [clientId]) // escludo il client che lascia
+		this.sendMessage(message, [userId]) // escludo il client che lascia
 
-		this.clientsIds.delete(clientId);
-		return this.clientsIds.size == 0
+		this.usersIds.delete(userId);
+		return this.usersIds.size == 0
 	}
 
 	/** 
 	 * aggiorno la HISTORY con una serie di MessageUpdate 
 	 * Manda il messaggio di aggiornamento a tutti i partecipanti alla CHAT
 	 */
-	updateHistory(updates: MessageUpdate[], roomId?: string): RoomTurnBased {
+	updateHistory(updates: MessageUpdate[], roomId?: string): RoomTurnBase {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
 		if (!room) throw new Error("Room not found")
 
@@ -180,11 +192,12 @@ class ChatNode {
 
 	/**
 	 * Restituisco le info della CHAT sotto forma di messaggio
+	 * @param accountId l'ACCOUNT a cui inviare le info
 	 */
-	private sendInfo(clientId:string) {
+	private sendInfo(accountId:string) {
 
-		const clients: AccountDTO[] = [...this.clientsIds].map(clientId => {
-			return this.context.getAccountById(clientId)
+		const clients: AccountDTO[] = [...this.usersIds].map(clientId => {
+			return this.context.getUserById(clientId)
 		}).filter(a => !!a)
 
 		const rooms = this.rooms.map(r => ({
@@ -203,16 +216,16 @@ class ChatNode {
 			rooms,
 		}
 
-		this.context.sendMessageToClient(clientId, msg)
+		this.context.sendMessageToUser(accountId, msg)
 	}
 
 	/**
 	 * Invia a tutti i partecipanti della CHAT un MESSAGE
 	 */
 	private sendMessage(message: BaseS2C, esclude: string[] = []): void {
-		for (const clientId of this.clientsIds) {
-			if (esclude.includes(clientId)) continue;
-			this.context.sendMessageToClient(clientId, message)
+		for (const userId of this.usersIds) {
+			if (esclude.includes(userId)) continue;
+			this.context.sendMessageToUser(userId, message)
 		}
 	}
 
@@ -227,67 +240,70 @@ class ChatNode {
 	 */
 	async complete(): Promise<LlmResponse> {
 		// [II] assumo che da completare sia sempre la MAIN-ROOM
-		let room: RoomTurnBased = this.getMainRoom()
+		let room: RoomTurnBase = this.getMainRoom()
 		return await this.recursiveRequest(room)
 	}
 
 	/**
 	 * Effettua una richiesta loop su una ROOM 
 	 */
-	private async recursiveRequest(room: RoomTurnBased): Promise<LlmResponse> {
+	private async recursiveRequest(room: RoomTurnBase): Promise<LlmResponse> {
 
-		// [II] onTool, onSubAgent, onMessage devono essere dei parametri di getResponse
-		room.onTool = async (toolId: string, args: any) => {
-			return this.context.executeTool(toolId, args)
+		const handlers: IRoomHandlers = {
+			onTool: async (toolId: string, args: any) => {
+				return this.context.executeTool(toolId, args)
+			},
+			onSubAgent: async (requestAgentId, responseAgentId, question) => {
+
+				// recupero il sub-agente dal DB
+				const agentRepo: AgentRepo = await this.context.getAgentRepoById(responseAgentId)
+				if (!agentRepo) return null;
+
+				// creo una nuova room per il sub-agente
+				const subRoom = RoomTurnBase.Build(this.id, [agentRepo], this.accountId, room.room.id)
+				this.rooms.push(subRoom);
+
+				// invia la nuova ROOM-AGENT al CLIENT
+				const newRoomMsg: RoomNewS2C = {
+					action: CHAT_ACTION_S2C.ROOM_NEW,
+					chatId: this.id,
+					roomId: subRoom.room.id,
+					parentRoomId: room.room.id,
+					agentsIds: [agentRepo.id],
+				}
+				this.sendMessage(newRoomMsg)
+
+				// inserisco messaggio "user" ma dell'AGENT nella nuova ROOM
+				const msgUpd: MessageUpdate = {
+					type: UPDATE_TYPE.APPEND,
+					content: {
+						id: randomUUID(),
+						clientId: requestAgentId,
+						role: "user",
+						content: question,
+					},
+				}
+				this.updateHistory([msgUpd], subRoom.room.id);
+
+				// effettuo la ricorsione su questa nuova ROOM-AGENT
+				const response = await this.recursiveRequest(subRoom)
+				return {
+					response,
+					roomId: subRoom.room.id
+				}
+			},
+			onMessage: (chatMessage: ChatMessage, roomId: string) => {
+				const msgUpd: MessageUpdate = {
+					type: UPDATE_TYPE.APPEND,
+					content: chatMessage,
+				}
+				this.updateHistory([msgUpd], roomId);
+			},
+			onBuildAgent: async (agentRepo: AgentRepo) => new AgentLlm(agentRepo),
 		}
-		room.onSubAgent = async (requestAgentId, responseAgentId, question) => {
 
-			// recupero il sub-agente dal DB
-			const agentRepo: AgentRepo = await this.context.getAgentRepoById(responseAgentId)
-			if (!agentRepo) return null;
-
-			// creo una nuova room per il sub-agente
-			const subRoom = RoomTurnBased.BuildRoom(this.id, [agentRepo], this.accountId, room.room.id)
-			this.rooms.push(subRoom);
-
-			// invia la nuova ROOM-AGENT al CLIENT
-			const newRoomMsg: RoomNewS2C = {
-				action: CHAT_ACTION_S2C.ROOM_NEW,
-				chatId: this.id,
-				roomId: subRoom.room.id,
-				parentRoomId: room.room.id,
-				agentsIds: [agentRepo.id],
-			}
-			this.sendMessage(newRoomMsg)
-
-			// inserisco il messaggio di tipo utente nella nuova ROOM
-			const msgUpd: MessageUpdate = {
-				type: UPDATE_TYPE.APPEND,
-				content: {
-					id: randomUUID(),
-					clientId: requestAgentId,
-					role: "user",
-					content: question,
-				},
-			}
-			this.updateHistory([msgUpd], subRoom.room.id);
-
-			// effettuo la ricorsione su questa nuova ROOM-AGENT
-			const response = await this.recursiveRequest(subRoom)
-			return {
-				response,
-				roomId: subRoom.room.id
-			}
-		}
-		room.onMessage = (chatMessage: ChatMessage, roomId: string) => {
-			const msgUpd: MessageUpdate = {
-				type: UPDATE_TYPE.APPEND,
-				content: chatMessage,
-			}
-			this.updateHistory([msgUpd], roomId);
-		}
-
-		return await room.getResponse()
+		const conversation = new RoomConversationManager(room.room, handlers)
+		return await conversation.getResponse()
 	}
 
 	//#endregion

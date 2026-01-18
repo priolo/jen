@@ -10,4 +10,5 @@ export default {
 	transform: {
 		'^.+\\.tsx?$': ['ts-jest', { useESM: true, config: 'tsconfig.json' }],
 	},
+	testPathIgnorePatterns: ['<rootDir>/jen-client/', '/node_modules/'],
 };

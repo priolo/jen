@@ -1,8 +1,6 @@
 import { AgentRepo } from "@/repository/Agent.js";
-import { RoomRepo } from "@/repository/Room.js";
 import { AccountDTO } from "@/types/account.js";
 import { BaseS2C } from "@/types/commons/RoomActions.js";
-import RoomTurnBased from "./RoomTurnBased.js";
 
 
 
@@ -11,7 +9,7 @@ import RoomTurnBased from "./RoomTurnBased.js";
  * - comunicazione
  * - risorse (tool, agent, account)
  */
-export interface ChatContext {
+export interface IChatContext {
 	/**
 	 * Esegue un TOOL e ne restituisce il risultato
 	 */
@@ -23,7 +21,7 @@ export interface ChatContext {
 	/**
 	 * Restituisce l'ACCOUNT ONLINE associato ad un CLIENT
 	 */
-	getAccountById(clientId: string): AccountDTO
+	getUserById(clientId: string): AccountDTO
 
 	/**
 	 * Costruisce un istanza di ROOM 
@@ -32,7 +30,7 @@ export interface ChatContext {
 	//buildRoom(room: RoomRepo): RoomTurnBased
 
 	/**
-	 * Invia un messaggio ad un client specifico
+	 * Invia un messaggio ad un ACCOUNT online specifico
 	 */
-	sendMessageToClient: (clientId: string, message: BaseS2C) => void
+	sendMessageToUser: (accountId: string, message: BaseS2C) => void
 }
