@@ -4,12 +4,11 @@ import { ACCOUNT_STATUS, AccountDTO, JWTPayload } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { FindManyOptions } from "typeorm"
 import { AgentRepo } from "../repository/Agent.js"
-import { RoomRepo } from "../repository/Room.js"
+import { BuildRoomRepo, RoomRepo } from "../repository/Room.js"
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js"
 import { McpTool } from "../services/mcp/types.js"
 import { executeMcpTool, getMcpTools } from "../services/mcp/utils.js"
 import ChatNode from "../services/rooms/ChatNode.js"
-import RoomTurnBase from "../services/rooms/RoomTurnBase.js"
 import { BaseS2C, CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
 import AgentRoute from "./AgentRoute.js"
 import McpServerRoute from "./McpServerRoute.js"
@@ -128,7 +127,7 @@ export class ChatsWSService extends ws.route implements IChatContext {
 			case CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE: {
 				const msgUp: RoomHistoryUpdateC2S = msg
 				const room = chat.updateHistory(msgUp.updates, msgUp.roomId)
-				if (room.room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.ADD)) {
+				if (room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.ADD)) {
 					await chat.complete()
 				}
 				break
@@ -152,7 +151,7 @@ export class ChatsWSService extends ws.route implements IChatContext {
 		)).filter(agent => !!agent) as AgentRepo[]
 
 		// creo chat e room
-		const room = RoomTurnBase.Build(msg.chatId, agentsRepo, accountId)
+		const room = BuildRoomRepo(msg.chatId, agentsRepo, accountId)
 		const chat = await ChatNode.Build(this, [room], accountId)
 		chat.id = msg.chatId
 
@@ -357,8 +356,7 @@ export class ChatsWSService extends ws.route implements IChatContext {
 	 */
 	private async saveChat(chat: ChatNode): Promise<void> {
 		if (!chat) return;
-		for (const roomChat of chat.rooms) {
-			const room = roomChat.room
+		for (const room of chat.rooms) {
 			await this.saveRoom(room)
 		}
 	}
@@ -385,8 +383,7 @@ export class ChatsWSService extends ws.route implements IChatContext {
 		})
 
 		// Creo la CHAT con le ROOMs caricate
-		const rooms = roomsRepo.map(repo => new RoomTurnBase(repo))
-		const chat = await ChatNode.Build(this, rooms, accountId)
+		const chat = await ChatNode.Build(this, roomsRepo, accountId)
 		chat.id = roomRepo.chatId
 		return chat
 	}

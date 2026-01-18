@@ -15,28 +15,11 @@ export class RoomConversationManager {
 		private handlers: IRoomHandlers = {}
 	) { }
 
-	public async getResponse(): Promise<LlmResponse> {
-		return this.getResponseSerial()
-		//return this.getResponseParallel()
-	}
-
-	/**
-	 * restituisco l'AGENT che deve rispondere al prossimo turno
-	 */
-	private getStartIndex(): number {
-		const history = this.room.history?.filter(m => m.role != "user")
-		const lastMessage = history?.[history.length - 1]
-		if (!lastMessage) return -1
-		const lastIndex = this.room.agents.findIndex(a => a.id == lastMessage.clientId)
-		const nextIndex = (lastIndex + 1) % this.room.agents.length
-		return nextIndex
-	}
-
 	/**
 	 * Restituiese un LlmResponse dopo aver processato tutti i turni necessari
 	 * ha degli "eventi" per gestire l'uso di tool o sub-agenti
 	 */
-	private async getResponseSerial(): Promise<LlmResponse> {
+	async getResponseSerial(): Promise<LlmResponse> {
 		if (this.room.agents.length == 0) return null
 
 		const responses: LlmResponse[] = []
@@ -51,6 +34,18 @@ export class RoomConversationManager {
 
 		return responses[responses.length - 1]
 	}
+	/**
+	 * restituisco l'AGENT che deve rispondere al prossimo turno
+	 */
+	private getStartIndex(): number {
+		const history = this.room.history?.filter(m => m.role != "user")
+		const lastMessage = history?.[history.length - 1]
+		if (!lastMessage) return -1
+		const lastIndex = this.room.agents.findIndex(a => a.id == lastMessage.clientId)
+		const nextIndex = (lastIndex + 1) % this.room.agents.length
+		return nextIndex
+	}
+
 
 	/**
 	 * metopdo alternativo cioe' la risposta è elaborata parallelamente da tutti gli AGENTS presenti in ROOM 

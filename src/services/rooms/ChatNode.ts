@@ -1,13 +1,14 @@
+import { BuildRoomRepo, RoomRepo } from '@/repository/Room.js';
 import { AccountDTO } from '@/types/account.js';
 import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
-import { IChatContext } from "./IChatContext.js";
-import RoomTurnBase from "./RoomTurnBase.js";
-import { IRoomHandlers } from "./IRoomHandlers.js";
 import AgentLlm from './AgentLlm.js';
+import { IChatContext } from "./IChatContext.js";
+import { IRoomHandlers } from "./IRoomHandlers.js";
 import { RoomConversationManager } from './RoomConversationManager.js';
+import { updateHistory } from "./RoomTurnBase.js";
 
 
 
@@ -32,7 +33,7 @@ class ChatNode {
 	 * @param rooms le ROOMs iniziali della CHAT
 	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
-	static async Build(context: IChatContext, rooms: RoomTurnBase[], accountId?: string): Promise<ChatNode> {
+	static async Build(context: IChatContext, rooms: RoomRepo[], accountId?: string): Promise<ChatNode> {
 		const chat = new ChatNode(context, accountId)
 		chat.rooms = rooms
 		return chat
@@ -61,7 +62,7 @@ class ChatNode {
 	/** 
 	 * le ROOM aperte in questa CHAT 
 	 */
-	public rooms: RoomTurnBase[] = [];
+	public rooms: RoomRepo[] = [];
 
 	/** 
 	 * gli ids degli ACCOUNT ONLINE partecipanti 
@@ -79,16 +80,16 @@ class ChatNode {
 	 * Recupera la MAIN-ROOM della CHAT  
 	 * Quella con il parent a null
 	 */
-	private getMainRoom(): RoomTurnBase {
-		return this.rooms.find(room => room.room.parentRoomId == null)
+	private getMainRoom(): RoomRepo {
+		return this.rooms.find(room => room.parentRoomId == null)
 	}
 
 	/**
 	 * Recupera una ROOM dalla CHAT
 	 */
-	public getRoomById(id?: string): RoomTurnBase {
+	public getRoomById(id?: string): RoomRepo {
 		if (!id || !this.rooms) return null
-		return this.rooms.find(room => room.room.id == id)
+		return this.rooms.find(room => room.id == id)
 	}
 
 	//#endregion 
@@ -148,17 +149,17 @@ class ChatNode {
 	 * aggiorno la HISTORY con una serie di MessageUpdate 
 	 * Manda il messaggio di aggiornamento a tutti i partecipanti alla CHAT
 	 */
-	updateHistory(updates: MessageUpdate[], roomId?: string): RoomTurnBase {
+	updateHistory(updates: MessageUpdate[], roomId?: string): RoomRepo {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
 		if (!room) throw new Error("Room not found")
 
-		room.updateHistory(updates);
+		updateHistory(room, updates);
 
 		// avviso tutti i partecipanti
 		const msg: RoomHistoryUpdateS2C = {
 			action: CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE,
 			chatId: this.id,
-			roomId: room.room.id,
+			roomId: room.id,
 			updates: updates,
 		}
 		this.sendMessage(msg)
@@ -178,13 +179,13 @@ class ChatNode {
 			const agent = await this.context.getAgentRepoById(agentId)
 			if (agent) agents.push(agent)
 		}
-		room.room.agents = agents
+		room.agents = agents
 
 		// avviso tutti i partecipanti
 		const msg: RoomAgentsUpdateS2C = {
 			action: CHAT_ACTION_S2C.ROOM_AGENTS_UPDATE,
 			chatId: this.id,
-			roomId: room.room.id,
+			roomId: room.id,
 			agentsIds: agentsIds,
 		}
 		this.sendMessage(msg)
@@ -200,13 +201,13 @@ class ChatNode {
 			return this.context.getUserById(clientId)
 		}).filter(a => !!a)
 
-		const rooms = this.rooms.map(r => ({
-			id: r.room.id,
+		const rooms = this.rooms.map(room => ({
+			id: room.id,
 			chatId: this.id,
-			parentRoomId: r.room.parentRoomId,
-			accountId: r.room.accountId,
-			history: r.room.history,
-			agentsIds: r.room.agents?.map(a => a.id),
+			parentRoomId: room.parentRoomId,
+			accountId: room.accountId,
+			history: room.history,
+			agentsIds: room.agents?.map(a => a.id),
 		}))
 
 		const msg:ChatInfoS2C = {
@@ -240,14 +241,14 @@ class ChatNode {
 	 */
 	async complete(): Promise<LlmResponse> {
 		// [II] assumo che da completare sia sempre la MAIN-ROOM
-		let room: RoomTurnBase = this.getMainRoom()
+		let room: RoomRepo = this.getMainRoom()
 		return await this.recursiveRequest(room)
 	}
 
 	/**
 	 * Effettua una richiesta loop su una ROOM 
 	 */
-	private async recursiveRequest(room: RoomTurnBase): Promise<LlmResponse> {
+	private async recursiveRequest(room: RoomRepo): Promise<LlmResponse> {
 
 		const handlers: IRoomHandlers = {
 			onTool: async (toolId: string, args: any) => {
@@ -260,15 +261,15 @@ class ChatNode {
 				if (!agentRepo) return null;
 
 				// creo una nuova room per il sub-agente
-				const subRoom = RoomTurnBase.Build(this.id, [agentRepo], this.accountId, room.room.id)
+				const subRoom = BuildRoomRepo(this.id, [agentRepo], this.accountId, room.id)
 				this.rooms.push(subRoom);
 
 				// invia la nuova ROOM-AGENT al CLIENT
 				const newRoomMsg: RoomNewS2C = {
 					action: CHAT_ACTION_S2C.ROOM_NEW,
 					chatId: this.id,
-					roomId: subRoom.room.id,
-					parentRoomId: room.room.id,
+					roomId: subRoom.id,
+					parentRoomId: room.id,
 					agentsIds: [agentRepo.id],
 				}
 				this.sendMessage(newRoomMsg)
@@ -283,13 +284,13 @@ class ChatNode {
 						content: question,
 					},
 				}
-				this.updateHistory([msgUpd], subRoom.room.id);
+				this.updateHistory([msgUpd], subRoom.id);
 
 				// effettuo la ricorsione su questa nuova ROOM-AGENT
 				const response = await this.recursiveRequest(subRoom)
 				return {
 					response,
-					roomId: subRoom.room.id
+					roomId: subRoom.id
 				}
 			},
 			onMessage: (chatMessage: ChatMessage, roomId: string) => {
@@ -302,8 +303,8 @@ class ChatNode {
 			onBuildAgent: async (agentRepo: AgentRepo) => new AgentLlm(agentRepo),
 		}
 
-		const conversation = new RoomConversationManager(room.room, handlers)
-		return await conversation.getResponse()
+		const conversation = new RoomConversationManager(room, handlers)
+		return await conversation.getResponseSerial()
 	}
 
 	//#endregion
