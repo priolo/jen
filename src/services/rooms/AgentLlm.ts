@@ -163,8 +163,7 @@ class AgentLlm implements IAgent {
 		}
 	}
 
-
-	getSystemTools(): ToolSet {
+	private getSystemTools(): ToolSet {
 		const tools = {
 			final_answer: tool({
 				description: "Provide the final answer to the problem",
@@ -238,7 +237,7 @@ class AgentLlm implements IAgent {
 		return tools
 	}
 
-	createSubAgentsTools(): ToolSet {
+	private createSubAgentsTools(): ToolSet {
 		if (!(this.agent?.subAgents?.length > 0)) return {}
 
 		const structs: ToolSet = {}
@@ -264,7 +263,7 @@ class AgentLlm implements IAgent {
 		return structs
 	}
 
-	createTools(): ToolSet {
+	private createTools(): ToolSet {
 		const structs: ToolSet = {}
 		if (!this.agent?.tools) return structs
 

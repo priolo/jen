@@ -4,15 +4,18 @@ import { RoomRepo } from "../../repository/Room.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
 import { ChatMessage } from "../../types/commons/RoomActions.js";
 import { printLlmResponse } from "../agents/utils/print.js";
-import { IRoomHandlers } from "./IRoomHandlers.js";
+import { IRoomConversationHandlers } from "./IRoomConversationHandlers.js";
 
 
-
-export class RoomConversationManager {
+/**
+ * Gestione della CONVERSATION all'interno di una ROOM
+ * Si occupa di far rispondere gli AGENTS in base alla HISTORY della ROOM
+ */
+export class RoomConversation {
 
 	constructor(
 		private room: RoomRepo,
-		private handlers: IRoomHandlers = {}
+		private handlers: IRoomConversationHandlers = {}
 	) { }
 
 	/**

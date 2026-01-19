@@ -6,9 +6,9 @@ import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
 import AgentLlm from './AgentLlm.js';
 import { IChatContext } from "./IChatContext.js";
-import { IRoomHandlers } from "./IRoomHandlers.js";
-import { RoomConversationManager } from './RoomConversationManager.js';
-import { updateHistory } from "./RoomTurnBase.js";
+import { IRoomConversationHandlers } from "./IRoomConversationHandlers.js";
+import { RoomConversation } from './RoomConversation.js';
+import { RoomHistoryUpdate } from "./RoomHistory.js";
 
 
 
@@ -153,7 +153,7 @@ class ChatNode {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
 		if (!room) throw new Error("Room not found")
 
-		updateHistory(room, updates);
+		RoomHistoryUpdate(room, updates);
 
 		// avviso tutti i partecipanti
 		const msg: RoomHistoryUpdateS2C = {
@@ -250,7 +250,7 @@ class ChatNode {
 	 */
 	private async recursiveRequest(room: RoomRepo): Promise<LlmResponse> {
 
-		const handlers: IRoomHandlers = {
+		const handlers: IRoomConversationHandlers = {
 			onTool: async (toolId: string, args: any) => {
 				return this.context.executeTool(toolId, args)
 			},
@@ -303,7 +303,7 @@ class ChatNode {
 			onBuildAgent: async (agentRepo: AgentRepo) => new AgentLlm(agentRepo),
 		}
 
-		const conversation = new RoomConversationManager(room, handlers)
+		const conversation = new RoomConversation(room, handlers)
 		return await conversation.getResponseSerial()
 	}
 

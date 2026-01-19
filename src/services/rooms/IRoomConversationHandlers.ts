@@ -4,7 +4,8 @@ import { ChatMessage } from "@/types/commons/RoomActions.js";
 import { IAgent } from "./IAgent.js";
 
 
-export interface IRoomHandlers {
+
+export interface IRoomConversationHandlers {
 	/**
 	 * chiamato quando bisogna avere un risultato da un tool
 	 * @param id l'ID del TOOL da eseguire

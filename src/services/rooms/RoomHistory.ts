@@ -1,12 +1,10 @@
-import { randomUUID } from "crypto";
-import { AgentRepo } from "../../repository/Agent.js";
 import { RoomRepo } from "../../repository/Room.js";
 import { MessageUpdate, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
 
 
 
 /** aggiorno la HISTORY con una serie di MessageUpdate */
-export function updateHistory(room: RoomRepo, updates: MessageUpdate[] | MessageUpdate): void {
+export function RoomHistoryUpdate(room: RoomRepo, updates: MessageUpdate[] | MessageUpdate): void {
 	if (!updates) return;
 	if (!Array.isArray(updates)) updates = [updates];
 	if (updates.length == 0) return;
