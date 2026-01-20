@@ -48,7 +48,9 @@ export class RoomRepo extends AccountAssets {
     //#endregion
 }
 
-
+/**
+ * Restituisce una nuova istanza di ROOM-REPO
+ */
 export function BuildRoomRepo(chatId: string, agentsRepo: AgentRepo[] = [], accountId?: string, parentRoomId?: string): RoomRepo {
     const room: RoomRepo = {
         id: randomUUID() as string,

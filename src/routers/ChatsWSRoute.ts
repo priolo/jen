@@ -65,8 +65,7 @@ export class ChatsWSService extends ws.route implements IChatContext {
 		const userId = client.jwtPayload?.id
 
 		// rimuovo il client da tutte le CHATs
-		const chats = [...this.chats]
-		for (const chat of chats) {
+		for (const chat of this.chats) {
 			await this.handleUserLeave(
 				client,
 				{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
@@ -305,14 +304,17 @@ export class ChatsWSService extends ws.route implements IChatContext {
 	/**
 	 * Restituisce tutti i CLIENT associati ad un determinato ACCOUNT-ID
 	 */
-	private getClientsById(accountId: string): ws.IClient[] {
-		if (!accountId) return null
-		return this.getClients()?.filter(c => c?.jwtPayload?.id == accountId)
+	private getClientsById(userId: string): ws.IClient[] {
+		if (!userId) return null
+		return this.getClients()?.filter(c => c?.jwtPayload?.id == userId)
 	}
 
-	public getUserById(clientId: string): AccountDTO {
-		if (!clientId) return null
-		return this.getClients()?.find(c => c?.jwtPayload?.id == clientId)?.jwtPayload
+	/**
+	 * Restituisce i dati JWT di un ACCOUNT specifico
+	 */
+	public getUserById(userId: string): AccountDTO {
+		if (!userId) return null
+		return this.getClients()?.find(c => c?.jwtPayload?.id == userId)?.jwtPayload
 	}
 
 	//#endregion
