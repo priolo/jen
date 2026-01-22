@@ -5,9 +5,8 @@ import { AgentRepo } from '../../repository/Agent.js';
 import { RoomRepo } from '../../repository/Room.js';
 import { ToolRepo } from '../../repository/Tool.js';
 import { LLM_RESPONSE_TYPE } from '../../types/commons/LlmResponse.js';
-import type ChatContext from './ChatContext.js';
 import ChatNode from './ChatNode.js';
-import RoomTurnBase from './RoomTurnBase.js';
+import { ChatContext } from "./ChatContext.js";
 
 
 describe("Test ChatNode", () => {

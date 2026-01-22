@@ -11,10 +11,16 @@ export function RoomHistoryUpdate(room: RoomRepo, updates: MessageUpdate[] | Mes
 
 	const history = [...room.history]
 	for (const update of updates) {
+
+		// se non c'e' l'uuid lo aggiungo in automatico
+		if (!update.content.id) update.content.id = crypto.randomUUID()
+
+		// applico l'update
 		if (update.type === UPDATE_TYPE.APPEND) {
 			history.push(update.content)
 			continue;
 		}
+		
 		const index = history.findIndex(m => m.id == update.refId)
 		switch (update.type) {
 			case UPDATE_TYPE.ADD: {

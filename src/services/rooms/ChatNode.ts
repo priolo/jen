@@ -5,7 +5,7 @@ import { AgentRepo } from "../../repository/Agent.js";
 import { LlmResponse } from '../../types/commons/LlmResponse.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ChatMessage, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE } from "../../types/commons/RoomActions.js";
 import AgentLlm from './AgentLlm.js';
-import { IChatContext } from "./IChatContext.js";
+import { ChatContext } from './ChatContext.js';
 import { IRoomConversationHandlers } from "./IRoomConversationHandlers.js";
 import { RoomConversation } from './RoomConversation.js';
 import { RoomHistoryUpdate } from "./RoomHistory.js";
@@ -20,7 +20,7 @@ import { RoomHistoryUpdate } from "./RoomHistory.js";
 class ChatNode {
 
 	private constructor(
-		context: IChatContext,
+		context: ChatContext,
 		accountId?: string,
 	) {
 		this.context = context;
@@ -33,7 +33,7 @@ class ChatNode {
 	 * @param rooms le ROOMs iniziali della CHAT
 	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
-	static async Build(context: IChatContext, rooms: RoomRepo[], accountId?: string): Promise<ChatNode> {
+	static async Build(context: ChatContext, rooms: RoomRepo[], accountId?: string): Promise<ChatNode> {
 		const chat = new ChatNode(context, accountId)
 		chat.rooms = rooms
 		return chat
@@ -57,7 +57,7 @@ class ChatNode {
 	 * il CONTEXT per la gestione della CHAT  
 	 * DEPENDENCY che si occupa della comunicazione e risorse
 	 */
-	private context: IChatContext;
+	private context: ChatContext;
 
 	/** 
 	 * le ROOM aperte in questa CHAT 
