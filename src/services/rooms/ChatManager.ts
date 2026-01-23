@@ -4,6 +4,7 @@ import { RoomRepo } from "@/repository/Room.js"
 import { REPO_PATHS } from "@/config.js"
 import { Bus, typeorm } from "@priolo/julian"
 import { FindManyOptions } from "typeorm"
+import { ChatRepo } from "@/repository/Chat.js"
 
 export class ChatManager {
 
@@ -28,9 +29,9 @@ export class ChatManager {
 	/**
 	 * Restituisce la CHAT che contiene la ROOM specificata
 	 */
-	getChatByRoomId(roomId: string): ChatNode | undefined {
-		return this.chats.find(c => !!c.getRoomById(roomId))
-	}
+	// getChatByRoomId(roomId: string): ChatNode | undefined {
+	// 	return this.chats.find(chat => !!chat.getRoomById(roomId))
+	// }
 
 	/**
 	 * Inizia una SESSION di una CHAT
@@ -49,15 +50,18 @@ export class ChatManager {
 	}
 
 	/** 
- * Salvo tutte le ROOM di una CHAT sul DB 
- */
-	async saveChat(chat: ChatNode): Promise<void> {
-		if (!chat) return;
-		for (const room of chat.rooms) {
+	 * Salvo la CHAT e tutte le sue ROOMs sul DB 
+	 */
+	async saveChat(chatRepo: ChatRepo): Promise<void> {
+		if (!chatRepo) return;
+		await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
+			type: typeorm.Actions.SAVE,
+			payload: chatRepo,
+		})
+		for (const room of chatRepo.rooms) {
 			await this.saveRoom(room)
 		}
 	}
-
 	private async saveRoom(room: RoomRepo): Promise<void> {
 		await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.SAVE,
@@ -75,27 +79,39 @@ export class ChatManager {
 	/**
 	 * Carica una CHAT dal DB partendo da una ROOM
 	 */
-	async loadChatByRoomId(roomId: string, accountId?: string): Promise<ChatNode> {
-		// Carico la ROOM richiesta
-		const roomRepo: RoomRepo = await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
+	// async loadChatByRoomId(roomId: string, accountId?: string): Promise<ChatNode> {
+	// 	// Carico la ROOM richiesta
+	// 	const roomRepo: RoomRepo = await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
+	// 		type: typeorm.Actions.GET_BY_ID,
+	// 		payload: roomId
+	// 	})
+	// 	if (!roomRepo || !roomRepo.chatId) throw new Error(`Room not found: ${roomId}`)
+
+	// 	return this.loadChatById(roomRepo.chatId)
+	// }
+
+	async loadChatById(chatId: string): Promise<ChatNode> {
+		// carico la CHAT
+		const chatRepo: ChatRepo = await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
-			payload: roomId
+			payload: chatId
 		})
-		if (!roomRepo || !roomRepo.chatId) throw new Error(`Room not found: ${roomId}`)
+		if (!chatRepo) throw new Error(`Chat not found: ${chatId}`)
 
 		// carico tutte le ROOMs di quella CHAT
 		const roomsRepo: RoomRepo[] = await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<RoomRepo>>{
 				where: {
-					chatId: roomRepo.chatId
+					chatId: chatId
 				}
 			}
 		})
 
+		chatRepo.rooms = roomsRepo
+
 		// Creo la CHAT con le ROOMs caricate
-		const chat = await ChatNode.Build(this.service.chatContext, roomsRepo, accountId)
-		chat.id = roomRepo.chatId
+		const chat = await ChatNode.Build(this.service.chatContext, chatRepo)
 		return chat
 	}
 

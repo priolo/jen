@@ -60,7 +60,7 @@ export enum CHAT_ACTION_C2S {
 	/** un USER crea una CHAT e ci entra*/
 	CHAT_CREATE_AND_ENTER = "chat-create",
 	/** un USER cerca/carica una CHAT tramite una ROOM ed entra */
-	CHAT_LOAD_BY_ROOM_AND_ENTER = "chat-get-by-room",
+	CHAT_LOAD_AND_ENTER = "chat-get",
 
 	/* USER lascia la CHAT */
 	USER_LEAVE = "user-leave",
@@ -88,10 +88,8 @@ export type BaseC2S = {
  * - inserisce l'user nella CHAT
  * - restituisce i dati della CHAT [ChatInfoS2C]
  */
-export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
-	action: CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER
-	/** id della ROOM da cercare nelle CHATs */
-	roomId: string
+export type ChatGetC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.CHAT_LOAD_AND_ENTER
 }
 
 /** 

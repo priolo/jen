@@ -1,7 +1,8 @@
 import type { Relation } from 'typeorm';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { ChatMessage } from '../types/commons/RoomActions.js';
 import { AgentRepo } from './Agent.js';
+import { ChatRepo } from './Chat.js';
 import { AccountAssets } from './AccountAssets.js';
 import { randomUUID } from 'crypto';
 
@@ -19,6 +20,10 @@ export class RoomRepo extends AccountAssets {
     /** ID of the chat this room belongs to */
     @Column({ type: 'uuid' })
     chatId?: string;
+
+    @ManyToOne(() => ChatRepo, (chat) => chat.rooms)
+    @JoinColumn({ name: "chatId" })
+    chat?: Relation<ChatRepo>;
 
     /** History of prompt conversation */
     @Column({ type: 'json', default: '[]' })

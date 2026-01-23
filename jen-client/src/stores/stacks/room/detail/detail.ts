@@ -78,16 +78,22 @@ What is 2+2? Just write the answer number.`,
 
 		//#endregion
 
-		/** chiamata sul MOUNTH del componente */
+		/** 
+		 * chiamata sul MOUNTH del componente 
+		 * chiede se esiste chiede i dati al server altrimenti chiede di crearla
+		 * */
 		fetch: async (_: void, store?: RoomDetailStore) => {
 			// se esiste chiedo dei suoi dati al BE
-			if (store.state.roomId) {
-				chatSo.requestByRoomId(store.state.roomId)
+			if (!!store.state.chatId) {
+				chatSo.request(store.state.chatId)
 				return
 			}
 			// altrimenti chiedo la creazione nuova chat al BE
 			if (!store.state.chatId) store.state.chatId = createUUID()
-			chatSo.create({ chatId: store.state.chatId, agentIds: store.state.agentsIds })
+			chatSo.create({
+				chatId: store.state.chatId,
+				agentIds: store.state.agentsIds
+			})
 		},
 
 

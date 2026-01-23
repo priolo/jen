@@ -59,16 +59,14 @@ export enum UPDATE_TYPE {
 export enum CHAT_ACTION_C2S {
 	/** un USER crea una CHAT e ci entra*/
 	CHAT_CREATE_AND_ENTER = "chat-create",
-	/** un USER cerca/carica una CHAT tramite una ROOM ed entra */
-	CHAT_LOAD_BY_ROOM_AND_ENTER = "chat-get-by-room",
+	/** un USER cerca/carica una CHAT ed entra */
+	CHAT_LOAD_AND_ENTER = "chat-get",
 
 	/* USER lascia la CHAT */
 	USER_LEAVE = "user-leave",
 	/* Invita unn USER alla chat */
 	USER_INVITE = "user-invite",
 
-	/** richiesta di avviare il completamento in una ROOM */
-	ROOM_COMPLETE = "room-complete",
 	/** aggiorna la lista degli AGENT in una ROOM */
 	ROOM_AGENTS_UPDATE = "room-agents-update",
 	/** aggiorna la HISTORY di una ROOM */
@@ -83,15 +81,12 @@ export type BaseC2S = {
 }
 
 /** 
- * CLIENT cerca/crea una CHAT trmite l'id di una ROOM esistente
- * - se la ROOM esiste in una CHAT, restituisce la CHAT
+ * CLIENT cerca/crea una CHAT trmite l'id 
  * - inserisce l'user nella CHAT
  * - restituisce i dati della CHAT [ChatInfoS2C]
  */
-export type ChatGetByRoomC2S = Omit<BaseC2S, "chatId"> & {
-	action: CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER
-	/** id della ROOM da cercare nelle CHATs */
-	roomId: string
+export type ChatGetC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.CHAT_LOAD_AND_ENTER
 }
 
 /** 
@@ -126,13 +121,6 @@ export type UserInviteC2S = BaseC2S & {
 //#endregion
 
 
-
-/** richiesta di completamento di una ROOM */
-export type RoomCompleteC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.ROOM_COMPLETE
-	/** id della ROOM, se null è la MAIN-ROOM */
-	roomId?: string
-}
 
 /** richiesta modifica lista AGENTS in ROOM */
 export type RoomAgentsUpdateC2S = BaseC2S & {

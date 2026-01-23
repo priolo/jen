@@ -36,7 +36,7 @@ const RoomView: FunctionComponent<Props> = ({
 
 	// eventualmente chiedo la ROOM se non esiste
 	useEffect(() => {
-		// 
+		// se c'e' l'id della ROOM vuol dire che gia' è presente sul server
 		if (!!store.state.roomId) return
 		// se è una nuova ROOM allora la setto con i dati della CHAT
 		const chat = chatSo.getChatById(store.state.chatId)

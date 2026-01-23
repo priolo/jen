@@ -9,6 +9,7 @@ import { ChatContext } from './ChatContext.js';
 import { IRoomConversationHandlers } from "./IRoomConversationHandlers.js";
 import { RoomConversation } from './RoomConversation.js';
 import { RoomHistoryUpdate } from "./RoomHistory.js";
+import { ChatRepo } from '@/repository/Chat.js';
 
 
 
@@ -20,11 +21,16 @@ import { RoomHistoryUpdate } from "./RoomHistory.js";
 class ChatNode {
 
 	private constructor(
-		context: ChatContext,
-		accountId?: string,
+		/** 
+		 * il CONTEXT per la gestione della CHAT  
+		 * DEPENDENCY che si occupa della comunicazione e risorse
+		 */
+		private context: ChatContext,
+		/**
+		 * MODEL della CHAT
+		 */
+		private chat: ChatRepo,
 	) {
-		this.context = context;
-		this.accountId = accountId;
 	}
 
 	/**
@@ -33,42 +39,34 @@ class ChatNode {
 	 * @param rooms le ROOMs iniziali della CHAT
 	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
-	static async Build(context: ChatContext, rooms: RoomRepo[], accountId?: string): Promise<ChatNode> {
-		const chat = new ChatNode(context, accountId)
-		chat.rooms = rooms
+	static async Build(context: ChatContext, chatRepo: ChatRepo): Promise<ChatNode> {
+		const chat = new ChatNode(context, chatRepo)
 		return chat
 	}
 
 
-	
+
 	//#region CHAT PROPERTIES
-
-	/** 
-	 * identificativo della CHAT 
-	 */
-	public id: string = null
-
-	/** 
-	 * ACCOUNT che ha creato la CHAT 
-	 */
-	public accountId?: string
-
-	/** 
-	 * il CONTEXT per la gestione della CHAT  
-	 * DEPENDENCY che si occupa della comunicazione e risorse
-	 */
-	private context: ChatContext;
-
-	/** 
-	 * le ROOM aperte in questa CHAT 
-	 */
-	public rooms: RoomRepo[] = [];
 
 	/** 
 	 * gli ids degli ACCOUNT ONLINE partecipanti 
 	 * cioe' quelli che devono essere aggiornati
 	 */
 	private usersIds: Set<string> = new Set();
+
+	public get id(): string {
+		return this.chat.id;
+	}
+	public get accountId(): string {
+		return this.chat.accountId;
+	}
+	public get rooms(): RoomRepo[] {
+		return this.chat.rooms;
+	}
+
+	public get chatRepo(): ChatRepo {
+		return this.chat;
+	}
 
 	//#endregion
 
@@ -80,16 +78,16 @@ class ChatNode {
 	 * Recupera la MAIN-ROOM della CHAT  
 	 * Quella con il parent a null
 	 */
-	private getMainRoom(): RoomRepo {
-		return this.rooms.find(room => room.parentRoomId == null)
+	public getMainRoom(): RoomRepo {
+		return this.chat.rooms.find(room => room.parentRoomId == null)
 	}
 
 	/**
 	 * Recupera una ROOM dalla CHAT
 	 */
 	public getRoomById(id?: string): RoomRepo {
-		if (!id || !this.rooms) return null
-		return this.rooms.find(room => room.id == id)
+		if (!id || !this.chat.rooms) return null
+		return this.chat.rooms.find(room => room.id == id)
 	}
 
 	//#endregion 
@@ -99,8 +97,9 @@ class ChatNode {
 	//#region HANDLE CHAT OPERATIONS
 
 	/**
-	 * comunico alla CHAT che un CLIENT è entrato
-	 * aggiungo il CLIENT in CHAT
+	 * comunico alla CHAT che un CLIENT è entrato  
+	 * aggiungo il CLIENT in CHAT  
+	 * invio INFO CHAT al client entrato  
 	 */
 	addUser(userId: string) {
 		// se il CLIENT è già in CHAT non faccio nulla
@@ -113,7 +112,7 @@ class ChatNode {
 		// avverto gli altri CLIENT
 		const message: ClientEnteredS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
-			chatId: this.id,
+			chatId: this.chat.id,
 			user: user,
 		}
 		this.sendMessage(message)
@@ -136,7 +135,7 @@ class ChatNode {
 		// avverto tutti i CLIENTs
 		const message: ClientLeaveS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_LEAVE,
-			chatId: this.id,
+			chatId: this.chat.id,
 			userId: userId,
 		}
 		this.sendMessage(message, [userId]) // escludo il client che lascia
@@ -158,7 +157,7 @@ class ChatNode {
 		// avviso tutti i partecipanti
 		const msg: RoomHistoryUpdateS2C = {
 			action: CHAT_ACTION_S2C.ROOM_HISTORY_UPDATE,
-			chatId: this.id,
+			chatId: this.chat.id,
 			roomId: room.id,
 			updates: updates,
 		}
@@ -184,7 +183,7 @@ class ChatNode {
 		// avviso tutti i partecipanti
 		const msg: RoomAgentsUpdateS2C = {
 			action: CHAT_ACTION_S2C.ROOM_AGENTS_UPDATE,
-			chatId: this.id,
+			chatId: this.chat.id,
 			roomId: room.id,
 			agentsIds: agentsIds,
 		}
@@ -195,24 +194,24 @@ class ChatNode {
 	 * Restituisco le info della CHAT sotto forma di messaggio
 	 * @param accountId l'ACCOUNT a cui inviare le info
 	 */
-	private sendInfo(accountId:string) {
+	private sendInfo(accountId: string) {
 
 		const clients: AccountDTO[] = [...this.usersIds].map(clientId => {
 			return this.context.getUserById(clientId)
 		}).filter(a => !!a)
 
-		const rooms = this.rooms.map(room => ({
+		const rooms = this.chat.rooms.map(room => ({
 			id: room.id,
-			chatId: this.id,
+			chatId: this.chat.id,
 			parentRoomId: room.parentRoomId,
 			accountId: room.accountId,
 			history: room.history,
 			agentsIds: room.agents?.map(a => a.id),
 		}))
 
-		const msg:ChatInfoS2C = {
+		const msg: ChatInfoS2C = {
 			action: CHAT_ACTION_S2C.CHAT_INFO,
-			chatId: this.id,
+			chatId: this.chat.id,
 			clients,
 			rooms,
 		}
@@ -261,13 +260,13 @@ class ChatNode {
 				if (!agentRepo) return null;
 
 				// creo una nuova room per il sub-agente
-				const subRoom = BuildRoomRepo(this.id, [agentRepo], this.accountId, room.id)
-				this.rooms.push(subRoom);
+				const subRoom = BuildRoomRepo(this.chat.id, [agentRepo], this.chat.accountId, room.id)
+				this.chat.rooms.push(subRoom);
 
 				// invia la nuova ROOM-AGENT al CLIENT
 				const newRoomMsg: RoomNewS2C = {
 					action: CHAT_ACTION_S2C.ROOM_NEW,
-					chatId: this.id,
+					chatId: this.chat.id,
 					roomId: subRoom.id,
 					parentRoomId: room.id,
 					agentsIds: [agentRepo.id],

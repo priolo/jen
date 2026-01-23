@@ -1,9 +1,10 @@
 import { BuildRoomRepo } from "@/repository/Room.js"
 import { JWTPayload } from "@/types/account.js"
-import { CHAT_ACTION_C2S, ChatCreateC2S, ChatGetByRoomC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@/types/commons/RoomActions.js"
+import { CHAT_ACTION_C2S, ChatCreateC2S, ChatGetC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@/types/commons/RoomActions.js"
 import ChatNode from "./ChatNode.js"
 import { AgentRepo } from "@/repository/Agent.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
+import { ChatRepo } from "@/repository/Chat.js"
 
 export class ChatMessages {
 
@@ -22,8 +23,8 @@ export class ChatMessages {
 			await this.handleChatCreate(user, msg as ChatCreateC2S)
 			return
 		}
-		if (msg.action === CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER) {
-			await this.handleChatLoadByRoom(user, msg as ChatGetByRoomC2S)
+		if (msg.action === CHAT_ACTION_C2S.CHAT_LOAD_AND_ENTER) {
+			await this.handleChatLoadByRoom(user, msg as ChatGetC2S)
 			return
 		}
 
@@ -40,10 +41,6 @@ export class ChatMessages {
 			case CHAT_ACTION_C2S.USER_INVITE:
 				await this.handleUserInvite(user, msg as UserInviteC2S)
 				break
-
-			// case CHAT_ACTION_C2S.ROOM_COMPLETE:
-			// 	await this.handleRoomComplete(client, msg as RoomCompleteC2S)
-			// 	break
 
 			case CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE: {
 				const msgUp: RoomAgentsUpdateC2S = msg
@@ -77,10 +74,17 @@ export class ChatMessages {
 			(msg.agentIds ?? []).map(id => this.service.chatContext.getAgentRepoById(id))
 		)).filter(agent => !!agent) as AgentRepo[]
 
-		// creo chat e room
+		// creao la ROOM principale
 		const room = BuildRoomRepo(msg.chatId, agentsRepo, userId)
-		const chat = await ChatNode.Build(this.service.chatContext, [room], userId)
-		chat.id = msg.chatId
+
+		// creo la CHAT
+		const chatRepo:ChatRepo = {
+			id: msg.chatId,
+			mainRoomId: room.id,
+			accountId: userId,
+			rooms: [room],
+		}
+		const chat = await ChatNode.Build(this.service.chatContext, chatRepo)
 
 		// inserisco la nuova CHAT e faccio entrare il CLIENT
 		this.service.chatManager.addChat(chat)
@@ -88,18 +92,20 @@ export class ChatMessages {
 	}
 
 	/**
-	 * Ottiene la CHAT che contiene la ROOM specificata
-	 * Eventualmente carica i dati dal DB se la ROOM non è in memoria
+	 * Ottiene la CHAT specificata  
+	 * Se non la trova in meme la carica dal DB  
+	 * Inserisce il CLIENT nella CHAT  
+	 * Invia le info della CHAT al CLIENT  
 	 */
-	private async handleChatLoadByRoom(user: JWTPayload, msg: ChatGetByRoomC2S) {
+	private async handleChatLoadByRoom(user: JWTPayload, msg: ChatGetC2S) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
-		let chat = this.service.chatManager.getChatByRoomId(msg.roomId)
-
+		// cerco la CHAT che contiene la ROOM
+		let chat = this.service.chatManager.getChatById(msg.chatId)
 		// non la trovo in memoria quindi carico tutta la CHAT dal DB
 		if (!chat) {
-			chat = await this.service.chatManager.loadChatByRoomId(msg.roomId, userId)
+			chat = await this.service.chatManager.loadChatById(msg.chatId)
 			this.service.chatManager.addChat(chat)
 		}
 
@@ -120,7 +126,7 @@ export class ChatMessages {
 		const isVoid = chat.removeUser(userId)
 		if (isVoid) {
 			this.service.chatManager.removeChat(chat.id)
-			await this.service.chatManager.saveChat(chat)
+			await this.service.chatManager.saveChat(chat.chatRepo)
 		}
 	}
 

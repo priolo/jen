@@ -1,9 +1,8 @@
 import type { Relation } from 'typeorm';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ChatMessage } from '../types/commons/RoomActions.js';
-import { AgentRepo } from './Agent.js';
-import { AccountAssets } from './AccountAssets.js';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { AccountRepo } from './Account.js';
+import { RoomRepo } from './Room.js';
+import { AccountAssets } from './AccountAssets.js';
 
 
 /**
@@ -16,8 +15,12 @@ export class ChatRepo extends AccountAssets {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @ManyToMany(() => AccountRepo)
-    @JoinTable()
-    accounts: Relation<AccountRepo[]>;
+    @Column({ type: 'uuid', nullable: true })
+    mainRoomId?: string;
+
+    @OneToMany(() => RoomRepo, (room) => room.chat)
+    rooms: Relation<RoomRepo[]>;
     
 }
+
+
