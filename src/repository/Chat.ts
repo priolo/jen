@@ -1,8 +1,7 @@
 import type { Relation } from 'typeorm';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { AccountRepo } from './Account.js';
-import { RoomRepo } from './Room.js';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AccountAssets } from './AccountAssets.js';
+import { RoomRepo } from './Room.js';
 
 
 /**
@@ -15,12 +14,25 @@ export class ChatRepo extends AccountAssets {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
+    /** nome della CHAT */
+    @Column({ type: 'varchar', default: '' })
+    name: string;
+
+    /** descrizione della CHAT */
+    @Column({ type: 'varchar', default: '' })
+    description?: string;
+
+
+    /** la ROOM principale della CHAT */
     @Column({ type: 'uuid', nullable: true })
     mainRoomId?: string;
 
+    /**
+     * le ROOMs appartenenti a questa CHAT
+     */
     @OneToMany(() => RoomRepo, (room) => room.chat)
     rooms: Relation<RoomRepo[]>;
-    
+
 }
 
 

@@ -1,8 +1,3 @@
-import LogIcon from "@/icons/LogIcon"
-import SyncIcon from "@/icons/SyncIcon"
-import ConnectionsIcon from "@/icons/cards/ConnectionsIcon"
-import StreamIcon from "@/icons/cards/StreamIcon"
-import StreamsIcon from "@/icons/cards/StreamsIcon"
 import { DOC_TYPE } from "@/types"
 import { FunctionComponent } from "react"
 
@@ -27,6 +22,11 @@ const CardIcon: FunctionComponent<Props> = ({
 
 		case DOC_TYPE.AGENT_EDITOR:
 			return null//<EditorIcon className={className} style={style} />
+
+		case DOC_TYPE.CHAT_LIST:
+			return null
+		case DOC_TYPE.CHAT_DETAIL:
+			return null
 
 
 		case DOC_TYPE.ROOM_LIST:

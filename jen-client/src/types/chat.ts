@@ -4,6 +4,9 @@ import { ChatRoom } from "@/types/commons/RoomActions"
 
 export interface Chat {
 	id: string
-	clients: AccountDTO[]
+	name?: string
+	description?: string
+	clients?: AccountDTO[]
+	mainRoomId?: string
 	rooms: ChatRoom[]
 }

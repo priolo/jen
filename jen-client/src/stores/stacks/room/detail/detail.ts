@@ -5,7 +5,7 @@ import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
 import { ChatMessage } from "@/types/commons/RoomActions"
 import { mixStores } from "@priolo/jon"
 import { buildAgentList } from "../../agent/factory"
-import chatSo from "../../chat/repo"
+import chatSo from "../../chat/ws"
 import { EditorState } from "../../editorBase"
 import { buildRoomDetail } from "../factory"
 import { buildAccountList } from "../../account/factory"
@@ -79,8 +79,8 @@ What is 2+2? Just write the answer number.`,
 		//#endregion
 
 		/** 
-		 * chiamata sul MOUNTH del componente 
-		 * chiede se esiste chiede i dati al server altrimenti chiede di crearla
+		 * chiamata sul MOUNTH del componente  
+		 * richiesta INFO CHAT
 		 * */
 		fetch: async (_: void, store?: RoomDetailStore) => {
 			// se esiste chiedo dei suoi dati al BE
@@ -89,7 +89,7 @@ What is 2+2? Just write the answer number.`,
 				return
 			}
 			// altrimenti chiedo la creazione nuova chat al BE
-			if (!store.state.chatId) store.state.chatId = createUUID()
+			store.state.chatId = createUUID()
 			chatSo.create({
 				chatId: store.state.chatId,
 				agentIds: store.state.agentsIds

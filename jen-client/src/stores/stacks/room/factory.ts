@@ -4,7 +4,11 @@ import { RoomDetailState, RoomDetailStore } from "./detail/detail";
 import { PromptListState, PromptListStore } from "./list";
 
 
-
+/**
+ * Crea una CARD di dettaglio ROOM
+ * src\app\cards\room\detail\View.tsx
+ * 
+ */
 export function buildRoomDetail(state: Partial<RoomDetailState> = {}) {
 	const store = buildStore({
 		type: DOC_TYPE.ROOM_DETAIL,

@@ -1,7 +1,7 @@
 import RowButton from "@/components/buttons/RowButton"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
-import chatSo, { getMainRoom } from "@/stores/stacks/chat/repo"
+import chatSo, { getMainRoom } from "@/stores/stacks/chat/ws"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { ChatMessage } from "@/types/commons/RoomActions"
 import { FloatButton, TextInput } from "@priolo/jack"

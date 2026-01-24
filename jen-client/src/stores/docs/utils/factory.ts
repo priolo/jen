@@ -22,6 +22,8 @@ import toolResultListSetup from "@/stores/stacks/mcpTool/resultList";
 import authDetailSetup from "@/stores/stacks/auth/detail";
 import accountDetailSetup from "@/stores/stacks/account/detail";
 import accountFinderSetup from "@/stores/stacks/account/finder";
+import chatListSetup from "@/stores/stacks/chat/list";
+import chatDetailSetup from "@/stores/stacks/chat/detail";
 
 
 
@@ -55,8 +57,12 @@ export function buildStore(state: Partial<ViewState>, stateSerializzation?: Part
 		[DOC_TYPE.AGENT_EDITOR]: agentEditorSetup,
 
 
+		[DOC_TYPE.CHAT_DETAIL]: chatDetailSetup,
+		[DOC_TYPE.CHAT_LIST]: chatListSetup,
+
 		[DOC_TYPE.ROOM_DETAIL]: roomDetailSetup,
-		[DOC_TYPE.ROOM_LIST]: promptListSetup,
+		[DOC_TYPE.ROOM_LIST]: null/*promptListSetup*/,
+
 
 		[DOC_TYPE.AGENT]: agentDetailSetup,
 		[DOC_TYPE.AGENT_LIST]: agentListSetup,

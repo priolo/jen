@@ -7,10 +7,15 @@ export enum DOC_TYPE {
 	/** lista degli ACCOUNTs */
 	ACCOUNT_LIST = "account_list",
 	ACCOUNT_FINDER = "account_finder",
+
 	
+	CHAT_DETAIL = "chat",
+	CHAT_LIST = "chat_list",
+
 	ROOM_DETAIL = "room",
 	ROOM_LIST = "room_list",
 
+	
 	AGENT = "agent",
 	AGENT_LIST = "agent_list",
 

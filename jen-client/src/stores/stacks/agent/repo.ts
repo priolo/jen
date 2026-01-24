@@ -36,17 +36,11 @@ const setup = {
 
 	actions: {
 
-		//#region VIEWBASE
-
-		//#endregion
-
-		//#region OVERWRITE
 		async fetch(_: void, store?: AgentStore) {
 			const agents = await agentApi.index({ store })
 			store.setAll(agents)
 			//await loadBaseSetup.actions.fetch(_, store)
 		},
-		//#endregion
 
 		async save(agent: Partial<AgentLlm>, store?: AgentStore): Promise<AgentLlm> {
 			let agentSaved: AgentLlm = null

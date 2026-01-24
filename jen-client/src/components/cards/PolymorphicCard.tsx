@@ -1,5 +1,6 @@
 import AgentListView from "@/app/cards/agent/ListView"
 import AgentView from "@/app/cards/agent/detail/View"
+import ChatListView from "@/app/cards/chat/ListView"
 import LlmListView from "@/app/cards/llm/ListView"
 import LlmDetailView from "@/app/cards/llm/detail/View"
 import McpServerListView from "@/app/cards/mcpServer/ListView"
@@ -10,11 +11,14 @@ import RootListView from "@/app/cards/room/ListView"
 import RoomView from "@/app/cards/room/detail/View"
 import ToolListView from "@/app/cards/tool/ListView"
 import ToolDetailView from "@/app/cards/tool/detail/View"
+import AccountFinderView from "@/app/cards/user/finder/ListView"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
+import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import { AgentListStore } from "@/stores/stacks/agent/list"
 import { AgentEditorStore } from "@/stores/stacks/agentEditor"
 import { AuthDetailStore } from "@/stores/stacks/auth/detail"
+import { ChatListStore } from "@/stores/stacks/chat/list"
 import { EditorCodeStore } from "@/stores/stacks/editorCode"
 import { LlmDetailStore } from "@/stores/stacks/llm/detail"
 import { LlmListStore } from "@/stores/stacks/llm/list"
@@ -37,8 +41,8 @@ import AccountDetailView from "../../app/cards/user/detail/View"
 import AccountListView from "../../app/cards/user/list/ListView"
 import { AccountListStore } from "../../stores/stacks/account/list"
 import { ReflectionStore } from "../../stores/stacks/reflection"
-import { AccountFinderStore } from "@/stores/stacks/account/finder"
-import AccountFinderView from "@/app/cards/user/finder/ListView"
+import ChatDetailView from "@/app/cards/chat/detail/View"
+import { ChatDetailStore } from "@/stores/stacks/chat/detail"
 
 
 
@@ -64,16 +68,24 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 				return <AccountDetailView store={view as AccountDetailStore} />
 
 
-			case DOC_TYPE.REFLECTION:
-				return <ReflectionView store={view as ReflectionStore} />
 
-			case DOC_TYPE.AGENT_EDITOR:
-				return <TextEditorView store={view as AgentEditorStore} />
+			case DOC_TYPE.CHAT_DETAIL:
+				return <ChatDetailView store={view as ChatDetailStore} />
+			case DOC_TYPE.CHAT_LIST:
+				return <ChatListView store={view as ChatListStore} />
 
 			case DOC_TYPE.ROOM_DETAIL:
 				return <RoomView store={view as RoomDetailStore} />
 			case DOC_TYPE.ROOM_LIST:
 				return <RootListView store={view as PromptListStore} />
+
+
+
+			case DOC_TYPE.REFLECTION:
+				return <ReflectionView store={view as ReflectionStore} />
+
+			case DOC_TYPE.AGENT_EDITOR:
+				return <TextEditorView store={view as AgentEditorStore} />
 
 			case DOC_TYPE.AGENT:
 				return <AgentView store={view as AgentDetailStore} />

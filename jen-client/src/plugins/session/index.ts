@@ -16,6 +16,8 @@ import { buildAccountFinder } from "@/stores/stacks/account/factory"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
 import { AuthDetailStore } from "@/stores/stacks/auth/detail"
+import chatSo from "@/stores/stacks/chat/ws"
+import chatRepoSo from "@/stores/stacks/chat/repo"
 
 
 
@@ -51,6 +53,7 @@ export async function StartSession() {
 	await llmSo.fetch()
 	await toolSo.fetch()
 	await agentSo.fetch()
+	await chatRepoSo.fetch()
 
 
 	// WS CONNECTION

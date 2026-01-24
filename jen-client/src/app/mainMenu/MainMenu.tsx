@@ -6,7 +6,7 @@ import { buildAccountFinder } from "@/stores/stacks/account/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
 import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
-import chatSo from "@/stores/stacks/chat/repo"
+import chatSo from "@/stores/stacks/chat/ws"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
 import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
 import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
@@ -22,6 +22,7 @@ import { DOC_TYPE } from "../../types"
 import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
 import StoreButton from "./StoreButton"
+import { buildChatList } from "@/stores/stacks/chat/factory"
 
 
 
@@ -56,6 +57,10 @@ const MainMenu: FunctionComponent<Props> = ({
 	}
 	const handleAgentList = () => {
 		const view = buildAgentList()
+		deckCardsSo.add({ view, anim: true })
+	}
+	const handleChatList = () => {
+		const view = buildChatList()
 		deckCardsSo.add({ view, anim: true })
 	}
 
@@ -128,6 +133,7 @@ const MainMenu: FunctionComponent<Props> = ({
 		<Button children="MCP" onClick={handleMcpServerList} />
 		<Button children="TOOLS" onClick={handleToolList} />
 		<Button children="CHAT" onClick={handleChat} />
+		<Button children="CHATS" onClick={handleChatList} />
 
 		{/* <Button children="ROOM" onClick={handleRoom} /> */}
 		<div>*{chatSo.state.online ? "ON" : "OFF"}*</div>
