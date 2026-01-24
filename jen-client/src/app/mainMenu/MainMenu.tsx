@@ -6,7 +6,7 @@ import { buildAccountFinder } from "@/stores/stacks/account/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
 import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
-import chatSo from "@/stores/stacks/chat/ws"
+import chatWSSo from "@/stores/stacks/chat/ws"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
 import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
 import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
@@ -37,7 +37,7 @@ const MainMenu: FunctionComponent<Props> = ({
 	// STORE
 	useStore(menuSo)
 	useStore(docsSo)
-	useStore(chatSo)
+	useStore(chatWSSo)
 
 	// HOOKS
 
@@ -136,7 +136,7 @@ const MainMenu: FunctionComponent<Props> = ({
 		<Button children="CHATS" onClick={handleChatList} />
 
 		{/* <Button children="ROOM" onClick={handleRoom} /> */}
-		<div>*{chatSo.state.online ? "ON" : "OFF"}*</div>
+		<div>*{chatWSSo.state.online ? "ON" : "OFF"}*</div>
 
 		{/* *** DEBUG *** */}
 		{import.meta.env.MODE === 'development' && <>

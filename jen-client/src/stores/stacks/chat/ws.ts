@@ -21,11 +21,11 @@ const setup = {
 	},
 
 	getters: {
-		getChatById(id: string, store?: ChatStore): Chat {
+		getChatById(id: string, store?: ChatWSStore): Chat {
 			if (!id) return null
 			return store.state.all?.find(chat => chat.id == id) ?? null
 		},
-		getRoomById(id: string, store?: ChatStore) {
+		getRoomById(id: string, store?: ChatWSStore) {
 			if (!id) return null
 			for (const chat of store.state.all) {
 				const room = chat.rooms?.find(r => r.id == id) ?? null
@@ -44,7 +44,7 @@ const setup = {
 		 */
 		create: async (
 			props: { chatId: string, agentIds: string[] },
-			store?: ChatStore
+			store?: ChatWSStore
 		) => {
 			const { chatId, agentIds } = props
 			const msgSend: ChatCreateC2S = {
@@ -58,7 +58,7 @@ const setup = {
 		/** 
 		* Notifico che un USER lascia una CHAT
 		*/
-		leave: async (chatId: string, store?: ChatStore) => {
+		leave: async (chatId: string, store?: ChatWSStore) => {
 			const message: UserLeaveC2S = {
 				action: CHAT_ACTION_C2S.USER_LEAVE,
 				chatId: chatId,
@@ -69,7 +69,7 @@ const setup = {
 		/**
 		 * Invito uno USER ad una CHAT
 		 */
-		invite: async (props: { chatId: string, accountId: string }, store?: ChatStore) => {
+		invite: async (props: { chatId: string, accountId: string }, store?: ChatWSStore) => {
 			const { chatId, accountId } = props
 			if (!chatId || !accountId) return
 			const message: UserInviteC2S = {
@@ -84,9 +84,9 @@ const setup = {
 		 * chiedo i dati di una CHAT
 		 * response CHAT_INFO
 		 */
-		request: ( chatId: string, store?: ChatStore) => {
+		request: ( chatId: string, store?: ChatWSStore) => {
 			// se non c'e' in locale la chiedo al server
-			const chat = chatSo.getChatById(chatId)
+			const chat = chatWSSo.getChatById(chatId)
 			if (!!chat) return
 			const msgSend: ChatGetC2S = {
 				action: CHAT_ACTION_C2S.CHAT_LOAD_AND_ENTER,
@@ -100,7 +100,7 @@ const setup = {
 		 */
 		updateAgentsInRoom: (
 			{ chatId, roomId, agentsIds }: { chatId: string, roomId: string, agentsIds: string[] },
-			store?: ChatStore
+			store?: ChatWSStore
 		) => {
 			const message: RoomAgentsUpdateC2S = {
 				action: CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE,
@@ -116,7 +116,7 @@ const setup = {
 		 */
 		appendMessage: (
 			{ chatId, roomId, text }: { chatId: string, roomId: string, text: string },
-			store?: ChatStore
+			store?: ChatWSStore
 		) => {
 			const room = store.getRoomById(roomId)
 			if (!room) return
@@ -141,7 +141,7 @@ const setup = {
 		/**
 		 * Chiamato quando una ROOM non è più visualizzata da nessuna CARD
 		 */
-		removeRoom: async ({ chatId, viewId }: { chatId: string, viewId?: string }, store?: ChatStore) => {
+		removeRoom: async ({ chatId, viewId }: { chatId: string, viewId?: string }, store?: ChatWSStore) => {
 			const rooms = utils.findAll(docsSo.getAllCards(), { type: DOC_TYPE.ROOM_DETAIL, chatId: chatId })
 			const activeRooms = rooms.filter((r: any) => r.state.uuid != viewId)
 			if (activeRooms.length > 0) return
@@ -152,7 +152,7 @@ const setup = {
 		/**
 		 * HANDLE MESSAGE FROM SERVER
 		 */
-		onMessage: (data: any, store?: ChatStore) => {
+		onMessage: (data: any, store?: ChatWSStore) => {
 			const message: BaseS2C = JSON.parse(data.payload)
 
 			switch (message.action) {
@@ -290,25 +290,25 @@ const setup = {
 	},
 }
 
-export type ChatState = typeof setup.state
-export type ChatGetters = typeof setup.getters
-export type ChatActions = typeof setup.actions
-export type ChatMutators = typeof setup.mutators
+export type ChatWSState = typeof setup.state
+export type ChatWSGetters = typeof setup.getters
+export type ChatWSActions = typeof setup.actions
+export type ChatWSMutators = typeof setup.mutators
 
 /**
  * Si occupa di mentenere i dati delle CHAT sul client comunicando con il server via WEBSOCKET
  */
-export interface ChatStore extends StoreCore<ChatState>, ChatGetters, ChatActions, ChatMutators {
-	state: ChatState
+export interface ChatWSStore extends StoreCore<ChatWSState>, ChatWSGetters, ChatWSActions, ChatWSMutators {
+	state: ChatWSState
 }
 
-const chatSo = createStore<ChatState>(setup) as ChatStore
-export default chatSo;
+const chatWSSo = createStore<ChatWSState>(setup) as ChatWSStore
+export default chatWSSo;
 
 
-wsConnection.emitter.on(SS_EVENT.MESSAGE, chatSo.onMessage)
+wsConnection.emitter.on(SS_EVENT.MESSAGE, chatWSSo.onMessage)
 wsConnection.emitter.on(SS_EVENT.CONNECTION,
-	({ payload }: { payload: number }) => chatSo.setOnline(payload == WebSocket.OPEN)
+	({ payload }: { payload: number }) => chatWSSo.setOnline(payload == WebSocket.OPEN)
 )
 
 

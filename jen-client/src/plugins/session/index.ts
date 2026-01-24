@@ -16,7 +16,7 @@ import { buildAccountFinder } from "@/stores/stacks/account/factory"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
 import { AuthDetailStore } from "@/stores/stacks/auth/detail"
-import chatSo from "@/stores/stacks/chat/ws"
+import chatWSSo from "@/stores/stacks/chat/ws"
 import chatRepoSo from "@/stores/stacks/chat/repo"
 
 

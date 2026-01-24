@@ -5,7 +5,7 @@ import { ContentAskTo, LlmResponse } from "@/types/commons/LlmResponse"
 import { ChatMessage } from "@/types/commons/RoomActions"
 import { mixStores } from "@priolo/jon"
 import { buildAgentList } from "../../agent/factory"
-import chatSo from "../../chat/ws"
+import chatWSSo from "../../chat/ws"
 import { EditorState } from "../../editorBase"
 import { buildRoomDetail } from "../factory"
 import { buildAccountList } from "../../account/factory"
@@ -73,7 +73,7 @@ What is 2+2? Just write the answer number.`,
 
 		onRemoval(_: void, store?: ViewStore) {
 			const roomSo = store as RoomDetailStore
-			chatSo.removeRoom({ chatId: roomSo.state.chatId, viewId: roomSo.state.uuid })
+			chatWSSo.removeRoom({ chatId: roomSo.state.chatId, viewId: roomSo.state.uuid })
 		},
 
 		//#endregion
@@ -85,12 +85,12 @@ What is 2+2? Just write the answer number.`,
 		fetch: async (_: void, store?: RoomDetailStore) => {
 			// se esiste chiedo dei suoi dati al BE
 			if (!!store.state.chatId) {
-				chatSo.request(store.state.chatId)
+				chatWSSo.request(store.state.chatId)
 				return
 			}
 			// altrimenti chiedo la creazione nuova chat al BE
 			store.state.chatId = createUUID()
-			chatSo.create({
+			chatWSSo.create({
 				chatId: store.state.chatId,
 				agentIds: store.state.agentsIds
 			})
@@ -99,7 +99,7 @@ What is 2+2? Just write the answer number.`,
 
 		/** invio un messaggio scritto dall'utente */
 		sendPrompt: async (_: void, store?: RoomDetailStore) => {
-			chatSo.appendMessage({
+			chatWSSo.appendMessage({
 				chatId: store.state.chatId,
 				roomId: store.state.roomId,
 				text: store.state.prompt

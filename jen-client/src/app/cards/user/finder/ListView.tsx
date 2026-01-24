@@ -3,7 +3,7 @@ import ElementRow from "@/components/rows/ElementRow"
 import ConnectionsIcon from "@/icons/cards/ConnectionsIcon"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
-import chatSo from "@/stores/stacks/chat/ws"
+import chatWSSo from "@/stores/stacks/chat/ws"
 import { AccountDTO } from "@/types/account"
 import { AlertDialog, FindInputHeader } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -25,7 +25,7 @@ const AccountFinderView: FunctionComponent<Props> = ({
 	// STORE
 	useStore(store)
 	useStore(store.state.group)
-	useStore(chatSo)
+	useStore(chatWSSo)
 
 
 	// HOOKs

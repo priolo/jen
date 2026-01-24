@@ -3,7 +3,7 @@ import FrameworkCard from "@/components/cards/FrameworkCard"
 import ElementRow from "@/components/rows/ElementRow.js"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
-import chatSo from "@/stores/stacks/chat/ws"
+import chatWSSo from "@/stores/stacks/chat/ws"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { DOC_TYPE } from "@/types"
 import { AccountDTO } from "@/types/account"
@@ -28,15 +28,15 @@ const AccountListView: FunctionComponent<Props> = ({
 	// STORE
 	useStore(store)
 	useStore(store.state.group)
-	useStore(chatSo)
+	useStore(chatWSSo)
 
 	// HOOKs
 	const users = useMemo(() => {
 		const roomId = (store.state.parent as RoomDetailStore)?.state.roomId
-		const room = chatSo.getRoomById(roomId)
-		const chat = chatSo.getChatById(room?.chatId)
+		const room = chatWSSo.getRoomById(roomId)
+		const chat = chatWSSo.getChatById(room?.chatId)
 		return chat?.clients ?? []
-	}, [chatSo.state])
+	}, [chatWSSo.state])
 
 	// HANDLER
 	const handleSelect = (account: AccountDTO) => store.openDetail(account.id)

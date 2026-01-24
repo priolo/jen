@@ -2,7 +2,7 @@ import { AccountFinderFixedCard } from "@/plugins/session"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
-import chatSo from "@/stores/stacks/chat/ws"
+import chatWSSo from "@/stores/stacks/chat/ws"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { DOC_TYPE } from "@/types"
 import { AccountDTO } from "@/types/account"
@@ -36,8 +36,8 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 	const handleInviteClick = (account: AccountDTO) => {
 		const roomId = (store.state.parent as RoomDetailStore)?.state.roomId
-		const room = chatSo.getRoomById(roomId)
-		chatSo.invite({
+		const room = chatWSSo.getRoomById(roomId)
+		chatWSSo.invite({
 			chatId: room?.chatId,
 			accountId: account.id
 		})

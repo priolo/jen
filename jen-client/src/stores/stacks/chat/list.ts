@@ -4,7 +4,7 @@ import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "
 import { mixStores } from "@priolo/jon"
 import { ChatDetailStore } from "./detail"
 import { buildChatDetail, buildChatDetailNew } from "./factory"
-import chatSo from "./ws"
+import chatWSSo from "./ws"
 import chatRepoSo from "./repo"
 
 

@@ -1,7 +1,7 @@
 import RowButton from "@/components/buttons/RowButton"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
-import chatSo, { getMainRoom } from "@/stores/stacks/chat/ws"
+import chatWSSo, { getMainRoom } from "@/stores/stacks/chat/ws"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { ChatMessage } from "@/types/commons/RoomActions"
 import { FloatButton, TextInput } from "@priolo/jack"
@@ -26,7 +26,7 @@ const RoomView: FunctionComponent<Props> = ({
 
 	// STORE
 	useStore(store)
-	useStore(chatSo)
+	useStore(chatWSSo)
 
 
 	// HOOKS
@@ -39,15 +39,15 @@ const RoomView: FunctionComponent<Props> = ({
 		// se c'e' l'id della ROOM vuol dire che gia' è presente sul server
 		if (!!store.state.roomId) return
 		// se è una nuova ROOM allora la setto con i dati della CHAT
-		const chat = chatSo.getChatById(store.state.chatId)
+		const chat = chatWSSo.getChatById(store.state.chatId)
 		const room = getMainRoom(chat?.rooms)
 		store.setRoomId(room?.id)
-	}, [chatSo.state.all])
+	}, [chatWSSo.state.all])
 
 	/** recupero l'oggetto ROOM  */
 	const room = useMemo(
-		() => chatSo.getRoomById(store.state.roomId), 
-		[store.state.roomId, chatSo.state.all]
+		() => chatWSSo.getRoomById(store.state.roomId), 
+		[store.state.roomId, chatWSSo.state.all]
 	)
 	
 	const history = room?.history ?? []
