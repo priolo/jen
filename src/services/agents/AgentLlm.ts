@@ -3,7 +3,7 @@ import { ChatMessage } from '../../types/commons/RoomActions.js';
 import { time } from '@priolo/jon-utils';
 import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet } from "ai";
 import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
-import { getHistory, getModel } from '../agents/utils/vercel.js';
+import { getHistory, getModel } from '../agents_utils/utils/vercel.js';
 import { IAgent } from './IAgent.js';
 
 

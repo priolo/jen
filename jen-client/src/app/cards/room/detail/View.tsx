@@ -59,7 +59,7 @@ const RoomView: FunctionComponent<Props> = ({
 	const handleSendClick = () => store.sendPrompt()
 	const handleOpenSubroom = (chatMessage: ChatMessage) => store.openSubRoom(chatMessage)
 	const handleAgentsClick = () => store.openAgents()
-	const handleAccountsClick = () => store.openAccounts()
+
 
 
 	// RENDER
@@ -84,11 +84,7 @@ const RoomView: FunctionComponent<Props> = ({
 			label="AGENTS"
 			onClick={handleAgentsClick}
 		/>
-		<RowButton
-			icon={<EditorIcon />}
-			label="USERS"
-			onClick={handleAccountsClick}
-		/>
+		
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
 			{history.map((chatMessage) => (

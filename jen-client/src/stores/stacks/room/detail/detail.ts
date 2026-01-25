@@ -51,9 +51,7 @@ What is 2+2? Just write the answer number.`,
 
 		//#endregion
 
-
 		getAgentsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.AGENT_LIST,
-		getAccountsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ACCOUNT_LIST,
 		getRoomDetailOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_DETAIL,
 	},
 
@@ -126,12 +124,7 @@ What is 2+2? Just write the answer number.`,
 			}) : null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
-		/** apro gli ACCOUNTS che partecipano alla CHAT */
-		openAccounts(_: void, store?: RoomDetailStore) {
-			const isOpen = store.getAccountsOpen()
-			const view = !isOpen ? buildAccountList() : null
-			store.state.group.addLink({ view, parent: store, anim: true })
-		}
+		
 
 	},
 

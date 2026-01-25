@@ -1,7 +1,7 @@
 import { REPO_PATHS } from "@/config.js"
-import { ChatContext } from "@/services/rooms/ChatContext.js"
-import { ChatManager } from "@/services/rooms/ChatManager.js"
-import { ChatMessages } from "@/services/rooms/ChatMessage.js"
+import { ChatsContext } from "@/services/chats/ChatsContext.js"
+import { ChatsManager } from "@/services/chats/ChatsManager.js"
+import { ChatsMessages } from "@/services/chats/ChatsMessage.js"
 import { ACCOUNT_STATUS, AccountDTO, JWTPayload } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { CHAT_ACTION_C2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
@@ -18,9 +18,9 @@ export type ChatsWSConf = Partial<ChatsWSService['stateDefault']>
  */
 export class ChatsWSService extends ws.route {
 
-	chatManager: ChatManager = new ChatManager(this)
-	chatMessages: ChatMessages = new ChatMessages(this)
-	chatContext: ChatContext = new ChatContext(this)
+	chatManager: ChatsManager = new ChatsManager(this)
+	chatMessages: ChatsMessages = new ChatsMessages(this)
+	chatContext: ChatsContext = new ChatsContext(this)
 
 	get stateDefault() {
 		return {
@@ -62,7 +62,10 @@ export class ChatsWSService extends ws.route {
 		for (const chat of chats) {
 			await this.chatMessages.handleUserLeave(
 				user,
-				{ action: CHAT_ACTION_C2S.USER_LEAVE, chatId: chat.id } as UserLeaveC2S
+				<UserLeaveC2S>{ 
+					action: CHAT_ACTION_C2S.USER_LEAVE, 
+					chatId: chat.chatRepo.id 
+				}
 			)
 		}
 

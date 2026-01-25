@@ -1,14 +1,12 @@
 import clsCard from "@/app/cards/CardYellow.module.css"
+import AvatarCmp from "@/components/avatar/AvatarCmp"
 import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { DOC_TYPE } from "@/types"
-import { TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
 import AccauntDetailActions from "./Actions"
-import Avatar from "@/components/avatar/Avatar"
-import AvatarCmp from "@/components/avatar/AvatarCmp"
 
 
 

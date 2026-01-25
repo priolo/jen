@@ -9,6 +9,7 @@ import { ChatListStore } from "./list"
 import chatRepoSo from "./repo"
 import { buildRoomDetail } from "../room/factory"
 import { deckCardsSo } from "@/stores/docs/cards"
+import { buildAccountList } from "../account/factory"
 
 
 
@@ -46,7 +47,7 @@ const setup = {
 			{ type: DOC_TYPE.CHAT_LIST }
 		) as ChatListStore,
 
-
+		getAccountsOpen: (_: void, store?: ChatDetailStore) => store.state.linked?.state.type == DOC_TYPE.ACCOUNT_LIST,
 	},
 
 	actions: {
@@ -101,6 +102,13 @@ const setup = {
 			})
 			deckCardsSo.add({ view, anim: true })
 		},
+
+		/** apro gli ACCOUNTS che partecipano alla CHAT */
+		openAccounts(_: void, store?: ChatDetailStore) {
+			const isOpen = store.getAccountsOpen()
+			const view = !isOpen ? buildAccountList() : null
+			store.state.group.addLink({ view, parent: store, anim: true })
+		}
 
 	},
 

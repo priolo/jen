@@ -1,3 +1,5 @@
+import RowButton from "@/components/buttons/RowButton"
+import EditorIcon from "@/icons/EditorIcon"
 import { ChatDetailStore } from "@/stores/stacks/chat/detail"
 import { EDIT_STATE } from "@/types"
 import { LLM_MODELS } from "@/types/commons/LlmProviders"
@@ -28,7 +30,9 @@ const ChatDetailForm: FunctionComponent<Props> = ({
         [name: string]: any
     }) => store.setChat({ ...store.state.chat, ...prop })
 
+    const handleAccountsClick = () => store.openAccounts()
 
+    
     // RENDER
     const chat = store.state.chat
     if (chat == null) return null
@@ -36,6 +40,12 @@ const ChatDetailForm: FunctionComponent<Props> = ({
     const inNew = store.state.editState == EDIT_STATE.NEW
 
     return <div className="jack-lyt-form var-dialog">
+
+        <RowButton
+            icon={<EditorIcon />}
+            label="USERS"
+            onClick={handleAccountsClick}
+        />
 
         <div className="lyt-v">
             <div className="jack-lbl-prop">NAME</div>

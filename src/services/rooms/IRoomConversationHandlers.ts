@@ -1,7 +1,7 @@
 import { AgentRepo } from "@/repository/Agent.js";
 import { LlmResponse } from "@/types/commons/LlmResponse.js";
 import { ChatMessage } from "@/types/commons/RoomActions.js";
-import { IAgent } from "./IAgent.js";
+import { IAgent } from "../agents/IAgent.js";
 
 
 

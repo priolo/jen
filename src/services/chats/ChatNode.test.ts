@@ -6,7 +6,7 @@ import { RoomRepo } from '../../repository/Room.js';
 import { ToolRepo } from '../../repository/Tool.js';
 import { LLM_RESPONSE_TYPE } from '../../types/commons/LlmResponse.js';
 import ChatNode from './ChatNode.js';
-import { ChatContext } from "./ChatContext.js";
+import { ChatsContext } from "./ChatsContext.js";
 
 
 describe("Test ChatNode", () => {
@@ -62,7 +62,7 @@ describe("Test ChatNode", () => {
 	class Recorder {
 		constructor() { }
 		messages: { clientId: string, msg: any }[] = []
-		context: ChatContext = {
+		context: ChatsContext = {
 			createRoomRepo: async (agents, parentId) => {
 				return <RoomRepo>{
 					id: randomUUID(),
@@ -86,7 +86,7 @@ describe("Test ChatNode", () => {
 		}
 	}
 
-	const nodeSym: ChatContext = {
+	const nodeSym: ChatsContext = {
 		createRoomRepo: async (agents, parentId) => {
 			return <RoomRepo>{
 				id: randomUUID(),

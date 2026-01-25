@@ -12,7 +12,7 @@ import { executeMcpTool, getMcpTools } from "../mcp/utils.js"
 
 
 
-export class ChatContext  {
+export class ChatsContext  {
 
 	constructor(
 		private service: ChatsWSService = null,
@@ -36,16 +36,16 @@ export class ChatContext  {
 			if (!!tool.mcpId) {
 
 				// non sono in CACHE allora li carico e li metto in CACHE
-				if (!ChatContext.McpCache.has(tool.mcpId)) {
+				if (!ChatsContext.McpCache.has(tool.mcpId)) {
 					// [II] anche questo va ricavato tramite path
 					const mcpServer = await McpServerRoute.GetById(tool.mcpId, this.service)
 					if (!mcpServer) continue
 					const mcpTools = await getMcpTools(mcpServer.host)
-					ChatContext.McpCache.set(mcpServer.id, mcpTools)
+					ChatsContext.McpCache.set(mcpServer.id, mcpTools)
 				}
 
 				// prendo i tools dal CACHE
-				const mcpTools = ChatContext.McpCache.get(tool.mcpId)
+				const mcpTools = ChatsContext.McpCache.get(tool.mcpId)
 				if (!mcpTools) continue
 				const cachedTool = mcpTools.find(t => t.name == tool.name)
 				tool.description = cachedTool.description

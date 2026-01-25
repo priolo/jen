@@ -5,8 +5,9 @@ import ChatNode from "./ChatNode.js"
 import { AgentRepo } from "@/repository/Agent.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { ChatRepo } from "@/repository/Chat.js"
+import { ChatProcessor } from "./ChatProcessor.js"
 
-export class ChatMessages {
+export class ChatsMessages {
 
 	constructor(
 		private service: ChatsWSService = null,
@@ -52,7 +53,7 @@ export class ChatMessages {
 				const msgUp: RoomHistoryUpdateC2S = msg
 				const room = chat.updateHistory(msgUp.updates, msgUp.roomId)
 				if (room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.ADD)) {
-					await chat.complete()
+					await (new ChatProcessor(this.service)).complete(chat, chat.getMainRoom());
 				}
 				break
 			}
@@ -126,7 +127,7 @@ export class ChatMessages {
 
 		const isVoid = chat.removeUser(userId)
 		if (isVoid) {
-			this.service.chatManager.removeChat(chat.id)
+			this.service.chatManager.removeChat(chat.chatRepo.id)
 			await this.service.chatManager.saveChat(chat.chatRepo)
 		}
 	}

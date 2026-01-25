@@ -4,11 +4,15 @@ import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "
 import { mixStores } from "@priolo/jon"
 import { ChatDetailStore } from "./detail"
 import { buildChatDetail, buildChatDetailNew } from "./factory"
-import chatWSSo from "./ws"
 import chatRepoSo from "./repo"
 
 
 
+/**
+ * Visualizza tutte le CHAT aperte dall'utente
+ * Permette di selezionare una CHAT per aprirne il dettaglio
+ * Visualizza le chat ONLINE tramite WebSocket
+ */
 const setup = {
 
 	state: {

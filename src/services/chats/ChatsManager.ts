@@ -6,7 +6,9 @@ import { Bus, typeorm } from "@priolo/julian"
 import { FindManyOptions } from "typeorm"
 import { ChatRepo } from "@/repository/Chat.js"
 
-export class ChatManager {
+
+
+export class ChatsManager {
 
 	constructor(
 		private service: ChatsWSService = null,
@@ -23,15 +25,8 @@ export class ChatManager {
 	 * Restituisce la CHAT specificata
 	 */
 	getChatById(chatId: string): ChatNode | undefined {
-		return this.chats.find(c => c.id === chatId)
+		return this.chats.find(chat => chat.chatRepo.id === chatId)
 	}
-
-	/**
-	 * Restituisce la CHAT che contiene la ROOM specificata
-	 */
-	// getChatByRoomId(roomId: string): ChatNode | undefined {
-	// 	return this.chats.find(chat => !!chat.getRoomById(roomId))
-	// }
 
 	/**
 	 * Inizia una SESSION di una CHAT
@@ -44,10 +39,12 @@ export class ChatManager {
 	 * Termina una SESSION di una CHAT
 	 */
 	removeChat(chatId: string): void {
-		const index = this.chats.findIndex(c => c.id === chatId)
+		const index = this.chats.findIndex(c => c.chatRepo.id === chatId)
 		if (index == -1) throw new Error(`Chat not found: ${chatId}`)
 		this.chats.splice(index, 1);
 	}
+
+
 
 	/** 
 	 * Salvo la CHAT e tutte le sue ROOMs sul DB 
@@ -75,20 +72,6 @@ export class ChatManager {
 			}
 		})
 	}
-
-	/**
-	 * Carica una CHAT dal DB partendo da una ROOM
-	 */
-	// async loadChatByRoomId(roomId: string, accountId?: string): Promise<ChatNode> {
-	// 	// Carico la ROOM richiesta
-	// 	const roomRepo: RoomRepo = await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
-	// 		type: typeorm.Actions.GET_BY_ID,
-	// 		payload: roomId
-	// 	})
-	// 	if (!roomRepo || !roomRepo.chatId) throw new Error(`Room not found: ${roomId}`)
-
-	// 	return this.loadChatById(roomRepo.chatId)
-	// }
 
 	async loadChatById(chatId: string): Promise<ChatNode> {
 		// carico la CHAT
