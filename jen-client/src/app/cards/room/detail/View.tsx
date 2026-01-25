@@ -30,15 +30,16 @@ const RoomView: FunctionComponent<Props> = ({
 
 
 	// HOOKS
+	// chiedo le CHAT INFO se non le ho gia'
 	useEffect(() => {
 		store.fetch()
 	}, [])
 
+	// Ho i dati della CHAT.
 	// eventualmente chiedo la ROOM se non esiste
 	useEffect(() => {
-		// se c'e' l'id della ROOM vuol dire che gia' è presente sul server
+		// se non c'e' l'id della ROOM allora suppongo si tratti della MAIN ROOM
 		if (!!store.state.roomId) return
-		// se è una nuova ROOM allora la setto con i dati della CHAT
 		const chat = chatWSSo.getChatById(store.state.chatId)
 		const room = getMainRoom(chat?.rooms)
 		store.setRoomId(room?.id)
@@ -49,7 +50,7 @@ const RoomView: FunctionComponent<Props> = ({
 		() => chatWSSo.getRoomById(store.state.roomId), 
 		[store.state.roomId, chatWSSo.state.all]
 	)
-	
+
 	const history = room?.history ?? []
 
 

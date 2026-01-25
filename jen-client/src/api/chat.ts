@@ -15,12 +15,12 @@ function get(id: string, opt?: CallOptions): Promise<Chat> {
 
 /** CREATE NEW */
 function create(chat: Partial<Chat>, opt?: CallOptions): Promise<Chat> {
-	return ajax.post(`chats`, { agent: chat }, opt)
+	return ajax.post(`chats`, { chat }, opt)
 }
 
 /** UPDATE */
 function update(chat: Partial<Chat>, opt?: CallOptions): Promise<Chat> {
-	return ajax.patch(`chats/${chat.id}`, { agent: chat }, opt)
+	return ajax.patch(`chats/${chat.id}`, { chat }, opt)
 }
 
 /** DELETE */

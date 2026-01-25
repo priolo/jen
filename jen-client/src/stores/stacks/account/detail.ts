@@ -16,38 +16,48 @@ const setup = {
 		//#endregion
 
 		account: <AccountDTO>null,
+		accountId : <string>null,
 		editState: EDIT_STATE.READ,
 	},
 
 	getters: {
+
 		//#region VIEWBASE
+
 		getTitle: (_: void, store?: ViewStore) => (<AccountDetailStore>store).state.account?.name?.toUpperCase() ?? "ACCOUNT DETAIL",
 		getSubTitle: (_: void, store?: ViewStore) => "DETAIL ACCOUNT",
 		getSerialization: (_: void, store?: ViewStore) => {
 			const state = store.state as AccountDetailState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
-				account: { id: state.account?.id }
+				accountId: state.account?.id,
 			}
 		},
+
 		//#endregion
 	},
 
 	actions: {
+
 		//#region VIEWBASE
+
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
-			store.state = {...store.state, ...data }
+			const state = store.state as AccountDetailState
+			state.accountId = data.accountId
 		},
+
 		//#endregion
 
+
 		async fetch(_: void, store?: AccountDetailStore) {
-			if (!store.state.account?.id) return
-			const account = (await accountApi.get(store.state.account.id, { store, manageAbort: true }))?.account
+			const accountId = store.state.accountId ?? store.state.account?.id
+			if (!accountId) return
+			const account = (await accountApi.get(accountId, { store, manageAbort: true }))?.account
 			store.setAccount(account)
 		},
 		async fetchIfVoid(_: void, store?: AccountDetailStore) {
-			if (!!store.state.account?.email) return
+			if (!!store.state.account) return
 			await store.fetch()
 		},
 	},

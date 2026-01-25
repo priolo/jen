@@ -35,7 +35,7 @@ class McpServerRoute extends httpRouter.Service {
 
 	async getAll(req: Request, res: Response) {
 		const user = req["jwtPayload"]
-		console.log("user", user)
+
 		const mcpServer = await new Bus(this, REPO_PATHS.MCP_SERVERS).dispatch<McpServerRepo>({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions>{

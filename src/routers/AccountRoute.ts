@@ -1,5 +1,5 @@
 import { REPO_PATHS } from "@/config.js";
-import { ACCOUNT_STATUS, AccountDTO, AccountDTOList } from '@/types/account.js';
+import { ACCOUNT_STATUS, AccountDTO, AccountDTOList, JWTPayload } from '@/types/account.js';
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, Like } from "typeorm";
@@ -54,7 +54,7 @@ class AccountRoute extends httpRouter.Service {
 		// aggiorno lo status online/offline
 		const chats = this.nodeByPath<ChatsWSService>("/>ws-chats")
 		for (const account of accounts) {
-			const isOnline = !!chats.getUserById(account.id)
+			const isOnline = !!chats.chatContext.getUserById(account.id)
 			account.status = isOnline ? ACCOUNT_STATUS.ONLINE : ACCOUNT_STATUS.OFFLINE
 		}
 
@@ -103,8 +103,9 @@ class AccountRoute extends httpRouter.Service {
 	 * Aggiorno i dati aggiornabili di un ACCOUNT
 	 */
 	async update(req: Request, res: Response) {
-		const userJwt: AccountRepo = req["jwtPayload"]
+		const userJwt: JWTPayload = req["jwtPayload"]
 		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+
 		const { account } = req.body;
 		if (!account) return res.status(400).json({ error: "Missing account data" });
 		if (account.name == null || account.name.trim().length == 0) return res.status(400).json({ error: "Invalid name" });

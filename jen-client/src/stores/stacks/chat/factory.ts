@@ -19,6 +19,7 @@ export function buildChatDetailNew() {
 		editState: EDIT_STATE.NEW,
 		size: VIEW_SIZE.NORMAL,
 		sizeForce: true,
+		chat: {},
 	} as ChatDetailState) as ChatDetailStore;
 	return store;
 }

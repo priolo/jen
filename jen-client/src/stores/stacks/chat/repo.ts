@@ -12,6 +12,10 @@ const setup = {
 	},
 
 	getters: {
+		getById (id: string, store?: ChatRepoStore): Chat {
+			if (!id) return null
+			return store.state.all?.find(chat => chat.id == id)
+		},
 		getIndexById(id: string, store?: ChatRepoStore) {
 			if (!id) return -1
 			return store.state.all?.findIndex(llm => llm.id == id)

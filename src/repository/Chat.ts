@@ -15,17 +15,17 @@ export class ChatRepo extends AccountAssets {
     id: string;
 
     /** nome della CHAT */
-    @Column({ type: 'varchar', default: '' })
-    name: string;
+    @Column({ type: 'varchar', nullable: true })
+    name?: string;
 
     /** descrizione della CHAT */
-    @Column({ type: 'varchar', default: '' })
+    @Column({ type: 'varchar', nullable: true })
     description?: string;
 
 
     /** la ROOM principale della CHAT */
     @Column({ type: 'uuid', nullable: true })
-    mainRoomId?: string;
+    mainRoomId: string;
 
     /**
      * le ROOMs appartenenti a questa CHAT

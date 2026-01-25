@@ -175,27 +175,21 @@ const setup = {
 						store.setAll([...store.state.all, chat])
 					}
 
-
-
-					// controllo se c'e' una VIEW aperta per questa CHAT
-					const views = utils.findAll(docsSo.getAllCards(), {
-						type: DOC_TYPE.ROOM_DETAIL,
-						chatId: msg.chatId,
-					})
-					if (views.length > 0) break
-					// non c'e': apro la VIEW della ROOM principale
-					const mainRoom = getMainRoom(chat.rooms)
-					if (!mainRoom) break
-					const view = buildRoomDetail({
-						chatId: msg.chatId,
-						roomId: mainRoom.id,
-					})
-					deckCardsSo.add({ view, anim: true })
+					// // controllo se c'e' una VIEW aperta per questa CHAT
+					// const views = utils.findAll(docsSo.getAllCards(), {
+					// 	type: DOC_TYPE.ROOM_DETAIL,
+					// 	chatId: msg.chatId,
+					// })
+					// if (views.length > 0) break
+					// // non c'e': apro la VIEW della ROOM principale
+					// const mainRoom = getMainRoom(chat.rooms)
+					// if (!mainRoom) break
+					// const view = buildRoomDetail({
+					// 	chatId: msg.chatId,
+					// 	roomId: mainRoom.id,
+					// })
+					// deckCardsSo.add({ view, anim: true })
 					break
-
-
-
-
 				}
 
 				case CHAT_ACTION_S2C.CLIENT_ENTERED: {

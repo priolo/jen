@@ -40,7 +40,7 @@ const setup = {
 		//#endregion
 
 		openDetail(accountId: string, store?: AccountListStore) {
-			const view = buildAccountDetail({ id: accountId })
+			const view = buildAccountDetail({ accountId })
 			deckCardsSo.addLink({ view, parent: store, anim: true })
 		}
 	},

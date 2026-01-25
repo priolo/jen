@@ -103,6 +103,7 @@ export class ChatMessages {
 
 		// cerco la CHAT che contiene la ROOM
 		let chat = this.service.chatManager.getChatById(msg.chatId)
+		
 		// non la trovo in memoria quindi carico tutta la CHAT dal DB
 		if (!chat) {
 			chat = await this.service.chatManager.loadChatById(msg.chatId)

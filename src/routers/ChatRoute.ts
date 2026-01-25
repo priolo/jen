@@ -3,7 +3,9 @@ import { ChatRepo } from "../repository/Chat.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { JWTPayload } from "@/types/account.js";
-import { FindManyOptions } from "typeorm";
+import { FindManyOptions, FindOneOptions } from "typeorm";
+import { BuildRoomRepo, RoomRepo } from "@/repository/Room.js";
+import { randomUUID } from "crypto";
 
 
 class ChatRoute extends httpRouter.Service {
@@ -16,8 +18,8 @@ class ChatRoute extends httpRouter.Service {
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
 				{ path: "/", verb: "post", method: "create" },
+				{ path: "/:id", verb: "patch", method: "update" },
 				{ path: "/:id", verb: "delete", method: "delete" },
-				{ path: "/:id", verb: "put", method: "update" },
 			]
 		}
 	}
@@ -25,6 +27,7 @@ class ChatRoute extends httpRouter.Service {
 
 	async getAll(req: Request, res: Response) {
 		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
 
 		const chats = await new Bus(this, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.FIND,
@@ -39,21 +42,74 @@ class ChatRoute extends httpRouter.Service {
 	}
 
 	async getById(req: Request, res: Response) {
+		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+
 		const id = req.params["id"]
-		const chat: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
-			type: typeorm.Actions.GET_BY_ID,
-			payload: id
-		})
+		const chat: ChatRepo = await this.getByIdInternal(id, userJwt.id)
 		res.json(chat)
+	}
+	private async getByIdInternal(chatId: string, userId: string): Promise<ChatRepo> {
+		const chat: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
+			type: typeorm.Actions.FIND_ONE,
+			payload: <FindOneOptions<ChatRepo>>{
+				where: [
+					{ id: chatId, accountId: userId },
+					{ id: chatId, accountId: null }
+				],
+			}
+		})
+		return chat
 	}
 
 	async create(req: Request, res: Response) {
+		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
 		const { chat }: { chat: ChatRepo } = req.body
+
+		// 1. SAVE CHAT (to have an ID for the ROOM)
 		const chatNew: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.SAVE,
-			payload: chat
+			payload: {
+				accountId: userJwt.id,
+				...chat,
+			} as ChatRepo
 		})
+
+		// 2. SAVE ROOM (with the chatId)
+		const roomNew: RoomRepo = await new Bus(this, REPO_PATHS.ROOMS).dispatch({
+			type: typeorm.Actions.SAVE,
+			payload: {
+				chatId: chatNew.id,
+				accountId: userJwt.id,
+			} as RoomRepo
+		})
+		
+		// 3. UPDATE CHAT (with the mainRoomId)
+		chatNew.mainRoomId = roomNew.id
+		await new Bus(this, REPO_PATHS.CHATS).dispatch({
+			type: typeorm.Actions.SAVE,
+			payload: chatNew
+		})
+
+		chatNew.rooms = [roomNew]
+
 		res.json(chatNew)
+	}
+
+	async update(req: Request, res: Response) {
+		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+
+		const id = req.params["id"]
+		const { chat }: { chat: ChatRepo } = req.body
+		if (!id || !chat) return
+
+		const chatUp = await new Bus(this, REPO_PATHS.CHATS).dispatch({
+			type: typeorm.Actions.SAVE,
+			payload: chat,
+		})
+		res.json(chatUp)
 	}
 
 	async delete(req: Request, res: Response) {
@@ -64,18 +120,6 @@ class ChatRoute extends httpRouter.Service {
 		})
 		res.json({ data: "ok" })
 	}
-
-	async update(req: Request, res: Response) {
-		const id = req.params["id"]
-		const { chat }: { chat: ChatRepo } = req.body
-		if (!id || !chat) return
-		const chatUp = await new Bus(this, REPO_PATHS.CHATS).dispatch({
-			type: typeorm.Actions.SAVE,
-			payload: chat,
-		})
-		res.json(chatUp)
-	}
-
 }
 
 export default ChatRoute

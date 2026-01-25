@@ -19,6 +19,7 @@ const setup = {
 
 		/** llm visualizzato */
 		chat: <Partial<Chat>>null,
+		chatId: <string>null,
 
 		editState: EDIT_STATE.READ,
 
@@ -31,6 +32,14 @@ const setup = {
 
 		//#region VIEWBASE
 		getTitle: (_: void, store?: ViewStore) => "CHAT DETAIL",
+		getSubTitle: (_: void, store?: ViewStore) => "chat detail",
+		getSerialization: (_: void, store?: ViewStore) => {
+			const state = store.state as ChatDetailState
+			return {
+				...viewSetup.getters.getSerialization(null, store),
+				chatId: state.chat.id,
+			}
+		},
 		//#endregion
 
 		getParentList: (_: void, store?: ChatDetailStore) => utils.findInRoot(store.state.group.state.all,
@@ -43,12 +52,20 @@ const setup = {
 	actions: {
 
 		//#region VIEWBASE
+
+		setSerialization: (data: any, store?: ViewStore) => {
+			viewSetup.actions.setSerialization(data, store)
+			const state = store.state as ChatDetailState
+			state.chatId = data.chatId
+		},
+
 		//#endregion
 
 		/** carica ENTITY da API */
 		fetch: async (_: void, store?: ChatDetailStore) => {
-			if (!store.state.chat?.id) return
-			const chat = await chatApi.get(store.state.chat.id, { store, manageAbort: true })
+			const chatId = store.state.chatId ?? store.state.chat?.id
+			if (!chatId) return
+			const chat = await chatApi.get(chatId, { store, manageAbort: true })
 			store.setChat(chat)
 			//await loadBaseSetup.actions.fetch(_, store)
 		},
@@ -77,19 +94,18 @@ const setup = {
 			store.setEditState(EDIT_STATE.READ)
 		},
 
-
-
-
 		/** apro la MAIN-ROOM */
-		openMainRoom(_: void, store?: ChatListStore) {
-			const view = buildRoomDetail()
+		openMainRoom(_: void, store?: ChatDetailStore) {
+			const view = buildRoomDetail({
+				chatId: store.state.chat?.id,
+			})
 			deckCardsSo.add({ view, anim: true })
 		},
 
 	},
 
 	mutators: {
-		setChat: (llm: Partial<Llm>) => ({ llm }),
+		setChat: (chat: Partial<Chat>) => ({ chat }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }

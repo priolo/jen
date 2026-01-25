@@ -15,11 +15,11 @@ export class RoomRepo extends AccountAssets {
 
     /** Unique identifier for the room */
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    id?: string;
 
     /** ID of the chat this room belongs to */
     @Column({ type: 'uuid' })
-    chatId?: string;
+    chatId: string;
 
     @ManyToOne(() => ChatRepo, (chat) => chat.rooms)
     @JoinColumn({ name: "chatId" })
@@ -48,7 +48,7 @@ export class RoomRepo extends AccountAssets {
 
     /** ID of the parent room, if this room is a sub-room */
     @Column({ type: 'uuid', nullable: true })
-    parentRoomId?: string | null;
+    parentRoomId?: string;
 
     //#endregion
 }

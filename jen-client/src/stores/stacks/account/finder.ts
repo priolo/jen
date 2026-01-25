@@ -58,7 +58,7 @@ const setup = {
 		},
 
 		openDetail(accountId: string, store?: AccountFinderStore) {
-			const view = buildAccountDetail({ id: accountId })
+			const view = buildAccountDetail({ accountId })
 			deckCardsSo.addLink({ view, parent: store, anim: true })
 		}
 	},
