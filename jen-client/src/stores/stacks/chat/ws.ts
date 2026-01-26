@@ -205,7 +205,7 @@ const setup = {
 					const msg = message as ClientLeaveS2C
 					const chat = store.getChatById(msg.chatId)
 					if (!chat) break
-					chat.clients = chat.clients.filter(c => c.id != msg.clientId)
+					chat.clients = chat.clients.filter(c => c.id != msg.userId)
 					store._update()
 					break
 				}

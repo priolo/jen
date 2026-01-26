@@ -59,7 +59,7 @@ export enum UPDATE_TYPE {
 export enum CHAT_ACTION_C2S {
 	/** un USER crea una CHAT e ci entra*/
 	CHAT_CREATE_AND_ENTER = "chat-create",
-	/** un USER cerca/carica una CHAT tramite una ROOM ed entra */
+	/** un USER cerca/carica una CHAT ed entra */
 	CHAT_LOAD_AND_ENTER = "chat-get",
 
 	/* USER lascia la CHAT */
@@ -67,8 +67,6 @@ export enum CHAT_ACTION_C2S {
 	/* Invita unn USER alla chat */
 	USER_INVITE = "user-invite",
 
-	/** richiesta di avviare il completamento in una ROOM */
-	ROOM_COMPLETE = "room-complete",
 	/** aggiorna la lista degli AGENT in una ROOM */
 	ROOM_AGENTS_UPDATE = "room-agents-update",
 	/** aggiorna la HISTORY di una ROOM */
@@ -83,8 +81,7 @@ export type BaseC2S = {
 }
 
 /** 
- * CLIENT cerca/crea una CHAT trmite l'id di una ROOM esistente
- * - se la ROOM esiste in una CHAT, restituisce la CHAT
+ * CLIENT cerca/crea una CHAT trmite l'id 
  * - inserisce l'user nella CHAT
  * - restituisce i dati della CHAT [ChatInfoS2C]
  */
@@ -124,13 +121,6 @@ export type UserInviteC2S = BaseC2S & {
 //#endregion
 
 
-
-/** richiesta di completamento di una ROOM */
-export type RoomCompleteC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.ROOM_COMPLETE
-	/** id della ROOM, se null è la MAIN-ROOM */
-	roomId?: string
-}
 
 /** richiesta modifica lista AGENTS in ROOM */
 export type RoomAgentsUpdateC2S = BaseC2S & {
@@ -188,11 +178,12 @@ export type BaseS2C = {
  * Invia ad un CLIENT i dati di una CHAT 
  * tipicamente su
  * CHAT_ACTION_C2S.CHAT_CREATE
- * CHAT_ACTION_C2S.USER_ENTER
+ * CHAT_ACTION_C2S.CHAT_LOAD
+ * CHAT_ACTION_C2S.USER_INVITE
  * */
 export type ChatInfoS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CHAT_INFO
-	/** lista dei CLIENTs presenti */
+	/** lista dei USERs ONLINE */
 	clients: AccountDTO[]
 	/** lista delle ROOMs. */
 	rooms: ChatRoom[]
@@ -201,7 +192,7 @@ export type ChatInfoS2C = BaseS2C & {
 /** un CLIENT è entrato in una CHAT */
 export type ClientEnteredS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_ENTERED
-	/** il CLIENT che entra */
+	/** un ACCOUNT entra */
 	user: AccountDTO
 }
 
@@ -209,7 +200,7 @@ export type ClientEnteredS2C = BaseS2C & {
 export type ClientLeaveS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CLIENT_LEAVE
 	/** id del CLIENT */
-	clientId?: string
+	userId: string
 }
 
 export type UserStatusS2C = {
