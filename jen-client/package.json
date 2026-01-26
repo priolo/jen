@@ -18,22 +18,19 @@
     "@priolo/jess": "file:C://Users//ivano.iorio//Documents//jess"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource/darker-grotesque": "^5.0.8",
-
     "@monaco-editor/react": "^4.7.0",
-    "monaco-editor": "^0.55.1",
-    "prismjs": "^1.30.0",
-
     "@priolo/jack": "file:C://Users//ivano.iorio//Documents//jack",
     "@priolo/jess": "^0.1.1",
     "@priolo/jon": "file:C://Users//ivano.iorio//Documents//jon",
     "@priolo/jon-utils": "^0.5.6",
-
     "@react-oauth/google": "^0.13.0",
     "cross-env": "^10.1.0",
     "dayjs": "^1.11.19",
-    
+    "monaco-editor": "^0.55.1",
+    "prismjs": "^1.30.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "slate": "^0.120.0",

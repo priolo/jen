@@ -38,7 +38,7 @@ const AccountFinderView: FunctionComponent<Props> = ({
 
 	// RENDER
 	const accounts = store.state.all
-	const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
+	const selectId = (store.state.linked as AccountDetailStore)?.state?.accountId
 	const isSelected = (account: AccountDTO) => account.id == selectId
 
 	return <FrameworkCard styleBody={{ padding: 0, }}

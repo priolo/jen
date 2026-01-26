@@ -25,7 +25,7 @@ const setup = {
 		editState: EDIT_STATE.READ,
 
 		//#region VIEWBASE
-		width: 200,
+		width: 170,
 		//#endregion
 	},
 
@@ -106,7 +106,7 @@ const setup = {
 		/** apro gli ACCOUNTS che partecipano alla CHAT */
 		openAccounts(_: void, store?: ChatDetailStore) {
 			const isOpen = store.getAccountsOpen()
-			const view = !isOpen ? buildAccountList() : null
+			const view = !isOpen ? buildAccountList({ chatId: store.state.chat?.id }) : null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		}
 

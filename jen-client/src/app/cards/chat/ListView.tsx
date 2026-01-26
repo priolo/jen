@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { ChatDetailStore } from "@/stores/stacks/chat/detail"
 import { ChatListStore } from "@/stores/stacks/chat/list"
@@ -8,6 +9,11 @@ import { FunctionComponent, useMemo } from "react"
 import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
 import chatRepoSo from "@/stores/stacks/chat/repo"
+import ElementRow from "@/components/rows/ElementRow"
+import { getShortUuid } from "@/utils/object"
+import OnlineIcon from "@/components/OnlineIcon"
+import chatWSSo from "@/stores/stacks/chat/ws"
+import { css } from '@emotion/react';
 
 
 
@@ -32,12 +38,15 @@ const ChatListView: FunctionComponent<Props> = ({
 	// HANDLER
 	const handleSelect = (chat: Chat) => store.select(chat.id)
 	const handleNew = () => store.create()
-	const handleDelete = () => store.delete(selectId)
+	const handleDelete = () => store.delete(selectedId)
 
 
 	// RENDER
-	const selectId = (store.state.linked as ChatDetailStore)?.state?.chat?.id
-	const isSelected = (chat: Chat) => chat.id == selectId
+	const selectedId = (store.state.linked as ChatDetailStore)?.state?.chat?.id
+	const isSelected = (chat: Chat) => chat.id == selectedId
+	const getName = (chat: Chat) => chat?.name ?? getShortUuid(chat.id) ?? "<no name>"
+	const isOnline = (chatId: string) => !!chatWSSo.getChatById(chatId)
+
 
 	//const isNewSelect = consumersSa.linked?.state.type == DOC_TYPE.CONSUMER && (consumersSa.linked as ConsumerStore).state.editState == EDIT_STATE.NEW
 
@@ -60,11 +69,11 @@ const ChatListView: FunctionComponent<Props> = ({
 				storeView={store}
 			/>
 			<div style={{ flex: 1 }} />
-			{!!selectId && <Button
+			{!!selectedId && <Button
 				children="DELETE"
 				onClick={handleDelete}
 			/>}
-			{!!selectId && <div> | </div>}
+			{!!selectedId && <div> | </div>}
 			<Button
 				children="NEW"
 				//select={isNewSelect}
@@ -72,13 +81,15 @@ const ChatListView: FunctionComponent<Props> = ({
 			/>
 		</>}
 	>
-		<div className={clsCard.content}>
+		<div css={cssListContainer}>
 			{chats?.map((chat) => {
-				return <div key={chat.id} className={clsCard.item}>
-					<div 
-						onClick={(e) => handleSelect(chat)}
-					>[{chat.id}] {chat.name} {isSelected(chat) ? "**": ""}</div>
-				</div>
+				return <ElementRow key={chat.id}
+					icon={<OnlineIcon online={isOnline(chat.id)} />}
+					onClick={() => handleSelect(chat)}
+					selected={isSelected(chat)}
+					title={getName(chat)}
+					subtitle={"esperimanto mentale"}
+				/>
 			})}
 		</div>
 
@@ -88,3 +99,9 @@ const ChatListView: FunctionComponent<Props> = ({
 }
 
 export default ChatListView
+
+
+const cssListContainer = css({
+	display: "flex",
+	flexDirection: "column",
+})

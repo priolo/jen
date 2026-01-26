@@ -1,11 +1,13 @@
+import { AgentRepo } from "@/repository/Agent.js"
+import { ChatRepo } from "@/repository/Chat.js"
 import { BuildRoomRepo } from "@/repository/Room.js"
+import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { JWTPayload } from "@/types/account.js"
 import { CHAT_ACTION_C2S, ChatCreateC2S, ChatGetC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@/types/commons/RoomActions.js"
 import ChatNode from "./ChatNode.js"
-import { AgentRepo } from "@/repository/Agent.js"
-import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
-import { ChatRepo } from "@/repository/Chat.js"
 import { ChatProcessor } from "./ChatProcessor.js"
+
+
 
 export class ChatsMessages {
 
@@ -25,7 +27,7 @@ export class ChatsMessages {
 			return
 		}
 		if (msg.action === CHAT_ACTION_C2S.CHAT_LOAD_AND_ENTER) {
-			await this.handleChatLoadByRoom(user, msg as ChatGetC2S)
+			await this.handleChatLoad(user, msg as ChatGetC2S)
 			return
 		}
 
@@ -79,11 +81,12 @@ export class ChatsMessages {
 		const room = BuildRoomRepo(msg.chatId, agentsRepo, userId)
 
 		// creo la CHAT
-		const chatRepo:ChatRepo = {
+		const chatRepo: ChatRepo = {
 			id: msg.chatId,
 			mainRoomId: room.id,
 			accountId: userId,
 			rooms: [room],
+			users: [{ id: userId }],
 		}
 		const chat = await ChatNode.Build(this.service.chatContext, chatRepo)
 
@@ -98,19 +101,20 @@ export class ChatsMessages {
 	 * Inserisce il CLIENT nella CHAT  
 	 * Invia le info della CHAT al CLIENT  
 	 */
-	private async handleChatLoadByRoom(user: JWTPayload, msg: ChatGetC2S) {
+	private async handleChatLoad(user: JWTPayload, msg: ChatGetC2S) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
 		// cerco la CHAT che contiene la ROOM
 		let chat = this.service.chatManager.getChatById(msg.chatId)
-		
+
 		// non la trovo in memoria quindi carico tutta la CHAT dal DB
 		if (!chat) {
 			chat = await this.service.chatManager.loadChatById(msg.chatId)
 			this.service.chatManager.addChat(chat)
 		}
 
+		// inserisco lo USER tra gli ONLINE
 		chat.addUser(userId)
 	}
 
@@ -148,10 +152,9 @@ export class ChatsMessages {
 
 		// inserisco il CLIENT invitato nella CHAT
 		chat.addUser(invitedUserId)
-
+		this.service.chatManager
 	}
 
 	//#endregion 
-
 
 }

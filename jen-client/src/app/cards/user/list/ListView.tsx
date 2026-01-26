@@ -4,7 +4,6 @@ import ElementRow from "@/components/rows/ElementRow.js"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
 import chatWSSo from "@/stores/stacks/chat/ws"
-import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { DOC_TYPE } from "@/types"
 import { AccountDTO } from "@/types/account"
 import { AlertDialog, FindInputHeader } from "@priolo/jack"
@@ -31,18 +30,13 @@ const AccountListView: FunctionComponent<Props> = ({
 	useStore(chatWSSo)
 
 	// HOOKs
-	const users = useMemo(() => {
-		const roomId = (store.state.parent as RoomDetailStore)?.state.roomId
-		const room = chatWSSo.getRoomById(roomId)
-		const chat = chatWSSo.getChatById(room?.chatId)
-		return chat?.clients ?? []
-	}, [chatWSSo.state])
+	const users = useMemo(() => store.getUsers(), [chatWSSo.state])
 
 	// HANDLER
 	const handleSelect = (account: AccountDTO) => store.openDetail(account.id)
 
 	// RENDER
-	const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
+	const selectId = (store.state.linked as AccountDetailStore)?.state?.accountId
 	const isSelected = (account: AccountDTO) => account.id == selectId
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
@@ -60,10 +54,10 @@ const AccountListView: FunctionComponent<Props> = ({
 			<ActionsCmp store={store} />
 		</>}
 	>
-		
+
 		{users.map(user => <ElementRow
 			key={user.id}
-			icon={<div style={{ width: 20, height: "100%", backgroundColor: "#FF0000"}} />}
+			icon={<div style={{ width: 20, height: "100%", backgroundColor: "#FF0000" }} />}
 			selected={isSelected(user)}
 			title={user.name}
 			subtitle={user.email}

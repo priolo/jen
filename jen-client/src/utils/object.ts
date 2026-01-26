@@ -66,3 +66,8 @@ export function generateUUID() {
 		return v.toString(16);
 	});
 }
+
+export function getShortUuid(uuid: string): string {
+	return `#${uuid.split('-')[0]}`;
+}
+

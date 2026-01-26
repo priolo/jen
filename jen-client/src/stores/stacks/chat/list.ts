@@ -17,7 +17,7 @@ const setup = {
 
 	state: {
 		//#region VIEWBASE
-		width: 370,
+		width: 180,
 		widthMax: 1000,
 		//#endregion
 	},
@@ -27,7 +27,6 @@ const setup = {
 		getTitle: (_: void, store?: ViewStore) => "CHATS",
 		getSubTitle: (_: void, store?: ViewStore) => "chats list",
 		//#endregion
-
 	},
 
 	actions: {

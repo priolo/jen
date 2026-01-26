@@ -1,5 +1,6 @@
 import type { Relation } from 'typeorm';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { AccountRepo } from './Account.js';
 import { AccountAssets } from './AccountAssets.js';
 import { RoomRepo } from './Room.js';
 
@@ -33,6 +34,11 @@ export class ChatRepo extends AccountAssets {
     @OneToMany(() => RoomRepo, (room) => room.chat)
     rooms: Relation<RoomRepo[]>;
 
+    /**
+     * gli UTENTI che partecipano alla CHAT
+     */
+    @ManyToMany(() => AccountRepo)
+    @JoinTable()
+    users: Relation<AccountRepo[]>;
+
 }
-
-

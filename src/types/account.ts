@@ -16,7 +16,7 @@ export interface AccountDTO {
 	githubName?: string;
 	status?: ACCOUNT_STATUS;
 	//description?: string; 
-	emailVerified: boolean;
+	emailVerified?: boolean;
 }
 
 export enum ACCOUNT_STATUS {

@@ -44,11 +44,11 @@ class ChatNode {
 	//#region CHAT PROPERTIES
 
 	/** 
-	 * gli ids degli ACCOUNT ONLINE partecipanti 
+	 * gli ids degli USERS ONLINE partecipanti 
 	 * cioe' quelli che devono essere aggiornati
 	 */
 	private usersIds: Set<string> = new Set();
-	
+
 	/**
 	 * l'ENTITY CHAT REPO
 	 */
@@ -78,6 +78,14 @@ class ChatNode {
 		return this.chat.rooms.find(room => room.id == id)
 	}
 
+	/**
+	 * Recupera uno USER partecipante alla CHAT
+	 */
+	public getUserById(id: string): AccountDTO {
+		if (!id || !this.chat.users) return null
+		return this.chat.users.find(user => user.id == id)
+	}
+
 	//#endregion 
 
 
@@ -85,19 +93,19 @@ class ChatNode {
 	//#region HANDLE CHAT OPERATIONS
 
 	/**
-	 * comunico alla CHAT che un CLIENT è entrato  
-	 * aggiungo il CLIENT in CHAT  
-	 * invio INFO CHAT al client entrato  
+	 * Comunico alla CHAT che uno USER è entrato  
+	 * aggiungo lo USER nei ONLINE della CHAT
+	 * invio INFO CHAT allo USER entrato  
 	 */
 	addUser(userId: string) {
-		// se il CLIENT è già in CHAT non faccio nulla
+		// se lo USER è già in CHAT non faccio nulla
 		if (!userId || this.usersIds.has(userId)) return;
 
-		// ricavo i dati del CLIENT
+		// ricavo i dati dello USER
 		const user = (this.context.getUserById(userId))
 		if (!user) return;
 
-		// avverto gli altri CLIENT
+		// avverto gli altri USERS
 		const message: ClientEnteredS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
 			chatId: this.chat.id,
@@ -105,11 +113,16 @@ class ChatNode {
 		}
 		this.sendMessage(message)
 
-		// inserisco il CLIENT nella CHAT
+		// inserisco lo USER nella CHAT
 		this.usersIds.add(userId);
 
-		// invio al nuovo CLIENT i dati della CHAT
+		// invio al nuovo USER i dati della CHAT
 		this.sendInfo(userId)
+
+		// aggiungo lo USER ai partecipanti della CHAT
+		if (!this.getUserById(userId)) {
+			this.chat.users.push({ id: userId })
+		}
 	}
 
 	/**

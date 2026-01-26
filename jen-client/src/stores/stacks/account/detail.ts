@@ -13,6 +13,7 @@ const setup = {
 
 	state: {
 		//#region VIEWBASE
+		width: 165,
 		//#endregion
 
 		account: <AccountDTO>null,

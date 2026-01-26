@@ -15,9 +15,11 @@ import { AccountDetailStore } from "./detail"
 const setup = {
 
 	state: {
-		//#region VIEWBASE
 
+		//#region VIEWBASE
+		width: 165,
 		//#endregion
+
 		textSearch: <string>null,
 		all: <AccountDTO[]>[],
 	},
@@ -39,8 +41,8 @@ const setup = {
 		 * restituisce, se c'e', l'ACCOUNT selezionato
 		 */
 		getAccountSelected: (_: void, store?: AccountFinderStore) => {
-			if ( store.state.group == null ) return null
-			const selectId = (store.state.linked as AccountDetailStore)?.state?.account?.id
+			if (store.state.group == null) return null
+			const selectId = (store.state.linked as AccountDetailStore)?.state?.accountId
 			return store.state.all.find(a => a.id == selectId)
 		}
 	},

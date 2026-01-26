@@ -1,10 +1,9 @@
-import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
-import ChatNode from "./ChatNode.js"
-import { RoomRepo } from "@/repository/Room.js"
 import { REPO_PATHS } from "@/config.js"
-import { Bus, typeorm } from "@priolo/julian"
-import { FindManyOptions } from "typeorm"
 import { ChatRepo } from "@/repository/Chat.js"
+import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
+import { Bus, typeorm } from "@priolo/julian"
+import { FindOneOptions } from "typeorm"
+import ChatNode from "./ChatNode.js"
 
 
 
@@ -55,47 +54,32 @@ export class ChatsManager {
 			type: typeorm.Actions.SAVE,
 			payload: chatRepo,
 		})
-		for (const room of chatRepo.rooms) {
-			await this.saveRoom(room)
+		for (const room of chatRepo.rooms ?? []) {
+			await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
+				type: typeorm.Actions.SAVE,
+				payload: room,
+			})
 		}
-	}
-	private async saveRoom(room: RoomRepo): Promise<void> {
-		await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
-			type: typeorm.Actions.SAVE,
-			payload: <RoomRepo>{
-				id: room.id,
-				chatId: room.chatId,
-				accountId: room.accountId,
-				history: room.history ?? [],
-				parentRoomId: room.parentRoomId,
-				agents: room.agents ?? [],
-			}
-		})
 	}
 
 	async loadChatById(chatId: string): Promise<ChatNode> {
-		// carico la CHAT
-		const chatRepo: ChatRepo = await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
-			type: typeorm.Actions.GET_BY_ID,
-			payload: chatId
-		})
-		if (!chatRepo) throw new Error(`Chat not found: ${chatId}`)
+        // carico la CHAT specificando le relazioni da includere (users e rooms)
+        const chatRepo: ChatRepo = await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
+            type: typeorm.Actions.FIND_ONE,
+            payload: <FindOneOptions<ChatRepo>>{
+                where: { id: chatId },
+                relations: {
+                    users: true,
+                    rooms: true,
+                }
+            }
+        })
 
-		// carico tutte le ROOMs di quella CHAT
-		const roomsRepo: RoomRepo[] = await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
-			type: typeorm.Actions.FIND,
-			payload: <FindManyOptions<RoomRepo>>{
-				where: {
-					chatId: chatId
-				}
-			}
-		})
+        if (!chatRepo) throw new Error(`Chat not found: ${chatId}`)
 
-		chatRepo.rooms = roomsRepo
-
-		// Creo la CHAT con le ROOMs caricate
-		const chat = await ChatNode.Build(this.service.chatContext, chatRepo)
-		return chat
-	}
+        // Creo la CHAT con le ROOMs caricate
+        const chat = await ChatNode.Build(this.service.chatContext, chatRepo)
+        return chat
+    }
 
 }

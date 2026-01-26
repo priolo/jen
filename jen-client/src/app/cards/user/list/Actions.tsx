@@ -35,12 +35,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	// HANDLER
 
 	const handleInviteClick = (account: AccountDTO) => {
-		const roomId = (store.state.parent as RoomDetailStore)?.state.roomId
-		const room = chatWSSo.getRoomById(roomId)
-		chatWSSo.invite({
-			chatId: room?.chatId,
-			accountId: account.id
-		})
+		store.invite(account.id)
 	}
 
 	const handleFindClick = async () => {

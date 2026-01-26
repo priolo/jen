@@ -1,11 +1,10 @@
 import { AccountFinderFixedCard, AuthFixedCard, ClearSession, EndSession, StartSession } from "@/plugins/session"
-import docsSo, { FIXED_CARD } from "@/stores/docs"
+import docsSo from "@/stores/docs"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
-import { buildAccountFinder } from "@/stores/stacks/account/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
-import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
+import { buildChatList } from "@/stores/stacks/chat/factory"
 import chatWSSo from "@/stores/stacks/chat/ws"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
 import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
@@ -21,8 +20,6 @@ import { ReflectionState, ReflectionStore } from "../../stores/stacks/reflection
 import { DOC_TYPE } from "../../types"
 import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
-import StoreButton from "./StoreButton"
-import { buildChatList } from "@/stores/stacks/chat/factory"
 
 
 
