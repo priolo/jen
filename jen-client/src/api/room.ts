@@ -1,5 +1,5 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
-import { ChatRoom } from "@/types/commons/RoomActions"
+import { ChatRoom } from "@shared/types/commons/RoomActions"
 
 
 

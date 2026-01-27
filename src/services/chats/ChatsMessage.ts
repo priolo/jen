@@ -3,7 +3,7 @@ import { ChatRepo } from "@/repository/Chat.js"
 import { BuildRoomRepo } from "@/repository/Room.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { JWTPayload } from "@/types/account.js"
-import { CHAT_ACTION_C2S, ChatCreateC2S, ChatGetC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@/types/commons/RoomActions.js"
+import { CHAT_ACTION_C2S, ChatCreateC2S, ChatGetC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@shared/types/commons/RoomActions.js"
 import ChatNode from "./ChatNode.js"
 import { ChatProcessor } from "./ChatProcessor.js"
 

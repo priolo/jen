@@ -1,5 +1,5 @@
-import { LlmResponse } from "@/types/commons/LlmResponse"
-import { ChatMessage } from "@/types/commons/RoomActions.js"
+import { LlmResponse } from "@shared/types/commons/LlmResponse"
+import { ChatMessage } from "@shared/types/commons/RoomActions.js"
 import { FunctionComponent } from "react"
 import ContentCmp from "./ContentCmp"
 import cls from "./MessageCmp.module.css"

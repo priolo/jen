@@ -178,12 +178,12 @@ export type BaseS2C = {
  * Invia ad un CLIENT i dati di una CHAT 
  * tipicamente su
  * CHAT_ACTION_C2S.CHAT_CREATE
- * CHAT_ACTION_C2S.CHAT_LOAD
+ * CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER
  * CHAT_ACTION_C2S.USER_INVITE
  * */
 export type ChatInfoS2C = BaseS2C & {
 	action: CHAT_ACTION_S2C.CHAT_INFO
-	/** lista dei USERs ONLINE */
+	/** lista dei CLIENTs presenti */
 	clients: AccountDTO[]
 	/** lista delle ROOMs. */
 	rooms: ChatRoom[]

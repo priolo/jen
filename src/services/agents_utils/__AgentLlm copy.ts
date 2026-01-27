@@ -1,6 +1,6 @@
 import { AgentRepo } from '@/repository/Agent.js';
 import { ToolRepo } from '@/repository/Tool.js';
-import { ChatMessage } from '@/types/commons/RoomActions.js';
+import { ChatMessage } from '@shared/types/commons/RoomActions.js';
 import { google } from '@ai-sdk/google';
 import { generateText, jsonSchema, tool, ToolSet } from "ai";
 import { z } from "zod";

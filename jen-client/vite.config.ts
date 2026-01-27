@@ -16,6 +16,7 @@ export default defineConfig(() => {
         resolve: {
             alias: {
                 '@': path.resolve(__dirname, './src'),
+                '@shared': path.resolve(__dirname, '../shared'),
                 // // Force Vite to resolve React to the project's single copy
                 // react: path.resolve(__dirname, './node_modules/react'),
                 // 'react-dom': path.resolve(__dirname, './node_modules/react-dom'),

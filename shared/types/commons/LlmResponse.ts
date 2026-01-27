@@ -57,4 +57,3 @@ export interface ContentTool extends ContentBase {
 	// risposta del tool
 	result: any
 }
-

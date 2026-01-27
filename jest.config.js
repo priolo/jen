@@ -3,7 +3,9 @@ export default {
   	testEnvironment: 'node',
 	extensionsToTreatAsEsm: ['.ts'],
 	moduleNameMapper: {
-		'^@/(.*)\.js$': '<rootDir>/src/$1',
+		'^@shared/(.*)\\.js$': '<rootDir>/shared/$1',
+		'^@shared/(.*)$': '<rootDir>/shared/$1',
+		'^@/(.*)\\.js$': '<rootDir>/src/$1',
 		'^@/(.*)$': '<rootDir>/src/$1',
 		'^(\\.{1,2}/.*)\\.js$': '$1',
 	},

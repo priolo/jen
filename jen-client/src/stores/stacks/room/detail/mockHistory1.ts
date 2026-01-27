@@ -1,4 +1,4 @@
-import { ChatMessage } from "@/types/commons/RoomActions";
+import { ChatMessage } from "@shared/types/commons/RoomActions";
 
 
 

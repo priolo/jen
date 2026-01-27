@@ -1,5 +1,5 @@
 import { AccountDTO } from "@/types/account"
-import { ChatRoom } from "@/types/commons/RoomActions"
+import { ChatRoom } from "@shared/types/commons/RoomActions"
 
 
 export interface Chat {

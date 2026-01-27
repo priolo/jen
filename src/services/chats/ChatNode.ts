@@ -2,7 +2,7 @@ import { ChatRepo } from '@/repository/Chat.js';
 import { RoomRepo } from '@/repository/Room.js';
 import { AccountDTO } from '@/types/account.js';
 import { AgentRepo } from "../../repository/Agent.js";
-import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C } from "../../types/commons/RoomActions.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C } from "@shared/types/commons/RoomActions.js";
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
 import { ChatsContext } from './ChatsContext.js';
 
@@ -203,7 +203,7 @@ class ChatNode {
 
 		const rooms = this.chat.rooms.map(room => ({
 			id: room.id,
-			chatId: this.chat.id,
+			chatId: room.chatId,
 			parentRoomId: room.parentRoomId,
 			accountId: room.accountId,
 			history: room.history,

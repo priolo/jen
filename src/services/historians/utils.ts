@@ -1,5 +1,5 @@
-import { LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse.js"
-import { ChatMessage } from "@/types/commons/RoomActions.js"
+import { LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/commons/LlmResponse.js"
+import { ChatMessage } from "@shared/types/commons/RoomActions.js"
 
 
 

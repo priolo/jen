@@ -1,7 +1,7 @@
 import { AgentRepo } from '@/repository/Agent.js';
-import { ChatMessage } from '@/types/commons/RoomActions.js';
+import { ChatMessage } from "@shared/types/commons/RoomActions.js";
 import { time } from '@priolo/jon-utils';
-import { LlmResponse } from '../../types/commons/LlmResponse.js';
+import { LlmResponse } from "@shared/types/commons/LlmResponse.js";
 
 
 

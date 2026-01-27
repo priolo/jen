@@ -1,4 +1,4 @@
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@/types/commons/LlmResponse"
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/commons/LlmResponse"
 import { FunctionComponent } from "react"
 import cls from "./MessageCmp.module.css"
 import { Button } from "@priolo/jack"

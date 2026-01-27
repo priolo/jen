@@ -1,7 +1,7 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { PromptListStore } from "@/stores/stacks/room/list"
-import { ChatRoom } from "@/types/commons/RoomActions"
+import { ChatRoom } from "@shared/types/commons/RoomActions"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"

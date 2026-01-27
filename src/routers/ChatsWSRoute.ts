@@ -4,7 +4,7 @@ import { ChatsManager } from "@/services/chats/ChatsManager.js"
 import { ChatsMessages } from "@/services/chats/ChatsMessage.js"
 import { ACCOUNT_STATUS, AccountDTO, JWTPayload } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
-import { CHAT_ACTION_C2S, UserLeaveC2S } from "../types/commons/RoomActions.js"
+import { CHAT_ACTION_C2S, UserLeaveC2S } from "@shared/types/commons/RoomActions.js"
 
 
 

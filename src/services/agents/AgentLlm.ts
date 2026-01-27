@@ -1,8 +1,8 @@
 import { AgentRepo } from '../../repository/Agent.js';
-import { ChatMessage } from '../../types/commons/RoomActions.js';
+import { ChatMessage } from "@shared/types/commons/RoomActions.js";
 import { time } from '@priolo/jon-utils';
 import { generateText, jsonSchema, ModelMessage, tool, ToolResultPart, ToolSet } from "ai";
-import { LLM_RESPONSE_TYPE, LlmResponse } from '../../types/commons/LlmResponse.js';
+import { LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/commons/LlmResponse.js";
 import { getHistory, getModel } from '../agents_utils/utils/vercel.js';
 import { IAgent } from './IAgent.js';
 

@@ -5,7 +5,7 @@ import { AGENT_TYPE, AgentRepo } from "../repository/Agent.js";
 import { LlmRepo } from "../repository/Llm.js";
 import { McpServerRepo } from "../repository/McpServer.js";
 import { TOOL_TYPE, ToolRepo } from "../repository/Tool.js";
-import { LLM_MODELS } from "../types/commons/LlmProviders.js";
+import { LLM_MODELS } from "@shared/types/commons/LlmProviders.js";
 
 
 

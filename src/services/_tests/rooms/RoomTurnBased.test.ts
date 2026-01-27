@@ -3,7 +3,7 @@ import "../../../startup/envPreload.js"
 import { AgentRepo } from "../../../repository/Agent.js";
 import { RoomRepo } from "../../../repository/Room.js";
 import { TOOL_TYPE, ToolRepo } from "../../../repository/Tool.js";
-import { LLM_RESPONSE_TYPE, LlmResponse } from '../../../types/commons/LlmResponse.js';
+import { LLM_RESPONSE_TYPE, LlmResponse } from '@shared/types/commons/LlmResponse.js';
 import RoomTurnBased from '../../rooms/RoomTurnBased.js';
 
 
