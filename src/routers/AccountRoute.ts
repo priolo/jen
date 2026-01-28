@@ -1,5 +1,5 @@
 import { REPO_PATHS } from "@/config.js";
-import { ACCOUNT_STATUS, AccountDTO, AccountDTOList, JWTPayload } from '@/types/account.js';
+import { ACCOUNT_STATUS, GetAccountDTOList, GetAccountDTO, JWTPayload } from '@/types/account.js';
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, Like } from "typeorm";
@@ -54,12 +54,12 @@ class AccountRoute extends httpRouter.Service {
 		// aggiorno lo status online/offline
 		const chats = this.nodeByPath<ChatsWSService>("/>ws-chats")
 		for (const account of accounts) {
-			const isOnline = !!chats.chatContext.getUserById(account.id)
+			const isOnline = !!chats.chatSend.getUserOnlineById(account.id)
 			account.status = isOnline ? ACCOUNT_STATUS.ONLINE : ACCOUNT_STATUS.OFFLINE
 		}
 
 		res.json({
-			accounts: AccountDTOList(accounts)
+			accounts: GetAccountDTOList(accounts)
 		})
 	}
 
@@ -77,7 +77,7 @@ class AccountRoute extends httpRouter.Service {
 		if (!account) return res.status(404).json({ error: "Account not found" })
 
 		res.json({
-			account: AccountDTO(account)
+			account: GetAccountDTO(account)
 		})
 	}
 
@@ -95,7 +95,7 @@ class AccountRoute extends httpRouter.Service {
 			}
 		})
 		res.json({
-			account: AccountDTO(account),
+			account: GetAccountDTO(account),
 		})
 	}
 

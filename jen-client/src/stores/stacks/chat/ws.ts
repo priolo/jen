@@ -1,13 +1,13 @@
-import chatApi from "@/api/chat"
 import { wsConnection } from "@/plugins/session/wsConnection"
 import { SS_EVENT } from "@/plugins/SocketService/types"
-import { deckCardsSo } from "@/stores/docs/cards"
 import { DOC_TYPE } from "@/types"
-import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetC2S, ChatInfoS2C, ChatRoom, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@shared/types/commons/RoomActions"
 import { docsSo, utils } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
+import { RoomDTO } from "@shared/types/RoomDTO"
+import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetC2S, ChatInfoS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/commons/RoomActions"
 import { Chat } from "../../../types/Chat"
 import { buildRoomDetail } from "../room/factory"
+import authSo from "../auth/repo"
 
 
 
@@ -76,6 +76,20 @@ const setup = {
 				action: CHAT_ACTION_C2S.USER_INVITE,
 				chatId,
 				userId: accountId,
+			}
+			wsConnection.send(JSON.stringify(message))
+		},
+
+		/**
+		 * Rimuovo un USER da una CHAT
+		 */
+		removeUser: async (props: { chatId: string, userId: string }, store?: ChatWSStore) => {
+			const { chatId, userId } = props
+			if (!chatId || !userId) return
+			const message: UserRemoveC2S = {
+				action: CHAT_ACTION_C2S.USER_REMOVE,
+				chatId,
+				userId,
 			}
 			wsConnection.send(JSON.stringify(message))
 		},
@@ -205,6 +219,12 @@ const setup = {
 					const msg = message as ClientLeaveS2C
 					const chat = store.getChatById(msg.chatId)
 					if (!chat) break
+					// sono io che esco dalla chat
+					if ( msg.userId == authSo.state.user.id) {
+						
+						
+						break
+					}
 					chat.clients = chat.clients.filter(c => c.id != msg.userId)
 					store._update()
 					break
@@ -306,7 +326,7 @@ wsConnection.emitter.on(SS_EVENT.CONNECTION,
 )
 
 
-export function getMainRoom(rooms: ChatRoom[]): ChatRoom {
+export function getMainRoom(rooms: RoomDTO[]): RoomDTO {
 	if (rooms == null) return null
 	for (const room of rooms) {
 		if (!room.parentRoomId) return room

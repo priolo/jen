@@ -1,10 +1,10 @@
 import { ChatRepo } from '@/repository/Chat.js';
 import { RoomRepo } from '@/repository/Room.js';
-import { AccountDTO } from '@/types/account.js';
-import { AgentRepo } from "../../repository/Agent.js";
+import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
+import { AccountDTO } from '@shared/types/account.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C } from "@shared/types/commons/RoomActions.js";
+import { AgentRepo } from "../../repository/Agent.js";
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
-import { ChatsContext } from './ChatsContext.js';
 
 
 
@@ -20,7 +20,7 @@ class ChatNode {
 		 * il CONTEXT per la gestione della CHAT  
 		 * DEPENDENCY che si occupa della comunicazione e risorse
 		 */
-		private context: ChatsContext,
+		private service: ChatsWSService = null,
 		/**
 		 * MODEL della CHAT
 		 */
@@ -30,12 +30,12 @@ class ChatNode {
 
 	/**
 	 * Creo una nuova CHAT inserendo una MAIN-ROOM
-	 * @param context il CONTEXT di gestione della CHAT
+	 * @param service il CONTEXT di gestione della CHAT
 	 * @param rooms le ROOMs iniziali della CHAT
 	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
-	static async Build(context: ChatsContext, chatRepo: ChatRepo): Promise<ChatNode> {
-		const chat = new ChatNode(context, chatRepo)
+	static async Build(service: ChatsWSService, chatRepo: ChatRepo): Promise<ChatNode> {
+		const chat = new ChatNode(service, chatRepo)
 		return chat
 	}
 
@@ -80,8 +80,9 @@ class ChatNode {
 
 	/**
 	 * Recupera uno USER partecipante alla CHAT
+	 * non necessariamente ONLINE
 	 */
-	public getUserById(id: string): AccountDTO {
+	public getPartecipantById(id: string): AccountDTO {
 		if (!id || !this.chat.users) return null
 		return this.chat.users.find(user => user.id == id)
 	}
@@ -98,11 +99,12 @@ class ChatNode {
 	 * invio INFO CHAT allo USER entrato  
 	 */
 	addUser(userId: string) {
+		
 		// se lo USER è già in CHAT non faccio nulla
 		if (!userId || this.usersIds.has(userId)) return;
 
 		// ricavo i dati dello USER
-		const user = (this.context.getUserById(userId))
+		const user = (this.service.chatSend.getUserOnlineById(userId))
 		if (!user) return;
 
 		// avverto gli altri USERS
@@ -113,16 +115,11 @@ class ChatNode {
 		}
 		this.sendMessage(message)
 
-		// inserisco lo USER nella CHAT
+		// inserisco lo USER tra gli ONLINE
 		this.usersIds.add(userId);
 
 		// invio al nuovo USER i dati della CHAT
 		this.sendInfo(userId)
-
-		// aggiungo lo USER ai partecipanti della CHAT
-		if (!this.getUserById(userId)) {
-			this.chat.users.push({ id: userId })
-		}
 	}
 
 	/**
@@ -143,6 +140,22 @@ class ChatNode {
 
 		this.usersIds.delete(userId);
 		return this.usersIds.size == 0
+	}
+
+
+	/**
+	 * Aggiungo uno USER partecipante alla CHAT
+	 */
+	addParticipant(userId: string) {
+		if (!!this.getPartecipantById(userId)) return
+		this.chat.users.push({ id: userId })
+	}
+
+	/**
+	 * Rimuovo uno USER partecipante alla CHAT
+	 */
+	removeParticipant(userId: string) {
+		this.chat.users = this.chat.users.filter(u => u.id != userId)
 	}
 
 	/** 
@@ -176,7 +189,7 @@ class ChatNode {
 
 		const agents: AgentRepo[] = []
 		for (const agentId of agentsIds) {
-			const agent = await this.context.getAgentRepoById(agentId)
+			const agent = await this.service.chatContext.getAgentRepoById(agentId)
 			if (agent) agents.push(agent)
 		}
 		room.agents = agents
@@ -198,7 +211,7 @@ class ChatNode {
 	private sendInfo(accountId: string) {
 
 		const clients: AccountDTO[] = [...this.usersIds].map(clientId => {
-			return this.context.getUserById(clientId)
+			return this.service.chatSend.getUserOnlineById(clientId)
 		}).filter(a => !!a)
 
 		const rooms = this.chat.rooms.map(room => ({
@@ -217,7 +230,7 @@ class ChatNode {
 			rooms,
 		}
 
-		this.context.sendMessageToUser(accountId, msg)
+		this.service.chatSend.sendMessageToUser(accountId, msg)
 	}
 
 	/**
@@ -226,7 +239,7 @@ class ChatNode {
 	public sendMessage(message: BaseS2C, esclude: string[] = []): void {
 		for (const userId of this.usersIds) {
 			if (esclude.includes(userId)) continue;
-			this.context.sendMessageToUser(userId, message)
+			this.service.chatSend.sendMessageToUser(userId, message)
 		}
 	}
 

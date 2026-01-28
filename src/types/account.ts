@@ -1,8 +1,7 @@
 import { AccountRepo } from '@/repository/Account.js';
-import { AccountDTO as IAccountDTO, ACCOUNT_STATUS, GithubAccountMetadata as IGithubAccountMetadata } from '@shared/types/account.js';
+import { AccountDTO, ACCOUNT_STATUS, GithubAccountMetadata as IGithubAccountMetadata } from '@shared/types/account.js';
 
 export { ACCOUNT_STATUS };
-export type AccountDTO = IAccountDTO;
 export type GithubAccountMetadata = IGithubAccountMetadata;
 
 
@@ -20,7 +19,7 @@ export type JWTPayload = {
 /**
  * restituisce una versione "sendable" dell'ACCOUNT, senza campi sensibili
  */
-export function AccountDTO(account: AccountRepo): AccountDTO | null {
+export function GetAccountDTO(account: AccountRepo): AccountDTO | null {
 	if (!account) return null;
 
 	// 2. Accesso diretto senza destrutturazione intermedia per evitare duplicazioni
@@ -43,8 +42,8 @@ export function AccountDTO(account: AccountRepo): AccountDTO | null {
 /**
  * Restituisce una lista di ACCOUNT in versione "sendable"
  */
-export function AccountDTOList(accounts: AccountRepo[]) {
-	return accounts.map(account => AccountDTO(account));
+export function GetAccountDTOList(accounts: AccountRepo[]) {
+	return accounts.map(account => GetAccountDTO(account));
 }
 
 export enum EMAIL_CODE {

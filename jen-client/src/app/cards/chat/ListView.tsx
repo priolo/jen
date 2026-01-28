@@ -1,19 +1,17 @@
-/** @jsxImportSource @emotion/react */
 import FrameworkCard from "@/components/cards/FrameworkCard"
+import OnlineIcon from "@/components/OnlineIcon"
+import ElementRow from "@/components/rows/ElementRow"
 import { ChatDetailStore } from "@/stores/stacks/chat/detail"
 import { ChatListStore } from "@/stores/stacks/chat/list"
+import chatRepoSo from "@/stores/stacks/chat/repo"
+import chatWSSo from "@/stores/stacks/chat/ws"
 import { Chat } from "@/types/Chat"
+import { getShortUuid } from "@/utils/object"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
 import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
-import chatRepoSo from "@/stores/stacks/chat/repo"
-import ElementRow from "@/components/rows/ElementRow"
-import { getShortUuid } from "@/utils/object"
-import OnlineIcon from "@/components/OnlineIcon"
-import chatWSSo from "@/stores/stacks/chat/ws"
-import { css } from '@emotion/react';
 
 
 
@@ -29,11 +27,14 @@ const ChatListView: FunctionComponent<Props> = ({
 	useStore(store)
 	useStore(store.state.group)
 	useStore(chatRepoSo)
+	useStore(chatWSSo)
+
 
 	// HOOKs
 	const chats = useMemo(() => {
 		return chatRepoSo.state.all//?.sort((c1, c2) => c1.name?.localeCompare(c2.name))
 	}, [chatRepoSo.state.all])
+
 
 	// HANDLER
 	const handleSelect = (chat: Chat) => store.select(chat.id)
@@ -46,16 +47,6 @@ const ChatListView: FunctionComponent<Props> = ({
 	const isSelected = (chat: Chat) => chat.id == selectedId
 	const getName = (chat: Chat) => chat?.name ?? getShortUuid(chat.id) ?? "<no name>"
 	const isOnline = (chatId: string) => !!chatWSSo.getChatById(chatId)
-
-
-	//const isNewSelect = consumersSa.linked?.state.type == DOC_TYPE.CONSUMER && (consumersSa.linked as ConsumerStore).state.editState == EDIT_STATE.NEW
-
-
-	// const isNewSelect = cnnListSa.linked?.state.type == DOC_TYPE.CONNECTION && (cnnListSa.linked as CnnDetailStore).state.editState == EDIT_STATE.NEW
-	// const selectId = (cnnListSa.linked as CnnDetailStore)?.state?.connection?.id
-	// const isSelected = (cnn: Connection) => cnn.id == selectId
-	// const isVoid = !(connections?.length > 0)
-	// const loaderOpen = cnnListSa.linked?.state.type == DOC_TYPE.CNN_LOADER
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -81,7 +72,7 @@ const ChatListView: FunctionComponent<Props> = ({
 			/>
 		</>}
 	>
-		<div css={cssListContainer}>
+		<div style={cssListContainer}>
 			{chats?.map((chat) => {
 				return <ElementRow key={chat.id}
 					icon={<OnlineIcon online={isOnline(chat.id)} />}
@@ -100,8 +91,7 @@ const ChatListView: FunctionComponent<Props> = ({
 
 export default ChatListView
 
-
-const cssListContainer = css({
+const cssListContainer:React.CSSProperties = {
 	display: "flex",
 	flexDirection: "column",
-})
+}

@@ -1,4 +1,5 @@
 import { AccountDTO } from '../account.js';
+import { RoomDTO } from '../RoomDTO.js';
 import { LlmResponse } from "./LlmResponse.js";
 
 
@@ -14,19 +15,6 @@ export type ChatMessage = {
 	role: "user" | "agent" | "system"
 	/** il testo del messaggio (oppure la risposta LLM) */
 	content: string | LlmResponse
-}
-
-/**
- * E' uno spazio dotato di HISTORY dove i CLIENT possono comunicare
- */
-export type ChatRoom = {
-	id: string
-	chatId: string
-	parentRoomId?: string
-	accountId?: string
-
-	history: ChatMessage[]
-	agentsIds: string[]
 }
 
 /**
@@ -66,6 +54,8 @@ export enum CHAT_ACTION_C2S {
 	USER_LEAVE = "user-leave",
 	/* Invita unn USER alla chat */
 	USER_INVITE = "user-invite",
+	/** rimuove un USER da una CHAT */
+	USER_REMOVE = "user-remove",
 
 	/** aggiorna la lista degli AGENT in una ROOM */
 	ROOM_AGENTS_UPDATE = "room-agents-update",
@@ -111,10 +101,18 @@ export type UserLeaveC2S = BaseC2S & {
 }
 
 /** 
- * invito un CLIENT
+ * invito un USER in CHAT
  */
 export type UserInviteC2S = BaseC2S & {
 	action: CHAT_ACTION_C2S.USER_INVITE
+	userId: string
+}
+
+/** 
+ * rimuovo un USER da una CHAT
+ */
+export type UserRemoveC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.USER_REMOVE
 	userId: string
 }
 
@@ -186,7 +184,7 @@ export type ChatInfoS2C = BaseS2C & {
 	/** lista dei CLIENTs presenti */
 	clients: AccountDTO[]
 	/** lista delle ROOMs. */
-	rooms: ChatRoom[]
+	rooms: RoomDTO[]
 }
 
 /** un CLIENT è entrato in una CHAT */

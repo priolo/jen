@@ -14,6 +14,7 @@ const setup = {
 
 	state: {
 		token: <string>null,
+		/** USER correntemente loggato */
 		user: <AccountDTO>null,
 		userInEdit: <Partial<AccountDTO>>null,
 	},

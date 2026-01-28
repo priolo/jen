@@ -1,11 +1,10 @@
+import { EMAIL_CODE, GetAccountDTO, JWTPayload } from '@/types/account.js';
 import { Bus, email as emailNs, http, httpRouter, jwt, typeorm } from "@priolo/julian";
 import crypto from "crypto";
 import { Request, Response } from "express";
-import { CodeTemplate, loadTemplate } from "../services/templates/index.js";
 import { FindManyOptions } from "typeorm";
 import { AccountRepo } from "../repository/Account.js";
-import { EMAIL_CODE } from '@/types/account.js';
-import { AccountDTO, JWTPayload } from '@/types/account.js';
+import { CodeTemplate, loadTemplate } from "../services/templates/index.js";
 import { ENV_TYPE } from "../types/env.js";
 
 
@@ -136,7 +135,7 @@ class AuthEmailRoute extends httpRouter.Service {
 
 		// restituisco i dati dell'utente loggato
 		res.status(200).json({
-			user: AccountDTO(user),
+			user: GetAccountDTO(user),
 		});
 	}
 

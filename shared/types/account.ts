@@ -15,11 +15,13 @@ export interface AccountDTO {
 	status?: ACCOUNT_STATUS;
 	//description?: string; 
 	emailVerified?: boolean;
+
 }
 
 export enum ACCOUNT_STATUS {
 	OFFLINE = 0,
-	ONLINE
+	ONLINE,
+	UNKNOWN,
 }
 
 /**

@@ -1,12 +1,14 @@
 import { AccountDTO } from "@/types/account"
-import { ChatRoom } from "@shared/types/commons/RoomActions"
+import { RoomDTO } from "@shared/types/RoomDTO"
 
 
 export interface Chat {
 	id: string
+	accountId?: string
 	name?: string
 	description?: string
-	clients?: AccountDTO[]
 	mainRoomId?: string
-	rooms: ChatRoom[]
+	rooms: RoomDTO[]
+	users?: AccountDTO[]
+	clients?: AccountDTO[]
 }

@@ -1,10 +1,10 @@
+import { REPO_PATHS } from "@/config.js";
+import { GetAccountDTO, JWTPayload } from '@/types/account.js';
 import { Bus, httpRouter, jwt, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindOneOptions } from "typeorm";
 import { AccountRepo } from "../repository/Account.js";
-import { AccountDTO, JWTPayload } from '@/types/account.js';
 import { ENV_TYPE } from "../types/env.js";
-import { REPO_PATHS } from "@/config.js";
 
 
 
@@ -56,7 +56,7 @@ class AuthRoute extends httpRouter.Service {
 
 			// restituisco i dati dell'utente loggato
 			res.status(200).json({
-				user: AccountDTO(user),
+				user: GetAccountDTO(user),
 			});
 
 		} catch (error) {
@@ -103,7 +103,7 @@ class AuthRoute extends httpRouter.Service {
 		});
 		// restituisco i dati dell'utente loggato
 		res.status(200).json({
-			user: AccountDTO(user),
+			user: GetAccountDTO(user),
 		});
 	}
 

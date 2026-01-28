@@ -4,6 +4,7 @@ import React, { FunctionComponent } from "react";
 
 interface Props {
 	online?: boolean
+	disabled?: boolean
 }
 
 /**
@@ -11,16 +12,20 @@ interface Props {
  */
 const OnlineIcon: FunctionComponent<Props> = ({
 	online,
+	disabled,
 }) => {
 	const s: React.CSSProperties = {
 	}
-	return <div style={cssIcon(online)} />
+	return <div style={cssIcon(online, disabled)} />
 }
 
 export default OnlineIcon
 
-const cssIcon = (online: boolean) => ({
+const cssIcon = (online: boolean, disabled: boolean): React.CSSProperties => ({
 	width: 10,
 	height: "100%",
-	backgroundColor: online ? "green" : "red",
+	backgroundColor: disabled 
+		? "grey"
+		: (online ? "green" : "red"),
+
 })

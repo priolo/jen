@@ -6,16 +6,22 @@ import { FindOneOptions } from "typeorm"
 import ChatNode from "./ChatNode.js"
 
 
-
+/**
+ * Contiene tutte le CHATs attive nel sistema
+ */
 export class ChatsManager {
 
 	constructor(
 		private service: ChatsWSService = null,
 	) { }
 
-
+	/**
+	 * Le CHATs attive nel sistema
+	 */
 	private chats: ChatNode[] = []
-
+	/**
+	 * Restituisce tutte le CHATs attive
+	 */
 	getChats(): ChatNode[] {
 		return this.chats
 	}
@@ -54,6 +60,13 @@ export class ChatsManager {
 			type: typeorm.Actions.SAVE,
 			payload: chatRepo,
 		})
+	}
+
+	/**
+	 * Salvo le ROOMs della CHAT sul DB
+	 */
+	async saveChatRooms(chatRepo: ChatRepo): Promise<void> {
+		if (!chatRepo) return;
 		for (const room of chatRepo.rooms ?? []) {
 			await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
 				type: typeorm.Actions.SAVE,
@@ -62,6 +75,9 @@ export class ChatsManager {
 		}
 	}
 
+	/**
+	 * Carico un CHAT dal DB
+	 */
 	async loadChatById(chatId: string): Promise<ChatNode> {
         // carico la CHAT specificando le relazioni da includere (users e rooms)
         const chatRepo: ChatRepo = await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
@@ -78,7 +94,7 @@ export class ChatsManager {
         if (!chatRepo) throw new Error(`Chat not found: ${chatId}`)
 
         // Creo la CHAT con le ROOMs caricate
-        const chat = await ChatNode.Build(this.service.chatContext, chatRepo)
+        const chat = await ChatNode.Build(this.service, chatRepo)
         return chat
     }
 

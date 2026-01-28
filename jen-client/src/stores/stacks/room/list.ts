@@ -1,10 +1,10 @@
 import roomApi from "@/api/room"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { ChatRoom } from "@shared/types/commons/RoomActions.js"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { RoomDetailStore } from "./detail/detail.js"
 import { buildRoomDetail } from "./factory.js"
+import { RoomDTO } from "@shared/types/RoomDTO.js"
 
 
 
@@ -12,7 +12,7 @@ const setup = {
 
 	state: {
 
-		all: <ChatRoom[]>null,
+		all: <RoomDTO[]>null,
 
 		//#region VIEWBASE
 		width: 370,
@@ -47,16 +47,16 @@ const setup = {
 		},
 
 		/** apro/chiudo la CARD del dettaglio */
-		select(promptId: string, store?: PromptListStore) {
+		select(roomId: string, store?: PromptListStore) {
 			const detached = focusSo.state.shiftKey
-			const oldId = (store.state.linked as RoomDetailStore)?.state?.room?.id
-			const newId = (promptId && oldId !== promptId) ? promptId : null
+			const oldId = (store.state.linked as RoomDetailStore)?.state?.roomId
+			const newId = (roomId && oldId !== roomId) ? roomId : null
 
 			if (detached) {
-				const view = buildRoomDetail({ room: { id: promptId }, size: VIEW_SIZE.NORMAL })
+				const view = buildRoomDetail({ roomId, size: VIEW_SIZE.NORMAL })
 				store.state.group.add({ view, index: store.state.group.getIndexByView(store) + 1 })
 			} else {
-				const view = newId ? buildRoomDetail({ room: { id: promptId } }) : null
+				const view = newId ? buildRoomDetail({ roomId }) : null
 				//store.setSelect(newId)
 				store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
 			}
@@ -84,7 +84,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: ChatRoom[]) => ({ all }),
+		setAll: (all: RoomDTO[]) => ({ all }),
 	},
 }
 

@@ -4,9 +4,7 @@ import { TOOL_TYPE, ToolRepo } from "@/repository/Tool.js"
 import AgentRoute from "@/routers/AgentRoute.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import McpServerRoute from "@/routers/McpServerRoute.js"
-import { AccountDTO } from "@/types/account.js"
-import { BaseS2C } from "@shared/types/commons/RoomActions.js"
-import { Bus, typeorm, ws } from "@priolo/julian"
+import { Bus, typeorm } from "@priolo/julian"
 import { McpTool } from "../mcp/types.js"
 import { executeMcpTool, getMcpTools } from "../mcp/utils.js"
 
@@ -88,30 +86,6 @@ export class ChatsContext  {
 		}
 
 		return "Tool type not supported"
-	}
-
-	public sendMessageToUser(accountId: string, message: BaseS2C) {
-		const clients = this.getClientsById(accountId)
-		if (clients.length == 0) throw new Error(`Client not found: ${accountId}`)
-		for (const client of clients) {
-			this.service.sendToClient(client, JSON.stringify(message))
-		}
-	}
-
-	/**
-	 * Restituisce tutti i CLIENT associati ad un determinato ACCOUNT-ID
-	 */
-	private getClientsById(userId: string): ws.IClient[] {
-		if (!userId) return null
-		return this.service.getClients()?.filter(c => c?.jwtPayload?.id == userId)
-	}
-
-	/**
-	 * Restituisce i dati JWT di un ACCOUNT specifico
-	 */
-	public getUserById(userId: string): AccountDTO {
-		if (!userId) return null
-		return this.service.getClients()?.find(c => c?.jwtPayload?.id == userId)?.jwtPayload
 	}
 
 }

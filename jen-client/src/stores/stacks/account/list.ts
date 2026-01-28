@@ -1,11 +1,12 @@
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
-import { AccountDTO } from "@/types/account"
+import { ACCOUNT_STATUS, AccountDTO } from "@/types/account"
 import { mixStores } from "@priolo/jon"
 import chatWSSo from "../chat/ws"
 import { ViewState } from "../viewBase"
 import { AccountDetailStore } from "./detail"
 import { buildAccountDetail } from "./factory"
+import chatRepoSo from "../chat/repo"
 
 
 /**
@@ -37,11 +38,26 @@ const setup = {
 
 		//#endregion
 
+		/**
+		 * I partecipanti alla CHAT con info di online/offline
+		 */
 		getUsers: (_: void, store?: AccountListStore): AccountDTO[] => {
-			const chat = chatWSSo.getChatById(store.state.chatId)
-			if (!chat) return []
-			return chat.clients ?? []
+			const partecipants = chatRepoSo.getById(store.state.chatId)?.users ?? []
+			const chatOnline = chatWSSo.getChatById(store.state.chatId)
+			const usersOnline = chatOnline?.clients ?? []
+			const users = partecipants.map(user => ({
+				...user,
+				status: !chatOnline 
+					? ACCOUNT_STATUS.UNKNOWN 
+					: (usersOnline?.some(u => u.id == user.id) 
+						? ACCOUNT_STATUS.ONLINE 
+						: ACCOUNT_STATUS.OFFLINE
+					),
+			}))
+			return users
 		},
+
+		
 
 	},
 
@@ -68,7 +84,16 @@ const setup = {
 				chatId: store.state.chatId,
 				accountId: accountId,
 			})
+		},
+
+		remove(accountId: string, store?: AccountListStore) {
+			chatWSSo.removeUser({
+				chatId: store.state.chatId,
+				userId: accountId,
+			})
 		}
+
+
 	},
 
 	mutators: {

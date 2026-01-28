@@ -5,11 +5,13 @@ import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
 import chatWSSo from "@/stores/stacks/chat/ws"
 import { DOC_TYPE } from "@/types"
-import { AccountDTO } from "@/types/account"
+import { ACCOUNT_STATUS, AccountDTO } from "@/types/account"
 import { AlertDialog, FindInputHeader } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
 import ActionsCmp from "./Actions"
+import chatRepoSo from "@/stores/stacks/chat/repo"
+import OnlineIcon from "@/components/OnlineIcon"
 
 
 
@@ -30,14 +32,18 @@ const AccountListView: FunctionComponent<Props> = ({
 	useStore(chatWSSo)
 
 	// HOOKs
-	const users = useMemo(() => store.getUsers(), [chatWSSo.state])
+	const users = useMemo(
+		() => store.getUsers(),
+		[chatWSSo.state.all]
+	)
 
 	// HANDLER
 	const handleSelect = (account: AccountDTO) => store.openDetail(account.id)
 
 	// RENDER
-	const selectId = (store.state.linked as AccountDetailStore)?.state?.accountId
-	const isSelected = (account: AccountDTO) => account.id == selectId
+	const selectedId = (store.state.linked as AccountDetailStore)?.state?.accountId
+	const isSelected = (account: AccountDTO) => account.id == selectedId
+
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}
@@ -47,17 +53,19 @@ const AccountListView: FunctionComponent<Props> = ({
 				style={{ marginLeft: 5, backgroundColor: "rgba(255,255,255,.4)" }}
 				store={store}
 			/> */}
-			<FindInputHeader
-				value={store.state.textSearch}
-				onChange={text => store.setTextSearch(text)}
-			/>
+			
 			<ActionsCmp store={store} />
 		</>}
 	>
 
 		{users.map(user => <ElementRow
 			key={user.id}
-			icon={<div style={{ width: 20, height: "100%", backgroundColor: "#FF0000" }} />}
+			icon={
+				<OnlineIcon
+					online={user.status == ACCOUNT_STATUS.ONLINE}
+					disabled={user.status == ACCOUNT_STATUS.UNKNOWN}
+				/>
+			}
 			selected={isSelected(user)}
 			title={user.name}
 			subtitle={user.email}

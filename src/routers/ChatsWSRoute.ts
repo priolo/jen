@@ -2,8 +2,10 @@ import { REPO_PATHS } from "@/config.js"
 import { ChatsContext } from "@/services/chats/ChatsContext.js"
 import { ChatsManager } from "@/services/chats/ChatsManager.js"
 import { ChatsMessages } from "@/services/chats/ChatsMessage.js"
-import { ACCOUNT_STATUS, AccountDTO, JWTPayload } from '@/types/account.js'
+import { ChatsSend } from "@/services/chats/ChatsSend.js"
+import { ACCOUNT_STATUS, GetAccountDTO } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
+import { AccountDTO } from "@shared/types/account.js"
 import { CHAT_ACTION_C2S, UserLeaveC2S } from "@shared/types/commons/RoomActions.js"
 
 
@@ -20,6 +22,7 @@ export class ChatsWSService extends ws.route {
 
 	chatManager: ChatsManager = new ChatsManager(this)
 	chatMessages: ChatsMessages = new ChatsMessages(this)
+	chatSend: ChatsSend = new ChatsSend(this)
 	chatContext: ChatsContext = new ChatsContext(this)
 
 	get stateDefault() {
@@ -36,14 +39,14 @@ export class ChatsWSService extends ws.route {
 		const userId = client.jwtPayload?.id
 
 		// aggiorno i dati del ACCOUNT
-		let account = this.chatContext.getUserById(userId)
+		let account = this.chatSend.getUserOnlineById(userId) as AccountDTO
 		if (!account) {
 			const accountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 				type: typeorm.Actions.GET_BY_ID,
 				payload: userId
 			})
 			if (!accountRepo) throw new Error(`Account not found: ${userId}`)
-			account = AccountDTO(accountRepo)
+			account = GetAccountDTO(accountRepo)
 		}
 		client.jwtPayload = {
 			...client.jwtPayload,
@@ -55,7 +58,13 @@ export class ChatsWSService extends ws.route {
 	}
 
 	async onDisconnect(client: ws.IClient) {
-		const user = client.jwtPayload
+		const user = client.jwtPayload as AccountDTO
+
+		// Se ci sono altri USER connessi con lo stesso ID, non faccio nulla
+		const clients = this.getClients()?.filter(c => c?.jwtPayload?.id == user.id)
+		if ( clients && clients.length > 0 ) {
+			return super.onDisconnect(client)
+		}
 
 		// rimuovo il client da tutte le CHATs
 		const chats = this.chatManager.getChats()
@@ -68,7 +77,6 @@ export class ChatsWSService extends ws.route {
 				}
 			)
 		}
-
 		super.onDisconnect(client)
 	}
 
@@ -77,7 +85,7 @@ export class ChatsWSService extends ws.route {
 	 * [II] forse bisogna togliere gli await, ma per ora lascio così
 	 */
 	async onMessage(client: ws.IClient, message: string) {
-		const user = client?.jwtPayload as JWTPayload
+		const user = client?.jwtPayload as AccountDTO
 		let msg = JSON.parse(message)
 		await this.chatMessages.onMessage(user, msg)
 	}

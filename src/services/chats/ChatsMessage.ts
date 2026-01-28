@@ -2,13 +2,15 @@ import { AgentRepo } from "@/repository/Agent.js"
 import { ChatRepo } from "@/repository/Chat.js"
 import { BuildRoomRepo } from "@/repository/Room.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
-import { JWTPayload } from "@/types/account.js"
-import { CHAT_ACTION_C2S, ChatCreateC2S, ChatGetC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S } from "@shared/types/commons/RoomActions.js"
+import { CHAT_ACTION_C2S, ChatCreateC2S, ChatGetC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/commons/RoomActions.js"
 import ChatNode from "./ChatNode.js"
 import { ChatProcessor } from "./ChatProcessor.js"
+import { AccountDTO } from "@shared/types/account.js"
 
 
-
+/**
+ * Gestisce i messaggi che arrivano dal CLIENT
+ */
 export class ChatsMessages {
 
 	constructor(
@@ -19,7 +21,7 @@ export class ChatsMessages {
 	 * Handle incoming WebSocket messages
 	 * [II] forse bisogna togliere gli await, ma per ora lascio così
 	 */
-	async onMessage(user: JWTPayload, msg: any) {
+	async onMessage(user: AccountDTO, msg: any) {
 		if (!user || !msg) return
 
 		if (msg.action === CHAT_ACTION_C2S.CHAT_CREATE_AND_ENTER) {
@@ -45,6 +47,10 @@ export class ChatsMessages {
 				await this.handleUserInvite(user, msg as UserInviteC2S)
 				break
 
+			case CHAT_ACTION_C2S.USER_REMOVE:
+				await this.handleUserRemove(user, msg as UserRemoveC2S)
+				break
+
 			case CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE: {
 				const msgUp: RoomAgentsUpdateC2S = msg
 				await chat.updateAgents(msgUp.agentsIds, msgUp.roomId)
@@ -68,7 +74,7 @@ export class ChatsMessages {
 	 * carica gli AGENTs specificati
 	 * Inserisce il CLIENT che l'ha creata
 	 */
-	private async handleChatCreate(user: JWTPayload, msg: ChatCreateC2S) {
+	private async handleChatCreate(user: AccountDTO, msg: ChatCreateC2S) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
@@ -88,9 +94,9 @@ export class ChatsMessages {
 			rooms: [room],
 			users: [{ id: userId }],
 		}
-		const chat = await ChatNode.Build(this.service.chatContext, chatRepo)
+		const chat = await ChatNode.Build(this.service, chatRepo)
 
-		// inserisco la nuova CHAT e faccio entrare il CLIENT
+		// inserisco la CHAT nel MANAGER e faccio entrare il CLIENT
 		this.service.chatManager.addChat(chat)
 		chat.addUser(userId)
 	}
@@ -101,7 +107,7 @@ export class ChatsMessages {
 	 * Inserisce il CLIENT nella CHAT  
 	 * Invia le info della CHAT al CLIENT  
 	 */
-	private async handleChatLoad(user: JWTPayload, msg: ChatGetC2S) {
+	private async handleChatLoad(user: AccountDTO, msg: ChatGetC2S) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
 
@@ -116,6 +122,8 @@ export class ChatsMessages {
 
 		// inserisco lo USER tra gli ONLINE
 		chat.addUser(userId)
+		// inserisco lo USER tra i PARTECIPANTI
+		chat.addParticipant(userId)
 	}
 
 	/**
@@ -123,7 +131,7 @@ export class ChatsMessages {
 	 * Avverte tutti i partecipanti
 	 * Se la CHAT è vuota la elimina
 	 */
-	async handleUserLeave(user: JWTPayload, msg: UserLeaveC2S) {
+	async handleUserLeave(user: AccountDTO, msg: UserLeaveC2S) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
 		const chat = this.service.chatManager.getChatById(msg.chatId)
@@ -133,6 +141,7 @@ export class ChatsMessages {
 		if (isVoid) {
 			this.service.chatManager.removeChat(chat.chatRepo.id)
 			await this.service.chatManager.saveChat(chat.chatRepo)
+			await this.service.chatManager.saveChatRooms(chat.chatRepo)
 		}
 	}
 
@@ -141,7 +150,7 @@ export class ChatsMessages {
 	 * Avverte tutti i partecipanti
 	 * Se la CHAT è vuota la elimina
 	 */
-	private async handleUserInvite(user: JWTPayload, msg: UserInviteC2S) {
+	private async handleUserInvite(user: AccountDTO, msg: UserInviteC2S) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
 		const chat = this.service.chatManager.getChatById(msg.chatId)
@@ -150,9 +159,28 @@ export class ChatsMessages {
 		if (!invitedUserId) throw new Error(`Invalid invited userId`)
 		//if ( this.getClientById(invitedUserId) ) return; // già presente
 
-		// inserisco il CLIENT invitato nella CHAT
+		// inserisco uno USER negli ONLINE della CHAT e avverto tutti
 		chat.addUser(invitedUserId)
-		this.service.chatManager
+		// inserisco lo USER tra i PARTECIPANTI
+		chat.addParticipant(invitedUserId)
+	}
+
+	/**
+	 * Rimuove un UTENTE dalla chat
+	 * - rimuove dai partecipanti nel db
+	 * - rimuove l'utente (se online) dalla chat
+	 * - avverte tutti (tranne l'utente rimosso) che l'utente è uscito
+	 */
+	private async handleUserRemove(user: AccountDTO, msg: UserRemoveC2S) {
+		const chat = this.service.chatManager.getChatById(msg.chatId)
+		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
+
+		// rimuovo dal DB
+		chat.removeParticipant(msg.userId)
+		await this.service.chatManager.saveChat(chat.chatRepo)
+
+		// rimuovo dalla sessione (se presente) e notifico (CLIENT_LEAVE)
+		chat.removeUser(msg.userId)
 	}
 
 	//#endregion 

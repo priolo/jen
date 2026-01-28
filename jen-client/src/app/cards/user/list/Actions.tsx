@@ -3,10 +3,9 @@ import { deckCardsSo } from "@/stores/docs/cards"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
 import chatWSSo from "@/stores/stacks/chat/ws"
-import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { DOC_TYPE } from "@/types"
 import { AccountDTO } from "@/types/account"
-import { Button, CircularLoadingCmp, focusSo, TooltipWrapCmp } from "@priolo/jack"
+import { Button, CircularLoadingCmp, FindInputHeader, focusSo, TooltipWrapCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
 
@@ -14,12 +13,10 @@ import { FunctionComponent, useMemo } from "react"
 
 interface Props {
 	store?: AccountListStore
-	style?: React.CSSProperties
 }
 
 const ActionsCmp: FunctionComponent<Props> = ({
 	store,
-	style,
 }) => {
 
 	// STORE
@@ -43,11 +40,15 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		focusSo.focus(AccountFinderFixedCard)
 	}
 
+	const handleRemove = () => {
+		store.remove(selecteId)
+	}
+
 
 	// RENDER
 	const accountInvite = useMemo(() => {
-		if ( !AccountFinderFixedCard) return null
-		
+		if (!AccountFinderFixedCard) return null
+
 		// se c'e l'ACCOUNT FINDER è in un desk, prendo da li l'ACCOUNT selezionato
 		let accountSelect = AccountFinderFixedCard.getAccountSelected()
 
@@ -59,26 +60,43 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		return accountSelect
 	}, [AccountFinderFixedCard?.state.linked, store.state.group.state.all, focusSo.state.view])
 
+	const chat = chatWSSo.getChatById(store.state.chatId)
+	const selecteId = (store.state.linked as AccountDetailStore)?.state?.accountId
+
 
 	if (store.state.disabled) {
 		return <CircularLoadingCmp style={{ width: 25, height: 25, color: "rgba(0,0,0,.5)" }} />
 	}
 
-	return (
-		<div style={style}>
-			{!!accountInvite ? (
-				<TooltipWrapCmp content={`INVITE ${accountInvite.name.toUpperCase()} IN CHAT ROOM`}>
-					<Button
-						onClick={() => handleInviteClick(accountInvite)}
-					>INVITE</Button>
-				</TooltipWrapCmp>
-			) : (
+	const tooltip = !chat ?
+		"OPEN A CHAT ROOM TO ENABLE INVITE" :
+		`INVITE ${accountInvite?.name?.toUpperCase()} IN CHAT ROOM`
+
+	return <>
+		<FindInputHeader
+			value={store.state.textSearch}
+			onChange={text => store.setTextSearch(text)}
+		/>
+		{!!accountInvite ? (
+			<TooltipWrapCmp content={tooltip}>
 				<Button
-					onClick={handleFindClick}
-				>FIND</Button>
-			)}
-		</div>
-	)
+					onClick={() => handleInviteClick(accountInvite)}
+					disabled={!chat}
+				>INVITE</Button>
+			</TooltipWrapCmp>
+		) : (
+			<Button
+				onClick={handleFindClick}
+			>FIND</Button>
+		)}
+		{!!selecteId && (
+			<Button
+				style={{ marginLeft: 5 }}
+				onClick={handleRemove}
+			>DELETE</Button>
+		)}
+	</>
+
 }
 
 export default ActionsCmp

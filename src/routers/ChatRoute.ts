@@ -1,11 +1,11 @@
 import { REPO_PATHS } from "@/config.js";
-import { ChatRepo } from "../repository/Chat.js";
+import { RoomRepo } from "@/repository/Room.js";
+import { GetAccountDTOList, JWTPayload } from "@/types/account.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
-import { JWTPayload } from "@/types/account.js";
 import { FindManyOptions, FindOneOptions } from "typeorm";
-import { BuildRoomRepo, RoomRepo } from "@/repository/Room.js";
-import { randomUUID } from "crypto";
+import { ChatRepo } from "../repository/Chat.js";
+
 
 
 class ChatRoute extends httpRouter.Service {
@@ -29,15 +29,19 @@ class ChatRoute extends httpRouter.Service {
 		const userJwt: JWTPayload = req["jwtPayload"]
 		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
 
-		const chats = await new Bus(this, REPO_PATHS.CHATS).dispatch({
+		const chats: ChatRepo[] = await new Bus(this, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<ChatRepo>>{
 				where: [
 					{ accountId: userJwt.id },
-					{ accountId: null }
+					{ accountId: null },
+					{ users: { id: userJwt.id } }
 				],
+				relations: { users: true }
 			}
 		})
+		
+		chats.forEach(chat => chat.users = GetAccountDTOList(chat.users))
 		res.json(chats)
 	}
 
@@ -84,7 +88,7 @@ class ChatRoute extends httpRouter.Service {
 				accountId: userJwt.id,
 			} as RoomRepo
 		})
-		
+
 		// 3. UPDATE CHAT (with the mainRoomId)
 		chatNew.mainRoomId = roomNew.id
 		await new Bus(this, REPO_PATHS.CHATS).dispatch({

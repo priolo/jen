@@ -1,7 +1,7 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { PromptListStore } from "@/stores/stacks/room/list"
-import { ChatRoom } from "@shared/types/commons/RoomActions"
+import { RoomDTO } from "@shared/types/RoomDTO"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect } from "react"
@@ -31,14 +31,14 @@ const RootListView: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleSelect = (prompt: ChatRoom) => store.select(prompt.id)
+	const handleSelect = (room: RoomDTO) => store.select(room.id)
 	const handleNew = () => store.create()
 	const handleDelete = () => store.delete(selectId)
 
 
 	// RENDER
-	const selectId = (store.state.linked as RoomDetailStore)?.state?.room?.id
-	const isSelected = (prompt: ChatRoom) => prompt.id == selectId
+	const selectId = (store.state.linked as RoomDetailStore)?.state?.roomId
+	const isSelected = (room: RoomDTO) => room.id == selectId
 	const rooms = store.state.all
 
 	return <FrameworkCard
