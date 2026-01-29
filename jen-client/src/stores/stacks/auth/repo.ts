@@ -56,7 +56,7 @@ const setup = {
 				name: store.state.userInEdit?.name,
 				language: store.state.userInEdit?.language ?? undefined,
 				notificationsEnabled: store.state.userInEdit?.notificationsEnabled ?? undefined,
-				preferredCurrency: store.state.userInEdit?.preferredCurrency ?? undefined,
+				//preferredCurrency: store.state.userInEdit?.preferredCurrency ?? undefined,
 			}
 			const updateAccount = (await authApi.update(newAccount))?.account
 			store.setUser({

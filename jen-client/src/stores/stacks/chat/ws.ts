@@ -1,13 +1,14 @@
 import { wsConnection } from "@/plugins/session/wsConnection"
 import { SS_EVENT } from "@/plugins/SocketService/types"
 import { DOC_TYPE } from "@/types"
-import { docsSo, utils } from "@priolo/jack"
+import { docsSo, utils, ViewState, ViewStore } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
 import { RoomDTO } from "@shared/types/RoomDTO"
 import { BaseS2C, CHAT_ACTION_C2S, CHAT_ACTION_S2C, ChatCreateC2S, ChatGetC2S, ChatInfoS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, RoomHistoryUpdateS2C, RoomNewS2C, UPDATE_TYPE, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/commons/RoomActions"
 import { Chat } from "../../../types/Chat"
 import { buildRoomDetail } from "../room/factory"
 import authSo from "../auth/repo"
+import chatRepoSo from "./repo"
 
 
 
@@ -220,9 +221,19 @@ const setup = {
 					const chat = store.getChatById(msg.chatId)
 					if (!chat) break
 					// sono io che esco dalla chat
-					if ( msg.userId == authSo.state.user.id) {
-						
-						
+					if (msg.userId == authSo.state.user.id) {
+
+						// elimino la CHAT dal REPO
+						chatRepoSo.setAll(chatRepoSo.state.all.filter(c => c.id != msg.chatId))
+
+						// elimino la CHAT dall'ONLINE
+						store.setAll(store.state.all.filter(c => c.id != msg.chatId))
+
+						// elimino le CARD
+						const views = utils
+							.findAll(docsSo.getAllCards(), { type: DOC_TYPE.ROOM_DETAIL, chatId: msg.chatId })
+						views
+							.forEach((view: ViewStore) => view.onRemoveFromDeck())
 						break
 					}
 					chat.clients = chat.clients.filter(c => c.id != msg.userId)
