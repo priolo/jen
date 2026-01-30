@@ -79,11 +79,15 @@ const setup = {
 			deckCardsSo.addLink({ view, parent: store, anim: true })
 		},
 
+		/**
+		 * manda un messaggio di INVITO all'account selezionato
+		 */
 		invite(accountId: string, store?: AccountListStore) {
 			chatWSSo.invite({
 				chatId: store.state.chatId,
 				accountId: accountId,
 			})
+			
 		},
 
 		remove(accountId: string, store?: AccountListStore) {

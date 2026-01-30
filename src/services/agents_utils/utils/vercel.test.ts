@@ -1,4 +1,4 @@
-import { ChatMessage } from "@shared/types/commons/RoomActions.js";
+import { ChatMessage } from "@shared/types/RoomActions.js";
 import { getHistory } from "./vercel.js";
 
 

@@ -2,7 +2,8 @@ import { ChatRepo } from '@/repository/Chat.js';
 import { RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
 import { AccountDTO } from '@shared/types/account.js';
-import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ClientEnteredS2C, ClientLeaveS2C, MessageUpdate, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C } from "@shared/types/commons/RoomActions.js";
+import { MessageUpdate } from "@shared/types/ChatMessage.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C } from "@shared/types/ChatActionsServer.js";
 import { AgentRepo } from "../../repository/Agent.js";
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
 
@@ -103,7 +104,7 @@ class ChatNode {
 		// se lo USER è già in CHAT non faccio nulla
 		if (!userId || this.usersIds.has(userId)) return;
 
-		// ricavo i dati dello USER
+		// ricavo i dati dello USER. se è offline non faccio nulla
 		const user = (this.service.chatSend.getUserOnlineById(userId))
 		if (!user) return;
 

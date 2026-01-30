@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 import { AgentRepo } from '../../repository/Agent.js';
 import { RoomRepo } from '../../repository/Room.js';
 import { ToolRepo } from '../../repository/Tool.js';
-import { LLM_RESPONSE_TYPE } from '@shared/types/commons/LlmResponse.js';
+import { LLM_RESPONSE_TYPE } from '@shared/types/LlmResponse.js';
 import ChatNode from './ChatNode.js';
 import { ChatsContext } from "./ChatsContext.js";
 

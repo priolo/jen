@@ -1,8 +1,8 @@
 import "../../startup/envPreload.js";
 
-import { LLM_MODELS } from "../../../shared/types/commons/LlmProviders.js";
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../../shared/types/commons/LlmResponse.js";
-import { ChatMessage } from "../../../shared/types/commons/RoomActions.js";
+import { LLM_MODELS } from "../../../shared/types/LlmProviders.js";
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "../../../shared/types/LlmResponse.js";
+import { ChatMessage } from "../../../shared/types/RoomActions.js";
 import { AgentRepo } from "../../repository/Agent.js";
 import AgentLlm from "./AgentLlm.js";
 

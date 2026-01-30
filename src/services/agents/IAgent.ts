@@ -1,5 +1,5 @@
-import { ChatMessage } from "@shared/types/commons/RoomActions.js";
-import { LlmResponse } from "@shared/types/commons/LlmResponse.js";
+import { ChatMessage } from "@shared/types/RoomActions.js";
+import { LlmResponse } from "@shared/types/LlmResponse.js";
 import { AgentRepo } from "@/repository/Agent.js";
 
 /**

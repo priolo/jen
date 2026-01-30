@@ -1,7 +1,7 @@
 import { LlmRepo } from "../../../repository/Llm.js";
-import { LLM_MODELS } from "@shared/types/commons/LlmProviders.js";
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/commons/LlmResponse.js";
-import { ChatMessage } from "@shared/types/commons/RoomActions.js";
+import { LLM_MODELS } from "@shared/types/LlmProviders.js";
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/LlmResponse.js";
+import { ChatMessage } from "@shared/types/RoomActions.js";
 import { createCohere } from "@ai-sdk/cohere";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";

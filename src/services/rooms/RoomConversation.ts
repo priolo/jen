@@ -1,8 +1,8 @@
 import { randomUUID } from "crypto";
 import { AgentRepo } from "../../repository/Agent.js";
 import { RoomRepo } from "../../repository/Room.js";
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '@shared/types/commons/LlmResponse.js';
-import { ChatMessage } from "@shared/types/commons/RoomActions.js";
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '@shared/types/LlmResponse.js';
+import { ChatMessage } from "@shared/types/RoomActions.js";
 import { printLlmResponse } from "../agents_utils/utils/print.js";
 import { IRoomConversationHandlers } from "./IRoomConversationHandlers.js";
 

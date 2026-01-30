@@ -40,7 +40,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		focusSo.focus(AccountFinderFixedCard)
 	}
 
-	const handleRemove = () => {
+	const handleRemoveClick = () => {
 		store.remove(selecteId)
 	}
 
@@ -73,15 +73,16 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		`INVITE ${accountInvite?.name?.toUpperCase()} IN CHAT ROOM`
 
 	return <>
+
 		<FindInputHeader
 			value={store.state.textSearch}
 			onChange={text => store.setTextSearch(text)}
 		/>
+
 		{!!accountInvite ? (
 			<TooltipWrapCmp content={tooltip}>
 				<Button
 					onClick={() => handleInviteClick(accountInvite)}
-					disabled={!chat}
 				>INVITE</Button>
 			</TooltipWrapCmp>
 		) : (
@@ -92,7 +93,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		{!!selecteId && (
 			<Button
 				style={{ marginLeft: 5 }}
-				onClick={handleRemove}
+				onClick={handleRemoveClick}
 			>DELETE</Button>
 		)}
 	</>

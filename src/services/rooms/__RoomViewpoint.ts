@@ -1,9 +1,9 @@
 import { AGENT_TYPE, AgentRepo } from "@/repository/Agent.js";
 import { RoomRepo } from "@/repository/Room.js";
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js";
-import { ChatMessage } from "@shared/types/commons/RoomActions.js";
+import { ChatMessage } from "@shared/types/RoomActions.js";
 import { randomUUID } from "crypto";
-import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '@shared/types/commons/LlmResponse.js';
+import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from '@shared/types/LlmResponse.js';
 import AgentLlm from "./AgentLlm.js";
 import AgentMock from "../agents/AgentLlm.mock.js";
 import { printLlmResponse } from "../agents/utils/print.js";

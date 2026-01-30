@@ -1,11 +1,11 @@
 import { AgentRepo } from '@/repository/Agent.js';
-import { LLM_MODELS } from '@shared/types/commons/LlmProviders.js';
-import { ChatMessage } from '@shared/types/commons/RoomActions.js';
+import { LLM_MODELS } from '@shared/types/LlmProviders.js';
+import { ChatMessage } from '@shared/types/RoomActions.js';
 import { cohere, createCohere } from '@ai-sdk/cohere';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createMistral } from '@ai-sdk/mistral';
 import { generateText, jsonSchema, tool, ToolResultPart, ToolSet } from "ai";
-import { LLM_RESPONSE_TYPE, LlmResponse } from '@shared/types/commons/LlmResponse.js';
+import { LLM_RESPONSE_TYPE, LlmResponse } from '@shared/types/LlmResponse.js';
 import { colorPrint, ColorType } from '../../utils/index.js';
 // Uncomment and add these imports as needed:
 // import { createOpenAI } from '@ai-sdk/openai';

@@ -7,7 +7,7 @@ import { breakWords } from '../cutter/utils.js';
 import { getEmbeddings } from './embedding.js';
 import fromHTMLToText from '../textualize/html.js';
 import fromPDFToText from '../textualize/pdf.js';
-import { DOC_TYPE, NodeDoc } from "@shared/types/commons/LlmResponse.js";
+import { DOC_TYPE, NodeDoc } from "@shared/types/LlmResponse.js";
 import { vectorDBCreateAndStore } from "../db/manage.js";
 import { uuidv4 } from "../../types/env.js";
 

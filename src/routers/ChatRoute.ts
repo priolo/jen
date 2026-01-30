@@ -1,10 +1,12 @@
-import { REPO_PATHS } from "@/config.js";
+import { REPO_PATHS, SERVICE_PATHS } from "@/config.js";
 import { RoomRepo } from "@/repository/Room.js";
 import { GetAccountDTOList, JWTPayload } from "@/types/account.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, FindOneOptions, In } from "typeorm";
 import { ChatRepo } from "../repository/Chat.js";
+import { AccountRepo } from "../repository/Account.js";
+import { ChatsWSService } from "./ChatsWSRoute.js";
 
 
 
@@ -20,6 +22,7 @@ class ChatRoute extends httpRouter.Service {
 				{ path: "/", verb: "post", method: "create" },
 				{ path: "/:id", verb: "patch", method: "update" },
 				{ path: "/:id", verb: "delete", method: "delete" },
+				{ path: "/:id/users", verb: "post", method: "addUser" },
 			]
 		}
 	}
@@ -124,6 +127,39 @@ class ChatRoute extends httpRouter.Service {
 			payload: chat,
 		})
 		res.json(chatUp)
+	}
+
+	async addUser(req: Request, res: Response) {
+		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+
+		const chatId = req.params["id"]
+		const { userId } = req.body
+		if (!userId) return res.status(400).json({ error: "userId is required" })
+
+		const chat: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
+			type: typeorm.Actions.FIND_ONE,
+			payload: <FindOneOptions<ChatRepo>>{
+				where: { id: chatId },
+				relations: { users: true }
+			}
+		})
+		if (!chat) return res.status(404).json({ error: "Chat not found" })
+		if (chat.accountId != userJwt.id) return res.status(403).json({ error: "Forbidden" })
+
+		if (!chat.users.find(u => u.id == userId)) {
+			chat.users.push({ id: userId } as AccountRepo)
+			await new Bus(this, REPO_PATHS.CHATS).dispatch({
+				type: typeorm.Actions.SAVE,
+				payload: chat
+			})
+		}
+
+		const chatsWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
+		chatsWS.chatManager.getChatById(chatId)?.addUser(userId)
+
+		chat.users = GetAccountDTOList(chat.users)
+		res.json(chat)
 	}
 
 	async delete(req: Request, res: Response) {

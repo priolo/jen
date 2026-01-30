@@ -223,3 +223,7 @@ export enum REPO_PATHS {
 	ROOMS = "/typeorm/rooms",
 	LLMS = "/typeorm/llms",
 }
+
+export enum SERVICE_PATHS {
+	CHATS_WS = "/http/ws-server/ws-chats",
+}

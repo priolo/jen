@@ -1,4 +1,4 @@
-import { ChatMessage } from './commons/RoomActions.js';
+import { ChatMessage } from './ChatMessage.js';
 
 
 /**

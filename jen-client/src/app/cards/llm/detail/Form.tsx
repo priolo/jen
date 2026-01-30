@@ -1,6 +1,6 @@
 import { LlmDetailStore } from "@/stores/stacks/llm/detail"
 import { EDIT_STATE } from "@/types"
-import { LLM_MODELS } from "@shared/types/commons/LlmProviders"
+import { LLM_MODELS } from "@shared/types/LlmProviders"
 import { ListDialog, StringUpRow, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"

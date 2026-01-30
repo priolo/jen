@@ -1,4 +1,4 @@
-import { LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/commons/LlmResponse.js";
+import { LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/LlmResponse.js";
 
 
 

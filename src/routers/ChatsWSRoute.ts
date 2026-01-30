@@ -6,7 +6,7 @@ import { ChatsSend } from "@/services/chats/ChatsSend.js"
 import { ACCOUNT_STATUS, GetAccountDTO } from '@/types/account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
 import { AccountDTO } from "@shared/types/account.js"
-import { CHAT_ACTION_C2S, UserLeaveC2S } from "@shared/types/commons/RoomActions.js"
+import { CHAT_ACTION_C2S, UserLeaveC2S } from "@shared/types/RoomActions.js"
 
 
 
