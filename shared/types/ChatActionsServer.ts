@@ -1,21 +1,21 @@
 import { AccountDTO } from "./account.js";
-import { ChatMessage, MessageUpdate } from "./ChatMessage.js";
-import { RoomDTO } from "./RoomDTO.js";
+import { ChatDTO } from "./ChatDTO.js";
+import { MessageUpdate, UPDATE_TYPE } from "./ChatMessage.js";
 
 
 //#region SERVER TO CLIENT
 
 export enum CHAT_ACTION_S2C {
 
-	/** I dati di una CHAT */
-	CHAT_INFO = "chat-info",
+	/** I dati di una CHAT-ONLINE */
+	CHAT_UPDATE = "chat-update",
 
 	/** un CLIENT è entrato in CHAT. Potrebbe essere anche un AGENT*/
-	CLIENT_ENTERED = "entered",
+	CLIENT_ENTERED = "user-entered",
 	/** un CLIENT è uscita dalla CHAT. Potrebbe essere anche un AGENT */
-	CLIENT_LEAVE = "leave",
+	CLIENT_LEAVE = "user-leave",
 	/** comunica lo stato di connessione di un CLIENT */
-	USER_STATUS = "user-status",
+	//USER_STATUS = "user-status",
 
 	/** creata nuova ROOM in CHAT */
 	ROOM_NEW = "room-new",
@@ -35,18 +35,13 @@ export type BaseS2C = {
 //#region CLIENT
 
 /** 
- * Invia ad un CLIENT i dati di una CHAT 
- * tipicamente su
- * CHAT_ACTION_C2S.CHAT_CREATE
- * CHAT_ACTION_C2S.CHAT_LOAD_BY_ROOM_AND_ENTER
- * CHAT_ACTION_C2S.USER_INVITE
+ * aggiorno la CHAT
  * */
-export type ChatInfoS2C = BaseS2C & {
-	action: CHAT_ACTION_S2C.CHAT_INFO
-	/** lista dei CLIENTs presenti */
-	clients: AccountDTO[]
-	/** lista delle ROOMs. */
-	rooms: RoomDTO[]
+export type ChatUpdateS2C = BaseS2C & {
+	action: CHAT_ACTION_S2C.CHAT_UPDATE
+	type?: UPDATE_TYPE
+	/**  CHAT parziale di aggiornamento */
+	chat: Partial<ChatDTO>
 }
 
 /** un CLIENT è entrato in una CHAT */
@@ -63,11 +58,11 @@ export type ClientLeaveS2C = BaseS2C & {
 	userId: string
 }
 
-export type UserStatusS2C = {
-	action: CHAT_ACTION_S2C.USER_STATUS
-	userId: string
-	status: "online" | "offline"
-}
+// export type UserStatusS2C = {
+// 	action: CHAT_ACTION_S2C.USER_STATUS
+// 	userId: string
+// 	status: "online" | "offline"
+// }
 
 //#endregion
 

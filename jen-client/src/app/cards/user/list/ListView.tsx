@@ -1,17 +1,17 @@
 import CardIcon from "@/components/cards/CardIcon"
 import FrameworkCard from "@/components/cards/FrameworkCard"
+import OnlineIcon from "@/components/OnlineIcon"
 import ElementRow from "@/components/rows/ElementRow.js"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
 import chatWSSo from "@/stores/stacks/chat/ws"
 import { DOC_TYPE } from "@/types"
 import { ACCOUNT_STATUS, AccountDTO } from "@/types/account"
-import { AlertDialog, FindInputHeader } from "@priolo/jack"
+import { AlertDialog } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
 import ActionsCmp from "./Actions"
 import chatRepoSo from "@/stores/stacks/chat/repo"
-import OnlineIcon from "@/components/OnlineIcon"
 
 
 
@@ -29,12 +29,12 @@ const AccountListView: FunctionComponent<Props> = ({
 	// STORE
 	useStore(store)
 	useStore(store.state.group)
-	useStore(chatWSSo)
+	useStore(chatRepoSo)
 
 	// HOOKs
 	const users = useMemo(
 		() => store.getUsers(),
-		[chatWSSo.state.all]
+		[chatRepoSo.state.all]
 	)
 
 	// HANDLER

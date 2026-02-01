@@ -71,3 +71,21 @@ export function getShortUuid(uuid: string): string {
 	return `#${uuid.split('-')[0]}`;
 }
 
+export function deepMerge(destination: any, source: any): any {
+	if (source === null || typeof source !== 'object') return destination;
+	if (destination === null || typeof destination !== 'object') return destination;
+
+	for (const key in source) {
+		if (Object.prototype.hasOwnProperty.call(source, key)) {
+			if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key]) &&
+				destination[key] !== null && typeof destination[key] === 'object' && !Array.isArray(destination[key])) {
+				deepMerge(destination[key], source[key]);
+			} else {
+				destination[key] = source[key];
+			}
+		}
+	}
+	return destination;
+}
+
+

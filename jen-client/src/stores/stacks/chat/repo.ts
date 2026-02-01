@@ -1,6 +1,6 @@
 import chatApi from "@/api/chat"
 import { createStore, StoreCore } from "@priolo/jon"
-import { Chat } from "../../../types/Chat"
+import { ChatDTO } from "@shared/types/ChatDTO"
 
 
 
@@ -8,17 +8,25 @@ const setup = {
 
 	state: {
 		/** tutte le chat di questo user */
-		all: <Chat[]>[],
+		all: <ChatDTO[]>[],
 	},
 
 	getters: {
-		getById (id: string, store?: ChatRepoStore): Chat {
+		getById(id: string, store?: ChatRepoStore): ChatDTO {
 			if (!id) return null
 			return store.state.all?.find(chat => chat.id == id)
 		},
 		getIndexById(id: string, store?: ChatRepoStore) {
 			if (!id) return -1
 			return store.state.all?.findIndex(llm => llm.id == id)
+		},
+		getRoom({ chatId, roomId }: { chatId: string, roomId: string }, store?: ChatRepoStore) {
+			const chat = store.getById(chatId)
+			if (!chat) return null
+			roomId = roomId || chat.mainRoomId
+			if (!roomId) return null
+			const room = chat.rooms?.find(r => r.id == roomId) ?? null
+			return room
 		},
 	},
 
@@ -29,12 +37,12 @@ const setup = {
 			store.setAll(chats)
 		},
 
-		async save(chat: Partial<Chat>, store?: ChatRepoStore): Promise<Chat> {
-			let chatSaved: Chat = null
+		async save(chat: Partial<ChatDTO>, store?: ChatRepoStore): Promise<ChatDTO> {
+			let chatSaved: ChatDTO = null
 			if (!chat.id) {
 				chatSaved = await chatApi.create(chat, { store })
 			} else {
-				chatSaved = await chatApi.update(chat as Chat, { store })
+				chatSaved = await chatApi.update(chat as ChatDTO, { store })
 			}
 
 			const all = [...store.state.all]
@@ -53,7 +61,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Chat[]) => ({ all }),
+		setAll: (all: ChatDTO[]) => ({ all }),
 	},
 }
 

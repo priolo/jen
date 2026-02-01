@@ -1,10 +1,10 @@
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { Chat } from "@/types/Chat"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { ChatDetailStore } from "./detail"
 import { buildChatDetail, buildChatDetailNew } from "./factory"
 import chatRepoSo from "./repo"
+import { ChatDTO } from "@shared/types/ChatDTO"
 
 
 
@@ -59,7 +59,7 @@ const setup = {
 				const view = buildChatDetail({ chat, size: VIEW_SIZE.NORMAL })
 				store.state.group.add({ view, index: store.state.group.getIndexByView(store) + 1 })
 			} else {
-				const view = newId ? buildChatDetail({ chat }) : null
+				const view = newId ? buildChatDetail({ chatId }) : null
 				store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
 			}
 		},
@@ -89,7 +89,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Chat[]) => ({ all }),
+		setAll: (all: ChatDTO[]) => ({ all }),
 	},
 }
 

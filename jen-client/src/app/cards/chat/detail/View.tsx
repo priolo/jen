@@ -6,6 +6,7 @@ import ConnectionIcon from "../../../../icons/cards/ConnectionIcon"
 import clsGreen from "../../CardGreen.module.css"
 import ChatDetailActions from "./Actions"
 import ChatDetailForm from "./Form"
+import { EDIT_STATE } from "@/types"
 
 
 
@@ -23,13 +24,14 @@ const ChatDetailView: FunctionComponent<Props> = ({
 
 	// HOOKs
 	useEffect(() => {
-		store.fetchIfVoid()
-	}, [])
+		if (store.state.editState != EDIT_STATE.READ) return
+		store.fetch()
+	}, [store.state.editState])
 
 
 	// HANDLER
 
-	
+
 	// RENDER
 	return <FrameworkCard
 		className={clsGreen.root}

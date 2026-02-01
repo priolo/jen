@@ -61,10 +61,7 @@ const MainMenu: FunctionComponent<Props> = ({
 		deckCardsSo.add({ view, anim: true })
 	}
 
-	const handleChat = () => {
-		const view = buildRoomDetail()
-		deckCardsSo.add({ view, anim: true })
-	}
+
 
 
 
@@ -129,7 +126,6 @@ const MainMenu: FunctionComponent<Props> = ({
 		<Button children="LLM" onClick={handleLlmList} />
 		<Button children="MCP" onClick={handleMcpServerList} />
 		<Button children="TOOLS" onClick={handleToolList} />
-		<Button children="CHAT" onClick={handleChat} />
 		<Button children="CHATS" onClick={handleChatList} />
 
 		{/* <Button children="ROOM" onClick={handleRoom} /> */}

@@ -5,12 +5,18 @@ import { MessageUpdate } from "./ChatMessage.js";
 
 export enum CHAT_ACTION_C2S {
 	/** un USER crea una CHAT e ci entra*/
-	CHAT_CREATE_AND_ENTER = "chat-create",
+	//CHAT_CREATE_AND_ENTER = "chat-create",
 	/** un USER cerca/carica una CHAT ed entra */
-	CHAT_LOAD_AND_ENTER = "chat-get",
+	//CHAT_LOAD_AND_ENTER = "chat-get",
 
+	/** richiesta dati */
+	//CHAT_INFO = "chat-info",
+	/** USER entra in una CHAT e riceve una CHAT-INFO*/
+	USER_ENTER = "user-enter",
 	/* USER lascia la CHAT */
 	USER_LEAVE = "user-leave",
+
+
 	/* Invita unn USER alla chat */
 	USER_INVITE = "user-invite",
 	/** rimuove un USER da una CHAT */
@@ -34,9 +40,9 @@ export type BaseC2S = {
  * - inserisce l'user nella CHAT
  * - restituisce i dati della CHAT [ChatInfoS2C]
  */
-export type ChatGetC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.CHAT_LOAD_AND_ENTER
-}
+// export type ChatGetC2S = BaseC2S & {
+// 	action: CHAT_ACTION_C2S.CHAT_LOAD_AND_ENTER
+// }
 
 /** 
  * CLIENT crea una nuova CHAT 
@@ -44,15 +50,22 @@ export type ChatGetC2S = BaseC2S & {
  * - inserisce l'user nella CHAT
  * - restituisce i dati della CHAT creata [ChatInfoS2C]
  */
-export type ChatCreateC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.CHAT_CREATE_AND_ENTER
-	/** OPZIONALE. I primi agenti da inserire nella ROOM  */
-	agentIds?: string[]
-}
+// export type ChatCreateC2S = BaseC2S & {
+// 	action: CHAT_ACTION_C2S.CHAT_CREATE_AND_ENTER
+// 	/** OPZIONALE. I primi agenti da inserire nella ROOM  */
+// 	agentIds?: string[]
+// }
 
 
 
 //#region USER
+
+/** CLIENT lascia una CHAT */
+export type UserEnterC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.USER_ENTER
+	/** eventualmente la ROOM dove è entrato */
+	roomId?: string
+}
 
 /** CLIENT lascia una CHAT */
 export type UserLeaveC2S = BaseC2S & {

@@ -1,16 +1,15 @@
 import chatApi from "@/api/chat"
+import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE, EDIT_STATE } from "@/types"
-import { Chat } from "@/types/Chat"
-import { Llm } from "@/types/Llm"
-import { focusSo, MESSAGE_TYPE, utils } from "@priolo/jack"
+import { MESSAGE_TYPE, utils } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
+import { buildAccountList } from "../account/factory"
+import { buildRoomDetail } from "../room/factory"
 import { ChatListStore } from "./list"
 import chatRepoSo from "./repo"
-import { buildRoomDetail } from "../room/factory"
-import { deckCardsSo } from "@/stores/docs/cards"
-import { buildAccountList } from "../account/factory"
-
+import chatWSSo from "./ws"
+import { ChatDTO } from "@shared/types/ChatDTO"
 
 
 
@@ -19,7 +18,7 @@ const setup = {
 	state: {
 
 		/** llm visualizzato */
-		chat: <Partial<Chat>>null,
+		chat: <Partial<ChatDTO>>null,
 		chatId: <string>null,
 
 		editState: EDIT_STATE.READ,
@@ -64,19 +63,23 @@ const setup = {
 
 		/** carica ENTITY da API */
 		fetch: async (_: void, store?: ChatDetailStore) => {
-			const chatId = store.state.chatId ?? store.state.chat?.id
-			if (!chatId) return
-			const chat = await chatApi.get(chatId, { store, manageAbort: true })
-			store.setChat(chat)
-			//await loadBaseSetup.actions.fetch(_, store)
-		},
-		/** carica ENTITY da API se non presente */
-		async fetchIfVoid(_: void, store?: ChatDetailStore) {
-			if (!!store.state.chat) return
-			await store.fetch()
+			const chatId = store.state.chatId
+			let chat = store.state.chat
+			// se non ho la CHAT la prendo da API
+			if (!chat) {
+				chat = await chatApi.get(chatId, { store, manageAbort: true })
+				store.setChat(chat)
+			}
+			// comunico al WS che sono in questa CHAT
+			chatWSSo.enter(chatId)
 		},
 
-		/** crea un nuovo CONSUMER-INFO tramite CONSUMER-CONFIG */
+		onRemoval(_: void, store?: ViewStore) {
+			const chatSo = store as ChatDetailStore
+			chatWSSo.removeView({ chatId: chatSo.state.chatId, viewId: chatSo.state.uuid })
+		},
+
+		/** CREATE/UPDATE una CHAT */
 		async save(_: void, store?: ChatDetailStore) {
 			const chatSaved = await chatRepoSo.save(store.state.chat)
 
@@ -97,8 +100,10 @@ const setup = {
 
 		/** apro la MAIN-ROOM */
 		openMainRoom(_: void, store?: ChatDetailStore) {
+			if (!store.state.chat?.id || !store.state.chat?.mainRoomId) return
 			const view = buildRoomDetail({
-				chatId: store.state.chat?.id,
+				chatId: store.state.chat.id,
+				roomId: store.state.chat.mainRoomId,
 			})
 			deckCardsSo.add({ view, anim: true })
 		},
@@ -113,7 +118,7 @@ const setup = {
 	},
 
 	mutators: {
-		setChat: (chat: Partial<Chat>) => ({ chat }),
+		setChat: (chat: Partial<ChatDTO>) => ({ chat }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }

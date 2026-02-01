@@ -61,6 +61,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	}, [AccountFinderFixedCard?.state.linked, store.state.group.state.all, focusSo.state.view])
 
 	const chat = chatWSSo.getChatById(store.state.chatId)
+	
 	const selecteId = (store.state.linked as AccountDetailStore)?.state?.accountId
 
 

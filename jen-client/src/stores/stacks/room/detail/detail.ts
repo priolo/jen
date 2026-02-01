@@ -10,6 +10,7 @@ import { EditorState } from "../../editorBase"
 import { buildRoomDetail } from "../factory"
 import { buildAccountList } from "../../account/factory"
 import docsSo from "@/stores/docs"
+import roomApi from "@/api/room"
 
 
 
@@ -71,7 +72,7 @@ What is 2+2? Just write the answer number.`,
 
 		onRemoval(_: void, store?: ViewStore) {
 			const roomSo = store as RoomDetailStore
-			chatWSSo.removeRoom({ chatId: roomSo.state.chatId, viewId: roomSo.state.uuid })
+			chatWSSo.removeView({ chatId: roomSo.state.chatId, viewId: roomSo.state.uuid })
 		},
 
 		//#endregion
@@ -81,17 +82,9 @@ What is 2+2? Just write the answer number.`,
 		 * richiesta INFO CHAT
 		 * */
 		fetch: async (_: void, store?: RoomDetailStore) => {
-			// se esiste chiedo dei suoi dati al BE
-			if (!!store.state.chatId) {
-				chatWSSo.request(store.state.chatId)
-				return
-			}
-			// altrimenti chiedo la creazione nuova chat al BE
-			store.state.chatId = createUUID()
-			chatWSSo.create({
-				chatId: store.state.chatId,
-				agentIds: store.state.agentsIds
-			})
+			chatWSSo.enter(store.state.chatId)
+			// recupero i dati della ROOM
+			//const room = await roomApi.get(store.state.roomId, { store, manageAbort: true } )
 		},
 
 

@@ -5,6 +5,7 @@ import { AgentRepo } from './Agent.js';
 import { ChatRepo } from './Chat.js';
 import { AccountAssets } from './AccountAssets.js';
 import { randomUUID } from 'crypto';
+import { RoomDTO } from '@shared/types/RoomDTO.js';
 
 
 /**
@@ -67,4 +68,18 @@ export function BuildRoomRepo(chatId: string, agentsRepo: AgentRepo[] = [], acco
         agents: agentsRepo ?? [],
     }
     return room
+}
+
+
+
+export function RoomDTOFromRoomRepo(room: RoomRepo): RoomDTO {
+	if (!room) return null;
+	return {
+		id: room.id,
+		chatId: room.chatId,
+		parentRoomId: room.parentRoomId,
+		accountId: room.accountId,
+		history: room.history || [],
+		agentsIds: null//room.agentsIds || [],
+	};
 }

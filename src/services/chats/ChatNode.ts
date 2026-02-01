@@ -1,11 +1,13 @@
-import { ChatRepo } from '@/repository/Chat.js';
+import { ChatDTOFromChatRepo, ChatRepo } from '@/repository/Chat.js';
 import { RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
 import { AccountDTO } from '@shared/types/account.js';
-import { MessageUpdate } from "@shared/types/ChatMessage.js";
-import { BaseS2C, CHAT_ACTION_S2C, ChatInfoS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C } from "@shared/types/ChatActionsServer.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C } from "@shared/types/ChatActionsServer.js";
+import { MessageUpdate, UPDATE_TYPE } from "@shared/types/ChatMessage.js";
 import { AgentRepo } from "../../repository/Agent.js";
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
+import { GetAccountDTOList } from '@/types/account.js';
+import { AccountRepo } from '@/repository/Account.js';
 
 
 
@@ -35,7 +37,7 @@ class ChatNode {
 	 * @param rooms le ROOMs iniziali della CHAT
 	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
-	static async Build(service: ChatsWSService, chatRepo: ChatRepo): Promise<ChatNode> {
+	static Build(service: ChatsWSService, chatRepo: ChatRepo): ChatNode {
 		const chat = new ChatNode(service, chatRepo)
 		return chat
 	}
@@ -95,20 +97,20 @@ class ChatNode {
 	//#region HANDLE CHAT OPERATIONS
 
 	/**
-	 * Comunico alla CHAT che uno USER è entrato  
+	 * Comunico alla CHAT che uno USER (userId) è entrato  
 	 * aggiungo lo USER nei ONLINE della CHAT
 	 * invio INFO CHAT allo USER entrato  
 	 */
 	addUser(userId: string) {
-		
+
 		// se lo USER è già in CHAT non faccio nulla
 		if (!userId || this.usersIds.has(userId)) return;
 
-		// ricavo i dati dello USER. se è offline non faccio nulla
+		// cerco lo USER tra gli ONLINE. se è offline non faccio nulla
 		const user = (this.service.chatSend.getUserOnlineById(userId))
 		if (!user) return;
 
-		// avverto gli altri USERS
+		// avverto gli altri USERS della CHAT
 		const message: ClientEnteredS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
 			chatId: this.chat.id,
@@ -120,7 +122,16 @@ class ChatNode {
 		this.usersIds.add(userId);
 
 		// invio al nuovo USER i dati della CHAT
-		this.sendInfo(userId)
+		const users: AccountDTO[] = [...this.usersIds].map(userId => {
+			return this.service.chatSend.getUserOnlineById(userId)
+		}).filter(user => !!user)
+
+		const msg: ChatUpdateS2C = {
+			chatId: this.chat.id,
+			action: CHAT_ACTION_S2C.CHAT_UPDATE,
+			chat: ChatDTOFromChatRepo(this.chat, users),
+		}
+		this.service.chatSend.sendMessageToUser(userId, msg)
 	}
 
 	/**
@@ -147,16 +158,34 @@ class ChatNode {
 	/**
 	 * Aggiungo uno USER partecipante alla CHAT
 	 */
-	addParticipant(userId: string) {
-		if (!!this.getPartecipantById(userId)) return
-		this.chat.users.push({ id: userId })
+	addParticipant(user: AccountRepo) {
+		if (!!this.getPartecipantById(user.id)) return
+
+		this.chat.users.push(user)
+		const msg: ChatUpdateS2C = {
+			chatId: this.chat.id,
+			action: CHAT_ACTION_S2C.CHAT_UPDATE,
+			chat: { users: GetAccountDTOList(this.chat.users) },
+		}
+		this.sendMessage(msg)
 	}
 
 	/**
 	 * Rimuovo uno USER partecipante alla CHAT
 	 */
 	removeParticipant(userId: string) {
+		if (!this.getPartecipantById(userId)) return
+
+		// elimino l'utente anche tra quelli online (se c'e')
+		this.removeUser(userId)
+		
 		this.chat.users = this.chat.users.filter(u => u.id != userId)
+		const msg: ChatUpdateS2C = {
+			chatId: this.chat.id,
+			action: CHAT_ACTION_S2C.CHAT_UPDATE,
+			chat: { users: GetAccountDTOList(this.chat.users) },
+		}
+		this.sendMessage(msg)
 	}
 
 	/** 
@@ -205,34 +234,6 @@ class ChatNode {
 		this.sendMessage(msg)
 	}
 
-	/**
-	 * Restituisco le info della CHAT sotto forma di messaggio
-	 * @param accountId l'ACCOUNT a cui inviare le info
-	 */
-	private sendInfo(accountId: string) {
-
-		const clients: AccountDTO[] = [...this.usersIds].map(clientId => {
-			return this.service.chatSend.getUserOnlineById(clientId)
-		}).filter(a => !!a)
-
-		const rooms = this.chat.rooms.map(room => ({
-			id: room.id,
-			chatId: room.chatId,
-			parentRoomId: room.parentRoomId,
-			accountId: room.accountId,
-			history: room.history,
-			agentsIds: room.agents?.map(a => a.id),
-		}))
-
-		const msg: ChatInfoS2C = {
-			action: CHAT_ACTION_S2C.CHAT_INFO,
-			chatId: this.chat.id,
-			clients,
-			rooms,
-		}
-
-		this.service.chatSend.sendMessageToUser(accountId, msg)
-	}
 
 	/**
 	 * Invia a tutti i partecipanti della CHAT un MESSAGE

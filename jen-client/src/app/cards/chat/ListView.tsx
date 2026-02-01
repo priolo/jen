@@ -5,13 +5,13 @@ import { ChatDetailStore } from "@/stores/stacks/chat/detail"
 import { ChatListStore } from "@/stores/stacks/chat/list"
 import chatRepoSo from "@/stores/stacks/chat/repo"
 import chatWSSo from "@/stores/stacks/chat/ws"
-import { Chat } from "@/types/Chat"
 import { getShortUuid } from "@/utils/object"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
 import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
+import { ChatDTO } from "@shared/types/ChatDTO"
 
 
 
@@ -37,15 +37,15 @@ const ChatListView: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleSelect = (chat: Chat) => store.select(chat.id)
+	const handleSelect = (chat: ChatDTO) => store.select(chat.id)
 	const handleNew = () => store.create()
 	const handleDelete = () => store.delete(selectedId)
 
 
 	// RENDER
 	const selectedId = (store.state.linked as ChatDetailStore)?.state?.chat?.id
-	const isSelected = (chat: Chat) => chat.id == selectedId
-	const getName = (chat: Chat) => chat?.name ?? getShortUuid(chat.id) ?? "<no name>"
+	const isSelected = (chat: ChatDTO) => chat.id == selectedId
+	const getName = (chat: ChatDTO) => chat?.name ?? getShortUuid(chat.id) ?? "<no name>"
 	const isOnline = (chatId: string) => !!chatWSSo.getChatById(chatId)
 
 	return <FrameworkCard

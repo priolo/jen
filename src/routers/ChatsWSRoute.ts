@@ -70,6 +70,7 @@ export class ChatsWSService extends ws.route {
 		const chats = this.chatManager.getChats()
 		for (const chat of chats) {
 			await this.chatMessages.handleUserLeave(
+				chat,
 				user,
 				<UserLeaveC2S>{ 
 					action: CHAT_ACTION_C2S.USER_LEAVE, 

@@ -7,6 +7,7 @@ import { ViewState } from "../viewBase"
 import { AccountDetailStore } from "./detail"
 import { buildAccountDetail } from "./factory"
 import chatRepoSo from "../chat/repo"
+import chatApi from "@/api/chat"
 
 
 /**
@@ -82,19 +83,12 @@ const setup = {
 		/**
 		 * manda un messaggio di INVITO all'account selezionato
 		 */
-		invite(accountId: string, store?: AccountListStore) {
-			chatWSSo.invite({
-				chatId: store.state.chatId,
-				accountId: accountId,
-			})
-			
+		async invite(accountId: string, store?: AccountListStore) {
+			const ret = await chatApi.inviteUser(store.state.chatId, accountId)
 		},
 
-		remove(accountId: string, store?: AccountListStore) {
-			chatWSSo.removeUser({
-				chatId: store.state.chatId,
-				userId: accountId,
-			})
+		async remove(accountId: string, store?: AccountListStore) {
+			const ret = await chatApi.removeUser(store.state.chatId, accountId)
 		}
 
 

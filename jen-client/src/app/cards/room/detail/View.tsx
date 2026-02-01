@@ -12,6 +12,7 @@ import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import MessageCmp from "./history/MessageCmp"
 import RoleDialog from "./RoleDialog"
+import chatRepoSo from "@/stores/stacks/chat/repo"
 
 
 
@@ -26,7 +27,7 @@ const RoomView: FunctionComponent<Props> = ({
 
 	// STORE
 	useStore(store)
-	useStore(chatWSSo)
+	useStore(chatRepoSo)
 
 
 	// HOOKS
@@ -37,22 +38,19 @@ const RoomView: FunctionComponent<Props> = ({
 
 	// Ho i dati della CHAT.
 	// eventualmente chiedo la ROOM se non esiste
-	useEffect(() => {
-		// se non c'e' l'id della ROOM allora suppongo si tratti della MAIN ROOM
-		if (!!store.state.roomId) return
-		const chat = chatWSSo.getChatById(store.state.chatId)
-		const room = getMainRoom(chat?.rooms)
-		store.setRoomId(room?.id)
-	}, [chatWSSo.state.all])
+	// useEffect(() => {
+	// 	// se non c'e' l'id della ROOM allora suppongo si tratti della MAIN ROOM
+	// 	if (!!store.state.roomId) return
+	// 	const chat = chatWSSo.getChatById(store.state.chatId)
+	// 	const room = getMainRoom(chat?.rooms)
+	// 	store.setRoomId(room?.id)
+	// }, [chatWSSo.state.all])
 
 	/** recupero l'oggetto ROOM  */
-	const room = useMemo(
-		() => chatWSSo.getRoomById(store.state.roomId), 
-		[store.state.roomId, chatWSSo.state.all]
-	)
-
-	const history = room?.history ?? []
-
+	const room = useMemo(() => chatRepoSo.getRoom({
+		chatId: store.state.chatId,
+		roomId: store.state.roomId,
+	}), [store.state.chatId, store.state.roomId, chatRepoSo.state.all])
 
 	// HANDLER
 
@@ -61,8 +59,8 @@ const RoomView: FunctionComponent<Props> = ({
 	const handleAgentsClick = () => store.openAgents()
 
 
-
 	// RENDER
+	const history = room?.history ?? []
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -84,7 +82,6 @@ const RoomView: FunctionComponent<Props> = ({
 			label="AGENTS"
 			onClick={handleAgentsClick}
 		/>
-		
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
 			{history.map((chatMessage) => (

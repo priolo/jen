@@ -1,31 +1,40 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
-import { Chat } from "@/types/Chat"
+import { ChatDTO } from "@shared/types/ChatDTO"
 
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<Chat[]> {
+function index(opt?: CallOptions): Promise<ChatDTO[]> {
 	return ajax.get(`chats`, opt)
 }
 
 /** GET */
-function get(id: string, opt?: CallOptions): Promise<Chat> {
+function get(id: string, opt?: CallOptions): Promise<ChatDTO> {
 	return ajax.get(`chats/${id}`, opt)
 }
 
 /** CREATE NEW */
-function create(chat: Partial<Chat>, opt?: CallOptions): Promise<Chat> {
+function create(chat: Partial<ChatDTO>, opt?: CallOptions): Promise<ChatDTO> {
 	return ajax.post(`chats`, { chat }, opt)
 }
 
 /** UPDATE */
-function update(chat: Partial<Chat>, opt?: CallOptions): Promise<Chat> {
+function update(chat: Partial<ChatDTO>, opt?: CallOptions): Promise<ChatDTO> {
 	return ajax.patch(`chats/${chat.id}`, { chat }, opt)
 }
 
 /** DELETE */
 function remove(id: string, opt?: CallOptions): Promise<void> {
 	return ajax.delete(`chats/${id}`, null, opt)
+}
+
+/** Invita un USER */
+function inviteUser(id: string, userId: string, opt?: CallOptions): Promise<void> {
+	return ajax.post(`chats/${id}/invite`, { userId }, opt)
+}
+/** Rimuove un USER */
+function removeUser(id: string, userId: string, opt?: CallOptions): Promise<void> {
+	return ajax.post(`chats/${id}/remove`, { userId }, opt)
 }
 
 
@@ -36,5 +45,8 @@ const chatApi = {
 	create,
 	update,
 	remove,
+
+	inviteUser,
+	removeUser,
 }
 export default chatApi

@@ -1,6 +1,8 @@
+import { SERVICE_PATHS } from "@/config.js";
 import { RoomRepo } from "../repository/Room.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
+import { ChatsWSService } from "./ChatsWSRoute.js";
 
 
 
@@ -30,10 +32,14 @@ class RoomRoute extends httpRouter.Service {
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.Actions.GET_BY_ID,
-			payload: id
-		})
+		// verifico che non ci sia gia' in MEM
+		const chatWS = this.nodeByPath<ChatsWSService>( SERVICE_PATHS.CHATS_WS)
+		let room = chatWS?.chatManager.getChatById(id)
+
+		// const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
+		// 	type: typeorm.Actions.GET_BY_ID,
+		// 	payload: id
+		// })
 		res.json(room)
 	}
 

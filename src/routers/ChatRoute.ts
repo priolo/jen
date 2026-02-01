@@ -7,6 +7,7 @@ import { FindManyOptions, FindOneOptions, In } from "typeorm";
 import { ChatRepo } from "../repository/Chat.js";
 import { AccountRepo } from "../repository/Account.js";
 import { ChatsWSService } from "./ChatsWSRoute.js";
+import { UPDATE_TYPE } from "@shared/types/ChatMessage.js";
 
 
 
@@ -22,7 +23,8 @@ class ChatRoute extends httpRouter.Service {
 				{ path: "/", verb: "post", method: "create" },
 				{ path: "/:id", verb: "patch", method: "update" },
 				{ path: "/:id", verb: "delete", method: "delete" },
-				{ path: "/:id/users", verb: "post", method: "addUser" },
+				{ path: "/:id/invite", verb: "post", method: "invite" },
+				{ path: "/:id/remove", verb: "post", method: "remove" },
 			]
 		}
 	}
@@ -129,39 +131,6 @@ class ChatRoute extends httpRouter.Service {
 		res.json(chatUp)
 	}
 
-	async addUser(req: Request, res: Response) {
-		const userJwt: JWTPayload = req["jwtPayload"]
-		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
-
-		const chatId = req.params["id"]
-		const { userId } = req.body
-		if (!userId) return res.status(400).json({ error: "userId is required" })
-
-		const chat: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
-			type: typeorm.Actions.FIND_ONE,
-			payload: <FindOneOptions<ChatRepo>>{
-				where: { id: chatId },
-				relations: { users: true }
-			}
-		})
-		if (!chat) return res.status(404).json({ error: "Chat not found" })
-		if (chat.accountId != userJwt.id) return res.status(403).json({ error: "Forbidden" })
-
-		if (!chat.users.find(u => u.id == userId)) {
-			chat.users.push({ id: userId } as AccountRepo)
-			await new Bus(this, REPO_PATHS.CHATS).dispatch({
-				type: typeorm.Actions.SAVE,
-				payload: chat
-			})
-		}
-
-		const chatsWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
-		chatsWS.chatManager.getChatById(chatId)?.addUser(userId)
-
-		chat.users = GetAccountDTOList(chat.users)
-		res.json(chat)
-	}
-
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
 		await new Bus(this, REPO_PATHS.CHATS).dispatch({
@@ -170,6 +139,91 @@ class ChatRoute extends httpRouter.Service {
 		})
 		res.json({ data: "ok" })
 	}
+
+	async invite(req: Request, res: Response) {
+		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+
+		// prendo i parametri
+		const chatId = req.params["id"]
+		const { userId } = req.body
+		if (!userId) return res.status(400).json({ error: "userId is required" })
+
+		// carico lo USER
+		const user: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
+			type: typeorm.Actions.GET_BY_ID,
+			payload:  userId,
+		})
+		if (!user) return res.status(404).json({ error: "User not found" })
+
+		// carico la CHAT
+		const chat: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
+			type: typeorm.Actions.FIND_ONE,
+			payload: <FindOneOptions<ChatRepo>>{
+				where: { id: chatId },
+				relations: { users: true }
+			}
+		})
+		if (!chat) return res.status(404).json({ error: "Chat not found" })
+			
+		// se la CHAT non l'ho fatta io non posso invitare altri
+		if (chat.accountId != userJwt.id) return res.status(403).json({ error: "Forbidden" })
+
+		// aggiungo lo USER se non è già presente
+		if (!chat.users.find(u => u.id == userId)) {
+			chat.users.push({ id: userId } as AccountRepo)
+			await new Bus(this, REPO_PATHS.CHATS).dispatch({
+				type: typeorm.Actions.SAVE,
+				payload: chat
+			})
+		}
+
+		// avviso il WS della CHAT
+		const chatsWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
+		chatsWS.chatManager.getChatById(chat.id)?.addParticipant(user)
+
+		chat.users = GetAccountDTOList(chat.users)
+		res.json(chat)
+	}
+
+	async remove(req: Request, res: Response) {
+		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+
+		// prendo i parametri
+		const chatId = req.params["id"]
+		const { userId } = req.body
+		if (!userId) return res.status(400).json({ error: "userId is required" })
+
+		// carico la CHAT
+		const chat: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
+			type: typeorm.Actions.FIND_ONE,
+			payload: <FindOneOptions<ChatRepo>>{
+				where: { id: chatId },
+				relations: { users: true }
+			}
+		})
+		if (!chat) return res.status(404).json({ error: "Chat not found" })
+		// se la CHAT non l'ho fatta io non posso invitare altri
+		if (chat.accountId != userJwt.id) return res.status(403).json({ error: "Forbidden" })
+
+		// rimuovo lo USER se è presente e salvo in DB
+		if (chat.users.find(u => u.id == userId)) {
+			chat.users = chat.users.filter(u => u.id != userId)
+			await new Bus(this, REPO_PATHS.CHATS).dispatch({
+				type: typeorm.Actions.SAVE,
+				payload: chat
+			})
+		}
+
+		// avviso il WS della CHAT
+		const chatsWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
+		chatsWS.chatManager.getChatById(chat.id)?.removeParticipant(userId)
+
+		chat.users = GetAccountDTOList(chat.users)
+		res.json(chat)
+	}
+
 }
 
 export default ChatRoute

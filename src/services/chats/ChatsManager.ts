@@ -52,7 +52,7 @@ export class ChatsManager {
 
 
 	/** 
-	 * Salvo la CHAT e tutte le sue ROOMs sul DB 
+	 * Salvo la CHAT sul DB 
 	 */
 	async saveChat(chatRepo: ChatRepo): Promise<void> {
 		if (!chatRepo) return;
@@ -76,26 +76,34 @@ export class ChatsManager {
 	}
 
 	/**
-	 * Carico un CHAT dal DB
+	 * Cerco la chat in MEM se non la trovo la carico dal DB
 	 */
 	async loadChatById(chatId: string): Promise<ChatNode> {
-        // carico la CHAT specificando le relazioni da includere (users e rooms)
-        const chatRepo: ChatRepo = await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
-            type: typeorm.Actions.FIND_ONE,
-            payload: <FindOneOptions<ChatRepo>>{
-                where: { id: chatId },
-                relations: {
-                    users: true,
-                    rooms: true,
-                }
-            }
-        })
+		// cerco la CHAT che contiene la ROOM
+		let chat = this.getChatById(chatId)
 
-        if (!chatRepo) throw new Error(`Chat not found: ${chatId}`)
+		// non la trovo in memoria quindi carico tutta la CHAT dal DB
+		if (!chat) {
 
-        // Creo la CHAT con le ROOMs caricate
-        const chat = await ChatNode.Build(this.service, chatRepo)
-        return chat
-    }
+			// carico la CHAT specificando le relazioni da includere (users e rooms)
+			const chatRepo: ChatRepo = await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
+				type: typeorm.Actions.FIND_ONE,
+				payload: <FindOneOptions<ChatRepo>>{
+					where: { id: chatId },
+					relations: {
+						users: true,
+						rooms: true,
+					}
+				}
+			})
+
+			// Creo la CHAT con le ROOMs caricate
+			chat = ChatNode.Build(this.service, chatRepo)
+			this.service.chatManager.addChat(chat)
+		}
+
+		if (!chat) throw new Error(`Chat not found: ${chatId}`)
+		return chat
+	}
 
 }
