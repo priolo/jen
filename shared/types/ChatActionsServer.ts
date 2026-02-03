@@ -14,8 +14,6 @@ export enum CHAT_ACTION_S2C {
 	CLIENT_ENTERED = "user-entered",
 	/** un CLIENT è uscita dalla CHAT. Potrebbe essere anche un AGENT */
 	CLIENT_LEAVE = "user-leave",
-	/** comunica lo stato di connessione di un CLIENT */
-	//USER_STATUS = "user-status",
 
 	/** creata nuova ROOM in CHAT */
 	ROOM_NEW = "room-new",

@@ -1,18 +1,17 @@
 import RowButton from "@/components/buttons/RowButton"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
-import chatWSSo, { getMainRoom } from "@/stores/stacks/chat/ws"
+import chatRepoSo from "@/stores/stacks/chat/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
-import { ChatMessage } from "@shared/types/RoomActions"
 import { FloatButton, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
+import { ChatMessage } from "@shared/types/RoomActions"
 import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import MessageCmp from "./history/MessageCmp"
 import RoleDialog from "./RoleDialog"
-import chatRepoSo from "@/stores/stacks/chat/repo"
 
 
 
@@ -35,16 +34,6 @@ const RoomView: FunctionComponent<Props> = ({
 	useEffect(() => {
 		store.fetch()
 	}, [])
-
-	// Ho i dati della CHAT.
-	// eventualmente chiedo la ROOM se non esiste
-	// useEffect(() => {
-	// 	// se non c'e' l'id della ROOM allora suppongo si tratti della MAIN ROOM
-	// 	if (!!store.state.roomId) return
-	// 	const chat = chatWSSo.getChatById(store.state.chatId)
-	// 	const room = getMainRoom(chat?.rooms)
-	// 	store.setRoomId(room?.id)
-	// }, [chatWSSo.state.all])
 
 	/** recupero l'oggetto ROOM  */
 	const room = useMemo(() => chatRepoSo.getRoom({
