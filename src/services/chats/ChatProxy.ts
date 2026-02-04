@@ -1,8 +1,8 @@
 import { ChatDTOFromChatRepo, ChatRepo } from '@/repository/Chat.js';
-import { RoomRepo } from '@/repository/Room.js';
+import { BuildRoomRepo, RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
 import { AccountDTO } from '@shared/types/account.js';
-import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C } from "@shared/types/ChatActionsServer.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
 import { MessageUpdate, UPDATE_TYPE } from "@shared/types/ChatMessage.js";
 import { AgentRepo } from "../../repository/Agent.js";
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
@@ -16,7 +16,7 @@ import { AccountRepo } from '@/repository/Account.js';
  * CLIENTs che sono entrati nella CHAT
  * Le ROOMs create all'interno della CHAT
  */
-class ChatNode {
+class ChatProxy {
 
 	private constructor(
 		/** 
@@ -37,8 +37,8 @@ class ChatNode {
 	 * @param rooms le ROOMs iniziali della CHAT
 	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
-	static Build(service: ChatsWSService, chatRepo: ChatRepo): ChatNode {
-		const chat = new ChatNode(service, chatRepo)
+	static Build(service: ChatsWSService, chatRepo: ChatRepo): ChatProxy {
+		const chat = new ChatProxy(service, chatRepo)
 		return chat
 	}
 
@@ -47,7 +47,7 @@ class ChatNode {
 	//#region CHAT PROPERTIES
 
 	/** 
-	 * gli ids degli USERS ONLINE partecipanti 
+	 * gli ids degli USERS ONLINE in CHAT 
 	 * cioe' quelli che devono essere aggiornati
 	 */
 	private usersIds: Set<string> = new Set();
@@ -108,6 +108,7 @@ class ChatNode {
 
 		// cerco lo USER tra gli ONLINE. se è offline non faccio nulla
 		const user = (this.service.chatSend.getUserOnlineById(userId))
+		// TODO: gestire errore utente offline che entra in chat
 		if (!user) return;
 
 		// avverto gli altri USERS della CHAT
@@ -118,7 +119,7 @@ class ChatNode {
 		}
 		this.sendMessage(message)
 
-		// inserisco lo USER tra gli ONLINE
+		// inserisco lo USER tra quelli in CHAT
 		this.usersIds.add(userId);
 
 		// invio al nuovo USER i dati della CHAT
@@ -178,7 +179,7 @@ class ChatNode {
 
 		// elimino l'utente anche tra quelli online (se c'e')
 		this.removeUser(userId)
-		
+
 		this.chat.users = this.chat.users.filter(u => u.id != userId)
 		const msg: ChatUpdateS2C = {
 			chatId: this.chat.id,
@@ -192,7 +193,7 @@ class ChatNode {
 	 * aggiorno la HISTORY con una serie di MessageUpdate 
 	 * Manda il messaggio di aggiornamento a tutti i partecipanti alla CHAT
 	 */
-	updateHistory(updates: MessageUpdate[], roomId?: string): RoomRepo {
+	updateRoomHistory(updates: MessageUpdate[], roomId?: string): RoomRepo {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
 		if (!room) throw new Error("Room not found")
 
@@ -208,6 +209,23 @@ class ChatNode {
 		this.sendMessage(msg)
 
 		return room
+	}
+
+	addRoom(room: RoomRepo) {
+
+		this.chatRepo.rooms.push(room);
+		room.chatId = this.chatRepo.id;
+		if (!room.accountId) room.accountId = this.chatRepo.accountId
+
+		// invia la nuova ROOM-AGENT al CLIENT
+		const newRoomMsg: RoomNewS2C = {
+			action: CHAT_ACTION_S2C.ROOM_NEW,
+			chatId: this.chatRepo.id,
+			roomId: room.id,
+			parentRoomId: room.parentRoomId,
+			agentsIds: room.agents.map(a => a.id),
+		}
+		this.sendMessage(newRoomMsg)
 	}
 
 	/**
@@ -238,7 +256,7 @@ class ChatNode {
 	/**
 	 * Invia a tutti i partecipanti della CHAT un MESSAGE
 	 */
-	public sendMessage(message: BaseS2C, esclude: string[] = []): void {
+	private sendMessage(message: BaseS2C, esclude: string[] = []): void {
 		for (const userId of this.usersIds) {
 			if (esclude.includes(userId)) continue;
 			this.service.chatSend.sendMessageToUser(userId, message)
@@ -250,4 +268,4 @@ class ChatNode {
 
 }
 
-export default ChatNode
+export default ChatProxy

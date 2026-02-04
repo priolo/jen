@@ -3,7 +3,7 @@ import { AccountDTO } from "@shared/types/account.js"
 import { CHAT_ACTION_C2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient.js"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage.js"
 import { ChatProcessor } from "./ChatProcessor.js"
-import ChatNode from "./ChatNode.js"
+import ChatProxy from "./ChatProxy.js"
 
 
 /**
@@ -62,7 +62,7 @@ export class ChatsMessages {
 
 			case CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE: {
 				const msgUp: RoomHistoryUpdateC2S = msg
-				const room = chat.updateHistory(msgUp.updates, msgUp.roomId)
+				const room = chat.updateRoomHistory(msgUp.updates, msgUp.roomId)
 				if (room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.ADD)) {
 					await (new ChatProcessor(this.service)).complete(chat, chat.getMainRoom());
 				}
@@ -107,7 +107,7 @@ export class ChatsMessages {
 	/**
 	 * L'utente che ha inviato entra in una CHAT
 	 */
-	private async handleUserEnter(chat: ChatNode, user: AccountDTO) {
+	private async handleUserEnter(chat: ChatProxy, user: AccountDTO) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
 		// inserisco lo USER tra gli ONLINE
@@ -119,7 +119,7 @@ export class ChatsMessages {
 	 * Avverte tutti i partecipanti
 	 * Se la CHAT è vuota la elimina
 	 */
-	async handleUserLeave(chat: ChatNode, user: AccountDTO) {
+	async handleUserLeave(chat: ChatProxy, user: AccountDTO) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
 

@@ -3,7 +3,7 @@ import { ChatRepo } from "@/repository/Chat.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { Bus, typeorm } from "@priolo/julian"
 import { FindOneOptions } from "typeorm"
-import ChatNode from "./ChatNode.js"
+import ChatProxy from "./ChatProxy.js"
 
 
 /**
@@ -18,25 +18,25 @@ export class ChatsManager {
 	/**
 	 * Le CHATs attive nel sistema
 	 */
-	private chats: ChatNode[] = []
+	private chats: ChatProxy[] = []
 	/**
 	 * Restituisce tutte le CHATs attive
 	 */
-	getChats(): ChatNode[] {
+	getChats(): ChatProxy[] {
 		return this.chats
 	}
 
 	/**
 	 * Restituisce la CHAT specificata
 	 */
-	getChatById(chatId: string): ChatNode | undefined {
+	getChatById(chatId: string): ChatProxy | undefined {
 		return this.chats.find(chat => chat.chatRepo.id === chatId)
 	}
 
 	/**
 	 * Inizia una SESSION di una CHAT
 	 */
-	addChat(chat: ChatNode): void {
+	addChat(chat: ChatProxy): void {
 		this.chats.push(chat)
 	}
 
@@ -78,7 +78,7 @@ export class ChatsManager {
 	/**
 	 * Cerco la chat in MEM se non la trovo la carico dal DB
 	 */
-	async loadChatById(chatId: string): Promise<ChatNode> {
+	async loadChatById(chatId: string): Promise<ChatProxy> {
 		// cerco la CHAT che contiene la ROOM
 		let chat = this.getChatById(chatId)
 
@@ -98,7 +98,7 @@ export class ChatsManager {
 			})
 
 			// Creo la CHAT con le ROOMs caricate
-			chat = ChatNode.Build(this.service, chatRepo)
+			chat = ChatProxy.Build(this.service, chatRepo)
 			this.service.chatManager.addChat(chat)
 		}
 

@@ -76,10 +76,11 @@ export function RoomDTOFromRoomRepo(room: RoomRepo): RoomDTO {
 	if (!room) return null;
 	return {
 		id: room.id,
+        accountId: room.accountId,
 		chatId: room.chatId,
 		parentRoomId: room.parentRoomId,
-		accountId: room.accountId,
-		history: room.history || [],
-		agentsIds: null//room.agentsIds || [],
+		
+		history: room.history ?? [],
+		agentsIds: room.agents?.map(a => a.id) ?? [],
 	};
 }
