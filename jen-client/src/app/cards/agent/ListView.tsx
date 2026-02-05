@@ -1,18 +1,18 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
+import { AgentDetailStore } from "@/stores/stacks/agent/detail"
+import agentSo from "@/stores/stacks/agent/repo"
+import { RoomAgentsListStore } from "@/stores/stacks/room/detail/agentsList"
+import { AgentLlm } from "@/types/Agent"
 import { AlertDialog, Button, IconToggle, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../icons/EditorIcon"
 import clsCard from "../CardCyanDef.module.css"
-import { AgentListStore } from "@/stores/stacks/agent/list"
-import agentSo from "@/stores/stacks/agent/repo"
-import { AgentLlm } from "@/types/Agent"
-import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 
 
 
 interface Props {
-	store?: AgentListStore
+	store?: RoomAgentsListStore
 }
 
 const AgentListView: FunctionComponent<Props> = ({
@@ -26,9 +26,11 @@ const AgentListView: FunctionComponent<Props> = ({
 
 
 	// HOOKs
+
 	useEffect(() => {
-		store.fetch()
-	}, [store])
+		store.init()
+	}, [])
+
 	const { checked, unchecked } = useMemo(() => {
 		const all = agentSo.state.all?.sort((c1, c2) => c1.name?.localeCompare(c2.name)) ?? []
 		const { chacked, unchecked } = all?.reduce((acc, agent) => {

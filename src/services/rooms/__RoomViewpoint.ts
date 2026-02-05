@@ -1,4 +1,5 @@
-import { AGENT_TYPE, AgentRepo } from "@/repository/Agent.js";
+import { AgentRepo } from "@/repository/Agent.js";
+import { AGENT_TYPE } from "@shared/types/AgentDTO.js";
 import { RoomRepo } from "@/repository/Room.js";
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js";
 import { ChatMessage } from "@shared/types/RoomActions.js";

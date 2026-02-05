@@ -3,15 +3,9 @@ import { AccountAssets } from './AccountAssets.js';
 import { LlmRepo } from './Llm.js';
 import { RoomRepo } from './Room.js';
 import { ToolRepo } from './Tool.js';
+import { AGENT_TYPE } from '@shared/types/AgentDTO.js';
 
 
-
-export enum AGENT_TYPE {
-    REACT = 'react',
-    MOCK = 'mock',
-    HUMAN = 'human',
-    FINDER = 'finder'
-}
 
 @Entity('agents')
 export class AgentRepo extends AccountAssets {

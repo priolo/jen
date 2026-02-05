@@ -1,10 +1,11 @@
+import agentSo from "@/stores/stacks/agent/repo.js"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
+import { DOC_TYPE } from "@/types/index.js"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { AgentDetailStore } from "./detail.js"
-import { buildAgentDetail, buildAgentDetailNew } from "./factory.js"
-import agentSo from "./repo.js"
-import { AgentLlm } from "@/types/Agent"
+import { RoomDetailStore } from "./detail.js"
+import { AgentDetailStore } from "../../agent/detail.js"
+import { buildAgentDetail, buildAgentDetailNew } from "../../agent/factory.js"
 
 
 
@@ -25,13 +26,14 @@ const setup = {
 		getTitle: (_: void, store?: ViewStore) => "AGENT",
 		getSubTitle: (_: void, store?: ViewStore) => "agent list",
 		getSerialization: (_: void, store?: ViewStore) => {
-			const state = store.state as AgentListState
+			const state = store.state as RoomAgentsListState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
 				selectedIds: state.selectedIds,
 			}
 		},
 		//#endregion
+
 	},
 
 	actions: {
@@ -39,20 +41,30 @@ const setup = {
 		//#region OVERRIDE VIEWBASE
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
-			const state = store.state as AgentListState
+			const state = store.state as RoomAgentsListState
 			state.selectedIds = data.selectedIds ?? []
 		},
 		//#endregion
 
 		//#region OVERRIDE LOADBASE
-		
+
 
 		//#endregion
 
-		
+		/**
+		 * inizializzo la lista con gli AGENTI della ROOM
+		 */
+		init(_: void, store?: RoomAgentsListStore) {
+			let selectedIds: string[] = []
+			const parent = store.state.parent as RoomDetailStore
+			if (!!parent && parent.state.type == DOC_TYPE.ROOM_DETAIL) {
+				selectedIds = parent.getRoom()?.agentsIds ?? []
+			}
+			store.setSelectedIds(selectedIds)
+		},
 
 		/** apro/chiudo la CARD del dettaglio */
-		openDetail(agentId: string, store?: AgentListStore) {
+		openDetail(agentId: string, store?: RoomAgentsListStore) {
 			const detached = focusSo.state.shiftKey
 			const oldId = (store.state.linked as AgentDetailStore)?.state?.agent?.id
 			const newId = (agentId && oldId !== agentId) ? agentId : null
@@ -67,12 +79,18 @@ const setup = {
 			}
 		},
 
-		create(_: void, store?: AgentListStore) {
+		/** 
+		 * Apre la CARD per la creazione di un nuovo AGENTE
+		 * */
+		create(_: void, store?: RoomAgentsListStore) {
 			const view = buildAgentDetailNew()
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
-		async delete(agentId: string, store?: AgentListStore) {
+		/**
+		 * Elimina un AGENTE
+		 */
+		async delete(agentId: string, store?: RoomAgentsListStore) {
 			if (!await store.alertOpen({
 				title: "AGENT DELETION",
 				body: "This action is irreversible.\nAre you sure you want to delete the AGENT?",
@@ -96,12 +114,12 @@ const setup = {
 	},
 }
 
-export type AgentListState = typeof setup.state & ViewState
-export type AgentListGetters = typeof setup.getters
-export type AgentListActions = typeof setup.actions
-export type AgentListMutators = typeof setup.mutators
-export interface AgentListStore extends LoadBaseStore, ViewStore, AgentListGetters, AgentListActions, AgentListMutators {
-	state: AgentListState
+export type RoomAgentsListState = typeof setup.state & ViewState
+export type RoomAgentsListGetters = typeof setup.getters
+export type RoomAgentsListActions = typeof setup.actions
+export type RoomAgentsListMutators = typeof setup.mutators
+export interface RoomAgentsListStore extends LoadBaseStore, ViewStore, RoomAgentsListGetters, RoomAgentsListActions, RoomAgentsListMutators {
+	state: RoomAgentsListState
 }
-const agentListSetup = mixStores(viewSetup, loadBaseSetup, setup)
-export default agentListSetup
+const roomAgentsListSetup = mixStores(viewSetup, loadBaseSetup, setup)
+export default roomAgentsListSetup

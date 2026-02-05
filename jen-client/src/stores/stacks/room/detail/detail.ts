@@ -11,6 +11,8 @@ import { buildRoomDetail } from "../factory"
 import { buildAccountList } from "../../account/factory"
 import docsSo from "@/stores/docs"
 import roomApi from "@/api/room"
+import chatRepoSo from "../../chat/repo"
+import agentSo from "../../agent/repo"
 
 
 
@@ -52,8 +54,20 @@ What is 2+2? Just write the answer number.`,
 
 		//#endregion
 
+		/** se la lista degli AGENTS è aperta */
 		getAgentsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.AGENT_LIST,
+		/** se la DETAIL della ROOM è aperta */
 		getRoomDetailOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_DETAIL,
+		/** la ROOM */
+		getRoom: (_: void, store?: RoomDetailStore) =>
+			chatRepoSo.getRoom({
+				chatId: store.state.chatId,
+				roomId: store.state.roomId,
+			}
+		),
+		getAgents: (_: void, store?: RoomDetailStore) => {
+			return store.getRoom()?.agentsIds?.map(agentId => agentSo.getById(agentId)) ?? []
+		}
 	},
 
 	actions: {
@@ -117,7 +131,7 @@ What is 2+2? Just write the answer number.`,
 			}) : null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
-		
+
 
 	},
 

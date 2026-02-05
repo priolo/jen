@@ -1,13 +1,12 @@
+import { AccountRepo } from '@/repository/Account.js';
 import { ChatDTOFromChatRepo, ChatRepo } from '@/repository/Chat.js';
-import { BuildRoomRepo, RoomRepo } from '@/repository/Room.js';
+import { RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
+import { GetAccountDTOList } from '@/types/account.js';
 import { AccountDTO } from '@shared/types/account.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
-import { MessageUpdate, UPDATE_TYPE } from "@shared/types/ChatMessage.js";
-import { AgentRepo } from "../../repository/Agent.js";
+import { MessageUpdate } from "@shared/types/ChatMessage.js";
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
-import { GetAccountDTOList } from '@/types/account.js';
-import { AccountRepo } from '@/repository/Account.js';
 
 
 
@@ -211,6 +210,9 @@ class ChatProxy {
 		return room
 	}
 
+	/**
+	 * Aggiunge una nuova ROOM alla CHAT
+	 */
 	addRoom(room: RoomRepo) {
 
 		this.chatRepo.rooms.push(room);
@@ -235,11 +237,14 @@ class ChatProxy {
 		const room = this.getRoomById(roomId) ?? this.getMainRoom()
 		if (!room) return
 
-		const agents: AgentRepo[] = []
-		for (const agentId of agentsIds) {
-			const agent = await this.service.chatContext.getAgentRepoById(agentId)
-			if (agent) agents.push(agent)
-		}
+		const agents = await Promise.all(
+			agentsIds.map(agentId => this.service.chatContext.getAgentRepoById(agentId))
+		)
+		// const agents: AgentRepo[] = []
+		// for (const agentId of agentsIds) {
+		// 	const agent = await this.service.chatContext.getAgentRepoById(agentId)
+		// 	if (agent) agents.push(agent)
+		// }
 		room.agents = agents
 
 		// avviso tutti i partecipanti
