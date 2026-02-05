@@ -1,4 +1,6 @@
 
+
+
 /**
  * Dati di trasferimento
  */
@@ -7,15 +9,18 @@ export interface AccountDTO {
 	name?: string;
 	language?: string;
 	notificationsEnabled?: boolean;
+
 	email?: string;
-	avatarUrl?: string;
+	emailVerified?: boolean;
 	googleEmail?: string;
 	githubId?: number;
 	githubName?: string;
-	status?: ACCOUNT_STATUS;
-	//description?: string; 
-	emailVerified?: boolean;
 
+	avatarUrl?: string;
+
+	description?: string; 
+
+	status?: ACCOUNT_STATUS;
 }
 
 export enum ACCOUNT_STATUS {
@@ -34,4 +39,11 @@ export interface GithubAccountMetadata {
 	avatar_url: string; // avatar del owner
 	description?: string;
 	html_url?: string;
+}
+
+
+
+export enum EMAIL_CODE {
+	VERIFIED = "verified",
+	UNVERIFIED = null
 }

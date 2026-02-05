@@ -1,6 +1,6 @@
 import { REPO_PATHS, SERVICE_PATHS } from "@/config.js";
 import { RoomRepo } from "@/repository/Room.js";
-import { GetAccountDTOList, JWTPayload } from "@/types/account.js";
+import { AccountDTOFromAccountRepoList, JWTPayload } from '@/repository/Account.js';
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, FindOneOptions, In } from "typeorm";
@@ -55,7 +55,7 @@ class ChatRoute extends httpRouter.Service {
 			}
 		})
 
-		chats.forEach(chat => chat.users = GetAccountDTOList(chat.users))
+		chats.forEach(chat => chat.users = AccountDTOFromAccountRepoList(chat.users))
 		res.json(chats)
 	}
 
@@ -181,7 +181,7 @@ class ChatRoute extends httpRouter.Service {
 		const chatsWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
 		chatsWS.chatManager.getChatById(chat.id)?.addParticipant(user)
 
-		chat.users = GetAccountDTOList(chat.users)
+		chat.users = AccountDTOFromAccountRepoList(chat.users)
 		res.json(chat)
 	}
 
@@ -219,7 +219,7 @@ class ChatRoute extends httpRouter.Service {
 		const chatsWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
 		chatsWS.chatManager.getChatById(chat.id)?.removeParticipant(userId)
 
-		chat.users = GetAccountDTOList(chat.users)
+		chat.users = AccountDTOFromAccountRepoList(chat.users)
 		res.json(chat)
 	}
 

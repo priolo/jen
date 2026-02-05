@@ -3,9 +3,10 @@ import { ChatsContext } from "@/services/chats/ChatsContext.js"
 import { ChatsManager } from "@/services/chats/ChatsManager.js"
 import { ChatsMessages } from "@/services/chats/ChatsMessage.js"
 import { ChatsSend } from "@/services/chats/ChatsSend.js"
-import { ACCOUNT_STATUS, GetAccountDTO } from '@/types/account.js'
+import { ACCOUNT_STATUS } from '@shared/types/AccountDTO.js'
+import { AccountDTOFromAccountRepo } from '@/repository/Account.js'
 import { Bus, typeorm, ws } from "@priolo/julian"
-import { AccountDTO } from "@shared/types/account.js"
+import { AccountDTO } from "@shared/types/AccountDTO.js"
 import { CHAT_ACTION_C2S, UserLeaveC2S } from "@shared/types/RoomActions.js"
 
 
@@ -46,7 +47,7 @@ export class ChatsWSService extends ws.route {
 				payload: userId
 			})
 			if (!accountRepo) throw new Error(`Account not found: ${userId}`)
-			account = GetAccountDTO(accountRepo)
+			account = AccountDTOFromAccountRepo(accountRepo)
 		}
 		client.jwtPayload = {
 			...client.jwtPayload,
@@ -62,21 +63,14 @@ export class ChatsWSService extends ws.route {
 
 		// Se ci sono altri USER connessi con lo stesso ID, non faccio nulla
 		const clients = this.getClients()?.filter(c => c?.jwtPayload?.id == user.id)
-		if ( clients && clients.length > 0 ) {
+		if (clients && clients.length > 0) {
 			return super.onDisconnect(client)
 		}
 
 		// rimuovo il client da tutte le CHATs
 		const chats = this.chatManager.getChats()
 		for (const chat of chats) {
-			await this.chatMessages.handleUserLeave(
-				chat,
-				user,
-				<UserLeaveC2S>{ 
-					action: CHAT_ACTION_C2S.USER_LEAVE, 
-					chatId: chat.chatRepo.id 
-				}
-			)
+			await this.chatMessages.handleUserLeave(chat, user)
 		}
 		super.onDisconnect(client)
 	}

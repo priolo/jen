@@ -1,5 +1,6 @@
 import { REPO_PATHS } from "@/config.js";
-import { ACCOUNT_STATUS, GetAccountDTOList, GetAccountDTO, JWTPayload } from '@/types/account.js';
+import { ACCOUNT_STATUS } from '@shared/types/AccountDTO.js';
+import { AccountDTOFromAccountRepoList, AccountDTOFromAccountRepo, JWTPayload } from '@/repository/Account.js';
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, Like } from "typeorm";
@@ -59,7 +60,7 @@ class AccountRoute extends httpRouter.Service {
 		}
 
 		res.json({
-			accounts: GetAccountDTOList(accounts)
+			accounts: AccountDTOFromAccountRepoList(accounts)
 		})
 	}
 
@@ -77,7 +78,7 @@ class AccountRoute extends httpRouter.Service {
 		if (!account) return res.status(404).json({ error: "Account not found" })
 
 		res.json({
-			account: GetAccountDTO(account)
+			account: AccountDTOFromAccountRepo(account)
 		})
 	}
 
@@ -95,7 +96,7 @@ class AccountRoute extends httpRouter.Service {
 			}
 		})
 		res.json({
-			account: GetAccountDTO(account),
+			account: AccountDTOFromAccountRepo(account),
 		})
 	}
 

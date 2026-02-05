@@ -2,8 +2,8 @@ import { AccountRepo } from '@/repository/Account.js';
 import { ChatDTOFromChatRepo, ChatRepo } from '@/repository/Chat.js';
 import { RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
-import { GetAccountDTOList } from '@/types/account.js';
-import { AccountDTO } from '@shared/types/account.js';
+import { AccountDTOFromAccountRepoList } from '@/repository/Account.js';
+import { AccountDTO } from '@shared/types/AccountDTO.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
 import { MessageUpdate } from "@shared/types/ChatMessage.js";
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
@@ -165,7 +165,7 @@ class ChatProxy {
 		const msg: ChatUpdateS2C = {
 			chatId: this.chat.id,
 			action: CHAT_ACTION_S2C.CHAT_UPDATE,
-			chat: { users: GetAccountDTOList(this.chat.users) },
+			chat: { users: AccountDTOFromAccountRepoList(this.chat.users) },
 		}
 		this.sendMessage(msg)
 	}
@@ -183,7 +183,7 @@ class ChatProxy {
 		const msg: ChatUpdateS2C = {
 			chatId: this.chat.id,
 			action: CHAT_ACTION_S2C.CHAT_UPDATE,
-			chat: { users: GetAccountDTOList(this.chat.users) },
+			chat: { users: AccountDTOFromAccountRepoList(this.chat.users) },
 		}
 		this.sendMessage(msg)
 	}

@@ -1,5 +1,5 @@
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
-import { AccountDTO } from "@shared/types/account.js"
+import { AccountDTO } from "@shared/types/AccountDTO.js"
 import { CHAT_ACTION_C2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient.js"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage.js"
 import { ChatProcessor } from "./ChatProcessor.js"

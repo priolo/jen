@@ -3,7 +3,7 @@ import { AccountAssets } from './AccountAssets.js';
 import { LlmRepo } from './Llm.js';
 import { RoomRepo } from './Room.js';
 import { ToolRepo } from './Tool.js';
-import { AGENT_TYPE } from '@shared/types/AgentDTO.js';
+import { AGENT_TYPE, AgentDTO } from '@shared/types/AgentDTO.js';
 
 
 
@@ -70,7 +70,7 @@ export class AgentRepo extends AccountAssets {
     })
     tools?: Partial<ToolRepo>[]
 
-    
+
     /** ROOMS where this agent is used */
     @ManyToMany(() => RoomRepo, room => room.agents)
     rooms?: RoomRepo[]
@@ -102,7 +102,7 @@ export class AgentRepo extends AccountAssets {
             referencedColumnName: "id"
         }
     })
-    subAgents?: Partial<AgentRepo>[] 
+    subAgents?: Partial<AgentRepo>[]
 
     /** Parent agents (inverse side of subAgents) */
     @ManyToMany(() => AgentRepo, (agent) => agent.subAgents)
@@ -110,4 +110,37 @@ export class AgentRepo extends AccountAssets {
 
     //#endregion
 
+}
+
+
+export function AgentDTOFromAgentRepo(agent: AgentRepo): AgentDTO {
+    if (!agent) return null
+    return {
+        id: agent.id,
+        accountId: agent.accountId,
+
+        name: agent.name,
+        description: agent.description,
+        systemPrompt: agent.systemPrompt,
+        contextPrompt: agent.contextPrompt,
+
+        askInformation: agent.askInformation,
+        killOnResponse: agent.killOnResponse,
+
+        type: agent.type,
+
+        llmId: agent.llmId,
+
+        baseId: agent.baseId,
+
+        toolsIds: agent.tools?.map(t => t.id).filter(Boolean) as string[] || [],
+        subAgentsIds: agent.subAgents?.map(sa => sa.id).filter(Boolean) as string[] || [],
+    }
+}
+
+/**
+ * Restituisce una lista 
+ */
+export function AgentDTOFromAgentRepoList(agents: AgentRepo[]) {
+    return agents.map(account => AgentDTOFromAgentRepo(account));
 }

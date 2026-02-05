@@ -1,5 +1,5 @@
 import { REPO_PATHS } from "@/config.js";
-import { GetAccountDTO, JWTPayload } from '@/types/account.js';
+import { AccountDTOFromAccountRepo, JWTPayload } from '@/repository/Account.js';
 import { Bus, httpRouter, jwt, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { OAuth2Client } from 'google-auth-library';
@@ -87,7 +87,7 @@ class AuthGoogleRoute extends httpRouter.Service {
 
 			// restituisco i dati dell'utente loggato
 			res.status(200).json({
-				user: GetAccountDTO(user),
+				user: AccountDTOFromAccountRepo(user),
 			});
 
 		} catch (error) {

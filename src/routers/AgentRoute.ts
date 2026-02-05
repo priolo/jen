@@ -47,7 +47,7 @@ class AgentRoute extends httpRouter.Service {
 	async getAll(req: Request, res: Response) {
 		const userJwt: AccountRepo = req["jwtPayload"]
 
-		const agents = await new Bus(this, this.state.agents_repo).dispatch({
+		const agents:AgentRepo[] = await new Bus(this, this.state.agents_repo).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<AgentRepo>>{
 				where: [

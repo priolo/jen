@@ -1,4 +1,4 @@
-import { AccountDTO } from "./account.js"
+import { AccountDTO } from "./AccountDTO.js"
 import { RoomDTO } from "./RoomDTO.js"
 
 

@@ -70,8 +70,6 @@ export function BuildRoomRepo(chatId: string, agentsRepo: AgentRepo[] = [], acco
     return room
 }
 
-
-
 export function RoomDTOFromRoomRepo(room: RoomRepo): RoomDTO {
 	if (!room) return null;
 	return {

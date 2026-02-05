@@ -1,4 +1,4 @@
-import { AccountDTO } from "./account.js";
+import { AccountDTO } from "./AccountDTO.js";
 import { ChatDTO } from "./ChatDTO.js";
 import { MessageUpdate, UPDATE_TYPE } from "./ChatMessage.js";
 

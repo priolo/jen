@@ -3,7 +3,7 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColum
 import { AccountRepo } from './Account.js';
 import { AccountAssets } from './AccountAssets.js';
 import { RoomDTOFromRoomRepo, RoomRepo } from './Room.js';
-import { AccountDTO } from '@shared/types/account.js';
+import { AccountDTO } from '@shared/types/AccountDTO.js';
 import { ChatDTO } from '@shared/types/ChatDTO.js';
 
 

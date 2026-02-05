@@ -1,12 +1,10 @@
-import { ACCOUNT_STATUS, EMAIL_CODE } from '@/types/account.js';
+import { ACCOUNT_STATUS, AccountDTO, EMAIL_CODE } from '@shared/types/AccountDTO.js';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 
 
 @Entity('accounts')
 export class AccountRepo {
-
-	status?: ACCOUNT_STATUS;
 
 	@PrimaryGeneratedColumn("uuid")
 	id?: string;
@@ -53,6 +51,53 @@ export class AccountRepo {
 	@Column({ type: 'varchar', default: '' })
 	description?: string;
 
+
+	status?: ACCOUNT_STATUS;
+}
+
+
+
+/**
+ * Payload memorizzato nel JWT token
+ */
+export type JWTPayload = {
+	/** id ACCOUNT */
+	id: string;
+	email: string;
+	name: string;
+};
+
+/**
+ * restituisce una versione "sendable" dell'ACCOUNT, senza campi sensibili
+ */
+export function AccountDTOFromAccountRepo(account: AccountRepo): AccountDTO {
+	if (!account) return null;
+
+	// 2. Accesso diretto senza destrutturazione intermedia per evitare duplicazioni
+	return {
+		id: account.id,
+		name: account.name,
+		language: account.language,
+		notificationsEnabled: account.notificationsEnabled,
+		email: account.email,
+		emailVerified: account.emailCode === EMAIL_CODE.VERIFIED,
+
+		googleEmail: account.googleEmail,
+		githubId: account.githubId,
+		githubName: account.githubName,
+		avatarUrl: account.avatarUrl,
+
+		description: account.description,
+
+		status: account.status,
+	};
+}
+
+/**
+ * Restituisce una lista di ACCOUNT in versione "sendable"
+ */
+export function AccountDTOFromAccountRepoList(accounts: AccountRepo[]) {
+	return accounts.map(account => AccountDTOFromAccountRepo(account));
 }
 
 

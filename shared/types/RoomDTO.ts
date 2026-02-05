@@ -4,7 +4,6 @@ import { ChatMessage } from './ChatMessage.js';
 /**
  * E' uno spazio dotato di HISTORY dove gli USER possono comunicare con gli altri USER e con gli AGENTS
  */
-
 export type RoomDTO = {
 	id: string;
 	/** autore della ROOM */

@@ -1,4 +1,5 @@
-import { EMAIL_CODE, GetAccountDTO, JWTPayload } from '@/types/account.js';
+import { EMAIL_CODE } from '@shared/types/AccountDTO.js';
+import { AccountDTOFromAccountRepo, JWTPayload } from '@/repository/Account.js';
 import { Bus, email as emailNs, http, httpRouter, jwt, typeorm } from "@priolo/julian";
 import crypto from "crypto";
 import { Request, Response } from "express";
@@ -135,7 +136,7 @@ class AuthEmailRoute extends httpRouter.Service {
 
 		// restituisco i dati dell'utente loggato
 		res.status(200).json({
-			user: GetAccountDTO(user),
+			user: AccountDTOFromAccountRepo(user),
 		});
 	}
 
