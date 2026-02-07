@@ -1,6 +1,6 @@
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { AccountDTO } from "@shared/types/AccountDTO.js"
-import { CHAT_ACTION_C2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient.js"
+import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient.js"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage.js"
 import { ChatProcessor } from "./ChatProcessor.js"
 import ChatProxy from "./ChatProxy.js"
@@ -37,6 +37,10 @@ export class ChatsMessages {
 		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 
 		switch (msg.action) {
+
+			case CHAT_ACTION_C2S.CHAT_UPDATE:
+				await this.handleChatUpdate(user, chat, msg as ChatUpdateC2S)
+				break
 
 			case CHAT_ACTION_C2S.USER_ENTER:
 				await this.handleUserEnter(chat, user)
@@ -103,6 +107,17 @@ export class ChatsMessages {
 	// 	this.service.chatManager.addChat(chat)
 	// 	chat.addUser(userId)
 	// }
+
+	/**
+	 * Aggiornamento generico della CHAT
+	 */
+	private async handleChatUpdate(user:AccountDTO, chat: ChatProxy, msg: ChatUpdateC2S) {
+		const userId = user?.id
+		if (!userId) throw new Error(`Invalid userId`)
+		chat.updates(msg.commands)
+	
+	}
+
 
 	/**
 	 * L'utente che ha inviato entra in una CHAT

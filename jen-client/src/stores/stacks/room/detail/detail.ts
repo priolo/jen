@@ -1,18 +1,14 @@
-import { createUUID } from "@/stores/docs/utils/factory"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE } from "@/types"
-import { ContentAskTo, LlmResponse } from "@shared/types/LlmResponse"
-import { ChatMessage } from "@shared/types/RoomActions"
 import { mixStores } from "@priolo/jon"
+import { ContentAskTo, LlmResponse } from "@shared/types/LlmResponse"
 import { buildAgentList } from "../../agent/factory"
+import agentSo from "../../agent/repo"
+import chatRepoSo from "../../chat/repo"
 import chatWSSo from "../../chat/ws"
 import { EditorState } from "../../editorBase"
-import { buildRoomDetail } from "../factory"
-import { buildAccountList } from "../../account/factory"
-import docsSo from "@/stores/docs"
-import roomApi from "@/api/room"
-import chatRepoSo from "../../chat/repo"
-import agentSo from "../../agent/repo"
+import { buildRoomAgentList, buildRoomDetail } from "../factory"
+import { ChatMessage } from "@shared/types/ChatMessage"
 
 
 
@@ -55,7 +51,7 @@ What is 2+2? Just write the answer number.`,
 		//#endregion
 
 		/** se la lista degli AGENTS è aperta */
-		getAgentsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.AGENT_LIST,
+		getRoomAgentsOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_AGENT_LIST,
 		/** se la DETAIL della ROOM è aperta */
 		getRoomDetailOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_DETAIL,
 		/** la ROOM */
@@ -65,9 +61,9 @@ What is 2+2? Just write the answer number.`,
 				roomId: store.state.roomId,
 			}
 		),
-		getAgents: (_: void, store?: RoomDetailStore) => {
-			return store.getRoom()?.agentsIds?.map(agentId => agentSo.getById(agentId)) ?? []
-		}
+		// getAgents: (_: void, store?: RoomDetailStore) => {
+		// 	return store.getRoom()?.agentsIds?.map(agentId => agentSo.getById(agentId)) ?? []
+		// }
 	},
 
 	actions: {
@@ -116,8 +112,8 @@ What is 2+2? Just write the answer number.`,
 
 		/** apertura della CARD LIST AGENTS */
 		openAgents(_: void, store?: RoomDetailStore) {
-			const isOpen = store.getAgentsOpen()
-			const view = !isOpen ? buildAgentList() : null
+			const isOpen = store.getRoomAgentsOpen()
+			const view = !isOpen ? buildRoomAgentList(store.state.roomId) : null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 		/** ho cliccato su un MESSAGE che è linked ad una SUB-ROOM */

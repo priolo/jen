@@ -28,6 +28,18 @@ const setup = {
 			const room = chat.rooms?.find(r => r.id == roomId) ?? null
 			return room
 		},
+		getRoomById(roomId: string, store?: ChatRepoStore) {
+			if (!roomId) return null
+			for ( const chat of store.state.all ?? []) {
+				const room = chat.rooms?.find(r => r.id == roomId)
+				if (room) return room
+			}
+			return null
+		},
+		getByRoomId(roomId: string, store?: ChatRepoStore): ChatDTO {
+			if (!roomId) return null
+			return store.state.all?.find(chat => chat.rooms?.some(r => r.id == roomId))
+		},
 	},
 
 	actions: {

@@ -14,10 +14,9 @@ export enum DOC_TYPE {
 
 	ROOM_DETAIL = "room",
 	ROOM_LIST = "room_list",
-
+	ROOM_AGENT_LIST = "room_agent_list",
 	
 	AGENT = "agent",
-	AGENT_LIST = "agent_list",
 
 	LLM_LIST = "llm_list",
 	LLM_DETAIL = "llm_detail",

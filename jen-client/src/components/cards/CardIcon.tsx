@@ -34,7 +34,7 @@ const CardIcon: FunctionComponent<Props> = ({
 		case DOC_TYPE.ROOM_DETAIL:
 			return null
 
-		case DOC_TYPE.AGENT_LIST:
+		case DOC_TYPE.ROOM_AGENT_LIST:
 			return null
 		case DOC_TYPE.AGENT:
 			return null

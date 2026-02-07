@@ -1,25 +1,25 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
-import { AgentLlm } from "@/types/Agent"
+import { AgentDTO } from "@shared/types/AgentDTO"
 
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<AgentLlm[]> {
+function index(opt?: CallOptions): Promise<AgentDTO[]> {
 	return ajax.get(`agents`, opt)
 }
 
 /** GET */
-function get(id: string, opt?: CallOptions): Promise<AgentLlm> {
+function get(id: string, opt?: CallOptions): Promise<AgentDTO> {
 	return ajax.get(`agents/${id}`, opt)
 }
 
 /** CREATE NEW */
-function create(agent: Partial<AgentLlm>, opt?: CallOptions): Promise<AgentLlm> {
+function create(agent: Partial<AgentDTO>, opt?: CallOptions): Promise<AgentDTO> {
 	return ajax.post(`agents`, { agent }, opt)
 }
 
 /** UPDATE */
-function update(agent: Partial<AgentLlm>, opt?: CallOptions): Promise<AgentLlm> {
+function update(agent: Partial<AgentDTO>, opt?: CallOptions): Promise<AgentDTO> {
 	return ajax.patch(`agents/${agent.id}`, { agent }, opt)
 }
 

@@ -1,4 +1,5 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
+import { AgentDTO } from "@shared/types/AgentDTO"
 import { RoomDTO } from "@shared/types/RoomDTO"
 
 
@@ -33,6 +34,11 @@ function execute(prompt: Partial<RoomDTO>, opt?: CallOptions): Promise<Partial<R
 	return ajax.post(`rooms/execute`, { prompt }, opt)
 }
 
+/** GET AGENTS */
+function getAgents(roomId: string, opt?: CallOptions): Promise<AgentDTO[]> {
+	return ajax.get(`rooms/${roomId}/agents`, opt)
+}
+
 
 const roomApi = {
 	index,
@@ -41,5 +47,7 @@ const roomApi = {
 	update,
 	remove,
 	execute,
+
+	getAgents,
 }
 export default roomApi

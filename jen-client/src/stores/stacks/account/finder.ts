@@ -1,7 +1,7 @@
 import accountApi from "@/api/account"
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
-import { AccountDTO } from "@/types/account"
+import { AccountDTO } from "@shared/types/AccountDTO"
 import { debounce } from "@/utils/time"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"

@@ -1,4 +1,4 @@
-import { AccountDTO } from '@/types/account';
+import { AccountDTO } from "@shared/types/AccountDTO"
 import { TooltipWrapCmp } from '@priolo/jack';
 import React from 'react';
 import AvatarCmp from './AvatarCmp';

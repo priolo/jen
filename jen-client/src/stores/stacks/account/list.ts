@@ -1,6 +1,6 @@
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
-import { ACCOUNT_STATUS, AccountDTO } from "@/types/account"
+import { ACCOUNT_STATUS, AccountDTO } from "@shared/types/AccountDTO"
 import { mixStores } from "@priolo/jon"
 import chatWSSo from "../chat/ws"
 import { ViewState } from "../viewBase"

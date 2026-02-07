@@ -4,14 +4,15 @@ import { DOC_TYPE } from "@/types"
 import { deepMerge } from "@/utils/object"
 import { docsSo, utils, ViewStore } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
-import { CHAT_ACTION_C2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient"
-import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ClientEnteredS2C, ClientLeaveS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer"
+import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient"
+import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage"
 import { RoomDTO } from "@shared/types/RoomDTO"
 import authSo from "../auth/repo"
 import { buildRoomDetail } from "../room/factory"
 import chatRepoSo from "./repo"
 import { ChatDTO } from "@shared/types/ChatDTO"
+import { applyJsonCommand, JsonCommand } from "@shared/update"
 
 
 
@@ -36,23 +37,6 @@ const setup = {
 	actions: {
 
 		//#region MESSAGE TO SERVER
-
-		/**
-		 * chiedo creazione di una CHAT
-		 * response CHAT_INFO
-		 */
-		// create: async (
-		// 	props: { chatId: string, agentIds: string[] },
-		// 	store?: ChatWSStore
-		// ) => {
-		// 	const { chatId, agentIds } = props
-		// 	const msgSend: ChatCreateC2S = {
-		// 		chatId: chatId,
-		// 		action: CHAT_ACTION_C2S.CHAT_CREATE_AND_ENTER,
-		// 		agentIds,
-		// 	}
-		// 	wsConnection.send(JSON.stringify(msgSend))
-		// },
 
 		/** 
 		 * entro in una CHAT e ricevo CHAT-INFO
@@ -154,6 +138,16 @@ const setup = {
 			wsConnection.send(JSON.stringify(message))
 		},
 
+		updateChat: (props: { chatId: string, commands: JsonCommand[] }, store?: ChatWSStore) => {
+			const { chatId, commands } = props
+			const message: ChatUpdateC2S = {
+				action: CHAT_ACTION_C2S.CHAT_UPDATE,
+				chatId: chatId,
+				commands: commands,
+			}
+			wsConnection.send(JSON.stringify(message))
+		},
+
 		//#endregion
 
 
@@ -204,6 +198,17 @@ const setup = {
 					// 	roomId: mainRoom.id,
 					// })
 					// deckCardsSo.add({ view, anim: true })
+					break
+				}
+
+				case CHAT_ACTION_S2C.CHAT_UPDATE2: {
+					const msg = message as ChatUpdateS2C2
+					const chat = chatRepoSo.getById(msg.chatId)
+					if (!chat) break
+					for (const command of msg.commands) {
+						applyJsonCommand(chat, command)
+					}
+					chatRepoSo.setAll([...chatRepoSo.state.all])
 					break
 				}
 

@@ -1,7 +1,7 @@
 import accountApi from "@/api/account"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
 import { EDIT_STATE } from "@/types"
-import { AccountDTO } from "@/types/account"
+import { AccountDTO } from "@shared/types/AccountDTO"
 import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
 

@@ -1,16 +1,10 @@
 import { MessageUpdate } from "./ChatMessage.js";
-
+import { JsonCommand } from "../update.js"
 
 //#region CLIENT TO SERVER
 
 export enum CHAT_ACTION_C2S {
-	/** un USER crea una CHAT e ci entra*/
-	//CHAT_CREATE_AND_ENTER = "chat-create",
-	/** un USER cerca/carica una CHAT ed entra */
-	//CHAT_LOAD_AND_ENTER = "chat-get",
 
-	/** richiesta dati */
-	//CHAT_INFO = "chat-info",
 	/** USER entra in una CHAT e riceve una CHAT-INFO*/
 	USER_ENTER = "user-enter",
 	/* USER lascia la CHAT */
@@ -26,6 +20,8 @@ export enum CHAT_ACTION_C2S {
 	ROOM_AGENTS_UPDATE = "room-agents-update",
 	/** aggiorna la HISTORY di una ROOM */
 	ROOM_HISTORY_UPDATE = "room-history-update",
+
+	CHAT_UPDATE = "chat-update",
 }
 
 export type BaseC2S = {
@@ -34,6 +30,16 @@ export type BaseC2S = {
 	/** Rifrimento alla CHAT */
 	chatId: string
 }
+
+
+
+/** CLIENT lascia una CHAT */
+export type ChatUpdateC2S = BaseC2S & {
+	action: CHAT_ACTION_C2S.CHAT_UPDATE
+	commands: JsonCommand[]
+}
+
+
 
 /** 
  * CLIENT cerca/crea una CHAT trmite l'id 

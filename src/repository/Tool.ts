@@ -2,14 +2,8 @@ import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColu
 import { AccountAssets } from './AccountAssets.js';
 import { AgentRepo } from './Agent.js';
 import { McpServerRepo } from './McpServer.js';
-
-
-
-export enum TOOL_TYPE {
-	MCP = 'MCP',
-	NODE = 'NODE',
-	CODE = 'CODE'
-}
+import { TOOL_TYPE, ToolDTO } from '@shared/types/ToolDTO.js';
+export { TOOL_TYPE } from '@shared/types/ToolDTO.js';
 
 /**
  * Rappresenta un tool utilizzabile dagli agenti
@@ -73,4 +67,28 @@ export class ToolRepo extends AccountAssets {
 
 	//#endregion
 
+}
+
+
+export function ToolDTOFromToolRepo(tool: ToolRepo): ToolDTO {
+	if (!tool) return null;
+	return {
+		id: tool.id,
+		accountId: tool.accountId,
+
+		type: tool.type,
+		name: tool.name,
+		description: tool.description,
+		parameters: tool.parameters,
+
+		mcpId: tool.mcpId,
+		code: tool.code,
+		pathNode: tool.pathNode,
+
+		agentsIds: tool.agents?.map(agent => agent.id).filter(Boolean) as string[] || [],
+	};
+}
+
+export function ToolDTOFromToolRepoList(tools: ToolRepo[]) {
+	return tools.map(tool => ToolDTOFromToolRepo(tool));
 }

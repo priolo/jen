@@ -1,7 +1,7 @@
 import authApi from "@/api/auth";
 import authEmailApi from "@/api/authEmail";
 import { wsConnection } from "@/plugins/session/wsConnection";
-import { AccountDTO } from "@/types/account";
+import { AccountDTO } from "@shared/types/AccountDTO"
 import { StoreCore, createStore } from "@priolo/jon";
 
 

@@ -4,9 +4,11 @@ import { RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
 import { AccountDTOFromAccountRepoList } from '@/repository/Account.js';
 import { AccountDTO } from '@shared/types/AccountDTO.js';
-import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
 import { MessageUpdate } from "@shared/types/ChatMessage.js";
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
+import { ChatUpdateC2S } from '@shared/types/ChatActionsClient.js';
+import { applyJsonCommand, JsonCommand } from '@shared/update.js';
 
 
 
@@ -176,7 +178,7 @@ class ChatProxy {
 	removeParticipant(userId: string) {
 		if (!this.getPartecipantById(userId)) return
 
-		// elimino l'utente anche tra quelli online (se c'e')
+		//elimino l'utente anche tra quelli online (se c'e')
 		this.removeUser(userId)
 
 		this.chat.users = this.chat.users.filter(u => u.id != userId)
@@ -255,6 +257,24 @@ class ChatProxy {
 			agentsIds: agentsIds,
 		}
 		this.sendMessage(msg)
+	}
+
+
+
+
+
+
+
+
+	updates(commands: JsonCommand[]) {
+		for (const command of commands) {
+			applyJsonCommand(this.chatRepo, command)
+		}
+		this.sendMessage(<ChatUpdateS2C2>{
+			action: CHAT_ACTION_S2C.CHAT_UPDATE2,
+			chatId: this.chat.id,
+			commands: commands,
+		})
 	}
 
 

@@ -1,3 +1,4 @@
+import { JsonCommand } from "@shared/update.js";
 import { AccountDTO } from "./AccountDTO.js";
 import { ChatDTO } from "./ChatDTO.js";
 import { MessageUpdate, UPDATE_TYPE } from "./ChatMessage.js";
@@ -9,6 +10,7 @@ export enum CHAT_ACTION_S2C {
 
 	/** I dati di una CHAT-ONLINE */
 	CHAT_UPDATE = "chat-update",
+	CHAT_UPDATE2 = "chat-update-2",
 
 	/** un CLIENT è entrato in CHAT. Potrebbe essere anche un AGENT*/
 	CLIENT_ENTERED = "user-entered",
@@ -40,6 +42,10 @@ export type ChatUpdateS2C = BaseS2C & {
 	type?: UPDATE_TYPE
 	/**  CHAT parziale di aggiornamento */
 	chat: Partial<ChatDTO>
+}
+export type ChatUpdateS2C2 = BaseS2C & {
+	action: CHAT_ACTION_S2C.CHAT_UPDATE
+	commands: JsonCommand[]
 }
 
 /** un CLIENT è entrato in una CHAT */

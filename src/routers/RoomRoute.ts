@@ -1,8 +1,10 @@
-import { SERVICE_PATHS } from "@/config.js";
+import { REPO_PATHS, SERVICE_PATHS } from "@/config.js";
 import { RoomRepo } from "../repository/Room.js";
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { ChatsWSService } from "./ChatsWSRoute.js";
+import { FindManyOptions } from "typeorm";
+import { AgentDTOFromAgentRepoList, AgentRepo } from "@/repository/Agent.js";
 
 
 
@@ -12,19 +14,20 @@ class RoomRoute extends httpRouter.Service {
 		return {
 			...super.stateDefault,
 			path: "/rooms",
-			repository: "/typeorm/rooms",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
 				{ path: "/", verb: "post", method: "create" },
 				{ path: "/:id", verb: "delete", method: "delete" },
+
+				{ path: "/:id/agents", verb: "get", method: "getAgents" },
 			]
 		}
 	}
 	declare state: typeof this.stateDefault
 
 	async getAll(req: Request, res: Response) {
-		const rooms = await new Bus(this, this.state.repository).dispatch({
+		const rooms = await new Bus(this, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.ALL
 		})
 		res.json(rooms)
@@ -33,7 +36,7 @@ class RoomRoute extends httpRouter.Service {
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
 		// verifico che non ci sia gia' in MEM
-		const chatWS = this.nodeByPath<ChatsWSService>( SERVICE_PATHS.CHATS_WS)
+		const chatWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
 		let room = chatWS?.chatManager.getChatById(id)
 
 		// const room: RoomRepo = await new Bus(this, this.state.repository).dispatch({
@@ -45,7 +48,7 @@ class RoomRoute extends httpRouter.Service {
 
 	async create(req: Request, res: Response) {
 		const { room }: { room: RoomRepo } = req.body
-		const roomNew: RoomRepo = await new Bus(this, this.state.repository).dispatch({
+		const roomNew: RoomRepo = await new Bus(this, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.SAVE,
 			payload: room
 		})
@@ -54,7 +57,7 @@ class RoomRoute extends httpRouter.Service {
 
 	async delete(req: Request, res: Response) {
 		const id = req.params["id"]
-		await new Bus(this, this.state.repository).dispatch({
+		await new Bus(this, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.DELETE,
 			payload: id
 		})
@@ -65,11 +68,28 @@ class RoomRoute extends httpRouter.Service {
 		const id = req.params["id"]
 		const { room }: { room: RoomRepo } = req.body
 		if (!id || !room) return
-		const roomUp = await new Bus(this, this.state.repository).dispatch({
+		const roomUp = await new Bus(this, REPO_PATHS.ROOMS).dispatch({
 			type: typeorm.Actions.SAVE,
 			payload: room,
 		})
 		res.json(roomUp)
+	}
+
+	async getAgents(req: Request, res: Response) {
+		const roomId = req.params["id"]
+		if (!roomId) return res.status(400).json({ error: "Bad Request" })
+
+		const agents: AgentRepo[] = await new Bus(this, REPO_PATHS.AGENTS).dispatch({
+			type: typeorm.Actions.FIND,
+			payload: <FindManyOptions<AgentRepo>>{
+				where: {
+					rooms: { id: roomId }
+				}
+			}
+		})
+		
+		const agentsDTO = AgentDTOFromAgentRepoList(agents)
+		res.json(agentsDTO)
 	}
 
 }

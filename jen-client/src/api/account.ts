@@ -1,5 +1,5 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService";
-import { AccountDTO } from "../types/account";
+import { AccountDTO } from "@shared/types/AccountDTO"
 
 
 

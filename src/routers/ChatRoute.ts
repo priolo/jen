@@ -67,6 +67,7 @@ class ChatRoute extends httpRouter.Service {
 		const chat: ChatRepo = await this.getByIdInternal(id, userJwt.id)
 		res.json(chat)
 	}
+	
 	private async getByIdInternal(chatId: string, userId: string): Promise<ChatRepo> {
 		const chat: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.FIND_ONE,

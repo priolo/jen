@@ -5,13 +5,13 @@ import chatRepoSo from "@/stores/stacks/chat/repo"
 import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { FloatButton, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { ChatMessage } from "@shared/types/RoomActions"
 import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import MessageCmp from "./history/MessageCmp"
 import RoleDialog from "./RoleDialog"
+import { ChatMessage } from "@shared/types/ChatMessage"
 
 
 

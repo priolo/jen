@@ -6,6 +6,13 @@ import { mixStores } from "@priolo/jon"
 import { RoomDetailStore } from "./detail.js"
 import { AgentDetailStore } from "../../agent/detail.js"
 import { buildAgentDetail, buildAgentDetailNew } from "../../agent/factory.js"
+import agentApi from "@/api/agent.js"
+import roomApi from "@/api/room.js"
+import { AgentDTO } from "@shared/types/AgentDTO.js"
+import { add } from "@priolo/jon-utils/dist/object/diff.js"
+import chatRepoSo from "../../chat/repo.js"
+import { JsonCommand, TYPE_JSON_COMMAND } from "@shared/update.js"
+import chatWSSo from "../../chat/ws.js"
 
 
 
@@ -17,8 +24,8 @@ const setup = {
 		widthMax: 1000,
 		//#endregion
 
-		noSelection: <boolean>false,
-		selectedIds: <string[]>[],
+		roomId: <string>null,
+		agents: <AgentDTO[]>null,
 	},
 
 	getters: {
@@ -29,11 +36,15 @@ const setup = {
 			const state = store.state as RoomAgentsListState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
-				selectedIds: state.selectedIds,
+				roomId: state.roomId,
 			}
 		},
 		//#endregion
 
+		getSelectableAgents: (_: void, store?: RoomAgentsListStore) => {
+			const roomAgentsIds = store.state.agents?.map(a => a.id) ?? []
+			return agentSo.state.all?.filter(agent => !roomAgentsIds.includes(agent.id)) ?? []
+		}
 	},
 
 	actions: {
@@ -42,26 +53,67 @@ const setup = {
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
 			const state = store.state as RoomAgentsListState
-			state.selectedIds = data.selectedIds ?? []
+			state.roomId = data.roomId
 		},
 		//#endregion
 
-		//#region OVERRIDE LOADBASE
 
+
+		//#region OVERRIDE LOADBASE
+		
+		/**
+		 * inizializzo la lista con gli AGENTI della ROOM
+		 */
+		async fetch(_: void, store?: LoadBaseStore) {
+			const agentsSo = store as RoomAgentsListStore
+			const agents = await roomApi.getAgents(agentsSo.state.roomId, { store })
+			agentsSo.setAgents(agents)
+		},
+
+		async fetchIfVoid(_: void, store?: RoomAgentsListStore) {
+			if (!!store.state.agents) return
+			await store.fetch()
+		},
 
 		//#endregion
 
 		/**
-		 * inizializzo la lista con gli AGENTI della ROOM
+		 * Aggiunge un AGENTE alla ROOM
 		 */
-		init(_: void, store?: RoomAgentsListStore) {
-			let selectedIds: string[] = []
-			const parent = store.state.parent as RoomDetailStore
-			if (!!parent && parent.state.type == DOC_TYPE.ROOM_DETAIL) {
-				selectedIds = parent.getRoom()?.agentsIds ?? []
+		addAgent(agent: AgentDTO, store?: RoomAgentsListStore) {
+			const cmm:JsonCommand = {
+				type: TYPE_JSON_COMMAND.MERGE,
+				path: `rooms.{id:${store.state.roomId}}.agentsIds`,
+				value: agent.id,
 			}
-			store.setSelectedIds(selectedIds)
+			const chat = chatRepoSo.getByRoomId(store.state.roomId)
+			chatWSSo.updateChat({
+				chatId: chat.id,
+				commands: [ cmm ],
+			})
+
+			// const room = chatRepoSo.getRoomById(store.state.roomId)
+			// const agentsSo = store as RoomAgentsListStore
+			// const roomId = agentsSo.state.roomId
+			// roomApi.addAgent(roomId, agent.id, { store }).then(() => {
+			// 	agentsSo.setAgents([ ...(agentsSo.state.agents ?? []), agent ])
+			// })
 		},
+		removeAgent(agent: AgentDTO, store?: RoomAgentsListStore) {
+			const cmm:JsonCommand = {
+				type: TYPE_JSON_COMMAND.DELETE,
+				path: `rooms.{id:${store.state.roomId}}.agentsIds`,
+				value: agent.id,
+			}
+			const chat = chatRepoSo.getByRoomId(store.state.roomId)
+			chatWSSo.updateChat({
+				chatId: chat.id,
+				commands: [ cmm ],
+			})
+		},
+
+
+
 
 		/** apro/chiudo la CARD del dettaglio */
 		openDetail(agentId: string, store?: RoomAgentsListStore) {
@@ -107,10 +159,12 @@ const setup = {
 			})
 		},
 
+
+
 	},
 
 	mutators: {
-		setSelectedIds: (selectedIds: string[]) => ({ selectedIds }),
+		setAgents: (agents: AgentDTO[]) => ({ agents }),
 	},
 }
 

@@ -3,10 +3,10 @@ import { findInRoot } from "@/stores/docs/utils/manage"
 import { MESSAGE_TYPE } from "@/stores/log/utils"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE, EDIT_STATE } from "@/types"
-import { StoreCore, mixStores } from "@priolo/jon"
+import { loadBaseSetup, LoadBaseState, LoadBaseStore } from "@priolo/jack"
+import { mixStores } from "@priolo/jon"
+import { AccountDTO } from "@shared/types/AccountDTO"
 import { UsersState, UsersStore } from "."
-import { AccountDTO } from "../../../types/account"
-import { loadBaseSetup, LoadBaseState, LoadBaseStore, VIEW_SIZE } from "@priolo/jack"
 import docApi from "../../../api/doc"
 
 

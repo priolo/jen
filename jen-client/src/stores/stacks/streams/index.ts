@@ -1,9 +1,8 @@
-import { ViewState, ViewStore, default as docSetup, default as viewSetup } from "@/stores/stacks/viewBase"
-import { AccountDTO } from "@/types/account"
-import { mixStores, StoreCore } from "@priolo/jon"
-import accountApi from "../../../api/account"
-import { buildUser } from "./utils/factory"
+import { default as docSetup, default as viewSetup, ViewState, ViewStore } from "@/stores/stacks/viewBase"
+import { AccountDTO } from "@shared/types/AccountDTO"
 import { loadBaseSetup, LoadBaseState, LoadBaseStore } from "@priolo/jack"
+import { mixStores } from "@priolo/jon"
+import { buildUser } from "./utils/factory"
 
 
 

@@ -1,4 +1,4 @@
-import AgentListView from "@/app/cards/agent/ListView"
+import RoomAgentListView from "@/app/cards/room/detail/RoomAgentListView"
 import AgentView from "@/app/cards/agent/detail/View"
 import ChatListView from "@/app/cards/chat/ListView"
 import LlmListView from "@/app/cards/llm/ListView"
@@ -43,6 +43,7 @@ import { AccountListStore } from "../../stores/stacks/account/list"
 import { ReflectionStore } from "../../stores/stacks/reflection"
 import ChatDetailView from "@/app/cards/chat/detail/View"
 import { ChatDetailStore } from "@/stores/stacks/chat/detail"
+import { RoomAgentsListStore } from "@/stores/stacks/room/detail/roomAgentsList"
 
 
 
@@ -78,6 +79,8 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 				return <RoomView store={view as RoomDetailStore} />
 			case DOC_TYPE.ROOM_LIST:
 				return <RootListView store={view as PromptListStore} />
+			case DOC_TYPE.ROOM_AGENT_LIST:
+				return <RoomAgentListView store={view as RoomAgentsListStore} />
 
 
 
@@ -89,8 +92,6 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 
 			case DOC_TYPE.AGENT:
 				return <AgentView store={view as AgentDetailStore} />
-			case DOC_TYPE.AGENT_LIST:
-				return <AgentListView store={view as AgentListStore} />
 
 			case DOC_TYPE.LLM_LIST:
 				return <LlmListView store={view as LlmListStore} />

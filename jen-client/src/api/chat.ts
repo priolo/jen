@@ -28,6 +28,9 @@ function remove(id: string, opt?: CallOptions): Promise<void> {
 	return ajax.delete(`chats/${id}`, null, opt)
 }
 
+
+// TODO da cambiare nome
+
 /** Invita un USER */
 function inviteUser(id: string, userId: string, opt?: CallOptions): Promise<void> {
 	return ajax.post(`chats/${id}/invite`, { userId }, opt)

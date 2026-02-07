@@ -22,6 +22,7 @@ import { ChatsWSConf, ChatsWSService } from "./routers/ChatsWSRoute.js";
 import ToolRoute from "./routers/ToolRoute.js";
 import tools from "./startup/config_tools.js";
 import { getDBConnectionConfig } from './startup/dbConfig.js';
+import RoomRoute from "./routers/RoomRoute.js";
 
 
 
@@ -131,7 +132,7 @@ function buildNodeConfig(params?: ConfigParams) {
 								{ class: ChatRoute },
 								// { class: AuthRoute },
 								{ class: AccountRoute },
-								//{ class: RoomRoute },
+								{ class: RoomRoute },
 							],
 						},
 

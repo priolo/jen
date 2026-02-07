@@ -4,14 +4,13 @@ import OnlineIcon from "@/components/OnlineIcon"
 import ElementRow from "@/components/rows/ElementRow.js"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountListStore } from "@/stores/stacks/account/list"
-import chatWSSo from "@/stores/stacks/chat/ws"
+import chatRepoSo from "@/stores/stacks/chat/repo"
 import { DOC_TYPE } from "@/types"
-import { ACCOUNT_STATUS, AccountDTO } from "@/types/account"
 import { AlertDialog } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
+import { ACCOUNT_STATUS, AccountDTO } from "@shared/types/AccountDTO"
 import { FunctionComponent, useMemo } from "react"
 import ActionsCmp from "./Actions"
-import chatRepoSo from "@/stores/stacks/chat/repo"
 
 
 

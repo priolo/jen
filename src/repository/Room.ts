@@ -1,11 +1,11 @@
 import type { Relation } from 'typeorm';
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { ChatMessage } from "@shared/types/RoomActions.js";
 import { AgentRepo } from './Agent.js';
 import { ChatRepo } from './Chat.js';
 import { AccountAssets } from './AccountAssets.js';
 import { randomUUID } from 'crypto';
 import { RoomDTO } from '@shared/types/RoomDTO.js';
+import { ChatMessage } from '@shared/types/ChatMessage.js';
 
 
 /**

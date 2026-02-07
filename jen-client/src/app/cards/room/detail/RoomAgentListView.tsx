@@ -1,13 +1,13 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import agentSo from "@/stores/stacks/agent/repo"
-import { RoomAgentsListStore } from "@/stores/stacks/room/detail/agentsList"
-import { AgentLlm } from "@/types/Agent"
+import { RoomAgentsListStore } from "@/stores/stacks/room/detail/roomAgentsList"
 import { AlertDialog, Button, IconToggle, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect, useMemo } from "react"
-import EditorIcon from "../../../icons/EditorIcon"
-import clsCard from "../CardCyanDef.module.css"
+import EditorIcon from "../../../../icons/EditorIcon"
+import clsCard from "../../CardCyanDef.module.css"
+import { AgentDTO } from "@shared/types/AgentDTO"
 
 
 
@@ -15,7 +15,7 @@ interface Props {
 	store?: RoomAgentsListStore
 }
 
-const AgentListView: FunctionComponent<Props> = ({
+const RoomAgentListView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
@@ -26,41 +26,25 @@ const AgentListView: FunctionComponent<Props> = ({
 
 
 	// HOOKs
-
 	useEffect(() => {
-		store.init()
+		store.fetchIfVoid()
 	}, [])
 
-	const { checked, unchecked } = useMemo(() => {
-		const all = agentSo.state.all?.sort((c1, c2) => c1.name?.localeCompare(c2.name)) ?? []
-		const { chacked, unchecked } = all?.reduce((acc, agent) => {
-			if (store.state.selectedIds.includes(agent.id)) {
-				acc.chacked.push(agent)
-			} else {
-				acc.unchecked.push(agent)
-			}
-			return acc
-		}, { chacked: [] as AgentLlm[], unchecked: [] as AgentLlm[] }) ?? { chacked: [], unchecked: [] }
-		return { checked: chacked, unchecked }
-	}, [agentSo.state.all, store.state.selectedIds])
-
+	const selectable = useMemo(() => store.getSelectableAgents(), [agentSo.state.all, store.state.agents])
+	const selected = store.state.agents ?? []
 
 	// HANDLER
-	const handleSelect = (agent: AgentLlm) => store.openDetail(agent.id)
+	const handleSelect = (agent: AgentDTO) => store.openDetail(agent.id)
 	const handleNew = () => store.create()
 	const handleDelete = () => store.delete(selectId)
-	const handleToggle = (agent: AgentLlm, check: boolean) => {
-		const selectedIds = !check
-			? store.state.selectedIds.filter(id => id !== agent.id)
-			: [...store.state.selectedIds, agent.id]
-		store.setSelectedIds(selectedIds)
-	}
+	const handleAdd = (agent: AgentDTO) => store.addAgent(agent)
+	const handleRemove = (agent: AgentDTO) => store.removeAgent(agent)
 
 
 	// RENDER
 	const selectId = (store.state.linked as AgentDetailStore)?.state?.agent?.id
-	const isSelected = (agent: AgentLlm) => agent.id == selectId
-	const isChecked = (agent: AgentLlm) => store.state.selectedIds.includes(agent.id)
+	const isSelected = (agent: AgentDTO) => agent.id == selectId
+	const isChecked = (agent: AgentDTO) => null //store.state.selectedIds.includes(agent.id)
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -89,11 +73,11 @@ const AgentListView: FunctionComponent<Props> = ({
 		<div className="jack-lbl-prop">SELECTED</div>
 
 		<div className={clsCard.content}>
-			{checked?.map((agent) => {
+			{selected?.map((agent) => {
 				return <div key={agent.id} style={{ display: "flex" }}>
 					<IconToggle
 						check={isChecked(agent)}
-						onChange={(check) => handleToggle(agent, check)}
+						onChange={(check) => handleRemove(agent)}
 					/>
 					<div
 						onClick={(e) => handleSelect(agent)}
@@ -101,21 +85,19 @@ const AgentListView: FunctionComponent<Props> = ({
 				</div>
 			})}
 
-			{!checked?.length &&
+			{!selected?.length &&
 				<div className="jack-lbl-empty">NO AGENTS SELECTED</div>
 			}
-
-
 
 			<div className="jack-divider-h" />
 
 			<div className="jack-lbl-prop">SELECTABLE</div>
 
-			{unchecked?.map((agent) => {
+			{selectable?.map((agent) => {
 				return <div key={agent.id} style={{ display: "flex" }}>
 					<IconToggle
 						check={isChecked(agent)}
-						onChange={(check) => handleToggle(agent, check)}
+						onChange={(check) => handleAdd(agent)}
 					/>
 					<div
 						onClick={(e) => handleSelect(agent)}
@@ -130,4 +112,4 @@ const AgentListView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default AgentListView
+export default RoomAgentListView

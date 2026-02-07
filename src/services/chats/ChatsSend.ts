@@ -1,7 +1,7 @@
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { ws } from "@priolo/julian"
 import { AccountDTO } from "@shared/types/AccountDTO.js"
-import { BaseS2C } from "@shared/types/RoomActions.js"
+import { BaseS2C } from "@shared/types/ChatActionsServer.js"
 
 
 

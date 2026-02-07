@@ -27,7 +27,7 @@ export function buildAgentDetailNew() {
 
 export function buildAgentList() {
 	const store = buildStore({
-		type: DOC_TYPE.AGENT_LIST,
+		type: DOC_TYPE.ROOM_AGENT_LIST,
 	} as AgentListState) as AgentListStore
 	return store;
 }

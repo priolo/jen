@@ -24,6 +24,7 @@ import accountDetailSetup from "@/stores/stacks/account/detail";
 import accountFinderSetup from "@/stores/stacks/account/finder";
 import chatListSetup from "@/stores/stacks/chat/list";
 import chatDetailSetup from "@/stores/stacks/chat/detail";
+import roomAgentsListSetup from "@/stores/stacks/room/detail/roomAgentsList";
 
 
 
@@ -62,10 +63,9 @@ export function buildStore(state: Partial<ViewState>, stateSerializzation?: Part
 
 		[DOC_TYPE.ROOM_DETAIL]: roomDetailSetup,
 		[DOC_TYPE.ROOM_LIST]: null/*promptListSetup*/,
-
+		[DOC_TYPE.ROOM_AGENT_LIST]: roomAgentsListSetup,
 
 		[DOC_TYPE.AGENT]: agentDetailSetup,
-		[DOC_TYPE.AGENT_LIST]: agentListSetup,
 
 		[DOC_TYPE.LLM_LIST]: llmListSetup,
 		[DOC_TYPE.LLM_DETAIL]: llmDetailSetup,

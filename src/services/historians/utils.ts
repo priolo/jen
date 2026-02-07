@@ -1,5 +1,5 @@
+import { ChatMessage } from "@shared/types/ChatMessage.js"
 import { LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/LlmResponse.js"
-import { ChatMessage } from "@shared/types/RoomActions.js"
 
 
 

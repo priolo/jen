@@ -1,5 +1,5 @@
+import { MessageUpdate, UPDATE_TYPE } from "@shared/types/ChatMessage.js";
 import { RoomRepo } from "../../repository/Room.js";
-import { MessageUpdate, UPDATE_TYPE } from "@shared/types/RoomActions.js";
 
 
 
