@@ -44,7 +44,7 @@ export type ChatUpdateS2C = BaseS2C & {
 	chat: Partial<ChatDTO>
 }
 export type ChatUpdateS2C2 = BaseS2C & {
-	action: CHAT_ACTION_S2C.CHAT_UPDATE
+	action: CHAT_ACTION_S2C.CHAT_UPDATE2
 	commands: JsonCommand[]
 }
 
