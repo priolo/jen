@@ -1,17 +1,14 @@
+import roomApi from "@/api/room.js"
 import agentSo from "@/stores/stacks/agent/repo.js"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { DOC_TYPE } from "@/types/index.js"
+import { EDIT_STATE } from "@/types/index.js"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { RoomDetailStore } from "./detail.js"
+import { AgentDTO } from "@shared/types/AgentDTO.js"
+import { JsonCommand, TYPE_JSON_COMMAND } from "@shared/update.js"
 import { AgentDetailStore } from "../../agent/detail.js"
 import { buildAgentDetail, buildAgentDetailNew } from "../../agent/factory.js"
-import agentApi from "@/api/agent.js"
-import roomApi from "@/api/room.js"
-import { AgentDTO } from "@shared/types/AgentDTO.js"
-import { add } from "@priolo/jon-utils/dist/object/diff.js"
 import chatRepoSo from "../../chat/repo.js"
-import { JsonCommand, TYPE_JSON_COMMAND } from "@shared/update.js"
 import chatWSSo from "../../chat/ws.js"
 
 
@@ -22,10 +19,12 @@ const setup = {
 		//#region VIEWBASE
 		width: 370,
 		widthMax: 1000,
+		editState: EDIT_STATE.READ,
 		//#endregion
 
 		roomId: <string>null,
 		agents: <AgentDTO[]>null,
+		agentsInEdit: <AgentDTO[]>null,
 	},
 
 	getters: {
@@ -42,7 +41,7 @@ const setup = {
 		//#endregion
 
 		getSelectableAgents: (_: void, store?: RoomAgentsListStore) => {
-			const roomAgentsIds = store.state.agents?.map(a => a.id) ?? []
+			const roomAgentsIds = store.state.agentsInEdit?.map(a => a.id) ?? []
 			return agentSo.state.all?.filter(agent => !roomAgentsIds.includes(agent.id)) ?? []
 		}
 	},
@@ -60,7 +59,7 @@ const setup = {
 
 
 		//#region OVERRIDE LOADBASE
-		
+
 		/**
 		 * inizializzo la lista con gli AGENTI della ROOM
 		 */
@@ -78,38 +77,64 @@ const setup = {
 		//#endregion
 
 		/**
+		 * inizia l'editing
+		 */
+		edit(_: void, store?: RoomAgentsListStore) {
+			store.setAgentsInEdit([...store.state.agents])
+			store.setEditState(EDIT_STATE.EDIT)
+		},
+		/**
+		 * termina una sessione di editing
+		 */
+		cancel: (_: void, store?: RoomAgentsListStore) => {
+			store.setEditState(EDIT_STATE.READ)
+			store.setAgentsInEdit(null)
+		},
+		/**
+		 * Salva le modifiche effettuate
+		 */
+		save: async (_: void, store?: RoomAgentsListStore) => {
+			store.setEditState(EDIT_STATE.READ)
+
+			const cmm: JsonCommand = {
+				type: TYPE_JSON_COMMAND.SET,
+				path: `rooms.{"id":"${store.state.roomId}"}.agentsIds`,
+				value: store.state.agentsInEdit?.map(a => a.id) ?? [],
+			}
+			const chat = chatRepoSo.getByRoomId(store.state.roomId)
+			chatWSSo.updateChat({ chatId: chat.id, commands: [cmm] })
+
+			//store.setAgents([...store.state.agentsInEdit])
+		},
+
+		/**
 		 * Aggiunge un AGENTE alla ROOM
 		 */
 		addAgent(agent: AgentDTO, store?: RoomAgentsListStore) {
-			const cmm:JsonCommand = {
-				type: TYPE_JSON_COMMAND.MERGE,
-				path: `rooms.{id:${store.state.roomId}}.agentsIds`,
-				value: agent.id,
-			}
-			const chat = chatRepoSo.getByRoomId(store.state.roomId)
-			chatWSSo.updateChat({
-				chatId: chat.id,
-				commands: [ cmm ],
-			})
-
-			// const room = chatRepoSo.getRoomById(store.state.roomId)
-			// const agentsSo = store as RoomAgentsListStore
-			// const roomId = agentsSo.state.roomId
-			// roomApi.addAgent(roomId, agent.id, { store }).then(() => {
-			// 	agentsSo.setAgents([ ...(agentsSo.state.agents ?? []), agent ])
+			store.setAgentsInEdit([...(store.state.agentsInEdit ?? []), agent])
+			// const cmm:JsonCommand = {
+			// 	type: TYPE_JSON_COMMAND.MERGE,
+			// 	path: `rooms.{"id":"${store.state.roomId}"}.agentsIds`,
+			// 	value: agent.id,
+			// }
+			// const chat = chatRepoSo.getByRoomId(store.state.roomId)
+			// chatWSSo.updateChat({
+			// 	chatId: chat.id,
+			// 	commands: [ cmm ],
 			// })
 		},
 		removeAgent(agent: AgentDTO, store?: RoomAgentsListStore) {
-			const cmm:JsonCommand = {
-				type: TYPE_JSON_COMMAND.DELETE,
-				path: `rooms.{id:${store.state.roomId}}.agentsIds`,
-				value: agent.id,
-			}
-			const chat = chatRepoSo.getByRoomId(store.state.roomId)
-			chatWSSo.updateChat({
-				chatId: chat.id,
-				commands: [ cmm ],
-			})
+			store.setAgentsInEdit(store.state.agentsInEdit?.filter(a => a.id != agent.id) ?? [])
+			// const cmm:JsonCommand = {
+			// 	type: TYPE_JSON_COMMAND.DELETE,
+			// 	path: `rooms.{"id":"${store.state.roomId}"}.agentsIds`,
+			// 	value: agent.id,
+			// }
+			// const chat = chatRepoSo.getByRoomId(store.state.roomId)
+			// chatWSSo.updateChat({
+			// 	chatId: chat.id,
+			// 	commands: [ cmm ],
+			// })
 		},
 
 
@@ -165,6 +190,8 @@ const setup = {
 
 	mutators: {
 		setAgents: (agents: AgentDTO[]) => ({ agents }),
+		setAgentsInEdit: (agentsInEdit: AgentDTO[]) => ({ agentsInEdit }),
+		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }
 

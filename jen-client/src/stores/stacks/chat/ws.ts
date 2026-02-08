@@ -19,7 +19,7 @@ import { applyJsonCommand, JsonCommand } from "@shared/update"
 const setup = {
 
 	state: {
-		/** è praticamente un proxy delle CHAT presenti sul server */
+		/** la lista delle CHAT-ID che ho aperto sul FE */
 		all: <string[]>[],
 		/** indica se è connesso al server WS */
 		online: <boolean>false,
@@ -216,7 +216,7 @@ const setup = {
 					const msg = message as ClientEnteredS2C
 					const chat = chatRepoSo.getById(msg.chatId)
 					if (!chat) break
-					chat.clients.push(msg.user)
+					chat.onlineUserIds.push(msg.user.id)
 					chatRepoSo.setAll([...chatRepoSo.state.all])
 					break
 				}
@@ -237,7 +237,7 @@ const setup = {
 						break
 					}
 					// elimino degli user ONLINE
-					chat.clients = chat.clients.filter(c => c.id != msg.userId)
+					chat.onlineUserIds = chat.onlineUserIds.filter(id => id != msg.userId)
 					chatRepoSo.setAll([...chatRepoSo.state.all])
 					break
 				}

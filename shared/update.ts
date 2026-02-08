@@ -49,6 +49,32 @@ export function applyJsonCommand(json: any, command: JsonCommand): any {
 }
 
 
+
+/**
+ * Matcha un path con un pattern, supporta wildcard * che matcha qualsiasi blocco, restituendo i blocchi wildcard in un array
+ */
+export function matchPath(path: string, pattern: string) {
+	const pathBlocks = path.split(".")
+	const patternBlocks = pattern.split(".")
+	const res = []
+	if ( pathBlocks.length != patternBlocks.length) return false
+	for (let i = 0; i < patternBlocks.length; i++) {
+		const pathBlock = pathBlocks[i]
+		const patternBlock = patternBlocks[i]
+		if (patternBlock === "*") {
+			if (pathBlock.startsWith("{") && pathBlock.endsWith("}")) {
+				res.push(JSON.parse(pathBlock))
+			} else {
+				res.push(pathBlock)
+			}
+			continue
+		}
+		if ( patternBlock != pathBlock) return null
+	}
+	return res
+}
+
+
 /** confronta deboolmente due oggetti, true se tutti i campi di conf sono presenti in value e con lo stesso valore */
 const isWeakly = (value: any, conf: any) => Object.keys(conf).every(key => key in value && value[key] === conf[key])
 
@@ -71,7 +97,7 @@ function normalizePath(value: any, path: string): string | number {
 /**
  * resttuisce un riferimento al campo specificato dal path, supporta array con indici dinamici o oggetti di ricerca
  */
-function getRef(json: any, path: string): Ref {
+function getRef(json: any, path: string, noCreate?: boolean): Ref {
 	const pathParts = path.split(".")
 
 	let current: any = json

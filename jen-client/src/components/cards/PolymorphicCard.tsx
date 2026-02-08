@@ -1,4 +1,4 @@
-import RoomAgentListView from "@/app/cards/room/detail/RoomAgentListView"
+import RoomAgentListView from "@/app/cards/room/agents/RoomAgentListView"
 import AgentView from "@/app/cards/agent/detail/View"
 import ChatListView from "@/app/cards/chat/ListView"
 import LlmListView from "@/app/cards/llm/ListView"

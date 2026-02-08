@@ -9,12 +9,10 @@ import { DOC_TYPE } from "@/types"
 
 interface Props {
 	store?: RoomDetailStore
-	style?: React.CSSProperties
 }
 
 const ActionsCmp: FunctionComponent<Props> = ({
 	store,
-	style,
 }) => {
 
 	// STORE
@@ -46,7 +44,6 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 	return (<div
 		className={cls.actions}
-		style={style}
 	>
 		{/* {canInvite && (
 			<TooltipWrapCmp content="Invite new users to the room">

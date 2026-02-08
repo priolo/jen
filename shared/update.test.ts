@@ -1,4 +1,4 @@
-import { applyJsonCommand, JsonCommand, TYPE_JSON_COMMAND } from './update';
+import { applyJsonCommand, JsonCommand, matchPath, TYPE_JSON_COMMAND } from './update';
 
 describe('applyJsonCommand', () => {
 	let data: any;
@@ -22,6 +22,26 @@ describe('applyJsonCommand', () => {
 	});
 
 	//#region SET tests
+
+
+
+
+
+
+	// test('Create if not exist', () => {
+	// 	const command: JsonCommand = {
+	// 		type: TYPE_JSON_COMMAND.SET,
+	// 		path: 'test.tst2',
+	// 		value: "pippo"
+	// 	};
+	// 	applyJsonCommand(data, command);
+	// 	expect(data.user.details.age).toBe(31);
+	// });
+
+
+
+
+
 
 	test('should SET a nested object property', () => {
 		const command: JsonCommand = {
@@ -139,5 +159,38 @@ describe('applyJsonCommand', () => {
 	});
 
 	//#endregion
-	
+
+
+	//#region matchPath tests
+
+	test('should return true for exact match', () => {
+        expect(matchPath("a.b.c", "a.b.c")).toBe(true)
+        expect(matchPath("one", "one")).toBe(true)
+    })
+
+    test('should return false for different lengths', () => {
+        expect(matchPath("a.b.c", "a.b")).toBe(false)
+        expect(matchPath("a.b", "a.b.c")).toBe(false)
+    })
+
+    test('should return false for content mismatch', () => {
+        expect(matchPath("a.b.c", "a.b.d")).toBe(false)
+        expect(matchPath("a.b.c", "x.b.c")).toBe(false)
+    })
+
+    test('should support wildcards', () => {
+        expect(matchPath("a.b.c", "a.*.c")).toBe(true)
+        expect(matchPath("a.b.c", "*.b.c")).toBe(true)
+        expect(matchPath("a.b.c", "a.b.*")).toBe(true)
+        expect(matchPath("a.b.c", "*.*.*")).toBe(true)
+    })
+
+    test('should match mixed wildcard and values correctly', () => {
+        // Length matches, wildcard matches middle, but end mismatch
+        expect(matchPath("a.b.c", "a.*.d")).toBe(false)
+        // Length matches, start matches, wildcard matches end
+        expect(matchPath("context.user.id", "context.user.*")).toBe(true)
+    })
+
+	//#endregion
 });

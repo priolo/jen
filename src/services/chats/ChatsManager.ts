@@ -1,9 +1,11 @@
 import { REPO_PATHS } from "@/config.js"
-import { ChatRepo } from "@/repository/Chat.js"
+import { ChatDTOFromChatRepo, ChatRepo } from "@/repository/Chat.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { Bus, typeorm } from "@priolo/julian"
 import { FindOneOptions } from "typeorm"
 import ChatProxy from "./ChatProxy.js"
+import { RoomRepo } from "@/repository/Room.js"
+import { ChatDTO } from "@shared/types/ChatDTO.js"
 
 
 /**
@@ -54,20 +56,20 @@ export class ChatsManager {
 	/** 
 	 * Salvo la CHAT sul DB 
 	 */
-	async saveChat(chatRepo: ChatRepo): Promise<void> {
-		if (!chatRepo) return;
+	async saveChat(chatPOCO: ChatDTO): Promise<void> {
+		if (!chatPOCO) return;
 		await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.SAVE,
-			payload: chatRepo,
+			payload: chatPOCO,
 		})
 	}
 
 	/**
 	 * Salvo le ROOMs della CHAT sul DB
 	 */
-	async saveChatRooms(chatRepo: ChatRepo): Promise<void> {
-		if (!chatRepo) return;
-		for (const room of chatRepo.rooms ?? []) {
+	async saveRooms(rooms: RoomRepo[]): Promise<void> {
+		if ( !rooms || rooms.length === 0) return;
+		for (const room of rooms) {
 			await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
 				type: typeorm.Actions.SAVE,
 				payload: room,
@@ -98,7 +100,7 @@ export class ChatsManager {
 			})
 
 			// Creo la CHAT con le ROOMs caricate
-			chat = ChatProxy.Build(this.service, chatRepo)
+			chat = ChatProxy.Build(this.service, ChatDTOFromChatRepo(chatRepo))
 			this.service.chatManager.addChat(chat)
 		}
 

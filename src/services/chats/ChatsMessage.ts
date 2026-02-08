@@ -1,7 +1,11 @@
+import { REPO_PATHS } from "@/config.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
+import { Bus, typeorm } from "@priolo/julian"
 import { AccountDTO } from "@shared/types/AccountDTO.js"
-import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient.js"
+import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserInviteC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient.js"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage.js"
+import { RoomDTO } from "@shared/types/RoomDTO.js"
+import { matchPath } from "@shared/update.js"
 import { ChatProcessor } from "./ChatProcessor.js"
 import ChatProxy from "./ChatProxy.js"
 
@@ -111,11 +115,33 @@ export class ChatsMessages {
 	/**
 	 * Aggiornamento generico della CHAT
 	 */
-	private async handleChatUpdate(user:AccountDTO, chat: ChatProxy, msg: ChatUpdateC2S) {
+	private async handleChatUpdate(user: AccountDTO, chat: ChatProxy, msg: ChatUpdateC2S) {
 		const userId = user?.id
 		if (!userId) throw new Error(`Invalid userId`)
+
 		chat.updates(msg.commands)
-	
+
+		const buffer = new Set<string>()
+
+		for (const cmd of msg.commands) {
+
+			const res = matchPath(cmd.path, "rooms.*.agentsIds")
+			if (res != null) {
+				const roomId = res[0].id
+				const room = chat.getRoomById(roomId) as RoomDTO
+				await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
+					type: typeorm.Actions.SAVE,
+					payload: {
+						id: res[0].id,
+						agents: room?.agentsIds.map(agentId => ({ id: agentId })) ?? [],
+					},
+				})
+			}
+		}
+
+		chat.updates2(msg.commands)
+
+
 	}
 
 
@@ -142,7 +168,7 @@ export class ChatsMessages {
 		if (isVoid) {
 			this.service.chatManager.removeChat(chat.chatRepo.id)
 			await this.service.chatManager.saveChat(chat.chatRepo)
-			await this.service.chatManager.saveChatRooms(chat.chatRepo)
+			await this.service.chatManager.saveRooms(chat.chatRepo.rooms ?? [])
 		}
 	}
 

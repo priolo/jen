@@ -43,14 +43,13 @@ const setup = {
 		 * I partecipanti alla CHAT con info di online/offline
 		 */
 		getUsers: (_: void, store?: AccountListStore): AccountDTO[] => {
-			const partecipants = chatRepoSo.getById(store.state.chatId)?.users ?? []
-			const chatOnline = chatWSSo.getChatById(store.state.chatId)
-			const usersOnline = chatOnline?.clients ?? []
-			const users = partecipants.map(user => ({
+			const chat = chatRepoSo.getById(store.state.chatId)
+			const chatOnline = chatWSSo.state.all?.includes(store.state.chatId)
+			const users = chat?.users?.map(user => ({
 				...user,
 				status: !chatOnline 
 					? ACCOUNT_STATUS.UNKNOWN 
-					: (usersOnline?.some(u => u.id == user.id) 
+					: (chat?.onlineUserIds?.some(id => id == user.id) 
 						? ACCOUNT_STATUS.ONLINE 
 						: ACCOUNT_STATUS.OFFLINE
 					),

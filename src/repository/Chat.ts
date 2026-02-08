@@ -1,6 +1,6 @@
 import type { Relation } from 'typeorm';
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { AccountRepo } from './Account.js';
+import { AccountDTOFromAccountRepo, AccountDTOFromAccountRepoList, AccountRepo } from './Account.js';
 import { AccountAssets } from './AccountAssets.js';
 import { RoomDTOFromRoomRepo, RoomRepo } from './Room.js';
 import { AccountDTO } from '@shared/types/AccountDTO.js';
@@ -45,14 +45,18 @@ export class ChatRepo extends AccountAssets {
 
 }
 
-export function ChatDTOFromChatRepo(chat: ChatRepo, clients:AccountDTO[]): ChatDTO {
+export function ChatDTOFromChatRepo(chat: ChatRepo): ChatDTO {
 	if (!chat) return null
 	return {
+        accountId: chat.accountId,
+
 		id: chat.id,
 		name: chat.name,
 		description: chat.description,
 		mainRoomId: chat.mainRoomId,
 		rooms: chat.rooms?.map(room => RoomDTOFromRoomRepo(room)) || [],
-		clients,
+        users: AccountDTOFromAccountRepoList(chat.users),
+
+        onlineUserIds: [],
 	}
 }
