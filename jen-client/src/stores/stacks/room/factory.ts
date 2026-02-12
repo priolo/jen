@@ -2,7 +2,7 @@ import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE } from "@/types";
 import { RoomDetailState, RoomDetailStore } from "./detail/detail";
 import { PromptListState, PromptListStore } from "./list";
-import { RoomAgentsListState, RoomAgentsListStore } from "./detail/roomAgentsList";
+import { RoomAgentsListState, RoomAgentsListStore } from "./roomAgentsList";
 
 
 /**

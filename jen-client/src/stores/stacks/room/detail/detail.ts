@@ -9,6 +9,7 @@ import chatWSSo from "../../chat/ws"
 import { EditorState } from "../../editorBase"
 import { buildRoomAgentList, buildRoomDetail } from "../factory"
 import { ChatMessage } from "@shared/types/ChatMessage"
+import roomApi from "@/api/room"
 
 
 

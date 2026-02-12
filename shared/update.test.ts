@@ -88,6 +88,16 @@ describe('applyJsonCommand', () => {
 		expect(data.items.find((i: any) => i.id === 2)).toBeUndefined();
 	});
 
+	test('should DELETE an array element by id', () => {
+		const command: JsonCommand = {
+			type: TYPE_JSON_COMMAND.DELETE,
+			path: `items.{"id":2}`
+		};
+		applyJsonCommand(data, command);
+		expect(data.items).toHaveLength(2);
+		expect(data.items.find((i: any) => i.id === 2)).toBeUndefined();
+	});
+
 	test('should DELETE an array element by value', () => {
 		const command: JsonCommand = {
 			type: TYPE_JSON_COMMAND.DELETE,

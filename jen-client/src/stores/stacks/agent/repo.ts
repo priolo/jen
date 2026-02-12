@@ -36,12 +36,14 @@ const setup = {
 
 	actions: {
 
+		/** carico tutti gli AGENT appartenenti a me */
 		async fetch(_: void, store?: AgentStore) {
 			const agents = await agentApi.index({ store })
 			store.setAll(agents)
 			//await loadBaseSetup.actions.fetch(_, store)
 		},
 
+		
 		async save(agent: Partial<AgentDTO>, store?: AgentStore): Promise<AgentDTO> {
 			let agentSaved: AgentDTO = null
 			if (!agent.id) {

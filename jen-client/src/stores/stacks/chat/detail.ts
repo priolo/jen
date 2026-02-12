@@ -17,10 +17,12 @@ const setup = {
 
 	state: {
 
-		/** llm visualizzato */
-		chat: <Partial<ChatDTO>>null,
+		/** CHAT in editazione */
+		chatInEdit: <Partial<ChatDTO>>null,
+		/** id della CHAT di cui sto vedendo il dettaglio */
 		chatId: <string>null,
 
+		/** stato di editazione del form */
 		editState: EDIT_STATE.READ,
 
 		//#region VIEWBASE
@@ -37,7 +39,7 @@ const setup = {
 			const state = store.state as ChatDetailState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
-				chatId: state.chat.id,
+				chatId: state.chatId,
 			}
 		},
 		//#endregion
@@ -59,19 +61,12 @@ const setup = {
 			state.chatId = data.chatId
 		},
 
-		//#endregion
-
 		/** carica ENTITY da API */
 		fetch: async (_: void, store?: ChatDetailStore) => {
-			const chatId = store.state.chatId
-			let chat = store.state.chat
-			// se non ho la CHAT la prendo da API
-			if (!chat) {
-				chat = await chatApi.get(chatId, { store, manageAbort: true })
-				store.setChat(chat)
-			}
+			//mi assicuro che la CHAT sia in memoria
+			await chatRepoSo.load(store.state.chatId)
 			// comunico al WS che sono in questa CHAT
-			chatWSSo.enter(chatId)
+			chatWSSo.enter(store.state.chatId)
 		},
 
 		onRemoval(_: void, store?: ViewStore) {
@@ -79,12 +74,27 @@ const setup = {
 			chatWSSo.removeView({ chatId: chatSo.state.chatId, viewId: chatSo.state.uuid })
 		},
 
+		//#endregion
+
+		/** inizia l'editing */
+		edit(_: void, store?: ChatDetailStore) {
+			const chat = chatRepoSo.getById(store.state.chatId)
+			store.setChatInEdit({ ...chat })
+			store.setEditState(EDIT_STATE.EDIT)
+		},
+
+		/** annullo l'editing */
+		cancel: (_: void, store?: ChatDetailStore) => {
+			store.setEditState(EDIT_STATE.READ)
+			store.setChatInEdit(null)
+		},
+
 		/** CREATE/UPDATE una CHAT */
 		async save(_: void, store?: ChatDetailStore) {
-			const chatSaved = await chatRepoSo.save(store.state.chat)
+			const chatSaved = await chatRepoSo.save(store.state.chatInEdit)
 
-			store.setChat(chatSaved)
 			store.setEditState(EDIT_STATE.READ)
+			store.setChatInEdit(null)
 			store.setSnackbar({
 				open: true, type: MESSAGE_TYPE.SUCCESS, timeout: 5000,
 				title: "SAVED",
@@ -92,18 +102,15 @@ const setup = {
 			})
 		},
 
-		/** reset ENTITY */
-		restore: (_: void, store?: ChatDetailStore) => {
-			store.fetch()
-			store.setEditState(EDIT_STATE.READ)
-		},
+		
 
 		/** apro la MAIN-ROOM */
 		openMainRoom(_: void, store?: ChatDetailStore) {
-			if (!store.state.chat?.id || !store.state.chat?.mainRoomId) return
+			const chat = chatRepoSo.getById(store.state.chatId)
+			if (!chat?.id || !chat?.mainRoomId) return
 			const view = buildRoomDetail({
-				chatId: store.state.chat.id,
-				roomId: store.state.chat.mainRoomId,
+				chatId: chat.id,
+				roomId: chat.mainRoomId,
 			})
 			deckCardsSo.add({ view, anim: true })
 		},
@@ -111,14 +118,14 @@ const setup = {
 		/** apro gli ACCOUNTS che partecipano alla CHAT */
 		openAccounts(_: void, store?: ChatDetailStore) {
 			const isOpen = store.getAccountsOpen()
-			const view = !isOpen ? buildAccountList({ chatId: store.state.chat?.id }) : null
+			const view = !isOpen ? buildAccountList({ chatId: store.state.chatId }) : null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		}
 
 	},
 
 	mutators: {
-		setChat: (chat: Partial<ChatDTO>) => ({ chat }),
+		setChatInEdit: (chatInEdit: Partial<ChatDTO>) => ({ chatInEdit }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }

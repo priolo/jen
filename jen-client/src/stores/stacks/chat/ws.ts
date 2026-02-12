@@ -1,18 +1,18 @@
+import chatApi from "@/api/chat"
 import { wsConnection } from "@/plugins/session/wsConnection"
 import { SS_EVENT } from "@/plugins/SocketService/types"
 import { DOC_TYPE } from "@/types"
 import { deepMerge } from "@/utils/object"
 import { docsSo, utils, ViewStore } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
-import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserInviteC2S, UserLeaveC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient"
-import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer"
+import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S } from "@shared/types/ChatActionsClient"
+import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage"
 import { RoomDTO } from "@shared/types/RoomDTO"
+import { applyJsonCommand, JsonCommand } from "@shared/update"
 import authSo from "../auth/repo"
 import { buildRoomDetail } from "../room/factory"
 import chatRepoSo from "./repo"
-import { ChatDTO } from "@shared/types/ChatDTO"
-import { applyJsonCommand, JsonCommand } from "@shared/update"
 
 
 
@@ -27,9 +27,9 @@ const setup = {
 
 	getters: {
 
-		getChatById(id: string, store?: ChatWSStore): ChatDTO {
-			if (!id || !store.state.all.includes(id)) return null
-			return chatRepoSo.getById(id)
+		isOnline(id: string, store?: ChatWSStore): boolean {
+			if (!id) return false
+			return store.state.all.includes(id)
 		},
 
 	},
@@ -39,19 +39,18 @@ const setup = {
 		//#region MESSAGE TO SERVER
 
 		/** 
-		 * entro in una CHAT e ricevo CHAT-INFO
-		 * response CHAT_INFO
+		 * entro in una CHAT 
 		 */
-		enter: (chatId: string, store?: ChatWSStore) => {
+		async enter(chatId: string, store?: ChatWSStore) {
 			// se c'e' gia' la CHAT non faccio nulla
 			if (!chatId || store.state.all.includes(chatId)) return
+
 			// invio il messaggio di ENTER
 			const msgSend: UserEnterC2S = {
 				action: CHAT_ACTION_C2S.USER_ENTER,
 				chatId,
 			}
 			wsConnection.send(JSON.stringify(msgSend))
-			store.setAll([...store.state.all, chatId])
 		},
 
 		/** 
@@ -60,43 +59,42 @@ const setup = {
 		leave: async (chatId: string, store?: ChatWSStore) => {
 			// se non sono in chat allora non faccio nulla
 			if (!chatId || !store.state.all.includes(chatId)) return
+
 			// invio il messaggio di LEAVE
 			const message: UserLeaveC2S = {
 				action: CHAT_ACTION_C2S.USER_LEAVE,
 				chatId: chatId,
 			}
 			wsConnection.send(JSON.stringify(message))
-			// elimino la CHAT dall'ONLINE
-			store.setAll(store.state.all.filter(c => c != chatId))
 		},
 
 		/**
 		 * Invito uno USER ad una CHAT
 		 */
-		inviteUser: async (props: { chatId: string, accountId: string }, store?: ChatWSStore) => {
-			const { chatId, accountId } = props
-			if (!chatId || !accountId) return
-			const message: UserInviteC2S = {
-				action: CHAT_ACTION_C2S.USER_INVITE,
-				chatId,
-				userId: accountId,
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
+		// inviteUser: async (props: { chatId: string, accountId: string }, store?: ChatWSStore) => {
+		// 	const { chatId, accountId } = props
+		// 	if (!chatId || !accountId) return
+		// 	const message: UserInviteC2S = {
+		// 		action: CHAT_ACTION_C2S.USER_INVITE,
+		// 		chatId,
+		// 		userId: accountId,
+		// 	}
+		// 	wsConnection.send(JSON.stringify(message))
+		// },
 
 		/**
 		 * Rimuovo un USER da una CHAT
 		 */
-		removeUser: async (props: { chatId: string, userId: string }, store?: ChatWSStore) => {
-			const { chatId, userId } = props
-			if (!chatId || !userId) return
-			const message: UserRemoveC2S = {
-				action: CHAT_ACTION_C2S.USER_REMOVE,
-				chatId,
-				userId,
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
+		// removeUser: async (props: { chatId: string, userId: string }, store?: ChatWSStore) => {
+		// 	const { chatId, userId } = props
+		// 	if (!chatId || !userId) return
+		// 	const message: UserRemoveC2S = {
+		// 		action: CHAT_ACTION_C2S.USER_REMOVE,
+		// 		chatId,
+		// 		userId,
+		// 	}
+		// 	wsConnection.send(JSON.stringify(message))
+		// },
 
 
 		/**
@@ -174,33 +172,21 @@ const setup = {
 
 				// arrivate le INFO di una CHAT le integro nella store
 				// potrebbe trattarsi anche di un INVITE
-				case CHAT_ACTION_S2C.CHAT_UPDATE: {
-					const msg = message as ChatUpdateS2C
-					const chatOld = chatRepoSo.getById(msg.chatId)
-					if (!!chatOld) {
-						deepMerge(chatOld, msg.chat)
-						chatRepoSo.setAll([...chatRepoSo.state.all])
-					} else {
-						chatRepoSo.setAll([...chatRepoSo.state.all, msg.chat as ChatDTO])
-					}
+				// case CHAT_ACTION_S2C.CHAT_UPDATE: {
+				// 	const msg = message as ChatUpdateS2C
+				// 	const chatOld = chatRepoSo.getById(msg.chatId)
+				// 	if (!!chatOld) {
+				// 		deepMerge(chatOld, msg.chat)
+				// 		chatRepoSo.setAll([...chatRepoSo.state.all])
+				// 	} else {
+				// 		chatRepoSo.setAll([...chatRepoSo.state.all, msg.chat as ChatDTO])
+				// 	}
 
-					// // controllo se c'e' una VIEW aperta per questa CHAT
-					// const views = utils.findAll(docsSo.getAllCards(), {
-					// 	type: DOC_TYPE.ROOM_DETAIL,
-					// 	chatId: msg.chatId,
-					// })
-					// if (views.length > 0) break
-					// // non c'e': apro la VIEW della ROOM principale
-					// const mainRoom = getMainRoom(chat.rooms)
-					// if (!mainRoom) break
-					// const view = buildRoomDetail({
-					// 	chatId: msg.chatId,
-					// 	roomId: mainRoom.id,
-					// })
-					// deckCardsSo.add({ view, anim: true })
-					break
-				}
+				// 	break
+				// }
 
+
+				// agghiorno la CHAT
 				case CHAT_ACTION_S2C.CHAT_UPDATE2: {
 					const msg = message as ChatUpdateS2C2
 					const chat = chatRepoSo.getById(msg.chatId)
@@ -216,8 +202,14 @@ const setup = {
 					const msg = message as ClientEnteredS2C
 					const chat = chatRepoSo.getById(msg.chatId)
 					if (!chat) break
-					chat.onlineUserIds.push(msg.user.id)
+					// aggiungo agli user ONLINE
+					chat.onlineUserIds = [...(chat.onlineUserIds ?? []), msg.user.id]
 					chatRepoSo.setAll([...chatRepoSo.state.all])
+
+					if ( msg.user.id == authSo.state.user.id) {
+						ChatInline(msg.chatId)
+					}
+					
 					break
 				}
 
@@ -225,20 +217,15 @@ const setup = {
 					const msg = message as ClientLeaveS2C
 					const chat = chatRepoSo.getById(msg.chatId)
 					if (!chat) break
+					// elimino degli user ONLINE
+					chat.onlineUserIds = chat.onlineUserIds?.filter(id => id != msg.userId)
+					chatRepoSo.setAll([...chatRepoSo.state.all])
+
 					// sono io che esco dalla chat
 					if (msg.userId == authSo.state.user.id) {
-						// elimino dalle CHAT ONLINE
-						store.setAll(store.state.all.filter(c => c != msg.chatId))
-						// elimino le CARD
-						const views = utils
-							.findAll(docsSo.getAllCards(), { type: DOC_TYPE.ROOM_DETAIL, chatId: msg.chatId })
-						views
-							.forEach((view: ViewStore) => view.onRemoveFromDeck())
-						break
+						ChatOffline(msg.chatId)
 					}
-					// elimino degli user ONLINE
-					chat.onlineUserIds = chat.onlineUserIds.filter(id => id != msg.userId)
-					chatRepoSo.setAll([...chatRepoSo.state.all])
+
 					break
 				}
 
@@ -282,7 +269,7 @@ const setup = {
 				// è stata creata una nuova ROOM in una CHAT esistente. Tipicamente quando c'e' il reasoning
 				case CHAT_ACTION_S2C.ROOM_NEW: {
 					const msg = message as RoomNewS2C
-					const chat = store.getChatById(msg.chatId)
+					const chat = chatRepoSo.getById(msg.chatId)
 					chat.rooms.push({
 						id: msg.roomId,
 						chatId: msg.chatId,
@@ -344,4 +331,40 @@ export function getMainRoom(rooms: RoomDTO[]): RoomDTO {
 		if (!room.parentRoomId) return room
 	}
 	return null
+}
+
+
+async function ChatInline(chatId: string) {
+	// carico i dati della CHAT
+	const chat = await chatApi.get(chatId)//, { store: chatWSSo, manageAbort: true })
+
+	// inserisco la CHAT nelle CHAT ONLINE
+	chatWSSo.setAll([...chatWSSo.state.all, chatId])
+
+	// agiorno le CHATS-PROXY
+	const chatOld = chatRepoSo.getById(chatId)
+	if (!!chatOld) {
+		deepMerge(chatOld, chat)
+		chatRepoSo.setAll([...chatRepoSo.state.all])
+	} else {
+		chatRepoSo.setAll([...chatRepoSo.state.all, chat])
+	}
+}
+
+async function ChatOffline(chatId: string) {
+	// elimino dalle CHAT ONLINE
+	chatWSSo.setAll(chatWSSo.state.all.filter(c => c != chatId))
+
+	const chat = chatRepoSo.getById(chatId)
+	if ( !chat) return
+	// eimino i dati non necessari nella CHAT-PROXY
+	chat.onlineUserIds = null
+	chat.rooms = null
+	chatRepoSo.setAll([...chatRepoSo.state.all])
+
+	// elimino le CARD
+	const views = utils
+		.findAll(docsSo.getAllCards(), { type: DOC_TYPE.ROOM_DETAIL, chatId })
+	views
+		.forEach((view: ViewStore) => view.onRemoveFromDeck())
 }

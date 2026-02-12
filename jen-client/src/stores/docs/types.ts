@@ -13,7 +13,6 @@ export enum DOC_TYPE {
 	CHAT_LIST = "chat_list",
 
 	ROOM_DETAIL = "room",
-	ROOM_LIST = "room_list",
 	ROOM_AGENT_LIST = "room_agent_list",
 	
 	AGENT = "agent",

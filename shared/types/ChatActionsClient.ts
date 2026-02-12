@@ -11,10 +11,10 @@ export enum CHAT_ACTION_C2S {
 	USER_LEAVE = "user-leave",
 
 
-	/* Invita unn USER alla chat */
-	USER_INVITE = "user-invite",
-	/** rimuove un USER da una CHAT */
-	USER_REMOVE = "user-remove",
+	// /* Invita unn USER alla chat */
+	// USER_INVITE = "user-invite",
+	// /** rimuove un USER da una CHAT */
+	// USER_REMOVE = "user-remove",
 
 	/** aggiorna la lista degli AGENT in una ROOM */
 	ROOM_AGENTS_UPDATE = "room-agents-update",
@@ -81,18 +81,18 @@ export type UserLeaveC2S = BaseC2S & {
 /** 
  * invito un USER in CHAT
  */
-export type UserInviteC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.USER_INVITE
-	userId: string
-}
+// export type UserInviteC2S = BaseC2S & {
+// 	action: CHAT_ACTION_C2S.USER_INVITE
+// 	userId: string
+// }
 
 /** 
  * rimuovo un USER da una CHAT
  */
-export type UserRemoveC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.USER_REMOVE
-	userId: string
-}
+// export type UserRemoveC2S = BaseC2S & {
+// 	action: CHAT_ACTION_C2S.USER_REMOVE
+// 	userId: string
+// }
 
 //#endregion
 

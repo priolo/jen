@@ -1,18 +1,18 @@
 import { AccountFinderFixedCard } from "@/plugins/session"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
-import { AccountListStore } from "@/stores/stacks/account/list"
-import chatWSSo from "@/stores/stacks/chat/ws"
+import { ChatPartecipantsListStore } from "@/stores/stacks/chat/partecipantsList"
+import chatRepoSo from "@/stores/stacks/chat/repo"
 import { DOC_TYPE } from "@/types"
-import { AccountDTO } from "@shared/types/AccountDTO"
 import { Button, CircularLoadingCmp, FindInputHeader, focusSo, TooltipWrapCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
+import { AccountDTO } from "@shared/types/AccountDTO"
 import { FunctionComponent, useMemo } from "react"
 
 
 
 interface Props {
-	store?: AccountListStore
+	store?: ChatPartecipantsListStore
 }
 
 const ActionsCmp: FunctionComponent<Props> = ({
@@ -31,16 +31,16 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 	// HANDLER
 
-	const handleInviteClick = (account: AccountDTO) => {
+	const handleInvite = (account: AccountDTO) => {
 		store.invite(account.id)
 	}
 
-	const handleFindClick = async () => {
+	const handleFind = async () => {
 		await deckCardsSo.add({ view: AccountFinderFixedCard, anim: true })
 		focusSo.focus(AccountFinderFixedCard)
 	}
 
-	const handleRemoveClick = () => {
+	const handleRemove = () => {
 		store.remove(selecteId)
 	}
 
@@ -60,7 +60,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		return accountSelect
 	}, [AccountFinderFixedCard?.state.linked, store.state.group.state.all, focusSo.state.view])
 
-	const chat = chatWSSo.getChatById(store.state.chatId)
+	const chat = chatRepoSo.getById(store.state.chatId)
 	
 	const selecteId = (store.state.linked as AccountDetailStore)?.state?.accountId
 
@@ -83,18 +83,18 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		{!!accountInvite ? (
 			<TooltipWrapCmp content={tooltip}>
 				<Button
-					onClick={() => handleInviteClick(accountInvite)}
+					onClick={() => handleInvite(accountInvite)}
 				>INVITE</Button>
 			</TooltipWrapCmp>
 		) : (
 			<Button
-				onClick={handleFindClick}
+				onClick={handleFind}
 			>FIND</Button>
 		)}
 		{!!selecteId && (
 			<Button
 				style={{ marginLeft: 5 }}
-				onClick={handleRemoveClick}
+				onClick={handleRemove}
 			>DELETE</Button>
 		)}
 	</>

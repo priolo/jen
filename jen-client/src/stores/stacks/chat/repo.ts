@@ -49,6 +49,18 @@ const setup = {
 			store.setAll(chats)
 		},
 
+		/**
+		 * Carica una CHAT. Se è già in memoria la restituisce, altrimenti la prende da API e la mette in memoria.
+		 */
+		async load(id: string, store?: ChatRepoStore): Promise<ChatDTO> {
+			let chat = store.getById(id)
+			if (!!chat) return chat
+			chat = await chatApi.get(id, { store, manageAbort: true })
+			//chat.onlineUserIds = []
+			if (chat) store.setAll( [...store.state.all, chat])
+			return chat
+		},
+
 		async save(chat: Partial<ChatDTO>, store?: ChatRepoStore): Promise<ChatDTO> {
 			let chatSaved: ChatDTO = null
 			if (!chat.id) {

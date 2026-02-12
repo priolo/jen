@@ -1,5 +1,4 @@
 import { ChatDetailStore } from "@/stores/stacks/chat/detail"
-import { LlmDetailStore } from "@/stores/stacks/llm/detail"
 import { EDIT_STATE } from "@/types"
 import { Button, CircularLoadingCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -24,12 +23,12 @@ const ChatDetailActions: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleEditClick = async () => store.setEditState(EDIT_STATE.EDIT)
-	const handleOpenClick = async () => store.openMainRoom()
-	const handleCancelClick = () => store.restore()
-	const handleSaveClick = async () => store.save()
+	const handleEdit = () => store.edit()
+	const handleCancel = () => store.cancel()
+	const handleSave = () => store.save()
+	const handleOpen = async () => store.openMainRoom()
 
-
+	
 	// LOADING
 	if (cnnDetailSa.disabled) {
 		return <CircularLoadingCmp style={{ width: 25, height: 25, color: "rgba(0,0,0,.5)" }} />
@@ -40,18 +39,18 @@ const ChatDetailActions: FunctionComponent<Props> = ({
 	if (cnnDetailSa.editState == EDIT_STATE.NEW) {
 		return <Button
 			children="CREATE"
-			onClick={handleSaveClick}
+			onClick={handleSave}
 		/>
 
 	} else if (cnnDetailSa.editState == EDIT_STATE.READ) {
 		return <>
 			<Button
 				children="OPEN"
-				onClick={handleOpenClick}
+				onClick={handleOpen}
 			/>
 			<Button
 				children="EDIT"
-				onClick={handleEditClick}
+				onClick={handleEdit}
 			/>
 		</>
 	}
@@ -59,11 +58,11 @@ const ChatDetailActions: FunctionComponent<Props> = ({
 	return <>
 		<Button
 			children="SAVE"
-			onClick={handleSaveClick}
+			onClick={handleSave}
 		/>
 		<Button
 			children="CANCEL"
-			onClick={handleCancelClick}
+			onClick={handleCancel}
 		/>
 	</>
 }

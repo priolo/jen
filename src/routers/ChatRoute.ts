@@ -1,12 +1,14 @@
 import { REPO_PATHS, SERVICE_PATHS } from "@/config.js";
 import { RoomRepo } from "@/repository/Room.js";
-import { AccountDTOFromAccountRepoList, JWTPayload } from '@/repository/Account.js';
+import { AccountDTOFromAccountRepo, AccountDTOFromAccountRepoList, JWTPayload } from '@/repository/Account.js';
 import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, FindOneOptions, In } from "typeorm";
 import { AccountRepo } from "../repository/Account.js";
-import { ChatRepo } from "../repository/Chat.js";
+import { ChatDTOListFromChatRepoList, ChatRepo } from "../repository/Chat.js";
 import { ChatsWSService } from "./ChatsWSRoute.js";
+import { CHAT_ACTION_S2C, ChatUpdateS2C2 } from "@shared/types/ChatActionsServer.js";
+import { TYPE_JSON_COMMAND } from "@shared/update.js";
 
 
 
@@ -22,8 +24,8 @@ class ChatRoute extends httpRouter.Service {
 				{ path: "/", verb: "post", method: "create" },
 				{ path: "/:id", verb: "patch", method: "update" },
 				{ path: "/:id", verb: "delete", method: "delete" },
-				{ path: "/:id/invite", verb: "post", method: "invite" },
-				{ path: "/:id/remove", verb: "post", method: "remove" },
+				{ path: "/:id/invite", verb: "post", method: "partecipant_invite" },
+				{ path: "/:id/remove", verb: "post", method: "partecipant_remove" },
 			]
 		}
 	}
@@ -33,6 +35,7 @@ class ChatRoute extends httpRouter.Service {
 		const userJwt: JWTPayload = req["jwtPayload"]
 		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
 
+		// prendo tutte le CHATs dove sono PARTECIPANTE o PROPRIETARIO o PUBBLICA
 		const chatsIds: ChatRepo[] = await new Bus(this, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<ChatRepo>>{
@@ -47,6 +50,7 @@ class ChatRoute extends httpRouter.Service {
 		if (!chatsIds || chatsIds.length == 0) return res.json([])
 		const ids = chatsIds.map(chat => chat.id)
 
+		// recupero le CHATS
 		const chats: ChatRepo[] = await new Bus(this, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<ChatRepo>>{
@@ -55,30 +59,18 @@ class ChatRoute extends httpRouter.Service {
 			}
 		})
 
-		chats.forEach(chat => chat.users = AccountDTOFromAccountRepoList(chat.users))
-		res.json(chats)
+		res.json(ChatDTOListFromChatRepoList(chats))
 	}
 
 	async getById(req: Request, res: Response) {
 		const userJwt: JWTPayload = req["jwtPayload"]
 		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+		const chatId = req.params["id"]
 
-		const id = req.params["id"]
-		const chat: ChatRepo = await this.getByIdInternal(id, userJwt.id)
-		res.json(chat)
-	}
-	
-	private async getByIdInternal(chatId: string, userId: string): Promise<ChatRepo> {
-		const chat: ChatRepo = await new Bus(this, REPO_PATHS.CHATS).dispatch({
-			type: typeorm.Actions.FIND_ONE,
-			payload: <FindOneOptions<ChatRepo>>{
-				where: [
-					{ id: chatId, accountId: userId },
-					{ id: chatId, accountId: null }
-				],
-			}
-		})
-		return chat
+		const service = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
+		const chatProxy = await service.chatManager.loadChatById(chatId)
+
+		res.json(chatProxy.chatRepo)
 	}
 
 	async create(req: Request, res: Response) {
@@ -140,7 +132,7 @@ class ChatRoute extends httpRouter.Service {
 		res.json({ data: "ok" })
 	}
 
-	async invite(req: Request, res: Response) {
+	async partecipant_invite(req: Request, res: Response) {
 		const userJwt: JWTPayload = req["jwtPayload"]
 		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
 
@@ -152,7 +144,7 @@ class ChatRoute extends httpRouter.Service {
 		// carico lo USER
 		const user: AccountRepo = await new Bus(this, REPO_PATHS.ACCOUNTS).dispatch({
 			type: typeorm.Actions.GET_BY_ID,
-			payload:  userId,
+			payload: userId,
 		})
 		if (!user) return res.status(404).json({ error: "User not found" })
 
@@ -165,7 +157,7 @@ class ChatRoute extends httpRouter.Service {
 			}
 		})
 		if (!chat) return res.status(404).json({ error: "Chat not found" })
-			
+
 		// se la CHAT non l'ho fatta io non posso invitare altri
 		if (chat.accountId != userJwt.id) return res.status(403).json({ error: "Forbidden" })
 
@@ -177,16 +169,29 @@ class ChatRoute extends httpRouter.Service {
 				payload: chat
 			})
 		}
+		res.json(chat)
+
+
 
 		// avviso il WS della CHAT
 		const chatsWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
-		chatsWS.chatManager.getChatById(chat.id)?.addParticipant(user)
-
-		chat.users = AccountDTOFromAccountRepoList(chat.users)
-		res.json(chat)
+		const chatProxy = chatsWS.chatManager.getChatById(chat.id)
+		const userDTO = AccountDTOFromAccountRepo(user)
+		chatProxy.sendMessage(<ChatUpdateS2C2>{
+			action: CHAT_ACTION_S2C.CHAT_UPDATE2,
+			chatId: chat.id,
+			commands: [
+				{
+					type: TYPE_JSON_COMMAND.MERGE,
+					path: "users",
+					value: userDTO,
+				}
+			]
+		})
+		chat.users.push(userDTO)
 	}
 
-	async remove(req: Request, res: Response) {
+	async partecipant_remove(req: Request, res: Response) {
 		const userJwt: JWTPayload = req["jwtPayload"]
 		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
 
@@ -215,14 +220,30 @@ class ChatRoute extends httpRouter.Service {
 				payload: chat
 			})
 		}
+		res.json(chat)
+
+
 
 		// avviso il WS della CHAT
 		const chatsWS = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
-		chatsWS.chatManager.getChatById(chat.id)?.removeParticipant(userId)
+		const chatProxy = chatsWS.chatManager.getChatById(chat.id)
+		chatProxy.sendMessage(<ChatUpdateS2C2>{
+			action: CHAT_ACTION_S2C.CHAT_UPDATE2,
+			chatId: chat.id,
+			commands: [
+				{
+					type: TYPE_JSON_COMMAND.DELETE,
+					path: `users.{"id":"${userId}"}`,
+				}
+			]
+		})
+		chat.users = chat.users.filter(u => u.id != userId)
 
-		chat.users = AccountDTOFromAccountRepoList(chat.users)
-		res.json(chat)
+		// rimuovo dalla sessione (se presente) e notifico (CLIENT_LEAVE)
+		chatProxy.removeUser(userId)
 	}
+
+
 
 }
 

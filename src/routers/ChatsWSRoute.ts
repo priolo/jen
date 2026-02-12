@@ -85,5 +85,3 @@ export class ChatsWSService extends ws.route {
 	}
 
 }
-
-

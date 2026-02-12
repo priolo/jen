@@ -1,4 +1,4 @@
-import accountListSetup from "@/stores/stacks/account/list";
+import chatPartecipantsListSetup from "@/stores/stacks/chat/partecipantsList";
 import agentDetailSetup from "@/stores/stacks/agent/detail";
 import agentListSetup from "@/stores/stacks/agent/list";
 import agentEditorSetup from "@/stores/stacks/agentEditor";
@@ -24,7 +24,7 @@ import accountDetailSetup from "@/stores/stacks/account/detail";
 import accountFinderSetup from "@/stores/stacks/account/finder";
 import chatListSetup from "@/stores/stacks/chat/list";
 import chatDetailSetup from "@/stores/stacks/chat/detail";
-import roomAgentsListSetup from "@/stores/stacks/room/detail/roomAgentsList";
+import roomAgentsListSetup from "@/stores/stacks/room/roomAgentsList";
 
 
 
@@ -50,7 +50,7 @@ export function buildStore(state: Partial<ViewState>, stateSerializzation?: Part
 	const setup = {
 
 		[DOC_TYPE.AUTH_DETAIL]: authDetailSetup,
-		[DOC_TYPE.ACCOUNT_LIST]: accountListSetup,
+		[DOC_TYPE.ACCOUNT_LIST]: chatPartecipantsListSetup,
 		[DOC_TYPE.ACCOUNT_FINDER]: accountFinderSetup,
 		[DOC_TYPE.ACCOUNT_DETAIL]: accountDetailSetup,
 

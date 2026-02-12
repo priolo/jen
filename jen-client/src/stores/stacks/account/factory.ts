@@ -2,7 +2,7 @@ import { buildStore } from "@/stores/docs/utils/factory";
 import { DOC_TYPE } from "@/types";
 import { AccountDetailState, AccountDetailStore } from "./detail";
 import { AccountFinderState, AccountFinderStore } from "./finder";
-import { AccountListState, AccountListStore } from "./list";
+import { ChatPartecipantsListState, ChatPartecipantsListStore } from "../chat/partecipantsList";
 
 
 
@@ -20,11 +20,11 @@ export function buildAccountDetail(state:Partial<AccountDetailState>) {
 /**
  * Costruisce la CARD per la lista di ACCOUNT
  */
-export function buildAccountList(state: Partial<AccountListState> = {}) {
+export function buildAccountList(state: Partial<ChatPartecipantsListState> = {}) {
 	const store = buildStore({
 		type: DOC_TYPE.ACCOUNT_LIST,
 		...state,
-	} as AccountListState) as AccountListStore
+	} as ChatPartecipantsListState) as ChatPartecipantsListStore
 	return store;
 }
 

@@ -1,6 +1,7 @@
 import RowButton from "@/components/buttons/RowButton"
 import EditorIcon from "@/icons/EditorIcon"
 import { ChatDetailStore } from "@/stores/stacks/chat/detail"
+import chatRepoSo from "@/stores/stacks/chat/repo"
 import { EDIT_STATE } from "@/types"
 import { TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
@@ -27,16 +28,16 @@ const ChatDetailForm: FunctionComponent<Props> = ({
     // HANDLER
     const handlePropChange = (prop: {
         [name: string]: any
-    }) => store.setChat({ ...store.state.chat, ...prop })
+    }) => store.setChatInEdit({ ...store.state.chatInEdit, ...prop })
 
     const handleAccountsClick = () => store.openAccounts()
 
     
     // RENDER
-    const chat = store.state.chat
+    const inEdit = store.state.editState != EDIT_STATE.READ
+    const chat = inEdit ? store.state.chatInEdit : chatRepoSo.getById(store.state.chatId)
     if (chat == null) return null
-    const inRead = store.state.editState == EDIT_STATE.READ
-    const inNew = store.state.editState == EDIT_STATE.NEW
+    
 
     return <div className="jack-lyt-form var-dialog">
 
@@ -51,7 +52,7 @@ const ChatDetailForm: FunctionComponent<Props> = ({
             <TextInput autoFocus
                 value={chat.name}
                 onChange={name => handlePropChange({ name })}
-                readOnly={inRead}
+                readOnly={!inEdit}
             />
         </div>
 
@@ -60,7 +61,7 @@ const ChatDetailForm: FunctionComponent<Props> = ({
             <TextInput
                 value={chat.description}
                 onChange={description => handlePropChange({ description })}
-                readOnly={inRead}
+                readOnly={!inEdit}
             />
         </div>
 

@@ -2,12 +2,13 @@ import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
 import { ACCOUNT_STATUS, AccountDTO } from "@shared/types/AccountDTO"
 import { mixStores } from "@priolo/jon"
-import chatWSSo from "../chat/ws"
+import chatWSSo from "./ws"
 import { ViewState } from "../viewBase"
-import { AccountDetailStore } from "./detail"
-import { buildAccountDetail } from "./factory"
-import chatRepoSo from "../chat/repo"
+import { AccountDetailStore } from "../account/detail"
+import { buildAccountDetail } from "../account/factory"
+import chatRepoSo from "./repo"
 import chatApi from "@/api/chat"
+
 
 
 /**
@@ -19,6 +20,7 @@ const setup = {
 		//#region VIEWBASE
 		width: 170,
 		//#endregion
+
 		textSearch: <string>null,
 		chatId: <string>null,
 	},
@@ -30,7 +32,7 @@ const setup = {
 		getTitle: (_: void, store?: ViewStore) => "ACCOUNTS",
 		getSubTitle: (_: void, store?: ViewStore) => "List of accounts",
 		getSerialization: (_: void, store?: ViewStore) => {
-			const state = store.state as AccountListState
+			const state = store.state as ChatPartecipantsListState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
 				chatId: state.chatId,
@@ -42,9 +44,10 @@ const setup = {
 		/**
 		 * I partecipanti alla CHAT con info di online/offline
 		 */
-		getUsers: (_: void, store?: AccountListStore): AccountDTO[] => {
+		getUsers: (_: void, store?: ChatPartecipantsListStore): AccountDTO[] => {
 			const chat = chatRepoSo.getById(store.state.chatId)
-			const chatOnline = chatWSSo.state.all?.includes(store.state.chatId)
+			if ( !chat || !chat.users) return []
+			const chatOnline = chatWSSo.isOnline(store.state.chatId)
 			const users = chat?.users?.map(user => ({
 				...user,
 				status: !chatOnline 
@@ -67,13 +70,13 @@ const setup = {
 
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
-			const state = store.state as AccountListState
+			const state = store.state as ChatPartecipantsListState
 			state.chatId = data.chatId
 		},
 
 		//#endregion
 
-		openDetail(accountId: string, store?: AccountListStore) {
+		openDetail(accountId: string, store?: ChatPartecipantsListStore) {
 			const accountIdSelected = (store.state.linked as AccountDetailStore)?.state?.accountId
 			const view = accountIdSelected != accountId ? buildAccountDetail({ accountId }) : null
 			deckCardsSo.addLink({ view, parent: store, anim: true })
@@ -82,14 +85,13 @@ const setup = {
 		/**
 		 * manda un messaggio di INVITO all'account selezionato
 		 */
-		async invite(accountId: string, store?: AccountListStore) {
+		async invite(accountId: string, store?: ChatPartecipantsListStore) {
 			const ret = await chatApi.inviteUser(store.state.chatId, accountId)
 		},
 
-		async remove(accountId: string, store?: AccountListStore) {
+		async remove(accountId: string, store?: ChatPartecipantsListStore) {
 			const ret = await chatApi.removeUser(store.state.chatId, accountId)
 		}
-
 
 	},
 
@@ -100,14 +102,14 @@ const setup = {
 }
 
 
-export type AccountListState = typeof setup.state & ViewState
-export type AccountListGetters = typeof setup.getters
-export type AccountListActions = typeof setup.actions
-export type AccountListMutators = typeof setup.mutators
-export interface AccountListStore extends ViewStore, AccountListGetters, AccountListActions, AccountListMutators {
-	state: AccountListState
+export type ChatPartecipantsListState = typeof setup.state & ViewState
+export type ChatPartecipantsListGetters = typeof setup.getters
+export type ChatPartecipantsListActions = typeof setup.actions
+export type ChatPartecipantsListMutators = typeof setup.mutators
+export interface ChatPartecipantsListStore extends ViewStore, ChatPartecipantsListGetters, ChatPartecipantsListActions, ChatPartecipantsListMutators {
+	state: ChatPartecipantsListState
 }
-const accountListSetup = mixStores(viewSetup, setup)
-export default accountListSetup
+const chatPartecipantsListSetup = mixStores(viewSetup, setup)
+export default chatPartecipantsListSetup
 
 

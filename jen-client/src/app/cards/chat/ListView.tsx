@@ -43,10 +43,10 @@ const ChatListView: FunctionComponent<Props> = ({
 
 
 	// RENDER
-	const selectedId = (store.state.linked as ChatDetailStore)?.state?.chat?.id
+	const selectedId = (store.state.linked as ChatDetailStore)?.state?.chatId
 	const isSelected = (chat: ChatDTO) => chat.id == selectedId
 	const getName = (chat: ChatDTO) => chat?.name ?? getShortUuid(chat.id) ?? "<no name>"
-	const isOnline = (chatId: string) => !!chatWSSo.getChatById(chatId)
+	const isOnline = (chatId: string) => !!chatWSSo.isOnline(chatId)
 
 	return <FrameworkCard
 		className={clsCard.root}

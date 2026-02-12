@@ -3,7 +3,7 @@ import FrameworkCard from "@/components/cards/FrameworkCard"
 import OnlineIcon from "@/components/OnlineIcon"
 import ElementRow from "@/components/rows/ElementRow.js"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
-import { AccountListStore } from "@/stores/stacks/account/list"
+import { ChatPartecipantsListStore } from "@/stores/stacks/chat/partecipantsList"
 import chatRepoSo from "@/stores/stacks/chat/repo"
 import { DOC_TYPE } from "@/types"
 import { AlertDialog } from "@priolo/jack"
@@ -15,13 +15,13 @@ import ActionsCmp from "./Actions"
 
 
 interface Props {
-	store?: AccountListStore
+	store?: ChatPartecipantsListStore
 }
 
 /**
  * Lista di ACCOUNT registrati nel sistema
  */
-const AccountListView: FunctionComponent<Props> = ({
+const ChatPartecipatsListView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
@@ -43,18 +43,10 @@ const AccountListView: FunctionComponent<Props> = ({
 	const selectedId = (store.state.linked as AccountDetailStore)?.state?.accountId
 	const isSelected = (account: AccountDTO) => account.id == selectedId
 
-
 	return <FrameworkCard styleBody={{ padding: 0, }}
 		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}
 		store={store}
-		actionsRender={<>
-			{/* <OptionsCmp
-				style={{ marginLeft: 5, backgroundColor: "rgba(255,255,255,.4)" }}
-				store={store}
-			/> */}
-			
-			<ActionsCmp store={store} />
-		</>}
+		actionsRender={<ActionsCmp store={store} />}
 	>
 
 		{users.map(user => <ElementRow
@@ -76,7 +68,7 @@ const AccountListView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default AccountListView
+export default ChatPartecipatsListView
 
 
 // <div>

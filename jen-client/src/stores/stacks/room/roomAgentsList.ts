@@ -6,10 +6,10 @@ import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "
 import { mixStores } from "@priolo/jon"
 import { AgentDTO } from "@shared/types/AgentDTO.js"
 import { JsonCommand, TYPE_JSON_COMMAND } from "@shared/update.js"
-import { AgentDetailStore } from "../../agent/detail.js"
-import { buildAgentDetail, buildAgentDetailNew } from "../../agent/factory.js"
-import chatRepoSo from "../../chat/repo.js"
-import chatWSSo from "../../chat/ws.js"
+import { AgentDetailStore } from "../agent/detail.js"
+import { buildAgentDetail, buildAgentDetailNew } from "../agent/factory.js"
+import chatRepoSo from "../chat/repo.js"
+import chatWSSo from "../chat/ws.js"
 
 
 
@@ -76,26 +76,20 @@ const setup = {
 
 		//#endregion
 
-		/**
-		 * inizia l'editing
-		 */
+		/** inizia l'editing */
 		edit(_: void, store?: RoomAgentsListStore) {
 			store.setAgentsInEdit([...store.state.agents])
 			store.setEditState(EDIT_STATE.EDIT)
 		},
-		/**
-		 * termina una sessione di editing
-		 */
+
+		/** termina una sessione di editing */
 		cancel: (_: void, store?: RoomAgentsListStore) => {
 			store.setEditState(EDIT_STATE.READ)
 			store.setAgentsInEdit(null)
 		},
-		/**
-		 * Salva le modifiche effettuate
-		 */
-		save: async (_: void, store?: RoomAgentsListStore) => {
-			store.setEditState(EDIT_STATE.READ)
 
+		/** Salva le modifiche effettuate */
+		save: async (_: void, store?: RoomAgentsListStore) => {
 			const cmm: JsonCommand = {
 				type: TYPE_JSON_COMMAND.SET,
 				path: `rooms.{"id":"${store.state.roomId}"}.agentsIds`,
@@ -104,7 +98,8 @@ const setup = {
 			const chat = chatRepoSo.getByRoomId(store.state.roomId)
 			chatWSSo.updateChat({ chatId: chat.id, commands: [cmm] })
 
-			//store.setAgents([...store.state.agentsInEdit])
+			store.setEditState(EDIT_STATE.READ)
+			store.setAgentsInEdit(null)
 		},
 
 		/**
@@ -112,29 +107,9 @@ const setup = {
 		 */
 		addAgent(agent: AgentDTO, store?: RoomAgentsListStore) {
 			store.setAgentsInEdit([...(store.state.agentsInEdit ?? []), agent])
-			// const cmm:JsonCommand = {
-			// 	type: TYPE_JSON_COMMAND.MERGE,
-			// 	path: `rooms.{"id":"${store.state.roomId}"}.agentsIds`,
-			// 	value: agent.id,
-			// }
-			// const chat = chatRepoSo.getByRoomId(store.state.roomId)
-			// chatWSSo.updateChat({
-			// 	chatId: chat.id,
-			// 	commands: [ cmm ],
-			// })
 		},
 		removeAgent(agent: AgentDTO, store?: RoomAgentsListStore) {
 			store.setAgentsInEdit(store.state.agentsInEdit?.filter(a => a.id != agent.id) ?? [])
-			// const cmm:JsonCommand = {
-			// 	type: TYPE_JSON_COMMAND.DELETE,
-			// 	path: `rooms.{"id":"${store.state.roomId}"}.agentsIds`,
-			// 	value: agent.id,
-			// }
-			// const chat = chatRepoSo.getByRoomId(store.state.roomId)
-			// chatWSSo.updateChat({
-			// 	chatId: chat.id,
-			// 	commands: [ cmm ],
-			// })
 		},
 
 
@@ -156,33 +131,33 @@ const setup = {
 			}
 		},
 
-		/** 
-		 * Apre la CARD per la creazione di un nuovo AGENTE
-		 * */
-		create(_: void, store?: RoomAgentsListStore) {
-			const view = buildAgentDetailNew()
-			store.state.group.addLink({ view, parent: store, anim: true })
-		},
+		// /** 
+		//  * Apre la CARD per la creazione di un nuovo AGENTE
+		//  * */
+		// create(_: void, store?: RoomAgentsListStore) {
+		// 	const view = buildAgentDetailNew()
+		// 	store.state.group.addLink({ view, parent: store, anim: true })
+		// },
 
-		/**
-		 * Elimina un AGENTE
-		 */
-		async delete(agentId: string, store?: RoomAgentsListStore) {
-			if (!await store.alertOpen({
-				title: "AGENT DELETION",
-				body: "This action is irreversible.\nAre you sure you want to delete the AGENT?",
-			})) return
+		// /**
+		//  * Elimina un AGENTE
+		//  */
+		// async delete(agentId: string, store?: RoomAgentsListStore) {
+		// 	if (!await store.alertOpen({
+		// 		title: "AGENT DELETION",
+		// 		body: "This action is irreversible.\nAre you sure you want to delete the AGENT?",
+		// 	})) return
 
-			agentSo.delete(agentId)
+		// 	agentSo.delete(agentId)
 
-			store.state.group.addLink({ view: null, parent: store, anim: true })
+		// 	store.state.group.addLink({ view: null, parent: store, anim: true })
 
-			store.setSnackbar({
-				open: true, type: MESSAGE_TYPE.SUCCESS, timeout: 5000,
-				title: "DELETED",
-				body: "it is gone forever",
-			})
-		},
+		// 	store.setSnackbar({
+		// 		open: true, type: MESSAGE_TYPE.SUCCESS, timeout: 5000,
+		// 		title: "DELETED",
+		// 		body: "it is gone forever",
+		// 	})
+		// },
 
 
 

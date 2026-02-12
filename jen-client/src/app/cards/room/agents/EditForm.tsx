@@ -1,7 +1,7 @@
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import agentSo from "@/stores/stacks/agent/repo"
 import chatRepoSo from "@/stores/stacks/chat/repo"
-import { RoomAgentsListStore } from "@/stores/stacks/room/detail/roomAgentsList"
+import { RoomAgentsListStore } from "@/stores/stacks/room/roomAgentsList"
 import { IconToggle } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { AgentDTO } from "@shared/types/AgentDTO"

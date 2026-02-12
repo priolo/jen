@@ -6,7 +6,7 @@ import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ChatUpdateS2C2, ClientEnteredS
 import { ChatDTO } from '@shared/types/ChatDTO.js';
 import { MessageUpdate } from "@shared/types/ChatMessage.js";
 import { RoomDTO } from '@shared/types/RoomDTO.js';
-import { applyJsonCommand, JsonCommand } from '@shared/update.js';
+import { applyJsonCommand, JsonCommand, TYPE_JSON_COMMAND } from '@shared/update.js';
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
 
 
@@ -105,7 +105,10 @@ class ChatProxy {
 		// TODO: gestire errore utente offline che entra in chat
 		if (!user) return;
 
-		// avverto gli altri USERS della CHAT
+		// inserisco lo USER tra quelli in CHAT
+		this.chat.onlineUserIds.push(userId);
+
+		// avverto gli USERS della CHAT
 		const message: ClientEnteredS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_ENTERED,
 			chatId: this.chat.id,
@@ -113,16 +116,18 @@ class ChatProxy {
 		}
 		this.sendMessage(message)
 
-		// inserisco lo USER tra quelli in CHAT
-		this.chat.onlineUserIds.push(userId);
 
-		// invio al nuovo USER i dati della CHAT
-		const msg: ChatUpdateS2C = {
-			chatId: this.chat.id,
-			action: CHAT_ACTION_S2C.CHAT_UPDATE,
-			chat: this.chat, 
-		}
-		this.service.chatSend.sendMessageToUser(userId, msg)
+		// // invio al nuovo USER TUTTI i dati della CHAT
+		// const msg: ChatUpdateS2C2 = {
+		// 	chatId: this.chat.id,
+		// 	action: CHAT_ACTION_S2C.CHAT_UPDATE2,
+		// 	commands: [{
+		// 		type: TYPE_JSON_COMMAND.SET,
+		// 		path: "",
+		// 		value: this.chat,
+		// 	}]
+		// }
+		// this.service.chatSend.sendMessageToUser(userId, msg)
 	}
 
 	/**
@@ -149,17 +154,23 @@ class ChatProxy {
 	/**
 	 * Aggiungo uno USER partecipante alla CHAT
 	 */
-	addParticipant(user: AccountRepo) {
-		if (!!this.getPartecipantById(user.id)) return
+	// addParticipant(user: AccountRepo) {
+	// 	if (!!this.getPartecipantById(user.id)) return
 
-		this.chat.users.push(user)
-		const msg: ChatUpdateS2C = {
-			chatId: this.chat.id,
-			action: CHAT_ACTION_S2C.CHAT_UPDATE,
-			chat: { users: AccountDTOFromAccountRepoList(this.chat.users) },
-		}
-		this.sendMessage(msg)
-	}
+	// 	this.chat.users.push(user)
+
+	// 	const msg: ChatUpdateS2C2 = {
+	// 		chatId: this.chat.id,
+	// 		action: CHAT_ACTION_S2C.CHAT_UPDATE2,
+	// 		commands: [{
+	// 			type: TYPE_JSON_COMMAND.MERGE,
+	// 			path: "users",
+	// 			value: AccountDTOFromAccountRepo(user),
+	// 		}]	
+	// 		chat: { users: this.chat.users },
+	// 	}
+	// 	this.sendMessage(msg)
+	// }
 
 	/**
 	 * Rimuovo uno USER partecipante alla CHAT
@@ -277,7 +288,7 @@ class ChatProxy {
 	/**
 	 * Invia a tutti i partecipanti della CHAT un MESSAGE
 	 */
-	private sendMessage(message: BaseS2C, esclude: string[] = []): void {
+	sendMessage(message: BaseS2C, esclude: string[] = []): void {
 		for (const userId of this.chat.onlineUserIds) {
 			if (esclude.includes(userId)) continue;
 			this.service.chatSend.sendMessageToUser(userId, message)

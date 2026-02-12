@@ -60,3 +60,8 @@ export function ChatDTOFromChatRepo(chat: ChatRepo): ChatDTO {
         onlineUserIds: [],
 	}
 }
+
+export function ChatDTOListFromChatRepoList(chats: ChatRepo[]): ChatDTO[] {
+    if (!chats) return []
+    return chats.map(chat => ChatDTOFromChatRepo(chat)) 
+}

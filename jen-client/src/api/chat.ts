@@ -4,13 +4,17 @@ import { ChatDTO } from "@shared/types/ChatDTO"
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<ChatDTO[]> {
-	return ajax.get(`chats`, opt)
+async function index(opt?: CallOptions): Promise<ChatDTO[]> {
+	let chats:ChatDTO[] = await ajax.get(`chats`, opt)
+	//chats.forEach( chat => chat.onlineUserIds = [] )
+	return chats
 }
 
 /** GET */
-function get(id: string, opt?: CallOptions): Promise<ChatDTO> {
-	return ajax.get(`chats/${id}`, opt)
+async function get(id: string, opt?: CallOptions): Promise<ChatDTO> {
+	const chat:ChatDTO = await ajax.get(`chats/${id}`, opt)
+	//chat.onlineUserIds = []
+	return chat
 }
 
 /** CREATE NEW */

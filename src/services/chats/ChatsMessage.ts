@@ -2,7 +2,7 @@ import { REPO_PATHS } from "@/config.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { Bus, typeorm } from "@priolo/julian"
 import { AccountDTO } from "@shared/types/AccountDTO.js"
-import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserInviteC2S, UserRemoveC2S } from "@shared/types/ChatActionsClient.js"
+import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S } from "@shared/types/ChatActionsClient.js"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage.js"
 import { RoomDTO } from "@shared/types/RoomDTO.js"
 import { matchPath } from "@shared/update.js"
@@ -54,13 +54,13 @@ export class ChatsMessages {
 				await this.handleUserLeave(chat, user)
 				break
 
-			case CHAT_ACTION_C2S.USER_INVITE:
-				await this.handleUserInvite(user, msg as UserInviteC2S)
-				break
+			// case CHAT_ACTION_C2S.USER_INVITE:
+			// 	await this.handleUserInvite(user, msg as UserInviteC2S)
+			// 	break
 
-			case CHAT_ACTION_C2S.USER_REMOVE:
-				await this.handleUserRemove(user, msg as UserRemoveC2S)
-				break
+			// case CHAT_ACTION_C2S.USER_REMOVE:
+			// 	await this.handleUserRemove(user, msg as UserRemoveC2S)
+			// 	break
 
 			case CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE: {
 				const msgUp: RoomAgentsUpdateC2S = msg
@@ -177,7 +177,7 @@ export class ChatsMessages {
 	 * Avverte tutti i partecipanti
 	 * Se la CHAT è vuota la elimina
 	 */
-	private async handleUserInvite(user: AccountDTO, msg: UserInviteC2S) {
+	//private async handleUserInvite(user: AccountDTO, msg: UserInviteC2S) {
 		// const userId = user?.id
 		// if (!userId) throw new Error(`Invalid userId`)
 		// const chat = this.service.chatManager.getChatById(msg.chatId)
@@ -190,7 +190,7 @@ export class ChatsMessages {
 		// chat.addUser(invitedUserId)
 		// // inserisco lo USER tra i PARTECIPANTI
 		// chat.addParticipant(invitedUserId)
-	}
+	//}
 
 	/**
 	 * Rimuove un UTENTE dalla chat
@@ -198,17 +198,17 @@ export class ChatsMessages {
 	 * - rimuove l'utente (se online) dalla chat
 	 * - avverte tutti (tranne l'utente rimosso) che l'utente è uscito
 	 */
-	private async handleUserRemove(user: AccountDTO, msg: UserRemoveC2S) {
-		const chat = this.service.chatManager.getChatById(msg.chatId)
-		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
+	// private async handleUserRemove(user: AccountDTO, msg: UserRemoveC2S) {
+	// 	const chat = this.service.chatManager.getChatById(msg.chatId)
+	// 	if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 
-		// rimuovo dal DB
-		chat.removeParticipant(msg.userId)
-		await this.service.chatManager.saveChat(chat.chatRepo)
+	// 	// rimuovo dal DB
+	// 	chat.removeParticipant(msg.userId)
+	// 	await this.service.chatManager.saveChat(chat.chatRepo)
 
-		// rimuovo dalla sessione (se presente) e notifico (CLIENT_LEAVE)
-		chat.removeUser(msg.userId)
-	}
+	// 	// rimuovo dalla sessione (se presente) e notifico (CLIENT_LEAVE)
+	// 	chat.removeUser(msg.userId)
+	// }
 
 	//#endregion 
 

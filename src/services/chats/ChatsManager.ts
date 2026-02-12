@@ -92,10 +92,7 @@ export class ChatsManager {
 				type: typeorm.Actions.FIND_ONE,
 				payload: <FindOneOptions<ChatRepo>>{
 					where: { id: chatId },
-					relations: {
-						users: true,
-						rooms: true,
-					}
+					relations: { users: true, rooms: true }
 				}
 			})
 

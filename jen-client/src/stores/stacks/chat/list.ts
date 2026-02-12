@@ -52,11 +52,11 @@ const setup = {
 			const chat = chatRepoSo.getById(chatId)
 			if (!chatId || !chat) return
 			const detached = focusSo.state.shiftKey
-			const oldId = (store.state.linked as ChatDetailStore)?.state?.chat?.id
+			const oldId = (store.state.linked as ChatDetailStore)?.state?.chatInEdit?.id
 			const newId = (chatId && oldId !== chatId) ? chatId : null
 
 			if (detached) {
-				const view = buildChatDetail({ chat, size: VIEW_SIZE.NORMAL })
+				const view = buildChatDetail({ chatInEdit: chat, size: VIEW_SIZE.NORMAL })
 				store.state.group.add({ view, index: store.state.group.getIndexByView(store) + 1 })
 			} else {
 				const view = newId ? buildChatDetail({ chatId }) : null

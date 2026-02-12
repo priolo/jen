@@ -1,4 +1,4 @@
-import { RoomAgentsListStore } from "@/stores/stacks/room/detail/roomAgentsList"
+import { RoomAgentsListStore } from "@/stores/stacks/room/roomAgentsList"
 import { EDIT_STATE } from "@/types"
 import { Button, CircularLoadingCmp, OptionsCmp } from "@priolo/jack"
 import { FunctionComponent } from "react"

@@ -1,5 +1,5 @@
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
-import { RoomAgentsListStore } from "@/stores/stacks/room/detail/roomAgentsList"
+import { RoomAgentsListStore } from "@/stores/stacks/room/roomAgentsList"
 import { useStore } from "@priolo/jon"
 import { AgentDTO } from "@shared/types/AgentDTO"
 import { FunctionComponent } from "react"

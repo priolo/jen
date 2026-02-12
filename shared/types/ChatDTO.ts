@@ -20,7 +20,7 @@ export interface ChatDTO {
 	users?: AccountDTO[]
 
 
-	/** (NO REPO) gli users attualmente ONLINE */
+	/** (NO IN REPO) gli users attualmente ONLINE */
 	onlineUserIds?: string[]
 }
 
