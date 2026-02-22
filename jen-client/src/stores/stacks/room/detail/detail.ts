@@ -1,15 +1,12 @@
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { DOC_TYPE } from "@/types"
 import { mixStores } from "@priolo/jon"
+import { ChatMessage } from "@shared/types/ChatMessage"
 import { ContentAskTo, LlmResponse } from "@shared/types/LlmResponse"
-import { buildAgentList } from "../../agent/factory"
-import agentSo from "../../agent/repo"
 import chatRepoSo from "../../chat/repo"
 import chatWSSo from "../../chat/ws"
 import { EditorState } from "../../editorBase"
 import { buildRoomAgentList, buildRoomDetail } from "../factory"
-import { ChatMessage } from "@shared/types/ChatMessage"
-import roomApi from "@/api/room"
 
 
 

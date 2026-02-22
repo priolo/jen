@@ -48,19 +48,20 @@ const setup = {
 			state.accountId = data.accountId
 		},
 
-		//#endregion
-
-
 		async fetch(_: void, store?: AccountDetailStore) {
 			const accountId = store.state.accountId ?? store.state.account?.id
 			if (!accountId) return
 			const account = (await accountApi.get(accountId, { store, manageAbort: true }))?.account
 			store.setAccount(account)
 		},
+
 		async fetchIfVoid(_: void, store?: AccountDetailStore) {
 			if (!!store.state.account) return
 			await store.fetch()
 		},
+
+		//#endregion
+
 	},
 
 	mutators: {

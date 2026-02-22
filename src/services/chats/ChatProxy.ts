@@ -2,7 +2,7 @@ import { AccountDTOFromAccountRepoList, AccountRepo } from '@/repository/Account
 import { RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
 import { AccountDTO } from '@shared/types/AccountDTO.js';
-import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
 import { ChatDTO } from '@shared/types/ChatDTO.js';
 import { MessageUpdate } from "@shared/types/ChatMessage.js";
 import { RoomDTO } from '@shared/types/RoomDTO.js';
@@ -115,19 +115,6 @@ class ChatProxy {
 			user: user,
 		}
 		this.sendMessage(message)
-
-
-		// // invio al nuovo USER TUTTI i dati della CHAT
-		// const msg: ChatUpdateS2C2 = {
-		// 	chatId: this.chat.id,
-		// 	action: CHAT_ACTION_S2C.CHAT_UPDATE2,
-		// 	commands: [{
-		// 		type: TYPE_JSON_COMMAND.SET,
-		// 		path: "",
-		// 		value: this.chat,
-		// 	}]
-		// }
-		// this.service.chatSend.sendMessageToUser(userId, msg)
 	}
 
 	/**
@@ -138,56 +125,18 @@ class ChatProxy {
 	removeUser(userId: string): boolean {
 		if (!userId || !this.chat.onlineUserIds.includes(userId)) return false;
 
-		// avverto tutti i CLIENTs
+		// avverto tutti i CLIENTs eccetto quello che ha lasciato la CHAT
 		const message: ClientLeaveS2C = {
 			action: CHAT_ACTION_S2C.CLIENT_LEAVE,
 			chatId: this.chat.id,
 			userId: userId,
 		}
-		this.sendMessage(message, [userId]) // escludo il client che lascia
+		this.sendMessage(message)
 
+		// elimino lo USER dalla CHAT
 		this.chat.onlineUserIds = this.chat.onlineUserIds.filter(id => id !== userId)
+
 		return this.chat.onlineUserIds.length == 0
-	}
-
-
-	/**
-	 * Aggiungo uno USER partecipante alla CHAT
-	 */
-	// addParticipant(user: AccountRepo) {
-	// 	if (!!this.getPartecipantById(user.id)) return
-
-	// 	this.chat.users.push(user)
-
-	// 	const msg: ChatUpdateS2C2 = {
-	// 		chatId: this.chat.id,
-	// 		action: CHAT_ACTION_S2C.CHAT_UPDATE2,
-	// 		commands: [{
-	// 			type: TYPE_JSON_COMMAND.MERGE,
-	// 			path: "users",
-	// 			value: AccountDTOFromAccountRepo(user),
-	// 		}]	
-	// 		chat: { users: this.chat.users },
-	// 	}
-	// 	this.sendMessage(msg)
-	// }
-
-	/**
-	 * Rimuovo uno USER partecipante alla CHAT
-	 */
-	removeParticipant(userId: string) {
-		if (!this.getPartecipantById(userId)) return
-
-		//elimino l'utente anche tra quelli online (se c'e')
-		this.removeUser(userId)
-
-		this.chat.users = this.chat.users.filter(u => u.id != userId)
-		const msg: ChatUpdateS2C = {
-			chatId: this.chat.id,
-			action: CHAT_ACTION_S2C.CHAT_UPDATE,
-			chat: { users: AccountDTOFromAccountRepoList(this.chat.users) },
-		}
-		this.sendMessage(msg)
 	}
 
 	/** 
@@ -290,8 +239,12 @@ class ChatProxy {
 	 */
 	sendMessage(message: BaseS2C, esclude: string[] = []): void {
 		for (const userId of this.chat.onlineUserIds) {
-			if (esclude.includes(userId)) continue;
-			this.service.chatSend.sendMessageToUser(userId, message)
+			if (esclude.includes(userId)) continue
+			try {
+				this.service.chatSend.sendMessageToUser(userId, message)
+			} catch (error) {
+				console.error(`Error sending message to user ${userId}:`, error)
+			}
 		}
 	}
 

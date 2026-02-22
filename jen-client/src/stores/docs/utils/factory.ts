@@ -1,30 +1,27 @@
-import chatPartecipantsListSetup from "@/stores/stacks/chat/partecipantsList";
+import accountDetailSetup from "@/stores/stacks/account/detail";
+import accountFinderSetup from "@/stores/stacks/account/finder";
 import agentDetailSetup from "@/stores/stacks/agent/detail";
 import agentListSetup from "@/stores/stacks/agent/list";
 import agentEditorSetup from "@/stores/stacks/agentEditor";
+import authDetailSetup from "@/stores/stacks/auth/detail";
+import chatDetailSetup from "@/stores/stacks/chat/detail";
+import chatListSetup from "@/stores/stacks/chat/list";
+import chatPartecipantsListSetup from "@/stores/stacks/chat/partecipantsList";
 import editCodeSetup from "@/stores/stacks/editorCode";
 import llmDetailSetup from "@/stores/stacks/llm/detail";
 import llmListSetup from "@/stores/stacks/llm/list";
 import mcpServerDetailSetup from "@/stores/stacks/mcpServer/detail";
 import mcpServerListSetup from "@/stores/stacks/mcpServer/list";
+import mcpToolDetailSetup from "@/stores/stacks/mcpTool/detail";
+import toolResultListSetup from "@/stores/stacks/mcpTool/resultList";
 import roomDetailSetup from "@/stores/stacks/room/detail/detail";
-import promptListSetup from "@/stores/stacks/room/list";
-import usersSetup from "@/stores/stacks/streams";
-import userSetup from "@/stores/stacks/streams/detail";
+import roomAgentsListSetup from "@/stores/stacks/room/roomAgentsList";
 import toolDetailSetup from "@/stores/stacks/tool/detail";
 import toolListSetup from "@/stores/stacks/tool/list";
 import { DOC_TYPE } from "@/types";
 import { createStore } from "@priolo/jon";
 import reflectionSetup from "../../stacks/reflection";
 import { ViewState, ViewStore } from "../../stacks/viewBase";
-import mcpToolDetailSetup from "@/stores/stacks/mcpTool/detail";
-import toolResultListSetup from "@/stores/stacks/mcpTool/resultList";
-import authDetailSetup from "@/stores/stacks/auth/detail";
-import accountDetailSetup from "@/stores/stacks/account/detail";
-import accountFinderSetup from "@/stores/stacks/account/finder";
-import chatListSetup from "@/stores/stacks/chat/list";
-import chatDetailSetup from "@/stores/stacks/chat/detail";
-import roomAgentsListSetup from "@/stores/stacks/room/roomAgentsList";
 
 
 
@@ -62,10 +59,11 @@ export function buildStore(state: Partial<ViewState>, stateSerializzation?: Part
 		[DOC_TYPE.CHAT_LIST]: chatListSetup,
 
 		[DOC_TYPE.ROOM_DETAIL]: roomDetailSetup,
-		[DOC_TYPE.ROOM_LIST]: null/*promptListSetup*/,
+		//[DOC_TYPE.ROOM_LIST]: null/*promptListSetup*/,
 		[DOC_TYPE.ROOM_AGENT_LIST]: roomAgentsListSetup,
 
 		[DOC_TYPE.AGENT]: agentDetailSetup,
+		[DOC_TYPE.AGENT_LIST]: agentListSetup,
 
 		[DOC_TYPE.LLM_LIST]: llmListSetup,
 		[DOC_TYPE.LLM_DETAIL]: llmDetailSetup,

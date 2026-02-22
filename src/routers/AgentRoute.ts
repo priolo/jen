@@ -1,7 +1,7 @@
 import { AgentRepo } from "../repository/Agent.js";
 import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
-import { AccountRepo } from "src/repository/Account.js";
+import { AccountRepo, JWTPayload } from "src/repository/Account.js";
 import { FindManyOptions, FindOneOptions } from "typeorm";
 
 
@@ -16,9 +16,9 @@ class AgentRoute extends httpRouter.Service {
 				relations: ["tools", "subAgents", "llm"],
 				select: {
 					subAgents: { id: true, name: true, description: true },
-					tools: { 
-						id: true, type: true, name: true, description: true, 
-						parameters: true, mcpId: true, code: true, pathNode: true 
+					tools: {
+						id: true, type: true, name: true, description: true,
+						parameters: true, mcpId: true, code: true, pathNode: true
 					},
 					llm: { id: true, code: true, key: true }
 				}
@@ -26,7 +26,7 @@ class AgentRoute extends httpRouter.Service {
 		})
 		return agent
 	}
-	
+
 
 	get stateDefault() {
 		return {
@@ -47,7 +47,7 @@ class AgentRoute extends httpRouter.Service {
 	async getAll(req: Request, res: Response) {
 		const userJwt: AccountRepo = req["jwtPayload"]
 
-		const agents:AgentRepo[] = await new Bus(this, this.state.agents_repo).dispatch({
+		const agents: AgentRepo[] = await new Bus(this, this.state.agents_repo).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<AgentRepo>>{
 				where: [
@@ -71,20 +71,40 @@ class AgentRoute extends httpRouter.Service {
 	}
 
 	async create(req: Request, res: Response) {
+		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+		
 		const agent: AgentRepo = req.body?.agent
 		const agentNew: AgentRepo = await new Bus(this, this.state.agents_repo).dispatch({
 			type: typeorm.Actions.SAVE,
-			payload: agent
+			payload: {
+				accountId: userJwt.id,
+				...agent
+			} as AgentRepo
 		})
+
 		res.json(agentNew)
 	}
 
 	async delete(req: Request, res: Response) {
+		const userJwt: JWTPayload = req["jwtPayload"]
+		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
+
 		const id = req.params["id"]
+
+		// Verifico che l'agente esista e appartenga all'utente
+		const agent: AgentRepo = await new Bus(this, this.state.agents_repo).dispatch({
+			type: typeorm.Actions.FIND_ONE,
+			payload: { where: { id } }
+		})
+		if (!agent) return res.status(404).json({ error: "Agent not found" })
+		if (agent.accountId !== userJwt.id) return res.status(403).json({ error: "Forbidden" })
+
 		await new Bus(this, this.state.agents_repo).dispatch({
 			type: typeorm.Actions.DELETE,
 			payload: id
 		})
+
 		res.json({ data: "ok" })
 	}
 

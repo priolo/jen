@@ -131,22 +131,7 @@ const setup = {
 			}
 		},
 
-		// /** 
-		//  * Apre la CARD per la creazione di un nuovo AGENTE
-		//  * */
-		// create(_: void, store?: RoomAgentsListStore) {
-		// 	const view = buildAgentDetailNew()
-		// 	store.state.group.addLink({ view, parent: store, anim: true })
-		// },
-
-		// /**
-		//  * Elimina un AGENTE
-		//  */
-		// async delete(agentId: string, store?: RoomAgentsListStore) {
-		// 	if (!await store.alertOpen({
-		// 		title: "AGENT DELETION",
-		// 		body: "This action is irreversible.\nAre you sure you want to delete the AGENT?",
-		// 	})) return
+		
 
 		// 	agentSo.delete(agentId)
 

@@ -7,11 +7,11 @@ import McpServerListView from "@/app/cards/mcpServer/ListView"
 import McpServerDetailView from "@/app/cards/mcpServer/detail/View"
 import McpToolDetailView from "@/app/cards/mcpTool/detail/View"
 import ToolResultListView from "@/app/cards/mcpTool/result/ListView"
-import RoomAgentListView from "@/app/cards/room/agents/RoomAgentListView"
+import RoomAgentListView from "@/app/cards/room/agents/View"
 import RoomView from "@/app/cards/room/detail/View"
 import ToolListView from "@/app/cards/tool/ListView"
 import ToolDetailView from "@/app/cards/tool/detail/View"
-import AccountFinderView from "@/app/cards/user/finder/ListView"
+import AccountFinderView from "@/app/cards/account/finder/View"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
@@ -37,10 +37,12 @@ import TextEditorView from "../../app/cards/agentEditor/View"
 import AuthView from "../../app/cards/auth/View"
 import EditorCodeView from "../../app/cards/editorCode/View"
 import ReflectionView from "../../app/cards/reflection/node/View"
-import AccountDetailView from "../../app/cards/user/detail/View"
+import AccountDetailView from "../../app/cards/account/detail/View"
 import ChatPartecipatsListView from "../../app/cards/chat/partecipants/ListView"
 import { ChatPartecipantsListStore } from "../../stores/stacks/chat/partecipantsList"
 import { ReflectionStore } from "../../stores/stacks/reflection"
+import AgentListView from "@/app/cards/agent/list/View"
+import { AgentListStore } from "@/stores/stacks/agent/list"
 
 
 
@@ -58,6 +60,7 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 			case DOC_TYPE.AUTH_DETAIL:
 				return <AuthView store={view as AuthDetailStore} />
 
+
 			case DOC_TYPE.ACCOUNT_FINDER:
 				return <AccountFinderView store={view as AccountFinderStore} />
 			case DOC_TYPE.ACCOUNT_LIST:
@@ -72,6 +75,8 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 			case DOC_TYPE.CHAT_LIST:
 				return <ChatListView store={view as ChatListStore} />
 
+
+				
 			case DOC_TYPE.ROOM_DETAIL:
 				return <RoomView store={view as RoomDetailStore} />
 			case DOC_TYPE.ROOM_AGENT_LIST:
@@ -79,19 +84,22 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 
 
 
-			case DOC_TYPE.REFLECTION:
-				return <ReflectionView store={view as ReflectionStore} />
+			// case DOC_TYPE.REFLECTION:
+			// 	return <ReflectionView store={view as ReflectionStore} />
 
 			case DOC_TYPE.AGENT_EDITOR:
 				return <TextEditorView store={view as AgentEditorStore} />
-
 			case DOC_TYPE.AGENT:
 				return <AgentView store={view as AgentDetailStore} />
+			case DOC_TYPE.AGENT_LIST:
+				return <AgentListView store={view as AgentListStore} />
+
 
 			case DOC_TYPE.LLM_LIST:
 				return <LlmListView store={view as LlmListStore} />
 			case DOC_TYPE.LLM_DETAIL:
 				return <LlmDetailView store={view as LlmDetailStore} />
+
 
 			case DOC_TYPE.MCP_SERVER_LIST:
 				return <McpServerListView store={view as McpServerListStore} />
@@ -102,10 +110,12 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 			case DOC_TYPE.MCP_TOOL_RESULT_LIST:
 				return <ToolResultListView store={view as ToolResultListStore} />
 
+
 			case DOC_TYPE.TOOL_LIST:
 				return <ToolListView store={view as ToolListStore} />
 			case DOC_TYPE.TOOL_DETAIL:
 				return <ToolDetailView store={view as ToolDetailStore} />
+
 
 			case DOC_TYPE.CODE_EDITOR:
 				return <EditorCodeView store={view as EditorCodeStore} />

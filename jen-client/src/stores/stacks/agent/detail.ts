@@ -2,9 +2,9 @@ import agentApi from "@/api/agent"
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { EDIT_STATE } from "@/types"
-import { AgentLlm } from "@/types/Agent"
 import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
+import { AgentDTO } from "@shared/types/AgentDTO"
 import { buildEditorFromAgent } from "../agentEditor/factory"
 import { EditorState } from "../editorBase"
 import { buildRoomDetail } from "../room/factory"
@@ -16,7 +16,10 @@ const setup = {
 
 	state: {
 
-		agent: <Partial<AgentLlm>>null,
+		/** id dell'agente */
+		agentId: <string>null,
+
+		agent: <Partial<AgentDTO>>null,
 		editState: EDIT_STATE.READ,
 
 		/** indica che la dialog TOOLS è aperto */
@@ -46,12 +49,12 @@ const setup = {
 		 * Carica il dettaglio di questo AGENT
 		 */
 		async fetch(_: void, store?: AgentDetailStore) {
-			if (!store.state.agent?.id) return
-			const agent = await agentApi.get(store.state.agent.id, { store, manageAbort: true })
+			if (!store.state.agentId) return
+			const agent = await agentApi.get(store.state.agentId, { store, manageAbort: true })
 			store.setAgent(agent)
 		},
 		async fetchIfVoid(_: void, store?: AgentDetailStore) {
-			if (!!store.state.agent?.name) return // Assuming name is a required prop
+			if (!!store.state.agent) return
 			await store.fetch()
 		},
 
@@ -66,6 +69,7 @@ const setup = {
 			// 	agentSaved = await agentApi.update(store.state.agent, { store })
 			// }
 			const agentSaved = await agentSo.save(store.state.agent)
+			store.state.agentId = agentSaved.id
 			store.setAgent(agentSaved)
 			store.setEditState(EDIT_STATE.READ)
 			store.setSnackbar({
@@ -103,7 +107,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAgent: (agent: Partial<AgentLlm>) => ({ agent }),
+		setAgent: (agent: Partial<AgentDTO>) => ({ agent }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 		setToolsDialogOpen: (toolsDialogOpen: boolean) => ({ toolsDialogOpen }),
 		setLlmDialogOpen: (llmDialogOpen: boolean) => ({ llmDialogOpen }),

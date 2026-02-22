@@ -4,7 +4,7 @@ import { mixStores } from "@priolo/jon"
 import { AgentDetailStore } from "./detail.js"
 import { buildAgentDetail, buildAgentDetailNew } from "./factory.js"
 import agentSo from "./repo.js"
-import { AgentLlm } from "@/types/Agent"
+import { EDIT_STATE } from "@/types/index.js"
 
 
 
@@ -15,9 +15,6 @@ const setup = {
 		width: 370,
 		widthMax: 1000,
 		//#endregion
-
-		noSelection: <boolean>false,
-		selectedIds: <string[]>[],
 	},
 
 	getters: {
@@ -28,10 +25,18 @@ const setup = {
 			const state = store.state as AgentListState
 			return {
 				...viewSetup.getters.getSerialization(null, store),
-				selectedIds: state.selectedIds,
 			}
 		},
 		//#endregion
+
+		/** restituisce l'id del dettaglio selezionato nella lista */
+		getSelected: (_: void, store?: AgentListStore): string => {
+			return (store.state.linked as AgentDetailStore)?.state?.agentId
+		},
+
+		isNewOpen: (_: void, store?: AgentListStore): boolean => {
+			return (store.state.linked as AgentDetailStore)?.state?.editState == EDIT_STATE.NEW
+		},
 	},
 
 	actions: {
@@ -40,46 +45,50 @@ const setup = {
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
 			const state = store.state as AgentListState
-			state.selectedIds = data.selectedIds ?? []
 		},
+
+		// fetch: async (_: void, store?: LoadBaseStore) => {
+		// 	//await new Promise(resolve => setTimeout(resolve, 1000))
+		// 	agentSo.fetch()
+		// 	console.log("fetch AGENTS...")
+		// },
+
 		//#endregion
-
-		//#region OVERRIDE LOADBASE
-		
-
-		//#endregion
-
 		
 
 		/** apro/chiudo la CARD del dettaglio */
-		openDetail(agentId: string, store?: AgentListStore) {
+		detail(agentId: string, store?: AgentListStore) {
 			const detached = focusSo.state.shiftKey
 			const oldId = (store.state.linked as AgentDetailStore)?.state?.agent?.id
 			const newId = (agentId && oldId !== agentId) ? agentId : null
 
 			if (detached) {
-				const view = buildAgentDetail({ agent: { id: agentId }, size: VIEW_SIZE.NORMAL })
+				const view = buildAgentDetail({ agentId, size: VIEW_SIZE.NORMAL })
 				store.state.group.add({ view, index: store.state.group.getIndexByView(store) + 1 })
 			} else {
-				const view = newId ? buildAgentDetail({ agent: { id: agentId } }) : null
+				const view = newId ? buildAgentDetail({ agentId }) : null
 				//store.setSelect(newId)
 				store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
 			}
 		},
 
+		/** apro il dettaglio in modalità "crea nuovo" */
 		create(_: void, store?: AgentListStore) {
 			const view = buildAgentDetailNew()
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
-		async delete(agentId: string, store?: AgentListStore) {
+		/** elimino l'elemento selezionato (se c'e') */
+		async delete(_: void, store?: AgentListStore) {
+			const agentId = store.getSelected()
+			if (!agentId) return
+
 			if (!await store.alertOpen({
 				title: "AGENT DELETION",
 				body: "This action is irreversible.\nAre you sure you want to delete the AGENT?",
 			})) return
 
-			agentSo.delete(agentId)
-
+			await agentSo.delete(agentId)
 			store.state.group.addLink({ view: null, parent: store, anim: true })
 
 			store.setSnackbar({

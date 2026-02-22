@@ -26,15 +26,6 @@ export class ChatsMessages {
 	async onMessage(user: AccountDTO, msg: any) {
 		if (!user || !msg) return
 
-		// if (msg.action === CHAT_ACTION_C2S.CHAT_CREATE_AND_ENTER) {
-		// 	await this.handleChatCreate(user, msg as ChatCreateC2S)
-		// 	return
-		// }
-		// if (msg.action === CHAT_ACTION_C2S.CHAT_LOAD_AND_ENTER) {
-		// 	await this.handleChatLoad(user, msg as ChatGetC2S)
-		// 	return
-		// }
-
 		// messaggi che necessitano di una CHAT esistente
 		if (!msg.chatId) throw new Error(`Invalid chatId`)
 		const chat = await this.service.chatManager.loadChatById(msg.chatId)
@@ -54,14 +45,6 @@ export class ChatsMessages {
 				await this.handleUserLeave(chat, user)
 				break
 
-			// case CHAT_ACTION_C2S.USER_INVITE:
-			// 	await this.handleUserInvite(user, msg as UserInviteC2S)
-			// 	break
-
-			// case CHAT_ACTION_C2S.USER_REMOVE:
-			// 	await this.handleUserRemove(user, msg as UserRemoveC2S)
-			// 	break
-
 			case CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE: {
 				const msgUp: RoomAgentsUpdateC2S = msg
 				await chat.updateAgents(msgUp.agentsIds, msgUp.roomId)
@@ -78,39 +61,6 @@ export class ChatsMessages {
 			}
 		}
 	}
-
-	/**
-	 * Crea una nuova CHAT.  
-	 * crea la MAIN-ROOM
-	 * carica gli AGENTs specificati
-	 * Inserisce il CLIENT che l'ha creata
-	 */
-	// private async handleChatCreate(user: AccountDTO, msg: ChatCreateC2S) {
-	// 	const userId = user?.id
-	// 	if (!userId) throw new Error(`Invalid userId`)
-
-	// 	// carico gli agenti REPO
-	// 	const agentsRepo = (await Promise.all(
-	// 		(msg.agentIds ?? []).map(id => this.service.chatContext.getAgentRepoById(id))
-	// 	)).filter(agent => !!agent) as AgentRepo[]
-
-	// 	// creao la ROOM principale
-	// 	const room = BuildRoomRepo(msg.chatId, agentsRepo, userId)
-
-	// 	// creo la CHAT
-	// 	const chatRepo: ChatRepo = {
-	// 		id: msg.chatId,
-	// 		mainRoomId: room.id,
-	// 		accountId: userId,
-	// 		rooms: [room],
-	// 		users: [{ id: userId }],
-	// 	}
-	// 	const chat = await ChatNode.Build(this.service, chatRepo)
-
-	// 	// inserisco la CHAT nel MANAGER e faccio entrare il CLIENT
-	// 	this.service.chatManager.addChat(chat)
-	// 	chat.addUser(userId)
-	// }
 
 	/**
 	 * Aggiornamento generico della CHAT
@@ -140,8 +90,6 @@ export class ChatsMessages {
 		}
 
 		chat.updates2(msg.commands)
-
-
 	}
 
 
@@ -171,45 +119,5 @@ export class ChatsMessages {
 			await this.service.chatManager.saveRooms(chat.chatRepo.rooms ?? [])
 		}
 	}
-
-	/**
-	 * Un CLIENT lascia una CHAT
-	 * Avverte tutti i partecipanti
-	 * Se la CHAT è vuota la elimina
-	 */
-	//private async handleUserInvite(user: AccountDTO, msg: UserInviteC2S) {
-		// const userId = user?.id
-		// if (!userId) throw new Error(`Invalid userId`)
-		// const chat = this.service.chatManager.getChatById(msg.chatId)
-		// if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
-		// const invitedUserId = msg.userId
-		// if (!invitedUserId) throw new Error(`Invalid invited userId`)
-		// //if ( this.getClientById(invitedUserId) ) return; // già presente
-
-		// // inserisco uno USER negli ONLINE della CHAT e avverto tutti
-		// chat.addUser(invitedUserId)
-		// // inserisco lo USER tra i PARTECIPANTI
-		// chat.addParticipant(invitedUserId)
-	//}
-
-	/**
-	 * Rimuove un UTENTE dalla chat
-	 * - rimuove dai partecipanti nel db
-	 * - rimuove l'utente (se online) dalla chat
-	 * - avverte tutti (tranne l'utente rimosso) che l'utente è uscito
-	 */
-	// private async handleUserRemove(user: AccountDTO, msg: UserRemoveC2S) {
-	// 	const chat = this.service.chatManager.getChatById(msg.chatId)
-	// 	if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
-
-	// 	// rimuovo dal DB
-	// 	chat.removeParticipant(msg.userId)
-	// 	await this.service.chatManager.saveChat(chat.chatRepo)
-
-	// 	// rimuovo dalla sessione (se presente) e notifico (CLIENT_LEAVE)
-	// 	chat.removeUser(msg.userId)
-	// }
-
-	//#endregion 
 
 }

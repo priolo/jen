@@ -2,7 +2,6 @@ import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
 import { Llm } from "@/types/Llm"
 import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { EditorState } from "../editorBase"
 import { LlmDetailStore } from "./detail"
 import { buildLlmDetail, buildLlmDetailNew } from "./factory"
 import llmSo from "./repo"
@@ -23,7 +22,6 @@ const setup = {
 		getTitle: (_: void, store?: ViewStore) => "LLM",
 		getSubTitle: (_: void, store?: ViewStore) => "llm list",
 		//#endregion
-
 	},
 
 	actions: {

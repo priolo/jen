@@ -29,20 +29,23 @@ const CardIcon: FunctionComponent<Props> = ({
 			return null
 
 
-		case DOC_TYPE.ROOM_LIST:
-			return null
 		case DOC_TYPE.ROOM_DETAIL:
 			return null
-
 		case DOC_TYPE.ROOM_AGENT_LIST:
 			return null
+
+
 		case DOC_TYPE.AGENT:
 			return null
+		case DOC_TYPE.AGENT_LIST:
+			return null
+
 
 		case DOC_TYPE.LLM_LIST:
 			return null
 		case DOC_TYPE.LLM_DETAIL:
 			return null
+
 
 		case DOC_TYPE.MCP_SERVER_LIST:
 			return null
@@ -53,6 +56,7 @@ const CardIcon: FunctionComponent<Props> = ({
 		case DOC_TYPE.MCP_TOOL_RESULT_LIST:
 			return null
 
+			
 		case DOC_TYPE.TOOL_LIST:
 			return null
 		case DOC_TYPE.TOOL_DETAIL:

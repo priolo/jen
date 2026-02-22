@@ -48,16 +48,21 @@ const setup = {
 	},
 
 	actions: {
+
 		//#region VIEWBASE
+
 		setSerialization: (data: any, store?: ViewStore) => {
 			viewSetup.actions.setSerialization(data, store)
+			const state = store.state as AccountFinderState
+			state.textSearch = data.textSearch
 		},
-		//#endregion
 
-		async fetchFiltered(_: void, store?: AccountFinderStore) {
+		async fetch(_: void, store?: AccountFinderStore) {
 			const accounts = (await accountApi.index({ text: store.state.textSearch }))?.accounts ?? []
 			store.setAll(accounts)
 		},
+
+		//#endregion
 
 		openDetail(accountId: string, store?: AccountFinderStore) {
 			const view = buildAccountDetail({ accountId })
@@ -70,7 +75,7 @@ const setup = {
 		setTextSearch: (textSearch: string, store?: AccountFinderStore) => {
 			debounce(
 				"AccountListView.setTextSearch",
-				() => store.fetchFiltered(),
+				() => store.fetch(),
 				500
 			)
 			return { textSearch }

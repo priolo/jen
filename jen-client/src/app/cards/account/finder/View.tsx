@@ -17,6 +17,7 @@ interface Props {
 
 /**
  * Lista di ACCOUNT registrati nel sistema
+ * Serve a cercare gli USERS
  */
 const AccountFinderView: FunctionComponent<Props> = ({
 	store,
@@ -30,7 +31,7 @@ const AccountFinderView: FunctionComponent<Props> = ({
 
 	// HOOKs
 	useEffect(() => {
-		store.fetchFiltered()
+		store.fetch()
 	}, [])
 
 	// HANDLER

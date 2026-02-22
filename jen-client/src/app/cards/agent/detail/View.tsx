@@ -14,6 +14,8 @@ import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import ToolsDialog from "./ToolsDialog"
+import { buildLlmList } from "@/stores/stacks/llm/factory"
+import { deckCardsSo } from "@/stores/docs/cards"
 
 
 
@@ -30,8 +32,8 @@ const AgentView: FunctionComponent<Props> = ({
 
 	// HOOKs
 	useEffect(() => {
-		if ( inNew ) return
-		const agent = agentSo.getById(store.state.agent?.id)
+		if (inNew) return
+		const agent = agentSo.getById(store.state.agentId)
 		store.setAgent(agent)
 	}, [])
 
@@ -52,40 +54,38 @@ const AgentView: FunctionComponent<Props> = ({
 	}
 
 	const handleBaseAgentChange = (baseId: string) => {
-		store.setAgent({ ...store.state.agent, baseId  })
+		store.setAgent({ ...store.state.agent, baseId })
 	}
 
 	const handleNameChange = (name: string) => {
 		store.setAgent({ ...store.state.agent, name })
 	}
 
-	const handleAgentsSelectChange = (ids: string[]) => {
-		const subAgents: Partial<AgentLlm>[] = ids.map(id => ({ id }))
-		store.setAgent({ ...store.state.agent, subAgents })
+	const handleAgentsSelectChange = (subAgentsIds: string[]) => {
+		store.setAgent({ ...store.state.agent, subAgentsIds })
 	}
 
-	const handleToolsSelectChange = (ids: string[]) => {
-		const tools: Partial<Tool>[] = ids.map(id => ({ id }))
-		store.setAgent({ ...store.state.agent, tools })
+	const handleToolsSelectChange = (toolsIds: string[]) => {
+		store.setAgent({ ...store.state.agent, toolsIds })
 	}
 
 	// RENDER
 	const inRead = store.state.editState == EDIT_STATE.READ
 	const inNew = store.state.editState == EDIT_STATE.NEW
 
-	if ( !store.state.agent ) return null
+	if (!store.state.agent) return null
 
 	const llm = llmSo.state.all ?? []
 	const llmSelectedId = store.state.agent.llmId
 
 	const agents = agentSo.state.all ?? []
 	const agentBaseId = store.state.agent?.baseId
-	const subAgentsSelected = store.state.agent?.subAgents?.map(agent => agent.id) ?? []
+	const subAgentsSelected = store.state.agent?.subAgentsIds ?? []
 
-	const toolsSelected = store.state.agent?.tools?.map(tool => tool.id) ?? []
+	const toolsSelected = store.state.agent?.toolsIds ?? []
 	const tools = toolSo.state.all ?? []
 
-	
+
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -120,7 +120,12 @@ const AgentView: FunctionComponent<Props> = ({
 			</div> */}
 
 			<div className="lyt-v">
-				<div className="jack-lbl-prop">LLM</div>
+				<div className="jack-lbl-prop"
+					onClick={() => {
+						const view = buildLlmList()
+						deckCardsSo.add({ view, anim: true })
+					}}
+				>LLM</div>
 				<ListDialog2
 					store={store}
 					select={llmSelectedId}

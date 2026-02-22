@@ -43,7 +43,7 @@ const setup = {
 		 */
 		async enter(chatId: string, store?: ChatWSStore) {
 			// se c'e' gia' la CHAT non faccio nulla
-			if (!chatId || store.state.all.includes(chatId)) return
+			//if (!chatId || store.state.all.includes(chatId)) return
 
 			// invio il messaggio di ENTER
 			const msgSend: UserEnterC2S = {
@@ -58,7 +58,7 @@ const setup = {
 		*/
 		leave: async (chatId: string, store?: ChatWSStore) => {
 			// se non sono in chat allora non faccio nulla
-			if (!chatId || !store.state.all.includes(chatId)) return
+			//if (!chatId || !store.state.all.includes(chatId)) return
 
 			// invio il messaggio di LEAVE
 			const message: UserLeaveC2S = {
@@ -67,35 +67,6 @@ const setup = {
 			}
 			wsConnection.send(JSON.stringify(message))
 		},
-
-		/**
-		 * Invito uno USER ad una CHAT
-		 */
-		// inviteUser: async (props: { chatId: string, accountId: string }, store?: ChatWSStore) => {
-		// 	const { chatId, accountId } = props
-		// 	if (!chatId || !accountId) return
-		// 	const message: UserInviteC2S = {
-		// 		action: CHAT_ACTION_C2S.USER_INVITE,
-		// 		chatId,
-		// 		userId: accountId,
-		// 	}
-		// 	wsConnection.send(JSON.stringify(message))
-		// },
-
-		/**
-		 * Rimuovo un USER da una CHAT
-		 */
-		// removeUser: async (props: { chatId: string, userId: string }, store?: ChatWSStore) => {
-		// 	const { chatId, userId } = props
-		// 	if (!chatId || !userId) return
-		// 	const message: UserRemoveC2S = {
-		// 		action: CHAT_ACTION_C2S.USER_REMOVE,
-		// 		chatId,
-		// 		userId,
-		// 	}
-		// 	wsConnection.send(JSON.stringify(message))
-		// },
-
 
 		/**
 		 * Update the list of AGENTS in a ROOM 
@@ -170,22 +141,6 @@ const setup = {
 
 			switch (message.action) {
 
-				// arrivate le INFO di una CHAT le integro nella store
-				// potrebbe trattarsi anche di un INVITE
-				// case CHAT_ACTION_S2C.CHAT_UPDATE: {
-				// 	const msg = message as ChatUpdateS2C
-				// 	const chatOld = chatRepoSo.getById(msg.chatId)
-				// 	if (!!chatOld) {
-				// 		deepMerge(chatOld, msg.chat)
-				// 		chatRepoSo.setAll([...chatRepoSo.state.all])
-				// 	} else {
-				// 		chatRepoSo.setAll([...chatRepoSo.state.all, msg.chat as ChatDTO])
-				// 	}
-
-				// 	break
-				// }
-
-
 				// agghiorno la CHAT
 				case CHAT_ACTION_S2C.CHAT_UPDATE2: {
 					const msg = message as ChatUpdateS2C2
@@ -202,14 +157,16 @@ const setup = {
 					const msg = message as ClientEnteredS2C
 					const chat = chatRepoSo.getById(msg.chatId)
 					if (!chat) break
+
 					// aggiungo agli user ONLINE
 					chat.onlineUserIds = [...(chat.onlineUserIds ?? []), msg.user.id]
 					chatRepoSo.setAll([...chatRepoSo.state.all])
 
-					if ( msg.user.id == authSo.state.user.id) {
+					// sono aggiungo la chat a ONLINE
+					if (msg.user.id == authSo.state.user.id) {
 						ChatInline(msg.chatId)
 					}
-					
+
 					break
 				}
 
@@ -217,11 +174,12 @@ const setup = {
 					const msg = message as ClientLeaveS2C
 					const chat = chatRepoSo.getById(msg.chatId)
 					if (!chat) break
+
 					// elimino degli user ONLINE
 					chat.onlineUserIds = chat.onlineUserIds?.filter(id => id != msg.userId)
 					chatRepoSo.setAll([...chatRepoSo.state.all])
 
-					// sono io che esco dalla chat
+					// sono io che esco dalla chat, quindi la rimuovo da ONLINE
 					if (msg.userId == authSo.state.user.id) {
 						ChatOffline(msg.chatId)
 					}
@@ -356,7 +314,7 @@ async function ChatOffline(chatId: string) {
 	chatWSSo.setAll(chatWSSo.state.all.filter(c => c != chatId))
 
 	const chat = chatRepoSo.getById(chatId)
-	if ( !chat) return
+	if (!chat) return
 	// eimino i dati non necessari nella CHAT-PROXY
 	chat.onlineUserIds = null
 	chat.rooms = null

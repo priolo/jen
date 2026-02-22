@@ -3,7 +3,6 @@ import { EDIT_STATE } from "@/types"
 import { Button, CircularLoadingCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
-import cls from "./View.module.css"
 
 
 
@@ -27,8 +26,8 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	const handleEditClick = async () => store.setEditState(EDIT_STATE.EDIT)
 	const handleCancelClick = () => store.restore()
 	const handleSaveClick = async () => store.save()
-	const handleChatClick = () => store.openChatRoom()
-	const handleEditorClick = () => store.openEditor()
+	// const handleChatClick = () => store.openChatRoom()
+	// const handleEditorClick = () => store.openEditor()
 
 
 	// LOADING
@@ -38,40 +37,31 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 	// RENDER
 	if (agentDetailSa.editState == EDIT_STATE.NEW) {
-		return <div
-			className={cls.actions}
-			style={style}
-		>
+		return <>
 			<Button
 				children="CREATE"
 				onClick={handleSaveClick}
 			/>
-		</div>
+		</>
 
 	} else if (agentDetailSa.editState == EDIT_STATE.READ) {
-		return <div
-			className={cls.actions}
-			style={style}
-		>
+		return <>
 			<Button
 				children="EDIT"
 				onClick={handleEditClick}
 			/>
-			<Button
+			{/* <Button
 				children="CHAT"
 				onClick={handleChatClick}
-			/>
+			/> */}
 			{/* <Button
 				children="EDITOR"
 				onClick={handleEditorClick}
 			/> */}
-		</div>
+		</>
 	}
 
-	return (<div
-		className={cls.actions}
-		style={style}
-	>
+	return <>
 		<Button
 			children="SAVE"
 			onClick={handleSaveClick}
@@ -80,7 +70,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 			children="CANCEL"
 			onClick={handleCancelClick}
 		/>
-	</div>)
+	</>
 }
 
 export default ActionsCmp

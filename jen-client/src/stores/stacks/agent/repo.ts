@@ -1,5 +1,7 @@
 import agentApi from "@/api/agent"
-import { createStore, StoreCore } from "@priolo/jon"
+import { DOC_TYPE } from "@/types"
+import { docsSo, loadBaseSetup, LoadBaseState, LoadBaseStore, utils, ViewStore } from "@priolo/jack"
+import { createStore, mixStores, StoreCore } from "@priolo/jon"
 import { AgentDTO } from "@shared/types/AgentDTO"
 
 
@@ -37,10 +39,12 @@ const setup = {
 	actions: {
 
 		/** carico tutti gli AGENT appartenenti a me */
-		async fetch(_: void, store?: AgentStore) {
-			const agents = await agentApi.index({ store })
-			store.setAll(agents)
-			//await loadBaseSetup.actions.fetch(_, store)
+		async fetch(_: void, store?: LoadBaseStore) {
+			const s = <AgentStore>store
+			const cnnStore = utils.findAll(docsSo.getAllCards(), { type: DOC_TYPE.ACCOUNT_LIST })?.[0]
+			const agents = await agentApi.index({ store: cnnStore })
+			s.setAll(agents)
+			await loadBaseSetup.actions.fetch(_, store)
 		},
 
 		
@@ -72,13 +76,14 @@ const setup = {
 	},
 }
 
-export type AgentState = typeof setup.state
+export type AgentState = typeof setup.state & LoadBaseState
 export type AgentGetters = typeof setup.getters
 export type AgentActions = typeof setup.actions
 export type AgentMutators = typeof setup.mutators
-export interface AgentStore extends StoreCore<AgentState>, AgentGetters, AgentActions, AgentMutators {
+export interface AgentStore extends LoadBaseStore, AgentGetters, AgentActions, AgentMutators {
 	state: AgentState
 }
 
-const agentSo = createStore<AgentState>(setup)
+const agentSetup = mixStores(loadBaseSetup, setup)
+const agentSo = createStore<AgentState>(agentSetup)
 export default agentSo as AgentStore

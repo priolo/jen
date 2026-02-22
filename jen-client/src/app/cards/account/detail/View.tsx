@@ -22,13 +22,16 @@ const AccountDetailView: FunctionComponent<Props> = ({
 	useStore(store)
 	useStore(store.state.group)
 
+
 	// HOOKs
 	useEffect(() => {
 		store.fetchIfVoid()
 	}, [])
 
+
 	// HANDLER
 
+	
 	// RENDER
 
 	return <FrameworkCard
@@ -37,30 +40,27 @@ const AccountDetailView: FunctionComponent<Props> = ({
 		store={store}
 		actionsRender={<AccauntDetailActions store={store} />}
 	>
-		
-		{/* <TitleAccordion title="BASE"> */}
 
-			<div className="jack-lyt-form">
+		<div className="jack-lyt-form">
 
-				<AvatarCmp account={store.state.account} style={{ alignSelf: "center"}}/>
+			<AvatarCmp account={store.state.account} style={{ alignSelf: "center" }} />
 
-				<div className="jack-cmp-v">
-					<div className="jack-lbl-prop">NAME</div>
-					<div className="jack-lbl-readonly">
-						{store.state.account?.name ?? "--"}
-					</div>
+			<div className="jack-cmp-v">
+				<div className="jack-lbl-prop">NAME</div>
+				<div className="jack-lbl-readonly">
+					{store.state.account?.name ?? "--"}
 				</div>
-
-				<div className="jack-cmp-v">
-					<div className="jack-lbl-prop">E-MAIL</div>
-					<div className="jack-lbl-readonly">
-						{store.state.account?.email ?? "--"}
-					</div>
-				</div>
-
 			</div>
 
-		{/* </TitleAccordion> */}
+			<div className="jack-cmp-v">
+				<div className="jack-lbl-prop">E-MAIL</div>
+				<div className="jack-lbl-readonly">
+					{store.state.account?.email ?? "--"}
+				</div>
+			</div>
+
+		</div>
+
 	</FrameworkCard>
 }
 
