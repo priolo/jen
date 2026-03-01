@@ -1,12 +1,12 @@
-import { AgentListStore } from "@/stores/stacks/agent/list"
 import agentSo from "@/stores/stacks/agent/repo"
+import { LlmListStore } from "@/stores/stacks/llm/list"
 import { Button, CircularLoadingCmp, OptionsCmp } from "@priolo/jack"
 import { FunctionComponent } from "react"
 
 
 
 interface Props {
-	store?: AgentListStore
+	store?: LlmListStore
 }
 
 const ActionsCmp: FunctionComponent<Props> = ({

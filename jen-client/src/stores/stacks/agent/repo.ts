@@ -42,7 +42,7 @@ const setup = {
 		async fetch(_: void, store?: LoadBaseStore) {
 			const s = <AgentStore>store
 			const cnnStore = utils.findAll(docsSo.getAllCards(), { type: DOC_TYPE.ACCOUNT_LIST })?.[0]
-			const agents = await agentApi.index({ store: cnnStore })
+			const agents = (await agentApi.index({ store: cnnStore }))?.agents
 			s.setAll(agents)
 			await loadBaseSetup.actions.fetch(_, store)
 		},
@@ -51,9 +51,9 @@ const setup = {
 		async save(agent: Partial<AgentDTO>, store?: AgentStore): Promise<AgentDTO> {
 			let agentSaved: AgentDTO = null
 			if (!agent.id) {
-				agentSaved = await agentApi.create(agent, { store })
+				agentSaved = (await agentApi.create(agent, { store }))?.agent
 			} else {
-				agentSaved = await agentApi.update(agent as AgentDTO, { store })
+				agentSaved = (await agentApi.update(agent as AgentDTO, { store }))?.agent
 			}
 
 			const all = [...store.state.all]

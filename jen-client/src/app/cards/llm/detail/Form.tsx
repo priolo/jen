@@ -52,13 +52,13 @@ const LlmDetailForm: FunctionComponent<Props> = ({
 
         <div className="lyt-v">
             <div className="jack-lbl-prop">LLMs</div>
-            <ListDialog width={80}
+            <ListDialog width={180}
                 store={store}
                 select={modelIndex}
                 items={models}
                 RenderRow={StringUpRow}
                 readOnly={inRead}
-                onSelect={index => handlePropChange({ name: Object.values(LLM_MODELS)[index] })}
+                onSelect={index => handlePropChange({ code: Object.values(LLM_MODELS)[index] })}
             />
         </div>
 

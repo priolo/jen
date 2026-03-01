@@ -1,21 +1,20 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
+import ArrowRightIcon from "@/icons/ArrowRightIcon"
+import { deckCardsSo } from "@/stores/docs/cards"
 import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 import agentSo from "@/stores/stacks/agent/repo"
+import { buildLlmList } from "@/stores/stacks/llm/factory"
 import llmSo from "@/stores/stacks/llm/repo"
 import toolSo from "@/stores/stacks/tool/repo"
 import { EDIT_STATE } from "@/types"
 import { AgentLlm } from "@/types/Agent"
-import { Llm } from "@/types/Llm"
-import { Tool } from "@/types/Tool"
-import { IconToggle, ListDialog2, ListMultiDialog, MarkdownEditor, TextInput, TitleAccordion } from "@priolo/jack"
+import { Component, IconToggle, ListMultiDialog, MarkdownEditor, TextInput, TitleAccordion } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import ToolsDialog from "./ToolsDialog"
-import { buildLlmList } from "@/stores/stacks/llm/factory"
-import { deckCardsSo } from "@/stores/docs/cards"
 
 
 
@@ -27,14 +26,14 @@ const AgentView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
+
 	// STORE
 	useStore(store)
 
+
 	// HOOKs
 	useEffect(() => {
-		if (inNew) return
-		const agent = agentSo.getById(store.state.agentId)
-		store.setAgent(agent)
+		store.fetchIfVoid()
 	}, [])
 
 	// [II] magari elimino il concetto di base agent
@@ -43,31 +42,24 @@ const AgentView: FunctionComponent<Props> = ({
 		[agentSo.state.all, store.state.agent]
 	)
 
-	// HANDLER
-	// const handleTypeChange = (index: number) => {
-	// 	const type = Object.values(AGENT_TYPE)[index]
-	// 	store.setAgent({ ...store.state.agent, type })
-	// }
 
+	// HANDLER
 	const handleLlmChange = (llmId: string) => {
 		store.setAgent({ ...store.state.agent, llmId })
 	}
-
 	const handleBaseAgentChange = (baseId: string) => {
 		store.setAgent({ ...store.state.agent, baseId })
 	}
-
 	const handleNameChange = (name: string) => {
 		store.setAgent({ ...store.state.agent, name })
 	}
-
 	const handleAgentsSelectChange = (subAgentsIds: string[]) => {
 		store.setAgent({ ...store.state.agent, subAgentsIds })
 	}
-
 	const handleToolsSelectChange = (toolsIds: string[]) => {
 		store.setAgent({ ...store.state.agent, toolsIds })
 	}
+
 
 	// RENDER
 	const inRead = store.state.editState == EDIT_STATE.READ
@@ -77,6 +69,7 @@ const AgentView: FunctionComponent<Props> = ({
 
 	const llm = llmSo.state.all ?? []
 	const llmSelectedId = store.state.agent.llmId
+	const llmSelected = llm.find(item => item.id == llmSelectedId)
 
 	const agents = agentSo.state.all ?? []
 	const agentBaseId = store.state.agent?.baseId
@@ -85,14 +78,11 @@ const AgentView: FunctionComponent<Props> = ({
 	const toolsSelected = store.state.agent?.toolsIds ?? []
 	const tools = toolSo.state.all ?? []
 
-
-
 	return <FrameworkCard
 		className={clsCard.root}
 		icon={<EditorIcon />}
 		store={store}
 		actionsRender={<ActionsCmp store={store} />}
-		iconizedRender={null}
 	>
 
 		<TitleAccordion title="BASE">
@@ -120,23 +110,31 @@ const AgentView: FunctionComponent<Props> = ({
 			</div> */}
 
 			<div className="lyt-v">
+				
 				<div className="jack-lbl-prop"
 					onClick={() => {
 						const view = buildLlmList()
 						deckCardsSo.add({ view, anim: true })
 					}}
 				>LLM</div>
-				<ListDialog2
+
+				<Component
+					onClick={()=> store.openLlmCard()}
+					enterRender={<ArrowRightIcon style={{ opacity: 0.5 }} />}
+				>{llmSelected?.code}</Component>
+
+
+				{/* <ListDialog2
 					store={store}
 					select={llmSelectedId}
 					items={llm}
 					readOnly={inRead}
-					fnGetId={(item: Llm) => item?.id}
-					fnGetString={(item: Llm) => item?.code}
+					fnGetId={(item: LlmDTO) => item?.id}
+					fnGetString={(item: LlmDTO) => item?.code}
 					onChangeSelect={handleLlmChange}
-				/>
+				/> */}
 			</div>
-
+{/* 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">BASE</div>
 				<ListDialog2
@@ -148,11 +146,11 @@ const AgentView: FunctionComponent<Props> = ({
 					fnGetString={(item: AgentLlm) => item?.name}
 					onChangeSelect={handleBaseAgentChange}
 				/>
-			</div>
+			</div> */}
 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">TOOLS</div>
-				<ListMultiDialog
+				{/* <ListMultiDialog
 					store={store}
 					items={tools}
 					selects={toolsSelected}
@@ -160,7 +158,11 @@ const AgentView: FunctionComponent<Props> = ({
 					onChangeSelect={handleToolsSelectChange}
 					fnGetId={(item: Tool) => item.id}
 					fnGetString={(item: Tool) => item?.name}
-				/>
+				/> */}
+				<Component
+					onClick={()=> store.openToolsCard()}
+					enterRender={<ArrowRightIcon style={{ opacity: 0.5 }} />}
+				>{toolsSelected?.join(", ") ?? "--"}</Component>
 			</div>
 
 			<div className="lyt-v">

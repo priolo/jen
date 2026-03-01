@@ -4,10 +4,12 @@ import cls from "./ElementRow.module.css"
 
 
 interface Props {
-	selected?: boolean
-	title: string
 	icon?: React.ReactNode
+	title: string
 	subtitle?: string
+	selected?: boolean
+	disabled?: boolean
+
 	tabIndex?: number
 	className?: string
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void
@@ -17,10 +19,12 @@ interface Props {
  * riga generica di lista figa
  */
 const ElementRow: FunctionComponent<Props> = ({
+	icon,
 	title,
 	subtitle,
-	icon,
 	selected,
+	disabled,
+
 	tabIndex = 0,
 	className,
 	onClick,
@@ -39,11 +43,14 @@ const ElementRow: FunctionComponent<Props> = ({
 
 	// RENDER
 	if (!title) return null
-	const clsRoot = `${cls.root} ${selected ? cls.select : ""} ${className ?? ""}`
+	const clsRoot = `${cls.root} ${selected ? cls.select : ""} ${disabled ? cls.disabled : ""} ${className ?? ""}`
 
-	return <div className={clsRoot} tabIndex={tabIndex}
-		onClick={onClick}
-		onKeyDown={handleKeyDown}
+	return <div className={clsRoot} 
+		tabIndex={disabled ? -1 : tabIndex}
+		aria-disabled={disabled}
+		role={onClick ? "button" : undefined}
+		onClick={disabled ? undefined : onClick}
+		onKeyDown={disabled ? undefined : handleKeyDown}
 	>
 		{icon}
 		<div className={cls.label}>

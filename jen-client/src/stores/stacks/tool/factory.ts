@@ -26,9 +26,10 @@ export function buildToolDetailNew() {
 	return store;
 }
 
-export function buildToolList() {
+export function buildToolList(state: Partial<ToolListState> = {}) {
 	const store = buildStore({
 		type: DOC_TYPE.TOOL_LIST,
+		...state,
 	} as ToolListState) as ToolListStore
 	return store;
 }

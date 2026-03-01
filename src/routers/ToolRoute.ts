@@ -15,8 +15,8 @@ class ToolRoute extends httpRouter.Service {
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
 				{ path: "/", verb: "post", method: "create" },
+				{ path: "/:id", verb: "patch", method: "update" },
 				{ path: "/:id", verb: "delete", method: "delete" },
-				{ path: "/:id", verb: "patch", method: "update" }
 			]
 		}
 	}
@@ -24,37 +24,28 @@ class ToolRoute extends httpRouter.Service {
 
 	async getAll(req: Request, res: Response) {
 		const tools = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.ALL
+			type: typeorm.Actions.ALL
 		})
-		res.json(tools)
+		res.json({ tools })
 	}
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
 		const tool: ToolRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.GET_BY_ID,
+			type: typeorm.Actions.GET_BY_ID,
 			payload: id
 		})
-		res.json(tool)
+		res.json({ tool })
 	}
 
 
 	async create(req: Request, res: Response) {
 		const { tool }: { tool: ToolRepo } = req.body
 		const toolNew: ToolRepo = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: tool
 		})
-		res.json(toolNew)
-	}
-
-	async delete(req: Request, res: Response) {
-		const id = req.params["id"]
-		await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.DELETE,
-			payload: id
-		})
-		res.json({ data: "ok" })
+		res.json({ tool: toolNew })
 	}
 
 	async update(req: Request, res: Response) {
@@ -62,10 +53,19 @@ class ToolRoute extends httpRouter.Service {
 		const { tool }: { tool: ToolRepo } = req.body
 		if (!id || !tool) return
 		const toolUp = await new Bus(this, this.state.repository).dispatch({
-			type: typeorm.RepoRestActions.SAVE,
+			type: typeorm.Actions.SAVE,
 			payload: tool,
 		})
-		res.json(toolUp)
+		res.json({ tool: toolUp })
+	}
+
+	async delete(req: Request, res: Response) {
+		const id = req.params["id"]
+		await new Bus(this, this.state.repository).dispatch({
+			type: typeorm.Actions.DELETE,
+			payload: id
+		})
+		res.json({ data: "ok" })
 	}
 }
 

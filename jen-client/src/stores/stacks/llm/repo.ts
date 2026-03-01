@@ -1,13 +1,13 @@
 import llmApi from "@/api/llm"
-import { Llm } from "@/types/Llm"
 import { createStore, StoreCore } from "@priolo/jon"
+import { LlmDTO } from "@shared/types/LlmDTO"
 
 
 
 const setup = {
 
 	state: {
-		all: <Llm[]>null,
+		all: <LlmDTO[]>null,
 	},
 
 	getters: {
@@ -24,24 +24,24 @@ const setup = {
 		//#endregion
 
 		//#region OVERWRITE
+
 		async fetch(_: void, store?: LlmStore) {
 			const llm = (await llmApi.index({ store }))?.llms ?? []
 			store.setAll(llm)
 		},
-		//#endregion
-
 		async fetchIfVoid(_: void, store?: LlmStore) {
 			if (!!store.state.all) return
 			await store.fetch()
 		},
 
+		//#endregion
 
-		async save(llm: Partial<Llm>, store?: LlmStore): Promise<Llm> {
-			let llmSaved: Llm = null
+		async save(llm: Partial<LlmDTO>, store?: LlmStore): Promise<LlmDTO> {
+			let llmSaved: LlmDTO = null
 			if (!llm.id) {
-				llmSaved = await llmApi.create(llm, { store })
+				llmSaved = (await llmApi.create(llm, { store }))?.llm
 			} else {
-				llmSaved = await llmApi.update(llm as Llm, { store })
+				llmSaved = (await llmApi.update(llm as LlmDTO, { store }))?.llm
 			}
 
 			const all = [...store.state.all]
@@ -60,7 +60,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Llm[]) => ({ all }),
+		setAll: (all: LlmDTO[]) => ({ all }),
 	},
 }
 

@@ -1,10 +1,11 @@
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { focusSo, loadBaseSetup, LoadBaseStore, MESSAGE_TYPE, VIEW_SIZE } from "@priolo/jack"
+import { EDIT_STATE } from "@/types"
+import { loadBaseSetup, LoadBaseStore, MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
+import { ToolDTO } from "@shared/types/ToolDTO"
 import { ToolDetailStore } from "./detail"
-import { buildToolDetail, buildToolDetailNew } from "./factory"
+import { buildToolDetail, buildToolDetailNew, buildToolList } from "./factory"
 import toolSo from "./repo"
-import { Tool } from "@/types/Tool"
 
 
 
@@ -12,45 +13,66 @@ const setup = {
 
 	state: {
 		//#region VIEWBASE
-		width: 370,
+		width: 270,
 		widthMax: 1000,
 		//#endregion
+
+		/** 
+		 * TOOLS da visualizzare.
+		 * se null, visualizzo toolSo.state.all (che contiene tutti i tool)
+		 */
+		tools: <ToolDTO[]>null,
+		textSearch: "",
+		/** callback chiamato quando seleziono un item */
+		onSelected: <(view: ToolListStore, tool: ToolDTO) => void>null,
+		onToolsChange: <(view: ToolListStore, tools: ToolDTO[]) => void>null,
+		
 	},
 
 	getters: {
 		//#region VIEWBASE
-		getTitle: (_: void, store?: ViewStore) => "TOOL",
-		getSubTitle: (_: void, store?: ViewStore) => "tool list",
+		getTitle: (_: void, store?: ViewStore) => "TOOLS",
+		getSubTitle: (_: void, store?: ViewStore) => "Tools list",
 		//#endregion
+
+		/** l'id dell'elemento selezionato. Sarebbe l'id della CARD DETTAGLI aperta */
+		getSelected: (_: void, store?: ToolListStore): string => {
+			return (store.state.linked as ToolDetailStore)?.state?.toolId
+		},
+		/** Se è aperto il dettaglio in NEW */
+		isNewOpen: (_: void, store?: ToolListStore): boolean => {
+			return (store.state.linked as ToolDetailStore)?.state?.editState == EDIT_STATE.NEW
+		},
+		isAddSelected: (_: void, store?: ToolListStore): boolean => {
+			return !!(store.state.linked as ToolListStore)?.state?.onSelected
+		},
+
+		/** restituisce la lista dei tool da visualizzare, filtrata con textSearch */
+		getList: (_: void, store?: ToolListStore): ToolDTO[] => {
+			const textSearch = store.state.textSearch?.toLowerCase() ?? ""
+			const all = store.state.tools ?? toolSo.state.all ?? []
+			if ( !store.state.textSearch ) return all
+			return all
+				.filter(tool => tool.name.toLowerCase().includes(textSearch))
+		},
+
+		/**
+		 * Se c'e' la lista dei TOOLS del proprio parent
+		 * Servbe per vedere i "disabled" nella lista totale, per evitare di aggiungere doppioni
+		 */
+		getParentList: (_: void, store?: ToolListStore): ToolDTO[] => {
+			return (<ToolListStore>store.state.parent)?.state.tools
+		}
 	},
 
 	actions: {
 
-		//#region OVERRIDE VIEWBASE
-		//#endregion
-
-		//#region OVERRIDE LOADBASE
-
-		async fetch(_: void, store?: LoadBaseStore) {
-			await toolSo.fetch()
-		},
-
-		//#endregion
-
 		/** apro/chiudo la CARD del dettaglio */
-		select(toolId: string, store?: ToolListStore) {
-			const detached = focusSo.state.shiftKey
+		detail(toolId: string, store?: ToolListStore) {
 			const oldId = (store.state.linked as ToolDetailStore)?.state?.tool?.id
 			const newId = (toolId && oldId !== toolId) ? toolId : null
-
-			if (detached) {
-				const view = buildToolDetail({ tool: { id: toolId }, size: VIEW_SIZE.NORMAL })
-				store.state.group.add({ view, index: store.state.group.getIndexByView(store) + 1 })
-			} else {
-				const view = newId ? buildToolDetail({ tool: { id: toolId } }) : null
-				//store.setSelect(newId)
-				store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
-			}
+			const view = newId ? buildToolDetail({ toolId }) : null
+			store.state.group.addLink({ view, parent: store, anim: !oldId || !newId })
 		},
 
 		create(_: void, store?: ToolListStore) {
@@ -58,14 +80,16 @@ const setup = {
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
-		async delete(toolId: string, store?: ToolListStore) {
+		async delete(_: void, store?: ToolListStore) {
+			const toolId = store.getSelected()
+			if (!toolId) return
+
 			if (!await store.alertOpen({
 				title: "CONSUMER DELETION",
 				body: "This action is irreversible.\nAre you sure you want to delete the CONSUMER?",
 			})) return
 
 			toolSo.delete(toolId)
-
 			store.state.group.addLink({ view: null, parent: store, anim: true })
 
 			store.setSnackbar({
@@ -75,10 +99,44 @@ const setup = {
 			})
 		},
 
+
+
+
+		remove(_: void, store?: ToolListStore) {
+			const toolId = store.getSelected()
+			if (!toolId) return
+			store.state.onToolsChange(
+				store,
+				store.state.tools?.filter(t => t.id != toolId)
+			)
+		},
+
+		/** eseguo il select sull'eventuale parent */
+		select(_: void, store?: ToolListStore) {
+			const selectedId = store.getSelected()
+			if (!selectedId || !store.state.onSelected) return
+			const tool = toolSo.state.all.find(t => t.id == selectedId)
+			store.state.onSelected(store, tool)
+			//store.onRemoveFromDeck()
+		},
+
+		add(_: void, store?: ToolListStore) {
+			let view = null
+			if (!store.isAddSelected()) {
+				view = buildToolList({
+					onSelected: (view, tool) => {
+						store.state.onToolsChange(store, [...store.state.tools, tool])
+					}
+				})
+			}
+			store.state.group.addLink({ view, parent: store, anim: true })
+		},
+
 	},
 
 	mutators: {
-		setAll: (all: Tool[]) => ({ all }),
+		setTextSearch: (textSearch: string) => ({ textSearch }),
+		setTools: (tools: ToolDTO[]) => ({ tools }),
 	},
 }
 

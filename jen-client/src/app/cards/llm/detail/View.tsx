@@ -29,17 +29,13 @@ const LlmDetailView: FunctionComponent<Props> = ({
 
 	// HANDLER
 
-	
+
 	// RENDER
 	return <FrameworkCard
 		className={clsGreen.root}
 		icon={<ConnectionIcon />}
 		store={store}
 		actionsRender={<LlmDetailActions store={store} />}
-		iconizedRender={
-			<div className="lyt-v lyt-v-btts">
-			</div>
-		}
 	>
 
 		<LlmDetailForm store={store} />

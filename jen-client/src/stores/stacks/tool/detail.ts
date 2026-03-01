@@ -1,12 +1,10 @@
 import toolApi from "@/api/tool"
 import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { DOC_TYPE, EDIT_STATE } from "@/types"
-import { Tool } from "@/types/Tool"
-import { MESSAGE_TYPE, utils } from "@priolo/jack"
+import { EDIT_STATE } from "@/types"
+import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { ToolListStore } from "./list"
+import { ToolDTO } from "@shared/types/ToolDTO"
 import toolSo from "./repo"
-
 
 
 
@@ -14,8 +12,8 @@ const setup = {
 
 	state: {
 
-		/** tool visualizzato */
-		tool: <Partial<Tool>>null,
+		toolId: <string>null,
+		tool: <Partial<ToolDTO>>null,
 		editState: EDIT_STATE.READ,
 
 		//#region VIEWBASE
@@ -27,35 +25,39 @@ const setup = {
 
 		//#region VIEWBASE
 		getTitle: (_: void, store?: ViewStore) => "TOOL DETAIL",
+		getSubTitle: (_: void, store?: ViewStore) => "tool detail",
 		//#endregion
 
-		getParentList: (_: void, store?: ToolDetailStore) => utils.findInRoot(store.state.group.state.all,
-			{ type: DOC_TYPE.TOOL_DETAIL }
-		) as ToolListStore,
+		// getParentList: (_: void, store?: ToolDetailStore) => utils.findInRoot(store.state.group.state.all,
+		// 	{ type: DOC_TYPE.TOOL_DETAIL }
+		// ) as ToolListStore,
 
 	},
 
 	actions: {
 
 		//#region VIEWBASE
+		setSerialization: (data: any, store?: ViewStore) => {
+			viewSetup.actions.setSerialization(data, store)
+			const state = store.state as ToolDetailState
+			state.toolId = data.toolId
+		},
 		//#endregion
 
 		fetch: async (_: void, store?: ToolDetailStore) => {
-			if (!store.state.tool?.id) return
-			const tool = await toolApi.get(store.state.tool.id, { store, manageAbort: true })
+			if (!store.state.toolId || store.state.editState == EDIT_STATE.NEW) return
+			const tool = (await toolApi.get(store.state.toolId, { store, manageAbort: true }))?.tool
 			store.setTool(tool)
 			//await loadBaseSetup.actions.fetch(_, store)
 		},
-
 		async fetchIfVoid(_: void, store?: ToolDetailStore) {
-			if (!!store.state.tool.name) return
+			if (!!store.state.tool) return
 			await store.fetch()
 		},
 
-		/** crea un nuovo CONSUMER-INFO tramite CONSUMER-CONFIG */
 		async save(_: void, store?: ToolDetailStore) {
 			const toolSaved = await toolSo.save(store.state.tool)
-
+			store.state.toolId = toolSaved.id
 			store.setTool(toolSaved)
 			store.setEditState(EDIT_STATE.READ)
 			store.setSnackbar({
@@ -74,7 +76,7 @@ const setup = {
 	},
 
 	mutators: {
-		setTool: (tool: Partial<Tool>) => ({ tool }),
+		setTool: (tool: Partial<ToolDTO>) => ({ tool }),
 		setEditState: (editState: EDIT_STATE) => ({ editState }),
 	},
 }

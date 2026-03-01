@@ -1,13 +1,13 @@
 import toolApi from "@/api/tool"
-import { Tool } from "@/types/Tool"
 import { createStore, StoreCore } from "@priolo/jon"
+import { ToolDTO } from "@shared/types/ToolDTO"
 
 
 
 const setup = {
 
 	state: {
-		all: <Tool[]>null,
+		all: <ToolDTO[]>null,
 	},
 
 	getters: {
@@ -26,23 +26,22 @@ const setup = {
 		//#region OVERWRITE
 
 		async fetch(_: void, store?: ToolStore) {
-			const tools = await toolApi.index({ store })
+			const tools = (await toolApi.index({ store }))?.tools ?? []
 			store.setAll(tools)
 		},
-
-		//#endregion
-
 		async fetchIfVoid(_: void, store?: ToolStore) {
 			if (!!store.state.all) return
 			await store.fetch()
 		},
 
-		async save(tool: Partial<Tool>, store?: ToolStore): Promise<Tool> {
-			let toolSaved: Tool = null
+		//#endregion
+
+		async save(tool: Partial<ToolDTO>, store?: ToolStore): Promise<ToolDTO> {
+			let toolSaved: ToolDTO = null
 			if (!tool.id) {
-				toolSaved = await toolApi.create(tool, { store })
+				toolSaved = (await toolApi.create(tool, { store }))?.tool
 			} else {
-				toolSaved = await toolApi.update(tool, { store })
+				toolSaved = (await toolApi.update(tool, { store }))?.tool
 			}
 
 			const all = [...store.state.all]
@@ -61,7 +60,7 @@ const setup = {
 	},
 
 	mutators: {
-		setAll: (all: Tool[]) => ({ all }),
+		setAll: (all: ToolDTO[]) => ({ all }),
 	},
 }
 

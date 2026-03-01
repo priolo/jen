@@ -1,4 +1,5 @@
-import { AgentRepo } from "../repository/Agent.js";
+import { REPO_PATHS } from "@/config.js";
+import { AgentDTOFromAgentRepo, AgentDTOFromAgentRepoList, AgentRepo } from "../repository/Agent.js";
 import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { AccountRepo, JWTPayload } from "src/repository/Account.js";
@@ -32,7 +33,6 @@ class AgentRoute extends httpRouter.Service {
 		return {
 			...super.stateDefault,
 			path: "/agents",
-			agents_repo: "/typeorm/agents",
 			routers: [
 				{ path: "/", verb: "get", method: "getAll" },
 				{ path: "/:id", verb: "get", method: "getById" },
@@ -47,7 +47,7 @@ class AgentRoute extends httpRouter.Service {
 	async getAll(req: Request, res: Response) {
 		const userJwt: AccountRepo = req["jwtPayload"]
 
-		const agents: AgentRepo[] = await new Bus(this, this.state.agents_repo).dispatch({
+		const agents: AgentRepo[] = await new Bus(this, REPO_PATHS.AGENTS).dispatch({
 			type: typeorm.Actions.FIND,
 			payload: <FindManyOptions<AgentRepo>>{
 				where: [
@@ -61,29 +61,46 @@ class AgentRoute extends httpRouter.Service {
 				}
 			}
 		})
-		res.json(agents)
+		res.json({ agents: AgentDTOFromAgentRepoList(agents) })
 	}
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
-		const agent: AgentRepo = await AgentRoute.GetById(id, this, this.state.agents_repo)
-		res.json(agent)
+		const agent: AgentRepo = await AgentRoute.GetById(id, this, REPO_PATHS.AGENTS)
+		res.json({ agent: AgentDTOFromAgentRepo(agent) })
 	}
 
 	async create(req: Request, res: Response) {
 		const userJwt: JWTPayload = req["jwtPayload"]
 		if (!userJwt) return res.status(401).json({ error: "Unauthorized" })
-		
+
 		const agent: AgentRepo = req.body?.agent
-		const agentNew: AgentRepo = await new Bus(this, this.state.agents_repo).dispatch({
+		const agentNew: AgentRepo = await new Bus(this, REPO_PATHS.AGENTS).dispatch({
 			type: typeorm.Actions.SAVE,
 			payload: {
 				accountId: userJwt.id,
 				...agent
 			} as AgentRepo
 		})
+		res.json({ agent: AgentDTOFromAgentRepo(agentNew) })
+	}
 
-		res.json(agentNew)
+	async update(req: Request, res: Response) {
+		const id = req.params["id"]
+		const { agent }: { agent: AgentRepo } = req.body
+
+		if (!id || !agent) {
+			return res.status(400).json({ error: "Agent ID is required for an update." });
+		}
+
+		const agentUp: AgentRepo = await new Bus(this, REPO_PATHS.AGENTS).dispatch({
+			type: typeorm.Actions.SAVE,
+			payload: { ...agent, id },
+		})
+		if (!agentUp) {
+			return res.status(404).json({ error: "Agent not found or update failed." });
+		}
+		res.json({ agent: AgentDTOFromAgentRepo(agentUp) })
 	}
 
 	async delete(req: Request, res: Response) {
@@ -93,45 +110,19 @@ class AgentRoute extends httpRouter.Service {
 		const id = req.params["id"]
 
 		// Verifico che l'agente esista e appartenga all'utente
-		const agent: AgentRepo = await new Bus(this, this.state.agents_repo).dispatch({
+		const agent: AgentRepo = await new Bus(this, REPO_PATHS.AGENTS).dispatch({
 			type: typeorm.Actions.FIND_ONE,
 			payload: { where: { id } }
 		})
 		if (!agent) return res.status(404).json({ error: "Agent not found" })
 		if (agent.accountId !== userJwt.id) return res.status(403).json({ error: "Forbidden" })
 
-		await new Bus(this, this.state.agents_repo).dispatch({
+		await new Bus(this, REPO_PATHS.AGENTS).dispatch({
 			type: typeorm.Actions.DELETE,
 			payload: id
 		})
 
 		res.json({ data: "ok" })
-	}
-
-	async update(req: Request, res: Response) {
-		const id = req.params["id"]
-		const { agent }: { agent: AgentRepo } = req.body
-
-		if (!id) {
-			return res.status(400).json({ error: "Agent ID is required for an update." });
-		}
-
-		// Ensure the ID from the path is used for the update
-		const payload = { ...agent, id };
-
-		try {
-			const updatedAgent: AgentRepo = await new Bus(this, this.state.agents_repo).dispatch({
-				type: typeorm.Actions.SAVE,
-				payload,
-			})
-			if (!updatedAgent) {
-				return res.status(404).json({ error: "Agent not found or update failed." });
-			}
-			res.json(updatedAgent)
-		} catch (e) {
-			console.error("Error updating agent:", e)
-			res.status(500).json({ error: "Failed to update agent." })
-		}
 	}
 }
 

@@ -1,25 +1,25 @@
 import ajax, { CallOptions } from "@/plugins/AjaxService"
-import { Tool } from "@/types/Tool"
+import { ToolDTO } from "@shared/types/ToolDTO"
 
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<Tool[]> {
+function index(opt?: CallOptions): Promise<{tools: ToolDTO[]}> {
 	return ajax.get(`tools`, opt)
 }
 
 /** GET */
-function get(id: string, opt?: CallOptions): Promise<Tool> {
+function get(id: string, opt?: CallOptions): Promise<{tool: ToolDTO}> {
 	return ajax.get(`tools/${id}`, opt)
 }
 
 /** CREATE NEW */
-function create(tool: Partial<Tool>, opt?: CallOptions): Promise<Tool> {
+function create(tool: Partial<ToolDTO>, opt?: CallOptions): Promise<{tool: ToolDTO}> {
 	return ajax.post(`tools`, { tool }, opt)
 }
 
 /** UPDATE */
-function update(tool: Partial<Tool>, opt?: CallOptions): Promise<Tool> {
+function update(tool: Partial<ToolDTO>, opt?: CallOptions): Promise<{tool: ToolDTO}> {
 	return ajax.patch(`tools/${tool.id}`, { tool }, opt)
 }
 

@@ -1,7 +1,7 @@
 import agentApi from "@/api/agent"
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewState, ViewStore } from "@/stores/stacks/viewBase"
-import { EDIT_STATE } from "@/types"
+import { DOC_TYPE, EDIT_STATE } from "@/types"
 import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { AgentDTO } from "@shared/types/AgentDTO"
@@ -9,6 +9,13 @@ import { buildEditorFromAgent } from "../agentEditor/factory"
 import { EditorState } from "../editorBase"
 import { buildRoomDetail } from "../room/factory"
 import agentSo from "./repo"
+import { buildLlmDetail, buildLlmList } from "../llm/factory"
+import { LlmListStore } from "../llm/list"
+import { buildToolList } from "../tool/factory"
+import llmSo from "../llm/repo"
+import toolSo from "../tool/repo"
+import { ToolDTO } from "@shared/types/ToolDTO"
+import { ToolListStore } from "../tool/list"
 
 
 
@@ -18,7 +25,6 @@ const setup = {
 
 		/** id dell'agente */
 		agentId: <string>null,
-
 		agent: <Partial<AgentDTO>>null,
 		editState: EDIT_STATE.READ,
 
@@ -34,23 +40,39 @@ const setup = {
 	},
 
 	getters: {
+
 		//#region VIEWBASE
+
 		getTitle: (_: void, store?: ViewStore) => "AGENT",
 		getSubTitle: (_: void, store?: ViewStore) => "agente",
+		getSerialization: (_: void, store?: ViewStore) => {
+			const state = store.state as AgentDetailState
+			return {
+				...viewSetup.getters.getSerialization(null, store),
+				agentId: state.agentId,
+			}
+		},
 		//#endregion
 	},
 
 	actions: {
 
 		//#region VIEWBASE
+
+		setSerialization: (data: any, store?: ViewStore) => {
+			viewSetup.actions.setSerialization(data, store)
+			const state = store.state as AgentDetailState
+			state.agentId = data.agentId
+		},
+
 		//#endregion
 
 		/**
 		 * Carica il dettaglio di questo AGENT
 		 */
 		async fetch(_: void, store?: AgentDetailStore) {
-			if (!store.state.agentId) return
-			const agent = await agentApi.get(store.state.agentId, { store, manageAbort: true })
+			if (!store.state.agentId || store.state.editState == EDIT_STATE.NEW) return
+			const agent = (await agentApi.get(store.state.agentId, { store, manageAbort: true }))?.agent
 			store.setAgent(agent)
 		},
 		async fetchIfVoid(_: void, store?: AgentDetailStore) {
@@ -89,6 +111,7 @@ const setup = {
 		},
 
 
+
 		/** apertura della CARD ROOM */
 		openChatRoom(_: void, store?: AgentDetailStore) {
 			//chatSo.createChat(store.state.agent?.id)
@@ -100,8 +123,58 @@ const setup = {
 
 		/** apertura della CARD EDITOR */
 		openEditor(_: void, store?: AgentDetailStore) {
-			const view = buildEditorFromAgent( store.state.agent?.id)
+			const view = buildEditorFromAgent(store.state.agent?.id)
 			store.state.group.addLink({ view, parent: store, anim: true })
+		},
+
+		async openLlmCard(_: void, store?: AgentDetailStore) {
+			if (store.state.editState == EDIT_STATE.READ) {
+				if (store.state.linked?.state.type == DOC_TYPE.LLM_DETAIL && (store.state.linked as any)?.state?.llmId == store.state.agent.llmId) {
+					store.state.group.addLink({ view: null, parent: store, anim: true })
+					return
+				}
+				const llmId = store.state.agent.llmId
+				const view = buildLlmDetail({ llmId })
+				store.state.group.addLink({ view, parent: store, anim: true })
+			} else {
+				if (store.state.linked?.state.type == DOC_TYPE.LLM_LIST) {
+					store.state.group.addLink({ view: null, parent: store, anim: true })
+					return
+				}
+				const view = buildLlmList({
+					onSelected: (view, llm) => {
+						store.setAgent({ ...store.state.agent, llmId: llm.id })
+					}
+				})
+				await store.state.group.addLink({ view, parent: store, anim: true })
+				if (!store.state.agent.llmId) return
+				const viewDetail = buildLlmDetail({ llmId: store.state.agent.llmId })
+				store.state.group.addLink({ view: viewDetail, parent: view, anim: true })
+			}
+		},
+
+		/** apre la lista dei TOOLS */
+		async openToolsCard(_: void, store?: AgentDetailStore) {
+			// temporaneamente costruisco io gli LLM
+			const toolsIds = store.state.agent?.toolsIds ?? []
+			const tools = toolSo.state.all.filter(item => toolsIds.includes(item.id))
+
+			const view = buildToolList({
+				tools,
+				onToolsChange: (view, tools) => {
+					store.setAgent({ ...store.state.agent, toolsIds: tools.map(t => t.id) })
+					view.setTools(tools)
+				}
+			})
+			store.state.group.addLink({ view, parent: store, anim: true })
+		},
+
+		// ---------
+
+		onSelect(view: ViewStore, store?: AgentDetailStore) {
+			const llmId = (<LlmListStore>view)?.getSelected()
+			console.log("SELECTED", llmId)
+			store.setAgent({ ...store.state.agent, llmId })
 		},
 
 	},

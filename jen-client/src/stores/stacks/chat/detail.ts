@@ -33,6 +33,7 @@ const setup = {
 	getters: {
 
 		//#region VIEWBASE
+
 		getTitle: (_: void, store?: ViewStore) => "CHAT DETAIL",
 		getSubTitle: (_: void, store?: ViewStore) => "chat detail",
 		getSerialization: (_: void, store?: ViewStore) => {
@@ -42,6 +43,7 @@ const setup = {
 				chatId: state.chatId,
 			}
 		},
+		
 		//#endregion
 
 		getParentList: (_: void, store?: ChatDetailStore) => utils.findInRoot(store.state.group.state.all,

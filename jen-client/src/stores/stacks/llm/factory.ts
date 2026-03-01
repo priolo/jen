@@ -25,9 +25,10 @@ export function buildLlmDetailNew() {
 	return store;
 }
 
-export function buildLlmList() {
+export function buildLlmList(state:Partial<LlmListState> = {}) {
 	const store = buildStore({
 		type: DOC_TYPE.LLM_LIST,
+		...state,
 	} as LlmListState) as LlmListStore
 	return store;
 }

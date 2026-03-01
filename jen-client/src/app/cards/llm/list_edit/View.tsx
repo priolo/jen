@@ -1,41 +1,41 @@
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import ElementRow from "@/components/rows/ElementRow"
-import EditorIcon from "@/icons/EditorIcon"
-import { AgentListStore } from "@/stores/stacks/agent/list"
-import agentSo from "@/stores/stacks/agent/repo"
+import { LlmListStore } from "@/stores/stacks/llm/list"
+import llmSo from "@/stores/stacks/llm/repo"
 import { AlertDialog } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
-import { AgentDTO } from "@shared/types/AgentDTO"
+import { LlmDTO } from "@shared/types/LlmDTO"
 import { FunctionComponent } from "react"
+import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 
 
 
 interface Props {
-	store?: AgentListStore
+	store?: LlmListStore
 }
 
-const AgentListView: FunctionComponent<Props> = ({
+const LlmListView: FunctionComponent<Props> = ({
 	store,
 }) => {
 
 	// STORE
 	useStore(store)
-	useStore(agentSo)
+	useStore(llmSo)
 
 
 	// HOOKs
-
+	
 
 	// HANDLER
-	const handleSelect = (agent: AgentDTO) => store.detail(agent.id)
+	const handleSelect = (llm: LlmDTO) => store.detail(llm.id)
 
 
 	// RENDER
-	const agents = agentSo.state.all ?? []
+	const llms = llmSo.state.all ?? []
 	const selectedId = store.getSelected()
-
+	
 	return <FrameworkCard
 		className={clsCard.root}
 		icon={<EditorIcon />}
@@ -45,17 +45,16 @@ const AgentListView: FunctionComponent<Props> = ({
 	>
 		<div className={clsCard.content}>
 
-			{agents?.map((agent) =>
+			{llms?.map(llm =>
 				<ElementRow
-					key={agent.id}
-					onClick={() => handleSelect(agent)}
-					selected={selectedId == agent.id}
-					title={agent.name}
-					//subtitle={account.email}
+					key={llm.id}
+					onClick={() => handleSelect(llm)}
+					selected={selectedId == llm.id}
+					title={llm.code}
 				/>
 			)}
 
-			{!agents?.length && <div className="jack-lbl-empty">NO AGENTS</div>}
+			{!llms?.length && <div className="jack-lbl-empty">NO LLMS</div>}
 
 		</div>
 
@@ -64,4 +63,4 @@ const AgentListView: FunctionComponent<Props> = ({
 	</FrameworkCard>
 }
 
-export default AgentListView
+export default LlmListView

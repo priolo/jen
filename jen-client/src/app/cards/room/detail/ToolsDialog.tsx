@@ -1,9 +1,9 @@
 
 import { AgentDetailState, AgentDetailStore } from "@/stores/stacks/agent/detail"
 import toolSo from "@/stores/stacks/tool/repo"
-import { Tool } from "@/types/Tool"
-import { Dialog, List, ListMultiWithFilter, ListMultiWithFilter2 } from "@priolo/jack"
+import { Dialog, ListMultiWithFilter2 } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
+import { ToolDTO } from "@shared/types/ToolDTO"
 import { FunctionComponent, useState } from "react"
 
 
@@ -51,8 +51,8 @@ const ToolsDialog: FunctionComponent<Props> = ({
 					items={tools}
 					selects={ids}
 					onChangeSelects={handleSelect}
-					fnGetId={(item: Tool) => item.id}
-					fnGetString={(item: Tool) => item.name}
+					fnGetId={(item: ToolDTO) => item.id}
+					fnGetString={(item: ToolDTO) => item.name}
 				/>
 			</div>
 		</Dialog>

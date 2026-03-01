@@ -20,6 +20,10 @@
 	color: var(--cmp-select-fg);
 	background-color: var(--cmp-select-bg);
 }
+.root.disabled {
+	opacity: .5;
+	cursor: default;
+}
 
 .label {
 	display: flex;

@@ -4,22 +4,22 @@ import { AgentDTO } from "@shared/types/AgentDTO"
 
 
 /** INDEX */
-function index(opt?: CallOptions): Promise<AgentDTO[]> {
+function index(opt?: CallOptions): Promise<{ agents: AgentDTO[] }> {
 	return ajax.get(`agents`, opt)
 }
 
 /** GET */
-function get(id: string, opt?: CallOptions): Promise<AgentDTO> {
+function get(id: string, opt?: CallOptions): Promise<{ agent: AgentDTO }> {
 	return ajax.get(`agents/${id}`, opt)
 }
 
 /** CREATE NEW */
-function create(agent: Partial<AgentDTO>, opt?: CallOptions): Promise<AgentDTO> {
+function create(agent: Partial<AgentDTO>, opt?: CallOptions): Promise<{ agent: AgentDTO }> {
 	return ajax.post(`agents`, { agent }, opt)
 }
 
 /** UPDATE */
-function update(agent: Partial<AgentDTO>, opt?: CallOptions): Promise<AgentDTO> {
+function update(agent: Partial<AgentDTO>, opt?: CallOptions): Promise<{ agent: AgentDTO }> {
 	return ajax.patch(`agents/${agent.id}`, { agent }, opt)
 }
 
