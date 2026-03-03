@@ -7,7 +7,7 @@
 	--cmp-select-bg: #DEDEDE;
 
 	/* ombra perimetrale inputtext buttton */
-	--cmp-bg: rgba(0, 0, 0, 0.05);
+	/* --cmp-bg: rgba(0, 0, 0, 0.05); */
 
 	/* tooltip drag dialog float-button*/
 	--dialog-fg: #393939;

@@ -6,9 +6,10 @@ import agentSo from "@/stores/stacks/agent/repo"
 import { AlertDialog } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { AgentDTO } from "@shared/types/AgentDTO"
-import { FunctionComponent } from "react"
+import { FunctionComponent, useMemo } from "react"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
+import { AgentDetailStore } from "@/stores/stacks/agent/detail"
 
 
 
@@ -26,6 +27,10 @@ const AgentListView: FunctionComponent<Props> = ({
 
 
 	// HOOKs
+	const items = useMemo(
+		() => store.getList(),
+		[store.state.textSearch, agentSo.state.all, store.state.items]
+	)
 
 
 	// HANDLER
@@ -33,8 +38,9 @@ const AgentListView: FunctionComponent<Props> = ({
 
 
 	// RENDER
-	const agents = agentSo.state.all ?? []
-	const selectedId = store.getSelected()
+	const selectId = (store.state.linked as AgentDetailStore)?.state?.agentId
+	const isSelected = (item: AgentDTO) => item.id == selectId
+	const isDisabled = (item: AgentDTO) => store.getParentList()?.some(t => t.id == item.id) ?? false
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -45,17 +51,16 @@ const AgentListView: FunctionComponent<Props> = ({
 	>
 		<div className={clsCard.content}>
 
-			{agents?.map((agent) =>
-				<ElementRow
-					key={agent.id}
-					onClick={() => handleSelect(agent)}
-					selected={selectedId == agent.id}
-					title={agent.name}
-					//subtitle={account.email}
+			{items?.map(item =>
+				<ElementRow key={item.id}
+					title={item.name}
+					selected={isSelected(item)}
+					disabled={isDisabled(item)}
+					onClick={() => handleSelect(item)}
 				/>
 			)}
 
-			{!agents?.length && <div className="jack-lbl-empty">NO AGENTS</div>}
+			{!items?.length && <div className="jack-lbl-empty">NO AGENTS</div>}
 
 		</div>
 

@@ -108,6 +108,11 @@ export class AgentRepo extends AccountAssets {
     @ManyToMany(() => AgentRepo, (agent) => agent.subAgents)
     parentAgents?: AgentRepo[]
 
+    // Transient properties for DTO typing and runtime use. 
+    // They are not mapped as columns in the DB to avoid side effects.
+    toolsIds?: string[];
+    subAgentsIds?: string[];
+
     //#endregion
 
 }
@@ -133,8 +138,12 @@ export function AgentDTOFromAgentRepo(agent: AgentRepo): AgentDTO {
 
         baseId: agent.baseId,
 
-        toolsIds: agent.tools?.map(t => t.id).filter(Boolean) as string[] || [],
-        subAgentsIds: agent.subAgents?.map(sa => sa.id).filter(Boolean) as string[] || [],
+        toolsIds: agent.toolsIds 
+            ?? agent.tools?.map(t => t.id).filter(Boolean) as string[] 
+            ?? [],
+        subAgentsIds: agent.subAgentsIds 
+            ?? agent.subAgents?.map(sa => sa.id).filter(Boolean) as string[] 
+            ?? [],
     }
 }
 

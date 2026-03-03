@@ -4,6 +4,8 @@ import { Bus, httpRouter, INode, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { AccountRepo, JWTPayload } from "src/repository/Account.js";
 import { FindManyOptions, FindOneOptions } from "typeorm";
+import { AgentDTO } from "@shared/types/AgentDTO.js";
+import { tool } from "ai";
 
 
 
@@ -61,13 +63,17 @@ class AgentRoute extends httpRouter.Service {
 				}
 			}
 		})
-		res.json({ agents: AgentDTOFromAgentRepoList(agents) })
+		res.json({
+			agents: AgentDTOFromAgentRepoList(agents)
+		})
 	}
 
 	async getById(req: Request, res: Response) {
 		const id = req.params["id"]
 		const agent: AgentRepo = await AgentRoute.GetById(id, this, REPO_PATHS.AGENTS)
-		res.json({ agent: AgentDTOFromAgentRepo(agent) })
+		res.json({
+			agent: AgentDTOFromAgentRepo(agent)
+		})
 	}
 
 	async create(req: Request, res: Response) {
@@ -82,12 +88,14 @@ class AgentRoute extends httpRouter.Service {
 				...agent
 			} as AgentRepo
 		})
-		res.json({ agent: AgentDTOFromAgentRepo(agentNew) })
+		res.json({
+			agent: AgentDTOFromAgentRepo(agentNew)
+		})
 	}
 
 	async update(req: Request, res: Response) {
 		const id = req.params["id"]
-		const { agent }: { agent: AgentRepo } = req.body
+		const { agent }: { agent: AgentDTO } = req.body
 
 		if (!id || !agent) {
 			return res.status(400).json({ error: "Agent ID is required for an update." });
@@ -95,12 +103,18 @@ class AgentRoute extends httpRouter.Service {
 
 		const agentUp: AgentRepo = await new Bus(this, REPO_PATHS.AGENTS).dispatch({
 			type: typeorm.Actions.SAVE,
-			payload: { ...agent, id },
+			payload: <AgentRepo>{
+				...agent, id,
+				tools: agent.toolsIds.map(id => ({ id: id })),
+				subAgents: agent.subAgentsIds.map(id => ({ id })),
+			},
 		})
 		if (!agentUp) {
 			return res.status(404).json({ error: "Agent not found or update failed." });
 		}
-		res.json({ agent: AgentDTOFromAgentRepo(agentUp) })
+		res.json({
+			agent: AgentDTOFromAgentRepo(agentUp)
+		})
 	}
 
 	async delete(req: Request, res: Response) {
@@ -122,7 +136,9 @@ class AgentRoute extends httpRouter.Service {
 			payload: id
 		})
 
-		res.json({ data: "ok" })
+		res.json({
+			data: "ok"
+		})
 	}
 }
 

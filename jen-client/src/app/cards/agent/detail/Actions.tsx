@@ -20,14 +20,23 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	useStore(store.state.group)
 	const agentDetailSa = useStore(store)
 
+
 	// HOOKs
 
+
 	// HANDLER
-	const handleEditClick = async () => store.setEditState(EDIT_STATE.EDIT)
-	const handleCancelClick = () => store.restore()
-	const handleSaveClick = async () => store.save()
-	// const handleChatClick = () => store.openChatRoom()
-	// const handleEditorClick = () => store.openEditor()
+	const handleEditClick = async () => {
+		store.state.linked?.onRemoveFromDeck()
+		store.setEditState(EDIT_STATE.EDIT)
+	}
+	const handleCancelClick = () => {
+		store.state.linked?.onRemoveFromDeck()
+		store.restore()
+	}
+	const handleSaveClick = async () => {
+		store.state.linked?.onRemoveFromDeck()
+		store.save()
+	}
 
 
 	// LOADING

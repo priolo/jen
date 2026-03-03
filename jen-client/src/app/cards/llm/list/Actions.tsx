@@ -1,5 +1,6 @@
 import agentSo from "@/stores/stacks/agent/repo"
 import { LlmListStore } from "@/stores/stacks/llm/list"
+import { EDIT_STATE } from "@/types"
 import { Button, CircularLoadingCmp, FindInputHeader, OptionsCmp } from "@priolo/jack"
 import { FunctionComponent, useDeferredValue, useEffect, useState } from "react"
 
@@ -39,8 +40,8 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// RENDER
+	const inEdit = store.state.editState == EDIT_STATE.EDIT
 	const selectedId = store.getSelected()
-
 	const haveButtonSelect = store.isSelectable()
 	const newSelected = store.isNewOpen()
 
@@ -57,30 +58,31 @@ const ActionsCmp: FunctionComponent<Props> = ({
 			onChange={text => setTextSearch(text)}
 		/>
 
-		<div style={{ display: "flex" }} >
+		{inEdit &&
+			<div style={{ display: "flex" }} >
 
-			{haveButtonSelect &&
+				{haveButtonSelect &&
+					<Button
+						children="SEL"
+						onClick={handleSelect}
+						disabled={!selectedId || !!newSelected}
+					/>
+				}
+
 				<Button
-					children="SEL"
-					onClick={handleSelect}
-					disabled={!selectedId || !!newSelected}
+					children="DEL"
+					onClick={handleDelete}
+					disabled={!selectedId || newSelected}
 				/>
-			}
 
-			<Button
-				children="DEL"
-				onClick={handleDelete}
-				disabled={!selectedId || newSelected}
-			/>
+				<Button
+					select={newSelected}
+					children="NEW"
+					onClick={handleNew}
+				/>
 
-			<Button
-				select={newSelected}
-				children="NEW"
-				onClick={handleNew}
-			/>
-
-		</div>
-
+			</div>
+		}
 	</>
 }
 

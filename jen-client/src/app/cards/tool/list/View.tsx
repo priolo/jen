@@ -28,9 +28,9 @@ const ToolListView: FunctionComponent<Props> = ({
 
 
 	// HOOKs
-	const tools = useMemo(
+	const items = useMemo(
 		() => store.getList(),
-		[store.state.textSearch, toolSo.state.all, store.state.tools]
+		[store.state.textSearch, toolSo.state.all, store.state.items]
 	)
 
 
@@ -40,8 +40,8 @@ const ToolListView: FunctionComponent<Props> = ({
 
 	// RENDER
 	const selectId = (store.state.linked as ToolDetailStore)?.state?.toolId
-	const isSelected = (tool: ToolDTO) => tool.id == selectId
-	const isDisabled = (tool: ToolDTO) => store.getParentList()?.some(t => t.id == tool.id) ?? false
+	const isSelected = (item: ToolDTO) => item.id == selectId
+	const isDisabled = (item: ToolDTO) => store.getParentList()?.some(t => t.id == item.id) ?? false
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -52,17 +52,17 @@ const ToolListView: FunctionComponent<Props> = ({
 	>
 		<div className={clsCard.content}>
 
-			{tools?.map(tool =>
-				<ElementRow key={tool.id}
-					title={tool.name}
-					selected={isSelected(tool)}
-					disabled={isDisabled(tool)}
+			{items?.map(item =>
+				<ElementRow key={item.id}
+					title={item.name}
+					selected={isSelected(item)}
+					disabled={isDisabled(item)}
 
-					onClick={() => handleSelect(tool)}
+					onClick={() => handleSelect(item)}
 				/>
 			)}
 
-			{!tools?.length && <div className="jack-lbl-empty">NO TOOLS</div>}
+			{!items?.length && <div className="jack-lbl-empty">NO TOOLS</div>}
 
 		</div>
 

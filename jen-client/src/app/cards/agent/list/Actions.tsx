@@ -1,7 +1,8 @@
 import { AgentListStore } from "@/stores/stacks/agent/list"
 import agentSo from "@/stores/stacks/agent/repo"
-import { Button, CircularLoadingCmp, OptionsCmp } from "@priolo/jack"
-import { FunctionComponent } from "react"
+import { EDIT_STATE } from "@/types"
+import { Button, CircularLoadingCmp, FindInputHeader, OptionsCmp } from "@priolo/jack"
+import { FunctionComponent, useDeferredValue, useEffect, useState } from "react"
 
 
 
@@ -19,11 +20,19 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// HOOKs
+	const [textSearch, setTextSearch] = useState(store.state.textSearch)
+	const textSearchDeferred = useDeferredValue(textSearch)
+	useEffect(() => {
+		store.setTextSearch(textSearchDeferred)
+	}, [textSearchDeferred])
 
 
 	// HANDLER
-	const handleCancel = () => store.delete()
+	const handleDelete = () => store.delete()
+	const handleRemove = () => store.remove()
 	const handleNew = () => store.create()
+	const handleSelect = () => store.select()
+	const handleAdd = () => store.add()
 
 
 	// LOADING
@@ -33,28 +42,75 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// RENDER
+	const inEdit = store.state.editState == EDIT_STATE.EDIT
+	const selectedId = store.getSelected()
+
+	const haveButtonSelect = !!store.state.onSelected
+	const haveButtonAddRemove = !!store.state.onItemsChange
+	const haveLoader = !store.state.items
+	const haveButtonNew = !store.state.onItemsChange
+
+	const addSelected = store.isAddSelected()
 	const newSelected = store.isNewOpen()
-	const selectedId = store.getSelected() 
+	const removeDisabled = !selectedId || newSelected
 
 	return <>
-		<OptionsCmp
-			style={{ marginLeft: 5, backgroundColor: "rgba(255,255,255,.4)" }}
-			store={agentSo}
-			storeView={store}
-		/>
-		<div style={{ flex: 1 }} />
 
-		<Button
-			children="DELETE"
-			onClick={handleCancel}
-			disabled={!selectedId || newSelected}
-		/>
-		<Button
-			select={newSelected}
-			children="NEW"
-			onClick={handleNew}
+		{haveLoader &&
+			<OptionsCmp
+				style={{ marginLeft: 5, backgroundColor: "rgba(255,255,255,.4)" }}
+				store={agentSo}
+				storeView={store}
+			/>
+		}
+
+		<FindInputHeader
+			value={textSearch}
+			onChange={text => setTextSearch(text)}
 		/>
 
+		{inEdit &&
+			<div style={{ display: "flex" }} >
+
+				{haveButtonAddRemove && <>
+					<Button
+						children="ADD"
+						onClick={handleAdd}
+						select={addSelected}
+					/>
+					<Button
+						children="REMOVE"
+						onClick={handleRemove}
+						disabled={removeDisabled}
+					/>
+				</>}
+
+				{haveButtonSelect &&
+					<Button
+						children="SEL"
+						onClick={handleSelect}
+						disabled={!selectedId || !!newSelected}
+					/>
+				}
+
+				{!haveButtonAddRemove &&
+					<Button
+						children="DEL"
+						onClick={handleDelete}
+						disabled={!selectedId || newSelected}
+					/>
+				}
+
+				{haveButtonNew &&
+					<Button
+						select={newSelected}
+						children="NEW"
+						onClick={handleNew}
+					/>
+				}
+
+			</div>
+		}
 	</>
 }
 

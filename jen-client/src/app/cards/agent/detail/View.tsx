@@ -37,27 +37,15 @@ const AgentView: FunctionComponent<Props> = ({
 	}, [])
 
 	// [II] magari elimino il concetto di base agent
-	const baseAgents = useMemo(() =>
-		agentSo.getAllBaseAgents(store.state.agent?.id),
-		[agentSo.state.all, store.state.agent]
-	)
+	// const baseAgents = useMemo(() =>
+	// 	agentSo.getAllBaseAgents(store.state.agent?.id),
+	// 	[agentSo.state.all, store.state.agent]
+	// )
 
 
 	// HANDLER
-	const handleLlmChange = (llmId: string) => {
-		store.setAgent({ ...store.state.agent, llmId })
-	}
-	const handleBaseAgentChange = (baseId: string) => {
-		store.setAgent({ ...store.state.agent, baseId })
-	}
 	const handleNameChange = (name: string) => {
 		store.setAgent({ ...store.state.agent, name })
-	}
-	const handleAgentsSelectChange = (subAgentsIds: string[]) => {
-		store.setAgent({ ...store.state.agent, subAgentsIds })
-	}
-	const handleToolsSelectChange = (toolsIds: string[]) => {
-		store.setAgent({ ...store.state.agent, toolsIds })
 	}
 
 
@@ -65,18 +53,19 @@ const AgentView: FunctionComponent<Props> = ({
 	const inRead = store.state.editState == EDIT_STATE.READ
 	const inNew = store.state.editState == EDIT_STATE.NEW
 
+	const toolsLabel = useMemo(() => {
+		return store.getTools()?.map(t => t.name)?.join(", ") ?? "--"
+	}, [store.state.agent?.toolsIds])
+
+	const agentsLabel = useMemo(() => {
+		return store.getSubAgents()?.map(t => t.name)?.join(", ") ?? "--"
+	}, [store.state.agent?.subAgentsIds])
+
 	if (!store.state.agent) return null
 
 	const llm = llmSo.state.all ?? []
 	const llmSelectedId = store.state.agent.llmId
 	const llmSelected = llm.find(item => item.id == llmSelectedId)
-
-	const agents = agentSo.state.all ?? []
-	const agentBaseId = store.state.agent?.baseId
-	const subAgentsSelected = store.state.agent?.subAgentsIds ?? []
-
-	const toolsSelected = store.state.agent?.toolsIds ?? []
-	const tools = toolSo.state.all ?? []
 
 	return <FrameworkCard
 		className={clsCard.root}
@@ -97,44 +86,19 @@ const AgentView: FunctionComponent<Props> = ({
 				/>
 			</div>
 
-			{/* <div className="lyt-v">
-				<div className="jack-lbl-prop">TYPE</div>
-				<ListDialog width={100}
-					store={store}
-					select={Object.values(AGENT_TYPE).indexOf(store.state.agent.type ?? AGENT_TYPE.REASONING)}
-					items={Object.values(AGENT_TYPE)}
-					RenderRow={StringUpRow}
-					//readOnly={readOnly}
-					onSelect={handleTypeChange}
-				/>
-			</div> */}
-
 			<div className="lyt-v">
-				
 				<div className="jack-lbl-prop"
 					onClick={() => {
 						const view = buildLlmList()
 						deckCardsSo.add({ view, anim: true })
 					}}
 				>LLM</div>
-
 				<Component
-					onClick={()=> store.openLlmCard()}
+					onClick={() => store.openLlmCard()}
 					enterRender={<ArrowRightIcon style={{ opacity: 0.5 }} />}
 				>{llmSelected?.code}</Component>
-
-
-				{/* <ListDialog2
-					store={store}
-					select={llmSelectedId}
-					items={llm}
-					readOnly={inRead}
-					fnGetId={(item: LlmDTO) => item?.id}
-					fnGetString={(item: LlmDTO) => item?.code}
-					onChangeSelect={handleLlmChange}
-				/> */}
 			</div>
-{/* 
+			{/* 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">BASE</div>
 				<ListDialog2
@@ -150,36 +114,21 @@ const AgentView: FunctionComponent<Props> = ({
 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">TOOLS</div>
-				{/* <ListMultiDialog
-					store={store}
-					items={tools}
-					selects={toolsSelected}
-					readOnly={inRead}
-					onChangeSelect={handleToolsSelectChange}
-					fnGetId={(item: Tool) => item.id}
-					fnGetString={(item: Tool) => item?.name}
-				/> */}
 				<Component
-					onClick={()=> store.openToolsCard()}
+					onClick={() => store.openToolsCard()}
 					enterRender={<ArrowRightIcon style={{ opacity: 0.5 }} />}
-				>{toolsSelected?.join(", ") ?? "--"}</Component>
+				>{toolsLabel}</Component>
 			</div>
 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">SUB-AGENTS</div>
-				<ListMultiDialog
-					store={store}
-					items={agents}
-					selects={subAgentsSelected}
-					readOnly={inRead}
-					onChangeSelect={handleAgentsSelectChange}
-					fnGetId={(item: AgentLlm) => item.id}
-					fnGetString={(item: AgentLlm) => item?.name}
-				/>
+				<Component
+					onClick={() => store.openSubAgentsCard()}
+					enterRender={<ArrowRightIcon style={{ opacity: 0.5 }} />}
+				>{agentsLabel}</Component>
 			</div>
 
-			<div className="lyt-v">
-				<div className="jack-lbl-prop">ASK INFORMATION</div>
+			<div className="lyt-h-props">
 				<IconToggle
 					check={store.state.agent.askInformation ?? false}
 					readOnly={inRead}
@@ -188,10 +137,10 @@ const AgentView: FunctionComponent<Props> = ({
 						askInformation
 					})}
 				/>
+				<div className="jack-lbl-prop">ASK INFORMATION</div>
 			</div>
 
-			<div className="lyt-v">
-				<div className="jack-lbl-prop">KILL ON RESPONSE</div>
+			<div className="lyt-h-props">
 				<IconToggle
 					check={store.state.agent.killOnResponse ?? true}
 					readOnly={inRead}
@@ -200,6 +149,7 @@ const AgentView: FunctionComponent<Props> = ({
 						killOnResponse
 					})}
 				/>
+				<div className="jack-lbl-prop">KILL ON RESPONSE</div>
 			</div>
 
 
@@ -209,7 +159,7 @@ const AgentView: FunctionComponent<Props> = ({
 
 			<div className="lyt-v">
 				<div className="jack-lbl-prop">DESCRIPTION</div>
-				{baseAgents.map((baseAgent: AgentLlm) => (
+				{/* {baseAgents.map((baseAgent: AgentLlm) => (
 					<div key={baseAgent.id} className="jack-lbl-prop">
 						{baseAgent.name}
 						<MarkdownEditor
@@ -223,7 +173,7 @@ const AgentView: FunctionComponent<Props> = ({
 							style={{ minHeight: '100px', marginTop: '10px' }}
 						/>
 					</div>
-				))}
+				))} */}
 
 				<MarkdownEditor
 					value={store.state.agent.description ?? ""}

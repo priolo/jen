@@ -1,5 +1,6 @@
 import agentSo from "@/stores/stacks/agent/repo"
 import { ToolListStore } from "@/stores/stacks/tool/list"
+import { EDIT_STATE } from "@/types"
 import { Button, CircularLoadingCmp, FindInputHeader, OptionsCmp } from "@priolo/jack"
 import { FunctionComponent, useDeferredValue, useEffect, useState } from "react"
 
@@ -41,17 +42,17 @@ const ActionsCmp: FunctionComponent<Props> = ({
 
 
 	// RENDER
+	const inEdit = store.state.editState == EDIT_STATE.EDIT
 	const selectedId = store.getSelected()
 
 	const haveButtonSelect = !!store.state.onSelected
-	const haveButtonAddRemove = !!store.state.onToolsChange
-	const haveLoader = !store.state.tools
-	const haveButtonNew = !store.state.onToolsChange
+	const haveButtonAddRemove = !!store.state.onItemsChange
+	const haveLoader = !store.state.items
+	const haveButtonNew = !store.state.onItemsChange
 
 	const addSelected = store.isAddSelected()
 	const newSelected = store.isNewOpen()
 	const removeDisabled = !selectedId || newSelected
-	
 
 	return <>
 
@@ -68,46 +69,48 @@ const ActionsCmp: FunctionComponent<Props> = ({
 			onChange={text => setTextSearch(text)}
 		/>
 
-		<div style={{ display: "flex" }} >
+		{inEdit &&
+			<div style={{ display: "flex" }} >
 
-			{haveButtonAddRemove && <>
-				<Button
-					children="ADD"
-					onClick={handleAdd}
-					select={addSelected}
-				/>
-				<Button
-					children="REMOVE"
-					onClick={handleRemove}
-					disabled={removeDisabled}
-				/>
-			</>}
+				{haveButtonAddRemove && <>
+					<Button
+						children="ADD"
+						onClick={handleAdd}
+						select={addSelected}
+					/>
+					<Button
+						children="REMOVE"
+						onClick={handleRemove}
+						disabled={removeDisabled}
+					/>
+				</>}
 
-			{haveButtonSelect &&
-				<Button
-					children="SEL"
-					onClick={handleSelect}
-					disabled={!selectedId || !!newSelected}
-				/>
-			}
+				{haveButtonSelect &&
+					<Button
+						children="SEL"
+						onClick={handleSelect}
+						disabled={!selectedId || !!newSelected}
+					/>
+				}
 
-			{!haveButtonAddRemove &&
-				<Button
-					children="DEL"
-					onClick={handleDelete}
-					disabled={!selectedId || newSelected}
-				/>
-			}
+				{!haveButtonAddRemove &&
+					<Button
+						children="DEL"
+						onClick={handleDelete}
+						disabled={!selectedId || newSelected}
+					/>
+				}
 
-			{haveButtonNew &&
-				<Button
-					select={newSelected}
-					children="NEW"
-					onClick={handleNew}
-				/>
-			}
+				{haveButtonNew &&
+					<Button
+						select={newSelected}
+						children="NEW"
+						onClick={handleNew}
+					/>
+				}
 
-		</div>
+			</div>
+		}
 	</>
 }
 

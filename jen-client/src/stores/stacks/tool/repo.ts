@@ -11,6 +11,10 @@ const setup = {
 	},
 
 	getters: {
+		getById: (id: string, store?: ToolStore) => {
+			if (!id) return null
+			return store.state.all?.find(tool => tool.id == id)
+		},
 		getIndexById(id: string, store?: ToolStore) {
 			if (!id) return -1
 			return store.state.all?.findIndex(tool => tool.id == id)

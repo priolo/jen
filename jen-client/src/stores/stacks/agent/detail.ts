@@ -5,17 +5,16 @@ import { DOC_TYPE, EDIT_STATE } from "@/types"
 import { MESSAGE_TYPE } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
 import { AgentDTO } from "@shared/types/AgentDTO"
+import { ToolDTO } from "@shared/types/ToolDTO"
 import { buildEditorFromAgent } from "../agentEditor/factory"
 import { EditorState } from "../editorBase"
-import { buildRoomDetail } from "../room/factory"
-import agentSo from "./repo"
 import { buildLlmDetail, buildLlmList } from "../llm/factory"
 import { LlmListStore } from "../llm/list"
+import { buildRoomDetail } from "../room/factory"
 import { buildToolList } from "../tool/factory"
-import llmSo from "../llm/repo"
 import toolSo from "../tool/repo"
-import { ToolDTO } from "@shared/types/ToolDTO"
-import { ToolListStore } from "../tool/list"
+import { buildAgentList } from "./factory"
+import agentSo from "./repo"
 
 
 
@@ -52,7 +51,18 @@ const setup = {
 				agentId: state.agentId,
 			}
 		},
+
 		//#endregion
+
+		getTools: (_: void, store?: AgentDetailStore): ToolDTO[] => {
+			return (store.state.agent?.toolsIds ?? [])
+				.map(id => toolSo.getById(id))
+		},
+		getSubAgents: (_: void, store?: AgentDetailStore): AgentDTO[] => {
+			return (store.state.agent?.subAgentsIds ?? [])
+				.map(id => agentSo.getById(id))
+		},
+
 	},
 
 	actions: {
@@ -128,17 +138,20 @@ const setup = {
 		},
 
 		async openLlmCard(_: void, store?: AgentDetailStore) {
+			const linked = store.state.linked
+
 			if (store.state.editState == EDIT_STATE.READ) {
-				if (store.state.linked?.state.type == DOC_TYPE.LLM_DETAIL && (store.state.linked as any)?.state?.llmId == store.state.agent.llmId) {
-					store.state.group.addLink({ view: null, parent: store, anim: true })
+				if (linked?.state.type == DOC_TYPE.LLM_DETAIL && (linked as any)?.state?.llmId == store.state.agent.llmId) {
+					store.state.linked.onRemoveFromDeck()
 					return
 				}
 				const llmId = store.state.agent.llmId
 				const view = buildLlmDetail({ llmId })
 				store.state.group.addLink({ view, parent: store, anim: true })
+				
 			} else {
-				if (store.state.linked?.state.type == DOC_TYPE.LLM_LIST) {
-					store.state.group.addLink({ view: null, parent: store, anim: true })
+				if (linked?.state.type == DOC_TYPE.LLM_LIST) {
+					linked.onRemoveFromDeck()
 					return
 				}
 				const view = buildLlmList({
@@ -160,10 +173,28 @@ const setup = {
 			const tools = toolSo.state.all.filter(item => toolsIds.includes(item.id))
 
 			const view = buildToolList({
-				tools,
-				onToolsChange: (view, tools) => {
-					store.setAgent({ ...store.state.agent, toolsIds: tools.map(t => t.id) })
-					view.setTools(tools)
+				items: tools,
+				editState: store.state.editState,
+				onItemsChange: (view, items) => {
+					store.setAgent({ ...store.state.agent, toolsIds: items.map(t => t.id) })
+					view.setItems(items)
+				},
+			})
+			store.state.group.addLink({ view, parent: store, anim: true })
+		},
+
+		/** apre la lista dei TOOLS */
+		async openSubAgentsCard(_: void, store?: AgentDetailStore) {
+			// temporaneamente costruisco io gli LLM
+			const subAgentsIds = store.state.agent?.subAgentsIds ?? []
+			const subAgents = agentSo.state.all.filter(item => subAgentsIds.includes(item.id))
+
+			const view = buildAgentList({
+				items: subAgents,
+				editState: store.state.editState,
+				onItemsChange: (view, items) => {
+					store.setAgent({ ...store.state.agent, subAgentsIds: items.map(t => t.id) })
+					view.setItems(items)
 				}
 			})
 			store.state.group.addLink({ view, parent: store, anim: true })

@@ -25,9 +25,10 @@ export function buildAgentDetailNew() {
 	return store;
 }
 
-export function buildAgentList() {
+export function buildAgentList(state: Partial<AgentListState> = {}) {
 	const store = buildStore({
 		type: DOC_TYPE.AGENT_LIST,
+		...state,
 	} as AgentListState) as AgentListStore
 	return store;
 }

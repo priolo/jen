@@ -20,6 +20,7 @@ const setup = {
 
 		//items: <LlmDTO[]>null,
 		textSearch: "",
+		editState: EDIT_STATE.READ,
 		/** callback chiamato quando seleziono un item */
 		onSelected: <(view: LlmListStore, item: LlmDTO) => void>null,
 
@@ -34,6 +35,7 @@ const setup = {
 
 		//#endregion
 
+		// *********************************
 		/** restituisce l'id del dettaglio selezionato nella lista */
 		getSelected: (_: void, store?: LlmListStore): string => {
 			return (store.state.linked as LlmDetailStore)?.state?.llmId
@@ -54,6 +56,7 @@ const setup = {
 			return all
 				.filter(llm => llm.code.toLowerCase().includes(textSearch))
 		},
+		// *********************************
 
 	},
 
@@ -93,6 +96,8 @@ const setup = {
 			})
 		},
 
+		// *********************************
+
 		/** eseguo il select sull'eventuale parent */
 		select(_: void, store?: LlmListStore) {
 			const selectedId = store.getSelected()
@@ -106,7 +111,6 @@ const setup = {
 
 	mutators: {
 		setTextSearch: (textSearch: string) => ({ textSearch }),
-		//setItems: (items: LlmDTO[]) => ({ items }),
 	},
 }
 

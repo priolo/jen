@@ -1,6 +1,7 @@
 .lyt-h-props {
 	display: flex;
 	text-align: center;
+	gap: 3px;
 }
 .lyt-h-props .item {
 	flex: 1;

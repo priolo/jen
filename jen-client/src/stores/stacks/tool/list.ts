@@ -17,16 +17,19 @@ const setup = {
 		widthMax: 1000,
 		//#endregion
 
-		/** 
-		 * TOOLS da visualizzare.
-		 * se null, visualizzo toolSo.state.all (che contiene tutti i tool)
-		 */
-		tools: <ToolDTO[]>null,
+
+		// *********************************
+
+		/** ITEMs da visualizzare. Se null, visualizzo tutti gli ITEMs disponibili */
+		items: <ToolDTO[]>null,
 		textSearch: "",
+		editState: EDIT_STATE.READ,
 		/** callback chiamato quando seleziono un item */
-		onSelected: <(view: ToolListStore, tool: ToolDTO) => void>null,
-		onToolsChange: <(view: ToolListStore, tools: ToolDTO[]) => void>null,
-		
+		onSelected: <(view: ToolListStore, item: ToolDTO) => void>null,
+		onItemsChange: <(view: ToolListStore, items: ToolDTO[]) => void>null,
+
+		// *********************************
+
 	},
 
 	getters: {
@@ -35,6 +38,8 @@ const setup = {
 		getSubTitle: (_: void, store?: ViewStore) => "Tools list",
 		//#endregion
 
+
+		// *********************************
 		/** l'id dell'elemento selezionato. Sarebbe l'id della CARD DETTAGLI aperta */
 		getSelected: (_: void, store?: ToolListStore): string => {
 			return (store.state.linked as ToolDetailStore)?.state?.toolId
@@ -46,23 +51,24 @@ const setup = {
 		isAddSelected: (_: void, store?: ToolListStore): boolean => {
 			return !!(store.state.linked as ToolListStore)?.state?.onSelected
 		},
-
 		/** restituisce la lista dei tool da visualizzare, filtrata con textSearch */
 		getList: (_: void, store?: ToolListStore): ToolDTO[] => {
 			const textSearch = store.state.textSearch?.toLowerCase() ?? ""
-			const all = store.state.tools ?? toolSo.state.all ?? []
-			if ( !store.state.textSearch ) return all
+			const all = store.state.items ?? toolSo.state.all ?? []
+			if (!store.state.textSearch) return all
 			return all
 				.filter(tool => tool.name.toLowerCase().includes(textSearch))
 		},
-
 		/**
 		 * Se c'e' la lista dei TOOLS del proprio parent
 		 * Servbe per vedere i "disabled" nella lista totale, per evitare di aggiungere doppioni
 		 */
 		getParentList: (_: void, store?: ToolListStore): ToolDTO[] => {
-			return (<ToolListStore>store.state.parent)?.state.tools
+			return (<ToolListStore>store.state.parent)?.state.items
 		}
+
+		// *********************************
+
 	},
 
 	actions: {
@@ -100,14 +106,14 @@ const setup = {
 		},
 
 
-
+		// *********************************
 
 		remove(_: void, store?: ToolListStore) {
 			const toolId = store.getSelected()
 			if (!toolId) return
-			store.state.onToolsChange(
+			store.state.onItemsChange(
 				store,
-				store.state.tools?.filter(t => t.id != toolId)
+				store.state.items?.filter(t => t.id != toolId)
 			)
 		},
 
@@ -121,22 +127,24 @@ const setup = {
 		},
 
 		add(_: void, store?: ToolListStore) {
-			let view = null
-			if (!store.isAddSelected()) {
-				view = buildToolList({
+			const view = !store.isAddSelected()
+				? buildToolList({
+					editState: EDIT_STATE.EDIT,
 					onSelected: (view, tool) => {
-						store.state.onToolsChange(store, [...store.state.tools, tool])
-					}
+						store.state.onItemsChange(store, [...store.state.items, tool])
+					},
 				})
-			}
+				: null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
+
+		// *********************************
 
 	},
 
 	mutators: {
 		setTextSearch: (textSearch: string) => ({ textSearch }),
-		setTools: (tools: ToolDTO[]) => ({ tools }),
+		setItems: (items: ToolDTO[]) => ({ items }),
 	},
 }
 
