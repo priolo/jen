@@ -38,7 +38,7 @@ import { FunctionComponent, useMemo } from "react"
 import AccountDetailView from "../../app/cards/account/detail/View"
 import TextEditorView from "../../app/cards/agentEditor/View"
 import AuthView from "../../app/cards/auth/View"
-import ChatPartecipatsListView from "../../app/cards/chat/partecipants/ListView"
+import ChatPartecipatsListView from "../../app/cards/chat/partecipants/View"
 import EditorCodeView from "../../app/cards/editorCode/View"
 import { ChatPartecipantsListStore } from "../../stores/stacks/chat/partecipantsList"
 
@@ -61,7 +61,7 @@ const PolymorphicCard: FunctionComponent<DocCmpProps> = ({
 
 			case DOC_TYPE.ACCOUNT_FINDER:
 				return <AccountFinderView store={view as AccountFinderStore} />
-			case DOC_TYPE.ACCOUNT_LIST:
+			case DOC_TYPE.CHAT_PARTECIPANTS_LIST:
 				return <ChatPartecipatsListView store={view as ChatPartecipantsListStore} />
 			case DOC_TYPE.ACCOUNT_DETAIL:
 				return <AccountDetailView store={view as AccountDetailStore} />

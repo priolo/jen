@@ -20,8 +20,18 @@ const setup = {
 		width: 165,
 		//#endregion
 
-		textSearch: <string>null,
 		all: <AccountDTO[]>[],
+
+		// *********************************
+
+		/** ITEMs da visualizzare. Se null, visualizzo tutti gli ITEMs disponibili */
+		textSearch: "",
+		//editState: EDIT_STATE.READ,
+		/** callback chiamato quando seleziono un item */
+		onSelected: <(view: AccountFinderStore, item: AccountDTO) => void>null,
+		//onItemsChange: <(view: AgentListStore, items: AgentDTO[]) => void>null,
+
+		// *********************************
 	},
 
 	getters: {
@@ -37,6 +47,11 @@ const setup = {
 		},
 		//#endregion
 
+		getById: (id: string, store?: AccountFinderStore) => {
+			return store.state.all.find(t => t.id == id)
+		},
+	
+
 		/**
 		 * restituisce, se c'e', l'ACCOUNT selezionato
 		 */
@@ -44,7 +59,16 @@ const setup = {
 			if (store.state.group == null) return null
 			const selectId = (store.state.linked as AccountDetailStore)?.state?.accountId
 			return store.state.all.find(a => a.id == selectId)
-		}
+		},
+
+		// *********************************
+
+		/** restituisce l'id del dettaglio selezionato nella lista */
+		getSelected: (_: void, store?: AccountFinderStore): string => {
+			return (store.state.linked as AccountDetailStore)?.state?.accountId
+		},
+
+		// *********************************
 	},
 
 	actions: {
@@ -67,7 +91,20 @@ const setup = {
 		openDetail(accountId: string, store?: AccountFinderStore) {
 			const view = buildAccountDetail({ accountId })
 			deckCardsSo.addLink({ view, parent: store, anim: true })
-		}
+		},
+
+		// *********************************
+
+		/** eseguo il select sull'eventuale parent */
+		select(_: void, store?: AccountFinderStore) {
+			const selectedId = store.getSelected()
+			if (!selectedId || !store.state.onSelected) return
+			const user = store.getById(selectedId)
+			store.state.onSelected(store, user)
+			//store.onRemoveFromDeck()
+		},
+
+		// *********************************
 	},
 
 	mutators: {

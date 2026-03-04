@@ -35,14 +35,8 @@ const ActionsCmp: FunctionComponent<Props> = ({
 		store.invite(account.id)
 	}
 
-	const handleFind = async () => {
-		await deckCardsSo.add({ view: AccountFinderFixedCard, anim: true })
-		focusSo.focus(AccountFinderFixedCard)
-	}
-
-	const handleRemove = () => {
-		store.remove(selecteId)
-	}
+	const handleAdd = async () => store.openFind()
+	const handleRemove = () => store.remove(selecteId)
 
 
 	// RENDER
@@ -88,8 +82,8 @@ const ActionsCmp: FunctionComponent<Props> = ({
 			</TooltipWrapCmp>
 		) : (
 			<Button
-				onClick={handleFind}
-			>FIND</Button>
+				onClick={handleAdd}
+			>ADD</Button>
 		)}
 		{!!selecteId && (
 			<Button

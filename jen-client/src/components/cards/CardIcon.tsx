@@ -71,7 +71,7 @@ const CardIcon: FunctionComponent<Props> = ({
 			return null
 		case DOC_TYPE.ACCOUNT_DETAIL:
 			return null
-		case DOC_TYPE.ACCOUNT_LIST:
+		case DOC_TYPE.CHAT_PARTECIPANTS_LIST:
 			return null
 		case DOC_TYPE.ACCOUNT_FINDER:
 			return null

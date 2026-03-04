@@ -65,7 +65,7 @@ export async function StartSession() {
 
 	// BUILD SINGLETONE CARDS
 	const allStores = [...deckStores/*, ...drawerStores, ...menuStores*/]
-	AccountFinderFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.ACCOUNT_FINDER) ?? buildAccountFinder()) as AccountFinderStore
+	//AccountFinderFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.ACCOUNT_FINDER) ?? buildAccountFinder()) as AccountFinderStore
 	AuthFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.AUTH_DETAIL) ?? buildAuthDetailCard()) as AuthDetailStore
 
 	deckCardsSo.setAll(deckStores)

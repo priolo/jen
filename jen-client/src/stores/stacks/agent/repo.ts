@@ -41,7 +41,7 @@ const setup = {
 		/** carico tutti gli AGENT appartenenti a me */
 		async fetch(_: void, store?: LoadBaseStore) {
 			const s = <AgentStore>store
-			const cnnStore = utils.findAll(docsSo.getAllCards(), { type: DOC_TYPE.ACCOUNT_LIST })?.[0]
+			const cnnStore = utils.findAll(docsSo.getAllCards(), { type: DOC_TYPE.CHAT_PARTECIPANTS_LIST })?.[0]
 			const agents = (await agentApi.index({ store: cnnStore }))?.agents
 			s.setAll(agents)
 			await loadBaseSetup.actions.fetch(_, store)

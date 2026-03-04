@@ -47,7 +47,7 @@ export function buildStore(state: Partial<ViewState>, stateSerializzation?: Part
 	const setup = {
 
 		[DOC_TYPE.AUTH_DETAIL]: authDetailSetup,
-		[DOC_TYPE.ACCOUNT_LIST]: chatPartecipantsListSetup,
+		[DOC_TYPE.CHAT_PARTECIPANTS_LIST]: chatPartecipantsListSetup,
 		[DOC_TYPE.ACCOUNT_FINDER]: accountFinderSetup,
 		[DOC_TYPE.ACCOUNT_DETAIL]: accountDetailSetup,
 

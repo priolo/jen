@@ -30,21 +30,20 @@ const ChatDetailForm: FunctionComponent<Props> = ({
         [name: string]: any
     }) => store.setChatInEdit({ ...store.state.chatInEdit, ...prop })
 
-    const handleAccountsClick = () => store.openAccounts()
+    const handlePartecipantsClick = () => store.openPartecipants()
 
     
     // RENDER
     const inEdit = store.state.editState != EDIT_STATE.READ
     const chat = inEdit ? store.state.chatInEdit : chatRepoSo.getById(store.state.chatId)
     if (chat == null) return null
-    
 
     return <div className="jack-lyt-form var-dialog">
 
         <RowButton
             icon={<EditorIcon />}
             label="USERS"
-            onClick={handleAccountsClick}
+            onClick={handlePartecipantsClick}
         />
 
         <div className="lyt-v">

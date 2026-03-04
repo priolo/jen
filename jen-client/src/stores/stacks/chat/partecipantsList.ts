@@ -5,9 +5,10 @@ import { mixStores } from "@priolo/jon"
 import chatWSSo from "./ws"
 import { ViewState } from "../viewBase"
 import { AccountDetailStore } from "../account/detail"
-import { buildAccountDetail } from "../account/factory"
+import { buildAccountDetail, buildAccountFinder } from "../account/factory"
 import chatRepoSo from "./repo"
 import chatApi from "@/api/chat"
+import { AccountFinderFixedCard } from "@/plugins/session"
 
 
 
@@ -46,21 +47,21 @@ const setup = {
 		 */
 		getUsers: (_: void, store?: ChatPartecipantsListStore): AccountDTO[] => {
 			const chat = chatRepoSo.getById(store.state.chatId)
-			if ( !chat || !chat.users) return []
+			if (!chat || !chat.users) return []
 			const chatOnline = chatWSSo.isOnline(store.state.chatId)
 			const users = chat?.users?.map(user => ({
 				...user,
-				status: !chatOnline 
-					? ACCOUNT_STATUS.UNKNOWN 
-					: (chat?.onlineUserIds?.some(id => id == user.id) 
-						? ACCOUNT_STATUS.ONLINE 
+				status: !chatOnline
+					? ACCOUNT_STATUS.UNKNOWN
+					: (chat?.onlineUserIds?.some(id => id == user.id)
+						? ACCOUNT_STATUS.ONLINE
 						: ACCOUNT_STATUS.OFFLINE
 					),
 			}))
 			return users
 		},
 
-		
+
 
 	},
 
@@ -79,6 +80,15 @@ const setup = {
 		openDetail(accountId: string, store?: ChatPartecipantsListStore) {
 			const accountIdSelected = (store.state.linked as AccountDetailStore)?.state?.accountId
 			const view = accountIdSelected != accountId ? buildAccountDetail({ accountId }) : null
+			deckCardsSo.addLink({ view, parent: store, anim: true })
+		},
+		/**
+		 * Apre la CARD ACCOUNT-FINDER per trovare un ACCOUNT da invitare alla CHAT
+		 */
+		openFind(_: void, store?: ChatPartecipantsListStore) {
+			const view = buildAccountFinder({
+				onSelected: (view, account) => store.invite(account.id),
+			})
 			deckCardsSo.addLink({ view, parent: store, anim: true })
 		},
 

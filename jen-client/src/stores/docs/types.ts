@@ -4,13 +4,13 @@ export enum DOC_TYPE {
 
 	AUTH_DETAIL = "auth_detail",
 	ACCOUNT_DETAIL = "account_detail",
-	/** lista degli ACCOUNTs */
-	ACCOUNT_LIST = "account_list",
 	ACCOUNT_FINDER = "account_finder",
 
 	
 	CHAT_DETAIL = "chat",
 	CHAT_LIST = "chat_list",
+	CHAT_PARTECIPANTS_LIST = "chat_partecipants",
+
 
 	ROOM_DETAIL = "room",
 	ROOM_AGENT_LIST = "room_agent_list",

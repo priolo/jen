@@ -4,7 +4,7 @@ import viewSetup, { ViewMutators, ViewState, ViewStore } from "@/stores/stacks/v
 import { DOC_TYPE, EDIT_STATE } from "@/types"
 import { MESSAGE_TYPE, utils } from "@priolo/jack"
 import { mixStores } from "@priolo/jon"
-import { buildAccountList } from "../account/factory"
+import { buildAccountList as buildPartecipantsList } from "../account/factory"
 import { buildRoomDetail } from "../room/factory"
 import { ChatListStore } from "./list"
 import chatRepoSo from "./repo"
@@ -50,7 +50,7 @@ const setup = {
 			{ type: DOC_TYPE.CHAT_LIST }
 		) as ChatListStore,
 
-		getAccountsOpen: (_: void, store?: ChatDetailStore) => store.state.linked?.state.type == DOC_TYPE.ACCOUNT_LIST,
+		getPartecipantsOpen: (_: void, store?: ChatDetailStore) => store.state.linked?.state.type == DOC_TYPE.CHAT_PARTECIPANTS_LIST,
 	},
 
 	actions: {
@@ -118,9 +118,9 @@ const setup = {
 		},
 
 		/** apro gli ACCOUNTS che partecipano alla CHAT */
-		openAccounts(_: void, store?: ChatDetailStore) {
-			const isOpen = store.getAccountsOpen()
-			const view = !isOpen ? buildAccountList({ chatId: store.state.chatId }) : null
+		openPartecipants(_: void, store?: ChatDetailStore) {
+			const isOpen = store.getPartecipantsOpen()
+			const view = !isOpen ? buildPartecipantsList({ chatId: store.state.chatId }) : null
 			store.state.group.addLink({ view, parent: store, anim: true })
 		}
 

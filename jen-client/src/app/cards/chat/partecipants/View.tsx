@@ -44,7 +44,7 @@ const ChatPartecipatsListView: FunctionComponent<Props> = ({
 	const isSelected = (account: AccountDTO) => account.id == selectedId
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
-		icon={<CardIcon type={DOC_TYPE.ACCOUNT_LIST} />}
+		icon={<CardIcon type={DOC_TYPE.CHAT_PARTECIPANTS_LIST} />}
 		store={store}
 		actionsRender={<ActionsCmp store={store} />}
 	>

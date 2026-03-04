@@ -22,7 +22,7 @@ export function buildAccountDetail(state:Partial<AccountDetailState>) {
  */
 export function buildAccountList(state: Partial<ChatPartecipantsListState> = {}) {
 	const store = buildStore({
-		type: DOC_TYPE.ACCOUNT_LIST,
+		type: DOC_TYPE.CHAT_PARTECIPANTS_LIST,
 		...state,
 	} as ChatPartecipantsListState) as ChatPartecipantsListStore
 	return store;
