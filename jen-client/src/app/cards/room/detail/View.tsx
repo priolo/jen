@@ -46,6 +46,7 @@ const RoomView: FunctionComponent<Props> = ({
 	const handleSendClick = () => store.sendPrompt()
 	const handleOpenSubroom = (chatMessage: ChatMessage) => store.openSubRoom(chatMessage)
 	const handleAgentsClick = () => store.openAgents()
+	const handleAgentsClick2 = () => store.openAgents2()
 
 
 	// RENDER
@@ -59,17 +60,22 @@ const RoomView: FunctionComponent<Props> = ({
 		iconizedRender={null}
 	>
 
-		<div className="lyt-v">
+		{/* <div className="lyt-v">
 			<div className="jack-lbl-prop">ROOM ID</div>
 			<div className="jack-lbl-readonly">{room?.id ?? "--"}</div>
 			<div className="jack-lbl-prop">ROOM PARENT ID</div>
 			<div className="jack-lbl-readonly">{room?.parentRoomId ?? "--"}</div>
-		</div>
+		</div> */}
 
 		<RowButton
 			icon={<EditorIcon />}
 			label="AGENTS"
 			onClick={handleAgentsClick}
+		/>
+		<RowButton
+			icon={<EditorIcon />}
+			label="AGENTS2"
+			onClick={handleAgentsClick2}
 		/>
 
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>

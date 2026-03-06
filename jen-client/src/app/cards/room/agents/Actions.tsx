@@ -2,7 +2,6 @@ import { RoomAgentsListStore } from "@/stores/stacks/room/roomAgentsList"
 import { EDIT_STATE } from "@/types"
 import { Button, CircularLoadingCmp, OptionsCmp } from "@priolo/jack"
 import { FunctionComponent } from "react"
-import cls from "../View.module.css"
 
 
 
@@ -39,7 +38,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	const inEdit = store.state.editState != EDIT_STATE.READ
 
 	return (<div
-		className={cls.actions}
+		
 	>
 		<OptionsCmp
 			style={{ marginLeft: 5, backgroundColor: "rgba(255,255,255,.4)" }}

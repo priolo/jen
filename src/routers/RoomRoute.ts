@@ -87,9 +87,9 @@ class RoomRoute extends httpRouter.Service {
 				}
 			}
 		})
-		
+
 		const agentsDTO = AgentDTOFromAgentRepoList(agents)
-		res.json(agentsDTO)
+		res.json({ agents: agentsDTO })
 	}
 
 }

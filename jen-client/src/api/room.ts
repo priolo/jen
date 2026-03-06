@@ -35,7 +35,7 @@ function execute(prompt: Partial<RoomDTO>, opt?: CallOptions): Promise<Partial<R
 }
 
 /** GET AGENTS */
-function getAgents(roomId: string, opt?: CallOptions): Promise<AgentDTO[]> {
+function getAgents(roomId: string, opt?: CallOptions): Promise<{agents: AgentDTO[]}> {
 	return ajax.get(`rooms/${roomId}/agents`, opt)
 }
 

@@ -4,10 +4,11 @@ import ConnectionsIcon from "@/icons/cards/ConnectionsIcon"
 import { AccountDetailStore } from "@/stores/stacks/account/detail"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import chatWSSo from "@/stores/stacks/chat/ws"
-import { AccountDTO } from "@shared/types/AccountDTO"
-import { AlertDialog, FindInputHeader } from "@priolo/jack"
+import { AlertDialog } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
+import { AccountDTO } from "@shared/types/AccountDTO"
 import { FunctionComponent, useEffect } from "react"
+import ActionsCmp from "./Actions"
 
 
 
@@ -41,24 +42,22 @@ const AccountFinderView: FunctionComponent<Props> = ({
 	const accounts = store.state.all
 	const selectId = (store.state.linked as AccountDetailStore)?.state?.accountId
 	const isSelected = (account: AccountDTO) => account.id == selectId
+	const isDisabled = (item: AccountDTO) => store.getParentList()?.some(t => t.id == item.id) ?? false
 
 	return <FrameworkCard styleBody={{ padding: 0, }}
 		icon={<ConnectionsIcon />}
 		store={store}
-		actionsRender={<>
-			<FindInputHeader
-				value={store.state.textSearch}
-				onChange={text => store.setTextSearch(text)}
-			/>
-		</>}
+		actionsRender={<ActionsCmp store={store} />}
 	>
 		
-		{accounts.map(account => <ElementRow
-			key={account.id}
-			onClick={() => handleSelect(account)}
-			selected={isSelected(account)}
-			title={account.name}
-			subtitle={account.email}
+		{accounts.map(item => <ElementRow
+			key={item.id}
+			selected={isSelected(item)}
+			disabled={isDisabled(item)}
+			title={item.name}
+			subtitle={item.email}
+
+			onClick={() => handleSelect(item)}
 		/>)}
 
 		<AlertDialog store={store} />

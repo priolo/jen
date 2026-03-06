@@ -121,16 +121,6 @@ const setup = {
 		},
 
 
-
-		/** apertura della CARD ROOM */
-		openChatRoom(_: void, store?: AgentDetailStore) {
-			//chatSo.createChat(store.state.agent?.id)
-			const view = buildRoomDetail({
-				agentsIds: [store.state.agent?.id],
-			})
-			deckCardsSo.add({ view, anim: true })
-		},
-
 		/** apertura della CARD EDITOR */
 		openEditor(_: void, store?: AgentDetailStore) {
 			const view = buildEditorFromAgent(store.state.agent?.id)

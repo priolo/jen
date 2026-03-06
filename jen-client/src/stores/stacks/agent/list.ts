@@ -44,6 +44,7 @@ const setup = {
 
 
 		// *********************************
+
 		/** restituisce l'id del dettaglio selezionato nella lista */
 		getSelected: (_: void, store?: AgentListStore): string => {
 			return (store.state.linked as AgentDetailStore)?.state?.agentId
@@ -69,6 +70,7 @@ const setup = {
 		getParentList: (_: void, store?: AgentListStore): AgentDTO[] => {
 			return (<AgentListStore>store.state.parent)?.state.items
 		}
+		
 		// *********************************
 	},
 

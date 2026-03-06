@@ -65,7 +65,7 @@ const setup = {
 		 */
 		async fetch(_: void, store?: LoadBaseStore) {
 			const agentsSo = store as RoomAgentsListStore
-			const agents = await roomApi.getAgents(agentsSo.state.roomId, { store })
+			const agents = (await roomApi.getAgents(agentsSo.state.roomId, { store }))?.agents ?? []
 			agentsSo.setAgents(agents)
 		},
 

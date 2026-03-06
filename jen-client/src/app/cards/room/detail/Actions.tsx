@@ -2,7 +2,6 @@ import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
 import { Button, CircularLoadingCmp, docsSo, focusSo, TooltipWrapCmp, utils } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
-import cls from "./View.module.css"
 import { DOC_TYPE } from "@/types"
 
 
@@ -43,7 +42,7 @@ const ActionsCmp: FunctionComponent<Props> = ({
 	// }, [store.state.group.state.all])
 
 	return (<div
-		className={cls.actions}
+		
 	>
 		{/* {canInvite && (
 			<TooltipWrapCmp content="Invite new users to the room">

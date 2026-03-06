@@ -1,14 +1,14 @@
+import chatApi from "@/api/chat"
 import { deckCardsSo } from "@/stores/docs/cards"
 import viewSetup, { ViewStore } from "@/stores/stacks/viewBase"
-import { ACCOUNT_STATUS, AccountDTO } from "@shared/types/AccountDTO"
 import { mixStores } from "@priolo/jon"
-import chatWSSo from "./ws"
-import { ViewState } from "../viewBase"
+import { ACCOUNT_STATUS, AccountDTO } from "@shared/types/AccountDTO"
 import { AccountDetailStore } from "../account/detail"
 import { buildAccountDetail, buildAccountFinder } from "../account/factory"
+import { AccountFinderStore } from "../account/finder"
+import { ViewState } from "../viewBase"
 import chatRepoSo from "./repo"
-import chatApi from "@/api/chat"
-import { AccountFinderFixedCard } from "@/plugins/session"
+import chatWSSo from "./ws"
 
 
 
@@ -19,7 +19,7 @@ const setup = {
 
 	state: {
 		//#region VIEWBASE
-		width: 170,
+		width: 200,
 		//#endregion
 
 		textSearch: <string>null,
@@ -61,7 +61,13 @@ const setup = {
 			return users
 		},
 
+		// *********************************
 
+		isAddSelected: (_: void, store?: ChatPartecipantsListStore): boolean => {
+			return !!(store.state.linked as AccountFinderStore)?.state?.onSelected
+		},
+
+		// *********************************
 
 	},
 
@@ -82,13 +88,16 @@ const setup = {
 			const view = accountIdSelected != accountId ? buildAccountDetail({ accountId }) : null
 			deckCardsSo.addLink({ view, parent: store, anim: true })
 		},
+		
 		/**
 		 * Apre la CARD ACCOUNT-FINDER per trovare un ACCOUNT da invitare alla CHAT
 		 */
 		openFind(_: void, store?: ChatPartecipantsListStore) {
-			const view = buildAccountFinder({
-				onSelected: (view, account) => store.invite(account.id),
-			})
+			const view = !store.isAddSelected() 
+				? buildAccountFinder({
+					onSelected: (view, account) => store.invite(account.id),
+				})
+				: null
 			deckCardsSo.addLink({ view, parent: store, anim: true })
 		},
 

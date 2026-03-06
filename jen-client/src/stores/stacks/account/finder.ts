@@ -7,6 +7,9 @@ import { mixStores } from "@priolo/jon"
 import { ViewState } from "../viewBase"
 import { buildAccountDetail } from "./factory"
 import { AccountDetailStore } from "./detail"
+import { ChatPartecipantsListStore } from "../chat/partecipantsList"
+import { DOC_TYPE } from "@/types"
+import chatRepoSo from "../chat/repo"
 
 
 /**
@@ -24,7 +27,6 @@ const setup = {
 
 		// *********************************
 
-		/** ITEMs da visualizzare. Se null, visualizzo tutti gli ITEMs disponibili */
 		textSearch: "",
 		//editState: EDIT_STATE.READ,
 		/** callback chiamato quando seleziono un item */
@@ -67,6 +69,17 @@ const setup = {
 		getSelected: (_: void, store?: AccountFinderStore): string => {
 			return (store.state.linked as AccountDetailStore)?.state?.accountId
 		},
+
+		/**
+		 * Se c'e' la lista dei TOOLS del proprio parent
+		 * Servbe per vedere i "disabled" nella lista totale, per evitare di aggiungere doppioni
+		 */
+		getParentList: (_: void, store?: AccountFinderStore): AccountDTO[] => {
+			const parent = <ChatPartecipantsListStore>store.state.parent
+			if ( parent?.state.type != DOC_TYPE.CHAT_PARTECIPANTS_LIST ) return null
+			const chat = chatRepoSo.getById(parent.state.chatId) 
+			return chat?.users ?? []
+		}
 
 		// *********************************
 	},
