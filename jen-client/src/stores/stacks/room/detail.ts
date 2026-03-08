@@ -3,14 +3,19 @@ import { DOC_TYPE, EDIT_STATE } from "@/types"
 import { mixStores } from "@priolo/jon"
 import { ChatMessage } from "@shared/types/ChatMessage"
 import { ContentAskTo, LlmResponse } from "@shared/types/LlmResponse"
-import chatRepoSo from "../../chat/repo"
-import chatWSSo from "../../chat/ws"
-import { EditorState } from "../../editorBase"
-import { buildRoomAgentList, buildRoomDetail } from "../factory"
-import agentSo from "../../agent/repo"
-import { buildAgentList } from "../../agent/factory"
+import chatRepoSo from "../chat/repo"
+import chatWSSo from "../chat/ws"
+import { EditorState } from "../editorBase"
+import { buildRoomAgentList, buildRoomDetail } from "./factory"
+import agentSo from "../agent/repo"
+import { buildAgentList } from "../agent/factory"
 import roomApi from "@/api/room"
 import { JsonCommand, TYPE_JSON_COMMAND } from "@shared/update"
+import { AgentListStore } from "../agent/list"
+import { buildChatDetail } from "../chat/factory"
+import { focusSo, utils } from "@priolo/jack"
+import { deckCardsSo } from "@/stores/docs/cards"
+import { ChatDetailState, ChatDetailStore } from "../chat/detail"
 
 
 
@@ -110,7 +115,7 @@ What is 2+2? Just write the answer number.`,
 		},
 
 		/** apertura della CARD LIST AGENTS */
-		async openAgents2(_: void, store?: RoomDetailStore) {
+		async openAgents(_: void, store?: RoomDetailStore) {
 			// ricao gli AGENTS della ROOM 
 
 			const agents = (await roomApi.getAgents(store.state.roomId, { store }))?.agents ?? []
@@ -118,6 +123,7 @@ What is 2+2? Just write the answer number.`,
 			const view = buildAgentList({
 				editState: EDIT_STATE.EDIT,
 				items: agents,
+				noSerialization: true,
 				onItemsChange: (view, items) => {
 					console.log("onItemsChange", items)
 					const cmm: JsonCommand = {
@@ -126,21 +132,35 @@ What is 2+2? Just write the answer number.`,
 						value: items?.map(a => a.id) ?? [],
 					}
 					const chat = chatRepoSo.getByRoomId(store.state.roomId)
-					chatWSSo.updateChat({ chatId: chat.id, commands: [cmm] })
+					chatWSSo.updateChat({ chatId: chat.id, commands: [cmm] });
 
 					// aggiornare la lista degli AGENTs della ROOM, per vedere subito i cambiamenti
-					
+					(<AgentListStore>store.state.linked)?.setItems(items)
 				}
 			})
 			store.state.group.addLink({ view, parent: store, anim: true })
 		},
 
-		/** apertura della CARD LIST AGENTS */
-		openAgents(_: void, store?: RoomDetailStore) {
-			const isOpen = store.getRoomAgentsOpen()
-			const view = !isOpen ? buildRoomAgentList(store.state.roomId) : null
-			store.state.group.addLink({ view, parent: store, anim: true })
+		async openChat(_: void, store?: RoomDetailStore) {
+			const chatId = store.state.chatId
+			if (!chatId) return
+			let view = utils.findAll(
+				deckCardsSo.state.all,
+				<Partial<ChatDetailState>>{ type: DOC_TYPE.CHAT_DETAIL, chatId }
+			)?.[0] as ChatDetailStore
+			if (!view) {
+				view = buildChatDetail({ chatId })
+				store.state.group.add({ view, anim: true })
+			}
+			focusSo.focus(view)
 		},
+
+		/** apertura della CARD LIST AGENTS */
+		// openAgents(_: void, store?: RoomDetailStore) {
+		// 	const isOpen = store.getRoomAgentsOpen()
+		// 	const view = !isOpen ? buildRoomAgentList(store.state.roomId) : null
+		// 	store.state.group.addLink({ view, parent: store, anim: true })
+		// },
 
 		/** ho cliccato su un MESSAGE che è linked ad una SUB-ROOM */
 		openSubRoom(chatMessage: ChatMessage, store?: RoomDetailStore) {

@@ -9,8 +9,8 @@ import { getShortUuid } from "@/utils/object"
 import { AlertDialog, Button, OptionsCmp } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent, useMemo } from "react"
-import EditorIcon from "../../../icons/EditorIcon"
-import clsCard from "../CardCyanDef.module.css"
+import EditorIcon from "../../../../icons/EditorIcon"
+import clsCard from "../../CardCyanDef.module.css"
 import { ChatDTO } from "@shared/types/ChatDTO"
 
 
@@ -37,7 +37,7 @@ const ChatListView: FunctionComponent<Props> = ({
 
 
 	// HANDLER
-	const handleSelect = (chat: ChatDTO) => store.select(chat.id)
+	const handleSelect = (chat: ChatDTO) => store.openDetail(chat.id)
 	const handleNew = () => store.create()
 	const handleDelete = () => store.delete(selectedId)
 

@@ -48,7 +48,7 @@ const setup = {
 		//#endregion
 
 		/** apro/chiudo la CARD del dettaglio */
-		select(chatId: string, store?: ChatListStore) {
+		openDetail(chatId: string, store?: ChatListStore) {
 			const chat = chatRepoSo.getById(chatId)
 			if (!chatId || !chat) return
 			const oldId = (store.state.linked as ChatDetailStore)?.state?.chatId

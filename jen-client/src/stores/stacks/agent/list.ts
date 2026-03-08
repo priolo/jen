@@ -15,7 +15,7 @@ const setup = {
 		//#region VIEWBASE
 		width: 270,
 		widthMax: 1000,
-		noSerializzation: false,
+		noSerialization: false,
 		//#endregion
 
 
@@ -39,6 +39,11 @@ const setup = {
 
 		getTitle: (_: void, store?: ViewStore) => "AGENT",
 		getSubTitle: (_: void, store?: ViewStore) => "agent list",
+		getSerialization: (_: void, store?: ViewStore) => {
+			const s = store as AgentListStore
+			if ( !!s.state.noSerialization ) return null
+			return viewSetup.getters.getSerialization(null, store)
+		},
 
 		//#endregion
 
@@ -70,7 +75,7 @@ const setup = {
 		getParentList: (_: void, store?: AgentListStore): AgentDTO[] => {
 			return (<AgentListStore>store.state.parent)?.state.items
 		}
-		
+
 		// *********************************
 	},
 

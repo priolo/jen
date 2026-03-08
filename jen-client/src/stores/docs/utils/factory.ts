@@ -14,7 +14,7 @@ import mcpServerDetailSetup from "@/stores/stacks/mcpServer/detail";
 import mcpServerListSetup from "@/stores/stacks/mcpServer/list";
 import mcpToolDetailSetup from "@/stores/stacks/mcpTool/detail";
 import toolResultListSetup from "@/stores/stacks/mcpTool/resultList";
-import roomDetailSetup from "@/stores/stacks/room/detail/detail";
+import roomDetailSetup from "@/stores/stacks/room/detail";
 import roomAgentsListSetup from "@/stores/stacks/room/roomAgentsList";
 import toolDetailSetup from "@/stores/stacks/tool/detail";
 import toolListSetup from "@/stores/stacks/tool/list";

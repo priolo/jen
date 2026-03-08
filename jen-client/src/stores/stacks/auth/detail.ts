@@ -17,23 +17,12 @@ const setup = {
 		//#region VIEWBASE
 		getTitle: (_: void, store?: ViewStore) => "AUTH",
 		getSubTitle: (_: void, store?: ViewStore) => "connetti al sistema",
-		getSerialization: (_: void, store?: ViewStore) => {
-			const state = store.state as AuthDetailState
-			return {
-				...viewSetup.getters.getSerialization(null, store),
-			}
-		},
 		//#endregion
 	},
 
 	actions: {
 		//#region VIEWBASE
-		setSerialization: (data: any, store?: ViewStore) => {
-			viewSetup.actions.setSerialization(data, store)
-		},
 		//#endregion
-
-		
 	},
 
 	mutators: {

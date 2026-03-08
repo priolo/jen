@@ -1,4 +1,4 @@
-import { RoomDetailState, RoomDetailStore } from "@/stores/stacks/room/detail/detail"
+import { RoomDetailState, RoomDetailStore } from "@/stores/stacks/room/detail"
 import { Dialog, List } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"

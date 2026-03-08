@@ -38,10 +38,6 @@ const ChatDetailView: FunctionComponent<Props> = ({
 		icon={<ConnectionIcon />}
 		store={store}
 		actionsRender={<ChatDetailActions store={store} />}
-		iconizedRender={
-			<div className="lyt-v lyt-v-btts">
-			</div>
-		}
 	>
 
 		<ChatDetailForm store={store} />

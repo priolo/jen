@@ -1,17 +1,16 @@
-import RowButton from "@/components/buttons/RowButton"
 import FrameworkCard from "@/components/cards/FrameworkCard"
 import SendIcon from "@/icons/SendIcon"
 import chatRepoSo from "@/stores/stacks/chat/repo"
-import { RoomDetailStore } from "@/stores/stacks/room/detail/detail"
+import { RoomDetailStore } from "@/stores/stacks/room/detail"
 import { FloatButton, TextInput } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
+import { ChatMessage } from "@shared/types/ChatMessage"
 import { FunctionComponent, useEffect, useMemo } from "react"
 import EditorIcon from "../../../../icons/EditorIcon"
 import clsCard from "../../CardCyanDef.module.css"
 import ActionsCmp from "./Actions"
 import MessageCmp from "./history/MessageCmp"
 import RoleDialog from "./RoleDialog"
-import { ChatMessage } from "@shared/types/ChatMessage"
 
 
 
@@ -34,6 +33,7 @@ const RoomView: FunctionComponent<Props> = ({
 	useEffect(() => {
 		store.fetch()
 	}, [])
+	
 
 	/** recupero l'oggetto ROOM  */
 	const room = useMemo(() => chatRepoSo.getRoom({
@@ -41,12 +41,11 @@ const RoomView: FunctionComponent<Props> = ({
 		roomId: store.state.roomId,
 	}), [store.state.chatId, store.state.roomId, chatRepoSo.state.all])
 
+
 	// HANDLER
 
-	const handleSendClick = () => store.sendPrompt()
+	const handleSend = () => store.sendPrompt()
 	const handleOpenSubroom = (chatMessage: ChatMessage) => store.openSubRoom(chatMessage)
-	const handleAgentsClick = () => store.openAgents()
-	const handleAgentsClick2 = () => store.openAgents2()
 
 
 	// RENDER
@@ -57,27 +56,7 @@ const RoomView: FunctionComponent<Props> = ({
 		icon={<EditorIcon />}
 		store={store}
 		actionsRender={<ActionsCmp store={store} />}
-		iconizedRender={null}
 	>
-
-		{/* <div className="lyt-v">
-			<div className="jack-lbl-prop">ROOM ID</div>
-			<div className="jack-lbl-readonly">{room?.id ?? "--"}</div>
-			<div className="jack-lbl-prop">ROOM PARENT ID</div>
-			<div className="jack-lbl-readonly">{room?.parentRoomId ?? "--"}</div>
-		</div> */}
-
-		<RowButton
-			icon={<EditorIcon />}
-			label="AGENTS"
-			onClick={handleAgentsClick}
-		/>
-		<RowButton
-			icon={<EditorIcon />}
-			label="AGENTS2"
-			onClick={handleAgentsClick2}
-		/>
-
 		<div style={{ backgroundColor: "var(--jack-color-bg)", flex: 1 }}>
 			{history.map((chatMessage) => (
 				<MessageCmp
@@ -96,7 +75,7 @@ const RoomView: FunctionComponent<Props> = ({
 
 		<div className="jack-lyt-float">
 			<FloatButton
-				onClick={handleSendClick}
+				onClick={handleSend}
 				disabled={false}
 			><SendIcon /></FloatButton>
 		</div>

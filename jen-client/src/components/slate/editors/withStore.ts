@@ -1,5 +1,5 @@
 import { ReactEditor } from "slate-react"
-import { RoomDetailStore } from "../../../stores/stacks/room/detail/detail"
+import { RoomDetailStore } from "../../../stores/stacks/room/detail"
 
 
 /**

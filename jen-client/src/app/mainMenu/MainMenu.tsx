@@ -1,16 +1,17 @@
-import { AccountFinderFixedCard, AuthFixedCard, ClearSession, EndSession, StartSession } from "@/plugins/session"
-import docsSo from "@/stores/docs"
-import { deckCardsSo } from "@/stores/docs/cards"
+import { ClearSession, EndSession, StartSession } from "@/plugins/session"
+import { deckCardsSo, drawerCardsSo } from "@/stores/docs/cards"
 import { menuSo } from "@/stores/docs/links"
+import { buildAccountFinder } from "@/stores/stacks/account/factory"
 import { buildAgentList } from "@/stores/stacks/agent/factory"
 import { buildEditorNew } from "@/stores/stacks/agentEditor/factory"
+import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
 import { buildChatList } from "@/stores/stacks/chat/factory"
 import chatWSSo from "@/stores/stacks/chat/ws"
 import { buildLlmList } from "@/stores/stacks/llm/factory"
 import { buildMcpServerList } from "@/stores/stacks/mcpServer/factory"
 import { buildMcpToolDetail } from "@/stores/stacks/mcpTool/factory"
 import { buildToolList } from "@/stores/stacks/tool/factory"
-import { Button, focusSo } from "@priolo/jack"
+import { Button, docsSo, focusSo, utils } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import React, { FunctionComponent } from "react"
 import { buildStore } from "../../stores/docs/utils/factory"
@@ -19,6 +20,9 @@ import { ReflectionState, ReflectionStore } from "../../stores/stacks/reflection
 import { DOC_TYPE } from "../../types"
 import AboutButton from "./AboutButton"
 import cls from "./MainMenu.module.css"
+import { AuthDetailStore } from "@/stores/stacks/auth/detail"
+import { AccountFinderStore } from "@/stores/stacks/account/finder"
+import { ChatListStore } from "@/stores/stacks/chat/list"
 
 
 
@@ -55,23 +59,35 @@ const MainMenu: FunctionComponent<Props> = ({
 		const view = buildAgentList()
 		deckCardsSo.add({ view, anim: true })
 	}
+
+
+
+	
 	const handleChatList = () => {
-		const view = buildChatList()
-		deckCardsSo.add({ view, anim: true })
+		let view = utils.findInRoot(deckCardsSo.state.all, { type: DOC_TYPE.CHAT_LIST }) as ChatListStore
+		if ( !view ) {
+			view = buildChatList()
+			deckCardsSo.add({ view, anim: true })
+		}
+		focusSo.focus(view)
 	}
 
-
-
-
-
 	const handleAccountFinder = async () => {
-		await deckCardsSo.add({ view: AccountFinderFixedCard, anim: true })
-		focusSo.focus(AccountFinderFixedCard)
+		let view = utils.findInRoot(deckCardsSo.state.all, { type: DOC_TYPE.ACCOUNT_FINDER }) as AccountFinderStore
+		if ( !view ) {
+			view = buildAccountFinder()
+			deckCardsSo.add({ view, anim: true })
+		}
+		focusSo.focus(view)
 	}
 
 	const handleAuth = async () => {
-		await deckCardsSo.add({ view: AuthFixedCard, anim: true })
-		focusSo.focus(AuthFixedCard)
+		let view = utils.findInRoot(deckCardsSo.state.all, { type: DOC_TYPE.AUTH_DETAIL }) as AuthDetailStore
+		if (!view) {
+			view = buildAuthDetailCard()
+			await deckCardsSo.add({ view, anim: true })
+		}
+		focusSo.focus(view)
 	}
 
 

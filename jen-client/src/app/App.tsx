@@ -1,6 +1,5 @@
 import MainMenu from "@/app/mainMenu/MainMenu"
-import docsSo from "@/stores/docs"
-import { DragCmp, TooltipCmp, ZenCard } from "@priolo/jack"
+import { docsSo, DragCmp, TooltipCmp, ZenCard } from "@priolo/jack"
 import { useStore } from "@priolo/jon"
 import { FunctionComponent } from "react"
 import cls from "./App.module.css"

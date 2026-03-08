@@ -1,7 +1,8 @@
 import { Log } from "@/stores/log/utils"
 import { ViewState } from "@/stores/stacks/viewBase"
 import { Session } from "./types"
-import { DocState } from "@/stores/docs"
+import { DocState } from "@priolo/jack"
+
 
 
 

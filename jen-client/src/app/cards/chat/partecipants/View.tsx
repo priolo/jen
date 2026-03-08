@@ -69,8 +69,3 @@ const ChatPartecipatsListView: FunctionComponent<Props> = ({
 }
 
 export default ChatPartecipatsListView
-
-
-// <div>
-// 	{isSelected(clients)? "***" : ""} {clients.name} - {clients.status == ACCOUNT_STATUS.ONLINE ? "ONLINE" : "OFFLINE"}
-// </div>

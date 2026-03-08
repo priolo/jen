@@ -8,6 +8,7 @@ import { RoomDTO } from "@shared/types/RoomDTO.js"
 import { matchPath } from "@shared/update.js"
 import { ChatProcessor } from "./ChatProcessor.js"
 import ChatProxy from "./ChatProxy.js"
+import { RoomRepo } from "@/repository/Room.js"
 
 
 /**
@@ -81,7 +82,7 @@ export class ChatsMessages {
 				const room = chat.getRoomById(roomId) as RoomDTO
 				await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
 					type: typeorm.Actions.SAVE,
-					payload: {
+					payload: <RoomRepo>{
 						id: res[0].id,
 						agents: room?.agentsIds.map(agentId => ({ id: agentId })) ?? [],
 					},

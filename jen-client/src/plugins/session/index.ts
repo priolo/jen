@@ -1,18 +1,13 @@
-import docsSo from "@/stores/docs"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { buildStore } from "@/stores/docs/utils/factory"
-import { buildAccountFinder } from "@/stores/stacks/account/factory"
 import { AccountFinderStore } from "@/stores/stacks/account/finder"
 import agentSo from "@/stores/stacks/agent/repo"
-import { AuthDetailStore } from "@/stores/stacks/auth/detail"
-import { buildAuthDetailCard } from "@/stores/stacks/auth/factory"
 import authSo from "@/stores/stacks/auth/repo"
 import chatRepoSo from "@/stores/stacks/chat/repo"
 import llmSo from "@/stores/stacks/llm/repo"
 import mcpServerSo from "@/stores/stacks/mcpServer/repo"
 import toolSo from "@/stores/stacks/tool/repo"
-import { DOC_TYPE } from "@/types"
-import { ViewStore } from "@priolo/jack"
+import { docsSo, ViewStore } from "@priolo/jack"
 import { loadLocalStorage, saveLocalStorage } from "./storage"
 import { Session } from "./types"
 import { wsConnection } from "./wsConnection"
@@ -36,7 +31,7 @@ window.addEventListener('offline', function () {
 /** CARD per la ricerca di un ACCOUNT */
 export let AccountFinderFixedCard: AccountFinderStore
 /** CARD la gestione AUTH dell'ACCOUNT */
-export let AuthFixedCard: AuthDetailStore
+//export let AuthFixedCard: AuthDetailStore
 
 
 
@@ -66,7 +61,7 @@ export async function StartSession() {
 	// BUILD SINGLETONE CARDS
 	const allStores = [...deckStores/*, ...drawerStores, ...menuStores*/]
 	//AccountFinderFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.ACCOUNT_FINDER) ?? buildAccountFinder()) as AccountFinderStore
-	AuthFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.AUTH_DETAIL) ?? buildAuthDetailCard()) as AuthDetailStore
+	//AuthFixedCard = (allStores.find(s => s.state.type == DOC_TYPE.AUTH_DETAIL) ?? buildAuthDetailCard()) as AuthDetailStore
 
 	deckCardsSo.setAll(deckStores)
 	//drawerCardsSo.setAll(drawerStores)
@@ -109,7 +104,9 @@ function buildCards(session: Session) {
 	//logSo.setAll(session.logs ?? [])
 
 	// DECK
+	// recupero lo STORE-STATE delle CARD presenti in DECK 
 	const deckStates = session.deckUuids?.map(uuid => session.allStates.find(s => s.uuid == uuid))
+	// costruisco gli STORE delle CARD presenti in DECK
 	const deckStores = deckStates?.map(state => {
 		const store: ViewStore = buildStore({ type: state.type, group: deckCardsSo }, state)
 		return store
