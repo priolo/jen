@@ -1,14 +1,13 @@
 import { REPO_PATHS } from "@/config.js"
+import { RoomRepo } from "@/repository/Room.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { Bus, typeorm } from "@priolo/julian"
 import { AccountDTO } from "@shared/types/AccountDTO.js"
-import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S } from "@shared/types/ChatActionsClient.js"
+import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomHistoryUpdateC2S } from "@shared/types/ChatActionsClient.js"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage.js"
-import { RoomDTO } from "@shared/types/RoomDTO.js"
 import { matchPath } from "@shared/update.js"
 import { ChatProcessor } from "./ChatProcessor.js"
 import ChatProxy from "./ChatProxy.js"
-import { RoomRepo } from "@/repository/Room.js"
 
 
 /**
@@ -46,17 +45,13 @@ export class ChatsMessages {
 				await this.handleUserLeave(chat, user)
 				break
 
-			case CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE: {
-				const msgUp: RoomAgentsUpdateC2S = msg
-				await chat.updateAgents(msgUp.agentsIds, msgUp.roomId)
-				break
-			}
-
 			case CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE: {
 				const msgUp: RoomHistoryUpdateC2S = msg
 				const room = chat.updateRoomHistory(msgUp.updates, msgUp.roomId)
-				if (room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.ADD)) {
-					await (new ChatProcessor(this.service)).complete(chat, chat.getMainRoom());
+				if (room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.APPEND)) {
+					// devo recuperare tutti gli AGENTS presenti in ROOM con i rispettivi LLM
+					// devo usare getAgentRepoById
+					await (new ChatProcessor(this.service)).complete(chat, room);
 				}
 				break
 			}
@@ -79,12 +74,12 @@ export class ChatsMessages {
 			const res = matchPath(cmd.path, "rooms.*.agentsIds")
 			if (res != null) {
 				const roomId = res[0].id
-				const room = chat.getRoomById(roomId) as RoomDTO
+				const room = chat.getRoomById(roomId)
 				await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
 					type: typeorm.Actions.SAVE,
 					payload: <RoomRepo>{
 						id: res[0].id,
-						agents: room?.agentsIds.map(agentId => ({ id: agentId })) ?? [],
+						agents: room?.agents.map(a => ({ id: a.id })) || [],
 					},
 				})
 			}

@@ -5,7 +5,7 @@ import { Bus, httpRouter, typeorm } from "@priolo/julian";
 import { Request, Response } from "express";
 import { FindManyOptions, FindOneOptions, In } from "typeorm";
 import { AccountRepo } from "../repository/Account.js";
-import { ChatDTOListFromChatRepoList, ChatRepo } from "../repository/Chat.js";
+import { ChatDTOFromChatRepo, ChatDTOListFromChatRepoList, ChatRepo } from "../repository/Chat.js";
 import { ChatsWSService } from "./ChatsWSRoute.js";
 import { CHAT_ACTION_S2C, ChatUpdateS2C2 } from "@shared/types/ChatActionsServer.js";
 import { TYPE_JSON_COMMAND } from "@shared/update.js";
@@ -69,8 +69,11 @@ class ChatRoute extends httpRouter.Service {
 
 		const service = this.nodeByPath<ChatsWSService>(SERVICE_PATHS.CHATS_WS)
 		const chatProxy = await service.chatManager.loadChatById(chatId)
+		if (!chatProxy) return res.status(404).json({ error: "Chat not found" })
 
-		res.json(chatProxy.chatRepo)
+		const chat = ChatDTOFromChatRepo(chatProxy.chatRepo)
+		chat.onlineUserIds = chatProxy.getOnlineUserIds()
+		res.json({ chat })
 	}
 
 	async create(req: Request, res: Response) {

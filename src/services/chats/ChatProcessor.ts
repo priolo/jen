@@ -10,7 +10,9 @@ import ChatProxy from './ChatProxy.js';
 import { ChatMessage, MessageUpdate, UPDATE_TYPE } from '@shared/types/ChatMessage.js';
 
 
-
+/**
+ * Gestisce l'elaborazione di una CHAT da parte di agenti
+ */
 export class ChatProcessor {
 
 	constructor(
@@ -21,8 +23,6 @@ export class ChatProcessor {
 	 * Indico alla CHAT che una ROOM deve essere "completata"
 	 */
 	async complete(chat: ChatProxy, room: RoomRepo): Promise<LlmResponse> {
-		// [II] assumo che da completare sia sempre la MAIN-ROOM
-		//let room: RoomRepo = chat.getMainRoom()
 		return await this.recursiveRequest(chat, room)
 	}
 
@@ -44,7 +44,7 @@ export class ChatProcessor {
 				const subRoom = BuildRoomRepo(null, [agentRepo], null, room.id)
 				chat.addRoom(subRoom) 
 
-				// inserisco messaggio "user" ma dell'AGENT nella nuova ROOM
+				// inserisco come primo messaggio "user" la domanda dell'AGENT nella nuova ROOM
 				const msgUpd: MessageUpdate = {
 					type: UPDATE_TYPE.APPEND,
 					content: {

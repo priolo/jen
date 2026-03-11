@@ -70,15 +70,30 @@ export function BuildRoomRepo(chatId: string, agentsRepo: AgentRepo[] = [], acco
     return room
 }
 
+/**
+ * Restituisce una nuova istanza di ROOM-REPO
+ */
+export function BuildRoomDTO(chatId: string, agentsIds: string[] = [], accountId?: string, parentRoomId?: string): RoomDTO {
+    const room: RoomDTO = {
+        id: randomUUID() as string,
+        accountId,
+        chatId,
+        parentRoomId,
+        history: [],
+        agentsIds,
+    }
+    return room
+}
+
 export function RoomDTOFromRoomRepo(room: RoomRepo): RoomDTO {
-	if (!room) return null;
-	return {
-		id: room.id,
+    if (!room) return null;
+    return {
+        id: room.id,
         accountId: room.accountId,
-		chatId: room.chatId,
-		parentRoomId: room.parentRoomId,
-		
-		history: room.history ?? [],
-		agentsIds: room.agents?.map(a => a.id) ?? [],
-	};
+        chatId: room.chatId,
+        parentRoomId: room.parentRoomId,
+
+        history: room.history ?? [],
+        agentsIds: room.agents?.map(a => a.id) ?? [],
+    };
 }

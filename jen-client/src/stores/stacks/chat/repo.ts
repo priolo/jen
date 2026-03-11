@@ -55,7 +55,7 @@ const setup = {
 		async load(id: string, store?: ChatRepoStore): Promise<ChatDTO> {
 			let chat = store.getById(id)
 			if (!!chat) return chat
-			chat = await chatApi.get(id, { store, manageAbort: true })
+			chat = (await chatApi.get(id, { store, manageAbort: true }))?.chat
 			//chat.onlineUserIds = []
 			if (chat) store.setAll( [...store.state.all, chat])
 			return chat

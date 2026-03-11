@@ -4,7 +4,9 @@ import { IAgent } from "../agents/IAgent.js";
 import { ChatMessage } from "@shared/types/ChatMessage.js";
 
 
-
+/**
+ * Gli handlers per la conversazione di una ROOM, utilizzati da RoomConversation per comunicare con il mondo esterno (es. ChatProcessor) senza dipendenze dirette
+ */
 export interface IRoomConversationHandlers {
 	/**
 	 * chiamato quando bisogna avere un risultato da un tool

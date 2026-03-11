@@ -99,12 +99,12 @@ export type UserLeaveC2S = BaseC2S & {
 
 
 /** richiesta modifica lista AGENTS in ROOM */
-export type RoomAgentsUpdateC2S = BaseC2S & {
-	action: CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE
-	roomId: string
-	/** new list of AGENTs in ROOM */
-	agentsIds: string[]
-}
+// export type RoomAgentsUpdateC2S = BaseC2S & {
+// 	action: CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE
+// 	roomId: string
+// 	/** new list of AGENTs in ROOM */
+// 	agentsIds: string[]
+// }
 
 /** richiesta modifica della HISTORY di una ROOM */
 export type RoomHistoryUpdateC2S = BaseC2S & {

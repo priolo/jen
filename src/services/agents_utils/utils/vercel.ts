@@ -1,7 +1,6 @@
 import { LlmRepo } from "../../../repository/Llm.js";
 import { LLM_MODELS } from "@shared/types/LlmProviders.js";
 import { ContentAskTo, ContentTool, LLM_RESPONSE_TYPE, LlmResponse } from "@shared/types/LlmResponse.js";
-import { ChatMessage } from "@shared/types/RoomActions.js";
 import { createCohere } from "@ai-sdk/cohere";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
@@ -10,6 +9,7 @@ import { createOllama } from 'ollama-ai-provider-v2';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGroq } from '@ai-sdk/groq';
+import { ChatMessage } from "@shared/types/ChatMessage.js";
 
 /**
  * Istanzio un MODELLO LLM in base alla configurazione

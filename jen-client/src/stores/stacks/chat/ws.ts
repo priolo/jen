@@ -5,7 +5,7 @@ import { DOC_TYPE } from "@/types"
 import { deepMerge } from "@/utils/object"
 import { docsSo, utils, ViewStore } from "@priolo/jack"
 import { createStore, StoreCore } from "@priolo/jon"
-import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomAgentsUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S } from "@shared/types/ChatActionsClient"
+import { CHAT_ACTION_C2S, ChatUpdateC2S, RoomHistoryUpdateC2S, UserEnterC2S, UserLeaveC2S } from "@shared/types/ChatActionsClient"
 import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer"
 import { UPDATE_TYPE } from "@shared/types/ChatMessage"
 import { RoomDTO } from "@shared/types/RoomDTO"
@@ -71,18 +71,18 @@ const setup = {
 		/**
 		 * Update the list of AGENTS in a ROOM 
 		 */
-		updateAgentsInRoom: (
-			{ chatId, roomId, agentsIds }: { chatId: string, roomId: string, agentsIds: string[] },
-			store?: ChatWSStore
-		) => {
-			const message: RoomAgentsUpdateC2S = {
-				action: CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE,
-				chatId: chatId,
-				roomId: roomId,
-				agentsIds: agentsIds,
-			}
-			wsConnection.send(JSON.stringify(message))
-		},
+		// updateAgentsInRoom: (
+		// 	{ chatId, roomId, agentsIds }: { chatId: string, roomId: string, agentsIds: string[] },
+		// 	store?: ChatWSStore
+		// ) => {
+		// 	const message: RoomAgentsUpdateC2S = {
+		// 		action: CHAT_ACTION_C2S.ROOM_AGENTS_UPDATE,
+		// 		chatId: chatId,
+		// 		roomId: roomId,
+		// 		agentsIds: agentsIds,
+		// 	}
+		// 	wsConnection.send(JSON.stringify(message))
+		// },
 
 		/**
 		 * Add a MESSAGE in the HISTORY of a ROOM
@@ -294,7 +294,7 @@ export function getMainRoom(rooms: RoomDTO[]): RoomDTO {
 
 async function ChatInline(chatId: string) {
 	// carico i dati della CHAT
-	const chat = await chatApi.get(chatId)//, { store: chatWSSo, manageAbort: true })
+	const chat = (await chatApi.get(chatId))?.chat//, { store: chatWSSo, manageAbort: true })
 
 	// inserisco la CHAT nelle CHAT ONLINE
 	chatWSSo.setAll([...chatWSSo.state.all, chatId])

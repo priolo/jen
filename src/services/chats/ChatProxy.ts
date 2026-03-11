@@ -1,12 +1,10 @@
-import { AccountDTOFromAccountRepoList, AccountRepo } from '@/repository/Account.js';
+import { ChatRepo } from '@/repository/Chat.js';
 import { RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
 import { AccountDTO } from '@shared/types/AccountDTO.js';
 import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
-import { ChatDTO } from '@shared/types/ChatDTO.js';
 import { MessageUpdate } from "@shared/types/ChatMessage.js";
-import { RoomDTO } from '@shared/types/RoomDTO.js';
-import { applyJsonCommand, JsonCommand, TYPE_JSON_COMMAND } from '@shared/update.js';
+import { applyJsonCommand, JsonCommand } from '@shared/update.js';
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
 
 
@@ -27,7 +25,7 @@ class ChatProxy {
 		/**
 		 * MODEL della CHAT
 		 */
-		private chat: ChatDTO,
+		private chat: ChatRepo,
 	) {
 	}
 
@@ -37,8 +35,8 @@ class ChatProxy {
 	 * @param rooms le ROOMs iniziali della CHAT
 	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
-	static Build(service: ChatsWSService, chatPOCO: ChatDTO): ChatProxy {
-		const chat = new ChatProxy(service, chatPOCO)
+	static Build(service: ChatsWSService, chatRepo: ChatRepo): ChatProxy {
+		const chat = new ChatProxy(service, chatRepo)
 		return chat
 	}
 
@@ -46,10 +44,16 @@ class ChatProxy {
 
 	//#region CHAT PROPERTIES
 
+	/** 
+	 * gli ids degli USERS ONLINE in CHAT 
+	 * cioe' quelli che devono essere aggiornati
+	 */
+	private usersIds: Set<string> = new Set();
+
 	/**
 	 * l'ENTITY CHAT REPO
 	 */
-	public get chatRepo(): ChatDTO {
+	public get chatRepo(): ChatRepo {
 		return this.chat;
 	}
 
@@ -84,7 +88,19 @@ class ChatProxy {
 		return this.chat.users.find(user => user.id == id)
 	}
 
+	public getOnlineUserIds (): string[] {
+		return Array.from(this.usersIds)
+	}
+
 	//#endregion 
+
+
+
+	//#region STORAGE
+
+	
+
+	//#endregion
 
 
 
@@ -98,7 +114,7 @@ class ChatProxy {
 	addUser(userId: string) {
 
 		// se lo USER è già in CHAT non faccio nulla
-		if (!userId || this.chat.onlineUserIds.includes(userId)) return;
+		if (!userId || this.usersIds.has(userId)) return;
 
 		// cerco lo USER tra gli ONLINE. se è offline non faccio nulla
 		const user = (this.service.chatSend.getUserOnlineById(userId))
@@ -106,7 +122,7 @@ class ChatProxy {
 		if (!user) return;
 
 		// inserisco lo USER tra quelli in CHAT
-		this.chat.onlineUserIds.push(userId);
+		this.usersIds.add(userId);
 
 		// avverto gli USERS della CHAT
 		const message: ClientEnteredS2C = {
@@ -123,7 +139,7 @@ class ChatProxy {
 	 * @return true se la chat è vuota e può essere rimossa
 	 */
 	removeUser(userId: string): boolean {
-		if (!userId || !this.chat.onlineUserIds.includes(userId)) return false;
+		if (!userId || !this.usersIds.has(userId)) return false;
 
 		// avverto tutti i CLIENTs eccetto quello che ha lasciato la CHAT
 		const message: ClientLeaveS2C = {
@@ -134,9 +150,8 @@ class ChatProxy {
 		this.sendMessage(message)
 
 		// elimino lo USER dalla CHAT
-		this.chat.onlineUserIds = this.chat.onlineUserIds.filter(id => id !== userId)
-
-		return this.chat.onlineUserIds.length == 0
+		this.usersIds.delete(userId);
+		return this.usersIds.size == 0
 	}
 
 	/** 
@@ -164,7 +179,7 @@ class ChatProxy {
 	/**
 	 * Aggiunge una nuova ROOM alla CHAT
 	 */
-	addRoom(room: RoomDTO) {
+	addRoom(room: RoomRepo) {
 
 		this.chatRepo.rooms.push(room);
 		room.chatId = this.chatRepo.id;
@@ -176,7 +191,7 @@ class ChatProxy {
 			chatId: this.chatRepo.id,
 			roomId: room.id,
 			parentRoomId: room.parentRoomId,
-			agentsIds: room.agentsIds,
+			agentsIds: room.agents.map(a => a.id),
 		}
 		this.sendMessage(newRoomMsg)
 	}
@@ -214,7 +229,7 @@ class ChatProxy {
 
 
 
-
+	// DA SISTEMARE!!!!
 	updates(commands: JsonCommand[]) {
 		for (const command of commands) {
 			applyJsonCommand(this.chatRepo, command)
@@ -238,7 +253,7 @@ class ChatProxy {
 	 * Invia a tutti i partecipanti della CHAT un MESSAGE
 	 */
 	sendMessage(message: BaseS2C, esclude: string[] = []): void {
-		for (const userId of this.chat.onlineUserIds) {
+		for (const userId of this.usersIds) {
 			if (esclude.includes(userId)) continue
 			try {
 				this.service.chatSend.sendMessageToUser(userId, message)

@@ -1,11 +1,11 @@
 import { REPO_PATHS } from "@/config.js"
-import { ChatDTOFromChatRepo, ChatRepo } from "@/repository/Chat.js"
+import { ChatRepo } from "@/repository/Chat.js"
+import { RoomRepo } from "@/repository/Room.js"
 import { ChatsWSService } from "@/routers/ChatsWSRoute.js"
 import { Bus, typeorm } from "@priolo/julian"
 import { FindOneOptions } from "typeorm"
 import ChatProxy from "./ChatProxy.js"
-import { RoomRepo } from "@/repository/Room.js"
-import { ChatDTO } from "@shared/types/ChatDTO.js"
+
 
 
 /**
@@ -21,6 +21,7 @@ export class ChatsManager {
 	 * Le CHATs attive nel sistema
 	 */
 	private chats: ChatProxy[] = []
+	
 	/**
 	 * Restituisce tutte le CHATs attive
 	 */
@@ -56,11 +57,11 @@ export class ChatsManager {
 	/** 
 	 * Salvo la CHAT sul DB 
 	 */
-	async saveChat(chatPOCO: ChatDTO): Promise<void> {
-		if (!chatPOCO) return;
+	async saveChat(chatRepo: ChatRepo): Promise<void> {
+		if (!chatRepo) return;
 		await new Bus(this.service, REPO_PATHS.CHATS).dispatch({
 			type: typeorm.Actions.SAVE,
-			payload: chatPOCO,
+			payload: chatRepo,
 		})
 	}
 
@@ -68,7 +69,7 @@ export class ChatsManager {
 	 * Salvo le ROOMs della CHAT sul DB
 	 */
 	async saveRooms(rooms: RoomRepo[]): Promise<void> {
-		if ( !rooms || rooms.length === 0) return;
+		if (!rooms || rooms.length === 0) return;
 		for (const room of rooms) {
 			await new Bus(this.service, REPO_PATHS.ROOMS).dispatch({
 				type: typeorm.Actions.SAVE,
@@ -79,6 +80,7 @@ export class ChatsManager {
 
 	/**
 	 * Cerco la chat in MEM se non la trovo la carico dal DB
+	 * TO DO: è un errore fare cosi' perche' metto in memoria anche CHAT che magari voglio solo caricare per cosultazione, in questo modo rischio di tenere in memoria CHAT che non servono, bisognerebbe fare un metodo apposito per caricare la CHAT senza metterla in MEMORIA, oppure mettere in MEMORIA solo le CHAT che hanno una SESSION attiva (cioe' che hanno almeno un utente online)
 	 */
 	async loadChatById(chatId: string): Promise<ChatProxy> {
 		// cerco la CHAT che contiene la ROOM
@@ -92,12 +94,17 @@ export class ChatsManager {
 				type: typeorm.Actions.FIND_ONE,
 				payload: <FindOneOptions<ChatRepo>>{
 					where: { id: chatId },
-					relations: { users: true, rooms: true }
+					relations: { 
+						users: true, 
+						rooms: {
+							agents: true 
+						}
+					}
 				}
 			})
 
 			// Creo la CHAT con le ROOMs caricate
-			chat = ChatProxy.Build(this.service, ChatDTOFromChatRepo(chatRepo))
+			chat = ChatProxy.Build(this.service, chatRepo)
 			this.service.chatManager.addChat(chat)
 		}
 
