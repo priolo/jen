@@ -2,7 +2,7 @@ import { ChatRepo } from '@/repository/Chat.js';
 import { RoomRepo } from '@/repository/Room.js';
 import { ChatsWSService } from '@/routers/ChatsWSRoute.js';
 import { AccountDTO } from '@shared/types/AccountDTO.js';
-import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomAgentsUpdateS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
+import { BaseS2C, CHAT_ACTION_S2C, ChatUpdateS2C2, ClientEnteredS2C, ClientLeaveS2C, RoomHistoryUpdateS2C, RoomNewS2C } from "@shared/types/ChatActionsServer.js";
 import { MessageUpdate } from "@shared/types/ChatMessage.js";
 import { applyJsonCommand, JsonCommand } from '@shared/update.js';
 import { RoomHistoryUpdate } from "../rooms/RoomHistory.js";
@@ -31,9 +31,6 @@ class ChatProxy {
 
 	/**
 	 * Creo una nuova CHAT inserendo una MAIN-ROOM
-	 * @param service il CONTEXT di gestione della CHAT
-	 * @param rooms le ROOMs iniziali della CHAT
-	 * @param accountId l'ACCOUNT che ha creato la CHAT
 	 */
 	static Build(service: ChatsWSService, chatRepo: ChatRepo): ChatProxy {
 		const chat = new ChatProxy(service, chatRepo)
@@ -67,9 +64,9 @@ class ChatProxy {
 	 * Recupera la MAIN-ROOM della CHAT  
 	 * Quella con il parent a null
 	 */
-	public getMainRoom(): RoomRepo {
-		return this.chat.rooms.find(room => room.parentRoomId == null)
-	}
+	// public getMainRoom(): RoomRepo {
+	// 	return this.chat.rooms.find(room => room.parentRoomId == null)
+	// }
 
 	/**
 	 * Recupera una ROOM dalla CHAT
@@ -158,8 +155,8 @@ class ChatProxy {
 	 * aggiorno la HISTORY con una serie di MessageUpdate 
 	 * Manda il messaggio di aggiornamento a tutti i partecipanti alla CHAT
 	 */
-	updateRoomHistory(updates: MessageUpdate[], roomId?: string): RoomRepo {
-		const room = this.getRoomById(roomId) ?? this.getMainRoom()
+	updateRoomHistory(updates: MessageUpdate[], roomId: string): RoomRepo {
+		const room = this.getRoomById(roomId)
 		if (!room) throw new Error("Room not found")
 
 		RoomHistoryUpdate(room, updates);
@@ -199,29 +196,29 @@ class ChatProxy {
 	/**
 	 * Aggiorno la lista degli AGENTS in una ROOM della CHAT
 	 */
-	async updateAgents(agentsIds: string[] = [], roomId?: string): Promise<void> {
-		const room = this.getRoomById(roomId) ?? this.getMainRoom()
-		if (!room) return
+	// async updateAgents(agentsIds: string[] = [], roomId?: string): Promise<void> {
+	// 	const room = this.getRoomById(roomId) ?? this.getMainRoom()
+	// 	if (!room) return
 
-		const agents = await Promise.all(
-			agentsIds.map(agentId => this.service.chatContext.getAgentRepoById(agentId))
-		)
-		// const agents: AgentRepo[] = []
-		// for (const agentId of agentsIds) {
-		// 	const agent = await this.service.chatContext.getAgentRepoById(agentId)
-		// 	if (agent) agents.push(agent)
-		// }
-		room.agents = agents
+	// 	const agents = await Promise.all(
+	// 		agentsIds.map(agentId => this.service.chatContext.getAgentRepoById(agentId))
+	// 	)
+	// 	// const agents: AgentRepo[] = []
+	// 	// for (const agentId of agentsIds) {
+	// 	// 	const agent = await this.service.chatContext.getAgentRepoById(agentId)
+	// 	// 	if (agent) agents.push(agent)
+	// 	// }
+	// 	room.agents = agents
 
-		// avviso tutti i partecipanti
-		const msg: RoomAgentsUpdateS2C = {
-			action: CHAT_ACTION_S2C.ROOM_AGENTS_UPDATE,
-			chatId: this.chat.id,
-			roomId: room.id,
-			agentsIds: agentsIds,
-		}
-		this.sendMessage(msg)
-	}
+	// 	// avviso tutti i partecipanti
+	// 	const msg: RoomAgentsUpdateS2C = {
+	// 		action: CHAT_ACTION_S2C.ROOM_AGENTS_UPDATE,
+	// 		chatId: this.chat.id,
+	// 		roomId: room.id,
+	// 		agentsIds: agentsIds,
+	// 	}
+	// 	this.sendMessage(msg)
+	// }
 
 
 
@@ -247,7 +244,6 @@ class ChatProxy {
 			commands: commands,
 		})
 	}
-
 
 	/**
 	 * Invia a tutti i partecipanti della CHAT un MESSAGE

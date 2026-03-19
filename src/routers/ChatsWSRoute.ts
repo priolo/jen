@@ -1,12 +1,14 @@
 import { REPO_PATHS } from "@/config.js"
+import { AccountDTOFromAccountRepo } from '@/repository/Account.js'
 import { ChatsContext } from "@/services/chats/ChatsContext.js"
 import { ChatsManager } from "@/services/chats/ChatsManager.js"
 import { ChatsMessages } from "@/services/chats/ChatsMessage.js"
 import { ChatsSend } from "@/services/chats/ChatsSend.js"
-import { ACCOUNT_STATUS } from '@shared/types/AccountDTO.js'
-import { AccountDTOFromAccountRepo } from '@/repository/Account.js'
+import { ChatsProxy } from "@shared/proxy/ChatsProxy.js"
+import { RoomsProxy } from "@shared/proxy/RoomProxy.js"
 import { Bus, typeorm, ws } from "@priolo/julian"
-import { AccountDTO } from "@shared/types/AccountDTO.js"
+import { ACCOUNT_STATUS, AccountDTO } from '@shared/types/AccountDTO.js'
+import { Message } from "apache-arrow"
 
 
 
@@ -20,10 +22,33 @@ export type ChatsWSConf = Partial<ChatsWSService['stateDefault']>
  */
 export class ChatsWSService extends ws.route {
 
-	chatManager: ChatsManager = new ChatsManager(this)
-	chatMessages: ChatsMessages = new ChatsMessages(this)
-	chatSend: ChatsSend = new ChatsSend(this)
-	chatContext: ChatsContext = new ChatsContext(this)
+	chatsProxy: ChatsProxy
+	roomsProxy: RoomsProxy
+	//chatManager: ChatsManager = new ChatsManager(this)
+	chatMessages: ChatsMessages
+	chatSend: ChatsSend
+	chatContext: ChatsContext
+
+	constructor(name?: string, state?: any) {
+		super(name, state)
+
+		const transport = {
+			send: (listenerId: string, message: Message) => {
+				const clients = this.getClients()?.filter(c => c?.id == listenerId)
+				if (clients.length == 0) throw new Error(`Client not found: ${listenerId}`)
+				for (const client of clients) {
+					this.sendToClient(client, JSON.stringify(message))
+				}
+			}
+		}
+
+		this.chatsProxy = new ChatsProxy(REPO_PATHS.CHATS, transport)
+		this.roomsProxy = new RoomsProxy(REPO_PATHS.ROOMS, transport)
+		this.chatMessages = new ChatsMessages(this)
+		this.chatSend = new ChatsSend(this)
+		this.chatContext = new ChatsContext(this)
+	}
+
 
 	get stateDefault() {
 		return {
@@ -67,10 +92,8 @@ export class ChatsWSService extends ws.route {
 		}
 
 		// rimuovo il client da tutte le CHATs
-		const chats = this.chatManager.getChats()
-		for (const chat of chats) {
-			await this.chatMessages.handleUserLeave(chat, user)
-		}
+		this.chatsProxy.removeListenerInAllItems(client.id)
+
 		super.onDisconnect(client)
 	}
 
@@ -81,7 +104,10 @@ export class ChatsWSService extends ws.route {
 	async onMessage(client: ws.IClient, message: string) {
 		const user = client?.jwtPayload as AccountDTO
 		let msg = JSON.parse(message)
-		await this.chatMessages.onMessage(user, msg)
+
+		//await this.chatMessages.onMessage(user, msg)
+		this.chatsProxy.onMessage(msg)
+		this.roomsProxy.onMessage(msg)
 	}
 
 }

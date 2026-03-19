@@ -4,31 +4,21 @@ import { ChatDTO } from "./ChatDTO.js";
 import { MessageUpdate, UPDATE_TYPE } from "./ChatMessage.js";
 
 
-//#region SERVER TO CLIENT
 
-export enum CHAT_ACTION_S2C {
 
-	/** I dati di una CHAT-ONLINE */
-	//CHAT_UPDATE = "chat-update",
-	CHAT_UPDATE2 = "chat-update-2",
-
-	/** un CLIENT è entrato in CHAT. Potrebbe essere anche un AGENT*/
-	CLIENT_ENTERED = "user-entered",
-	/** un CLIENT è uscita dalla CHAT. Potrebbe essere anche un AGENT */
-	CLIENT_LEAVE = "user-leave",
-
-	/** creata nuova ROOM in CHAT */
-	ROOM_NEW = "room-new",
-	/** comunica un aggiornamento degli AGENTS in una ROOM */
-	//ROOM_AGENTS_UPDATE = "room-agents-update",
-	/** comunica l'aggiornamento della HISTORY di una ROOM */
-	ROOM_HISTORY_UPDATE = "room-history-update",
+export enum ACTION_TYPE_S2C {
+	UPDATE = "update",
 }
 
 
-export type BaseS2C = {
-	action: CHAT_ACTION_S2C
-	chatId: string
+export type ActionS2C = {
+	entity: string
+	type: ACTION_TYPE_S2C
+}
+
+export type UpdateS2C = ActionS2C & {
+	type: ACTION_TYPE_S2C.UPDATE
+	commands: JsonCommand[]
 }
 
 

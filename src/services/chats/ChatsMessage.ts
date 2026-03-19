@@ -8,6 +8,7 @@ import { UPDATE_TYPE } from "@shared/types/ChatMessage.js"
 import { matchPath } from "@shared/update.js"
 import { ChatProcessor } from "./ChatProcessor.js"
 import ChatProxy from "./ChatProxy.js"
+import { Message } from "@shared/proxy/Message.js"
 
 
 /**
@@ -23,38 +24,40 @@ export class ChatsMessages {
 	 * Handle incoming WebSocket messages
 	 * [II] forse bisogna togliere gli await, ma per ora lascio così
 	 */
-	async onMessage(user: AccountDTO, msg: any) {
+	async onMessage(user: AccountDTO, msg: Message) {
 		if (!user || !msg) return
 
-		// messaggi che necessitano di una CHAT esistente
-		if (!msg.chatId) throw new Error(`Invalid chatId`)
-		const chat = await this.service.chatManager.loadChatById(msg.chatId)
-		if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
+		// // messaggi che necessitano di una CHAT esistente
+		// if (!msg.chatId) throw new Error(`Invalid chatId`)
+		// //const chat = await this.service.chatManager.loadChatById(msg.chatId)
+		// const chat = await this.service.chatsProxy.getAsync(msg.chatId)
+		// if (!chat) throw new Error(`Chat not found: ${msg.chatId}`)
 
-		switch (msg.action) {
+		// switch (msg.action) {
 
-			case CHAT_ACTION_C2S.CHAT_UPDATE:
-				await this.handleChatUpdate(user, chat, msg as ChatUpdateC2S)
-				break
+		// 	case CHAT_ACTION_C2S.CHAT_UPDATE:
+		// 		await this.handleChatUpdate(user, chat, msg as ChatUpdateC2S)
+		// 		break
 
-			case CHAT_ACTION_C2S.USER_ENTER:
-				await this.handleUserEnter(chat, user)
-				break
+		// 	case CHAT_ACTION_C2S.USER_ENTER:
+		// 		await this.handleUserEnter(chat, user)
+		// 		break
 
-			case CHAT_ACTION_C2S.USER_LEAVE:
-				await this.handleUserLeave(chat, user)
-				break
+		// 	case CHAT_ACTION_C2S.USER_LEAVE:
+		// 		//await this.handleUserLeave(chat, user)
+		// 		await this.service.chatsProxy.removeUserOnline(user.id)
+		// 		break
 
-			case CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE: {
-				const msgUp: RoomHistoryUpdateC2S = msg
-				const room = chat.updateRoomHistory(msgUp.updates, msgUp.roomId)
-				if (room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.APPEND)) {
-					// devo recuperare tutti gli AGENTS presenti in ROOM con i rispettivi LLM
-					// devo usare getAgentRepoById
-					await (new ChatProcessor(this.service)).complete(chat, room);
-				}
-				break
-			}
+		// 	case CHAT_ACTION_C2S.ROOM_HISTORY_UPDATE: {
+		// 		const msgUp: RoomHistoryUpdateC2S = msg
+		// 		const room = chat.updateRoomHistory(msgUp.updates, msgUp.roomId)
+		// 		if (room.agents?.length > 0 && msgUp.updates.some(u => u.content.role == "user" && u.type == UPDATE_TYPE.APPEND)) {
+		// 			// devo recuperare tutti gli AGENTS presenti in ROOM con i rispettivi LLM
+		// 			// devo usare getAgentRepoById
+		// 			await (new ChatProcessor(this.service)).complete(chat, room);
+		// 		}
+		// 		break
+		// 	}
 		}
 	}
 

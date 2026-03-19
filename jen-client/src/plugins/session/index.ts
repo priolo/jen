@@ -42,11 +42,13 @@ export async function StartSession() {
 
 
 	// LOAD SINGLETONE STORES
+	
+	await chatRepoSo.fetch()
 	await mcpServerSo.fetch()
 	await llmSo.fetch()
 	await toolSo.fetch()
 	await agentSo.fetch()
-	await chatRepoSo.fetch()
+	
 
 
 	// WS CONNECTION

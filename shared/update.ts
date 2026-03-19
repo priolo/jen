@@ -48,8 +48,6 @@ export function applyJsonCommand(json: any, command: JsonCommand): any {
 	}
 }
 
-
-
 /**
  * Matcha un path con un pattern, supporta wildcard * che matcha qualsiasi blocco, restituendo i blocchi wildcard in un array
  */
@@ -75,16 +73,23 @@ export function matchPath(path: string, pattern: string) {
 }
 
 
-/** confronta deboolmente due oggetti, true se tutti i campi di conf sono presenti in value e con lo stesso valore */
+/** 
+ * confronta deboolmente due oggetti, true se tutti i campi di conf sono presenti in value e con lo stesso valore 
+ */
 const isWeakly = (value: any, conf: any) => Object.keys(conf).every(key => key in value && value[key] === conf[key])
 
 /**
  * Normalizza il path per supportare anche array con indici dinamici o oggetti di ricerca
+ * es:
+ * normalizePath(["a", "b", "c"], "1") => 1
+ * normalizePath([{ id: 1, name: "pippo" }, { id: 2, name: "pappo" }, { id: 3, name: "pallo" }], '{"id":1}') => 0
  */
 function normalizePath(value: any, path: string): string | number {
 	if (Array.isArray(value)) {
 		const index = Number.parseInt(path)
+
 		if (!isNaN(index)) return index
+
 		if (path.startsWith("{") && path.endsWith("}")) {
 			const toFind = JSON.parse(path)
 			const index = value.findIndex((v) => isWeakly(v, toFind))
@@ -95,7 +100,11 @@ function normalizePath(value: any, path: string): string | number {
 }
 
 /**
- * resttuisce un riferimento al campo specificato dal path, supporta array con indici dinamici o oggetti di ricerca
+ * resttuisce un riferimento al sotto-oggetto presente nel "json" specificato dal path
+ * supporta array con indici dinamici o oggetti di ricerca
+ * es:
+ * getRef(json, "a.b.c") => { parent: json.a.b, key: "c", value: json.a.b.c }
+ * getRef(json, "arr.1") => { parent: json.arr, key: 1, value: json.arr[1] }
  */
 function getRef(json: any, path: string, noCreate?: boolean): Ref {
 	const pathParts = path.split(".")
@@ -107,6 +116,7 @@ function getRef(json: any, path: string, noCreate?: boolean): Ref {
 		if (partNorm == null || !(partNorm in current)) continue
 		current = current[partNorm]
 	}
+
 	const lastPart = pathParts[pathParts.length - 1]
 	const lastPartNorm = normalizePath(current, lastPart)
 	return { parent: current, key: lastPartNorm, value: current[lastPartNorm] }

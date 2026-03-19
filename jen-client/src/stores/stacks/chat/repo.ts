@@ -1,14 +1,16 @@
 import chatApi from "@/api/chat"
 import { createStore, StoreCore } from "@priolo/jon"
 import { ChatDTO } from "@shared/types/ChatDTO"
+import { ProxyClient } from "@shared/proxy/ProxyClient"
 
 
 
 const setup = {
 
 	state: {
+		all: <ChatDTO[]>null,
 		/** tutte le chat di questo user */
-		all: <ChatDTO[]>[],
+		proxy: <ProxyClient<ChatDTO>>null,
 	},
 
 	getters: {
@@ -30,7 +32,7 @@ const setup = {
 		},
 		getRoomById(roomId: string, store?: ChatRepoStore) {
 			if (!roomId) return null
-			for ( const chat of store.state.all ?? []) {
+			for (const chat of store.state.all ?? []) {
 				const room = chat.rooms?.find(r => r.id == roomId)
 				if (room) return room
 			}
@@ -44,10 +46,22 @@ const setup = {
 
 	actions: {
 
+		async init(clientId: string, store?: ChatRepoStore) {
+			if (!clientId) return
+			store.state.proxy = new ProxyClient<ChatDTO>("chats", clientId)
+			store.state.proxy.emitter.on(["set"], msg => {
+				store._update()
+			})
+			await store.fetch()
+		},
+
 		async fetch(_: void, store?: ChatRepoStore) {
 			const chats = await chatApi.index({ store })
 			store.setAll(chats)
 		},
+
+
+
 
 		/**
 		 * Carica una CHAT. Se è già in memoria la restituisce, altrimenti la prende da API e la mette in memoria.
@@ -57,7 +71,7 @@ const setup = {
 			if (!!chat) return chat
 			chat = (await chatApi.get(id, { store, manageAbort: true }))?.chat
 			//chat.onlineUserIds = []
-			if (chat) store.setAll( [...store.state.all, chat])
+			if (chat) store.setAll([...store.state.all, chat])
 			return chat
 		},
 
