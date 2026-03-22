@@ -8,7 +8,7 @@ import { ItemProxy } from "@shared/remote/RemoteProxy.js"
  * Implementazione in memoria di StoreTransport.
  * Lavora direttamente su un array di oggetti passato nel costruttore.
  */
-export class InMemoryProxy<T extends ItemProxy> extends CrudProxy<T> {
+export class ArrayDataProxy<T extends ItemProxy> extends CrudProxy<T> {
 
 	constructor(
 		protected source: T[],
@@ -16,6 +16,8 @@ export class InMemoryProxy<T extends ItemProxy> extends CrudProxy<T> {
 	) {
 		super(proxy)
 	}
+
+
 
 	async load(id: string): Promise<T | undefined> {
 		return this.source.find(item => item.id === id)
@@ -28,8 +30,14 @@ export class InMemoryProxy<T extends ItemProxy> extends CrudProxy<T> {
 		)
 	}
 
-	async create(item: T): Promise<T> {
-		this.source.push(item)
+	async save(item: T): Promise<T> {
+		if (!item.id) item.id = crypto.randomUUID()
+		const index = this.source.findIndex(i => i.id == item.id)
+		if (index == -1) {
+			this.source.push(item)
+		} else {
+			this.source[index] = item
+		}
 		return item
 	}
 

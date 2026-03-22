@@ -30,8 +30,8 @@ export class EmitterProxy<T extends ItemProxy> extends CrudProxy<T> {
         return items
     }
 
-    async create(item: T): Promise<T> {
-        const saved = await super.create(item) ?? item
+    async save(item: T): Promise<T> {
+        const saved = await super.save(item) ?? item
         this._emitter.emit("create", saved)
         return saved
     }

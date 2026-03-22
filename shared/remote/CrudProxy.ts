@@ -9,7 +9,7 @@ import { JsonCommand } from "@shared/update.js"
 export interface ICrudProxy<T extends ItemProxy> {
     load(id: string): Promise<T | undefined>
     loadAll(filter?: Partial<T>): Promise<T[]>
-    create(item: T): Promise<T>
+    save(item: T): Promise<T>
     update(id: string, commands: JsonCommand[]): Promise<T | undefined>
     delete(id: string): Promise<boolean>
 }
@@ -30,8 +30,8 @@ export abstract class CrudProxy<T extends ItemProxy> implements ICrudProxy<T> {
     loadAll(filter?: Partial<T>): Promise<T[]> {
         return this.proxy?.loadAll(filter) ?? Promise.resolve([])
     }
-    create(item: T): Promise<T> {
-        return this.proxy?.create(item) ?? Promise.resolve(item)
+    save(item: T): Promise<T> {
+        return this.proxy?.save(item) ?? Promise.resolve(item)
     }
     update(id: string, commands: JsonCommand[]): Promise<T> {
         return this.proxy?.update(id, commands) ?? Promise.resolve(undefined)

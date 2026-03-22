@@ -1,5 +1,5 @@
 import { ICrudProxy } from "@shared/remote/CrudProxy.js"
-import { CreateMessage, Message, MESSAGE_TYPE, SnapshotMessage, SubscribeMessage, UnsubscribeMessage, UpdateMessage } from "./Message.js"
+import { SaveMessage, Message, MESSAGE_TYPE, SnapshotMessage, SubscribeMessage, UnsubscribeMessage, UpdateMessage } from "./Message.js"
 import { ItemProxy, RemoteProxy } from "./RemoteProxy.js"
 import { Envelope, ENVELOPE_TYPE, RemoteTransport } from "./RemoteTransport.js"
 import { JsonCommand } from "@shared/update.js"
@@ -58,14 +58,14 @@ export class ClientRemoteProxy<T extends ItemProxy> extends RemoteProxy<T> {
 		return super.loadAll(filter)
 	}
 
-	override async create(item: T): Promise<T> {
-		const message: CreateMessage = {
-			type: MESSAGE_TYPE.CREATE,
+	override async save(item: T): Promise<T> {
+		const message: SaveMessage = {
+			type: MESSAGE_TYPE.SAVE,
 			itemId: null,
 			item,
 		}
 		this.sendMessage(message)
-		return super.create(item)
+		return super.save(item)
 	}
 
 	override async update(id: string, commands: JsonCommand[]): Promise<T> {
@@ -97,10 +97,26 @@ export class ClientRemoteProxy<T extends ItemProxy> extends RemoteProxy<T> {
 		const message = envelope.message
 
 		switch (message.type) {
-			case MESSAGE_TYPE.SNAPSHOT:
+			case MESSAGE_TYPE.SNAPSHOT: {
 				const msg = <SnapshotMessage>message
-				this.create(msg.item as T)
-				break
+				super.save(msg.item as T)
+			} break
+			case MESSAGE_TYPE.INDEX: {
+			} break
+			case MESSAGE_TYPE.SAVE: {
+				const msg = <SaveMessage>message
+				super.save(msg.item as T)
+			} break
+			case MESSAGE_TYPE.UPDATE: {
+				const msg = <UpdateMessage>message
+				super.update(msg.itemId, msg.commands)
+			} break
+			case MESSAGE_TYPE.DELETE: {
+				super.delete(message.itemId)
+			} break
+			default: {
+				console.warn("Message type not supported", message.type)
+			}
 		}
 	}
 

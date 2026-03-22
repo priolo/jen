@@ -43,8 +43,8 @@ export class CachedProxy<T extends ItemProxy> extends CrudProxy<T> {
 
     // --- WRITE ---
 
-    async create(item: T): Promise<T> {
-        const saved = await this.proxy?.create(item) ?? item
+    async save(item: T): Promise<T> {
+        const saved = await this.proxy?.save(item) ?? item
         this.items.set(saved.id, saved)
         return saved
     }

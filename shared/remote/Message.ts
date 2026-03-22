@@ -14,8 +14,8 @@ export enum MESSAGE_TYPE {
 	SNAPSHOT = "snapshot",
 	/** */
 	INDEX = "index",
-	/** creazione di un nuovo ITEM il server risponde con un messaggio di tipo SNAPSHOT  */
-	CREATE = "create",
+	/** creazione/aggiornamento di un ITEM il server risponde con un messaggio di tipo SNAPSHOT  */
+	SAVE = "save",
 	/** aggiornamento parziale dell'ITEM */
 	UPDATE = "update",
 	/** eliminazione dell'ITEM all'intertno della callection */
@@ -60,8 +60,8 @@ export type SnapshotMessage = Message & {
  * creazione di un nuovo ITEM 
  * il server risponde con un messaggio di tipo SNAPSHOT
  */
-export type CreateMessage = Message & {
-	type: MESSAGE_TYPE.CREATE
+export type SaveMessage = Message & {
+	type: MESSAGE_TYPE.SAVE
 	item: ItemProxy
 }
 

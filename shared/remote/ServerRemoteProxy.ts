@@ -1,4 +1,4 @@
-import { CreateMessage, Message, MESSAGE_TYPE, SnapshotMessage, UpdateMessage } from "@shared/remote/Message.js"
+import { SaveMessage, Message, MESSAGE_TYPE, SnapshotMessage, UpdateMessage } from "@shared/remote/Message.js"
 import { ItemProxy, RemoteProxy } from "./RemoteProxy.js"
 import { Envelope, ENVELOPE_TYPE } from "./RemoteTransport.js"
 
@@ -56,10 +56,11 @@ export class ServerRemoteProxy<T extends ItemProxy> extends RemoteProxy<T> {
 				this.removeListenerFromItem(message.itemId, envelope.from)
 			} break
 
-			case MESSAGE_TYPE.CREATE: {
-				const msg = message as CreateMessage
-				const itemCreated = await this.create(msg.item as T)
+			case MESSAGE_TYPE.SAVE: {
+				const msg = message as SaveMessage
+				const itemCreated = await this.save(msg.item as T)
 				msg.item = itemCreated
+				this.addListenerInItem(itemCreated.id, envelope.from)
 				this.sendMessage(msg)
 			} break
 
