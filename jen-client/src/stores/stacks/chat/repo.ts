@@ -1,7 +1,6 @@
 import chatApi from "@/api/chat"
 import { createStore, StoreCore } from "@priolo/jon"
 import { ChatDTO } from "@shared/types/ChatDTO"
-import { ProxyClient } from "@shared/proxy/ProxyClient"
 
 
 
@@ -9,8 +8,6 @@ const setup = {
 
 	state: {
 		all: <ChatDTO[]>null,
-		/** tutte le chat di questo user */
-		proxy: <ProxyClient<ChatDTO>>null,
 	},
 
 	getters: {
@@ -45,15 +42,6 @@ const setup = {
 	},
 
 	actions: {
-
-		async init(clientId: string, store?: ChatRepoStore) {
-			if (!clientId) return
-			store.state.proxy = new ProxyClient<ChatDTO>("chats", clientId)
-			store.state.proxy.emitter.on(["set"], msg => {
-				store._update()
-			})
-			await store.fetch()
-		},
 
 		async fetch(_: void, store?: ChatRepoStore) {
 			const chats = await chatApi.index({ store })

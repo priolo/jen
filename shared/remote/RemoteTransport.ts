@@ -1,4 +1,4 @@
-import { Message } from "@shared/proxy/Message.js";
+import { Message } from "@shared/remote/Message.js";
 
 
 
@@ -16,9 +16,10 @@ export interface Envelope<T extends Message = Message> {
 	message: T
 }
 
-export interface Transport {
-
+/**
+ * E' il livello per la comunicazione websocket
+ */
+export interface RemoteTransport {
 	/** invia un MESSAGE ad un LISTENER */
 	sendMessage<T extends Message = Message>(envelop:Envelope<T>): void | Promise<void>;
-
 }

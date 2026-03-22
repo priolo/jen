@@ -1,17 +1,14 @@
-import { Bus, typeorm } from "@priolo/julian"
-import { DeleteMessage, Message, MESSAGE_TYPE, SnapshotMessage, UpdateMessage } from "@shared/proxy/Message.js"
-import { applyJsonCommand, JsonCommand } from "@shared/update.js"
-import { FindOneOptions } from "typeorm"
-import { Envelope, ENVELOPE_TYPE, Transport } from "./Transport.js"
-import { ItemProxy, ProxyBase } from "./ProxyBase.js"
-import { Storage } from "./Storage.js"
+import { CreateMessage, Message, MESSAGE_TYPE, SnapshotMessage, UpdateMessage } from "@shared/remote/Message.js"
+import { ItemProxy, RemoteProxy } from "./RemoteProxy.js"
+import { Envelope, ENVELOPE_TYPE } from "./RemoteTransport.js"
 
 
 
-export class ProxyServer<T extends ItemProxy> extends ProxyBase<T> {
+export class ServerRemoteProxy<T extends ItemProxy> extends RemoteProxy<T> {
 
 
 
+	
 	private listener = new Map<string, Set<string>>()
 
 	public addListenerInItem(itemId: string, listenerId: string): void {
@@ -38,52 +35,50 @@ export class ProxyServer<T extends ItemProxy> extends ProxyBase<T> {
 
 
 
-	protected storage: Storage<T>
-
-	public setStorage(storage: Storage<T>): void {
-		this.storage = storage
-	}
-	public getStorage(): Storage<T> {
-		return this.storage
-	}
-
-
-
-
-
-
-	override async getAsync(id: string): Promise<T> {
-		let item = await super.getAsync(id)
-		if (!item) {
-			item = await this.storage?.load(id)
-			if (item) this.addItem(item)
-		}
-		return item
-	}
 
 	override async onMessage(envelope: Envelope): Promise<void> {
-		if (envelope.type != ENVELOPE_TYPE.TO_SERVER || !envelope.from || envelope.proxyId != this.proxyId) return
+		if (envelope.type != ENVELOPE_TYPE.TO_SERVER || !envelope.from || envelope.proxyId != this.id) return
 		const message = envelope.message
 
 		switch (message.type) {
 
-			case MESSAGE_TYPE.SUBSCRIBE:
+			case MESSAGE_TYPE.SUBSCRIBE: {
 				this.addListenerInItem(message.itemId, envelope.from)
-				const item = await this.getAsync(message.itemId)
+				const item = await this.load(message.itemId)
 				this.sendMessage(<SnapshotMessage>{
 					type: MESSAGE_TYPE.SNAPSHOT,
 					itemId: message.itemId,
 					item
 				})
-				break
+			} break
 
-			case MESSAGE_TYPE.UNSUBSCRIBE:
+			case MESSAGE_TYPE.UNSUBSCRIBE: {
 				this.removeListenerFromItem(message.itemId, envelope.from)
-				break
+			} break
+
+			case MESSAGE_TYPE.CREATE: {
+				const msg = message as CreateMessage
+				const itemCreated = await this.create(msg.item as T)
+				msg.item = itemCreated
+				this.sendMessage(msg)
+			} break
+
+			case MESSAGE_TYPE.UPDATE: {
+				const msg = message as UpdateMessage
+				await this.update(message.itemId, msg.commands)
+				this.sendMessage(msg)
+			} break
+
+			case MESSAGE_TYPE.DELETE: {
+				const success = await this.delete(message.itemId)
+				if (!success) break // devo avvertire che non è stato possibile eliminare l'ITEM
+				this.sendMessage(message)
+				this.removeAllListenersFromItem(message.itemId)
+			} break
 		}
 	}
 
-	override sendMessage(message: Message): void {
+	protected override sendMessage(message: Message): void {
 		const listeners = this.listener.get(message.itemId)
 		if (!listeners) return
 		// tutti i LISTENER di questo ITEM 
@@ -91,10 +86,17 @@ export class ProxyServer<T extends ItemProxy> extends ProxyBase<T> {
 			this.transport?.sendMessage({
 				type: ENVELOPE_TYPE.TO_CLIENT,
 				to: listenerId,
-				proxyId: this.proxyId,
+				proxyId: this.id,
 				message
 			})
 		}
 	}
+
+
+
+
+
+
+
 
 }

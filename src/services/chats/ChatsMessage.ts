@@ -8,7 +8,7 @@ import { UPDATE_TYPE } from "@shared/types/ChatMessage.js"
 import { matchPath } from "@shared/update.js"
 import { ChatProcessor } from "./ChatProcessor.js"
 import ChatProxy from "./ChatProxy.js"
-import { Message } from "@shared/proxy/Message.js"
+import { Message } from "@shared/remote/Message.js"
 
 
 /**

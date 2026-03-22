@@ -16,6 +16,8 @@ import { buildChatDetail } from "../chat/factory"
 import { focusSo, utils } from "@priolo/jack"
 import { deckCardsSo } from "@/stores/docs/cards"
 import { ChatDetailState, ChatDetailStore } from "../chat/detail"
+import { RoomsProxy } from "./RoomsProxy"
+import { RoomDTO } from "@shared/types/RoomDTO"
 
 
 
@@ -36,6 +38,8 @@ const setup = {
 		// prompt della textbox in basso
 		prompt: `Don't answer directly, but use the tools available to you.
 What is 2+2? Just write the answer number.`,
+
+		fnProwyUpdate: <(data: any) => void>null,
 
 	},
 
@@ -61,12 +65,8 @@ What is 2+2? Just write the answer number.`,
 		/** se la DETAIL della ROOM è aperta */
 		getRoomDetailOpen: (_: void, store?: RoomDetailStore) => store.state.linked?.state.type == DOC_TYPE.ROOM_DETAIL,
 		/** la ROOM */
-		getRoom: (_: void, store?: RoomDetailStore) =>
-			chatRepoSo.getRoom({
-				chatId: store.state.chatId,
-				roomId: store.state.roomId,
-			}
-			),
+		getRoom: (_: void, store?: RoomDetailStore) => RoomsProxy.Get().get(store.state.roomId),
+
 		getRoomAgents: (_: void, store?: RoomDetailStore) => {
 			return store.getRoom()?.agentsIds?.map(agentId => agentSo.getById(agentId)) ?? []
 		}
@@ -88,7 +88,14 @@ What is 2+2? Just write the answer number.`,
 
 		onRemoval(_: void, store?: ViewStore) {
 			const roomSo = store as RoomDetailStore
-			chatWSSo.removeView({ chatId: roomSo.state.chatId, viewId: roomSo.state.uuid })
+			
+			//chatWSSo.removeView({ chatId: roomSo.state.chatId, viewId: roomSo.state.uuid })
+
+			// [II] devo controllare che tutte le CARD che visualizzano questa ROOM siano chiuse, altrimenti rischio di rimanere con la ROOM in memoria senza nessuna CARD che la visualizza, e quindi senza ricevere aggiornamenti WS
+			//if (!roomSo.state.fnProwyUpdate) return
+			RoomsProxy.Get()
+				.unsubscribe(roomSo.state.roomId)
+				.emitter.off(["set", "update"], roomSo.state.fnProwyUpdate)
 		},
 
 		//#endregion
@@ -98,7 +105,14 @@ What is 2+2? Just write the answer number.`,
 		 * richiesta INFO CHAT
 		 * */
 		fetch: async (_: void, store?: RoomDetailStore) => {
-			chatWSSo.enter(store.state.chatId)
+			store.state.fnProwyUpdate = (data) => {
+				if (data.payload.id != store.state.roomId) return
+				store._update()
+			}
+			RoomsProxy.Get()
+				.subscribe(store.state.roomId)
+				.emitter.on(["set", "update"], store.state.fnProwyUpdate)
+			//chatWSSo.enter(store.state.chatId)
 			// recupero i dati della ROOM
 			//const room = await roomApi.get(store.state.roomId, { store, manageAbort: true } )
 		},
